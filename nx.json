@@ -59,7 +59,8 @@
       "options": {
         "targetName": "lint"
       }
-    }
+    },
+    "@nxext/capacitor/plugin"
   ],
   "generators": {
     "@nx/angular:application": {

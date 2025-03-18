@@ -1,0 +1,7 @@
+{
+  "name": "tabata-ai",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

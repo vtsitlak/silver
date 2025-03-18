@@ -1,13 +1,10 @@
 import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { NxWelcomeComponent } from './nx-welcome.component';
+import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 
 @Component({
-  imports: [NxWelcomeComponent, RouterModule],
   selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss',
+  templateUrl: 'app.component.html',
+  standalone: true,
+  imports: [IonApp, IonRouterOutlet],
 })
-export class AppComponent {
-  title = 'tabata-ai';
-}
+export class AppComponent {}

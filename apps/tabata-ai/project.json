@@ -18,11 +18,26 @@
         "inlineStyleLanguage": "scss",
         "assets": [
           {
-            "glob": "**/*",
-            "input": "apps/tabata-ai/public"
+            "glob": "**/*.svg",
+            "input": "node_modules/ionicons/dist/ionicons/svg",
+            "output": "./svg"
           }
         ],
-        "styles": ["apps/tabata-ai/src/styles.scss"],
+        "styles": [
+          "apps/tabata-ai/src/styles.scss",
+          "apps/tabata-ai/src/theme/variables.scss",
+          "node_modules/@ionic/angular/css/core.css",
+          "node_modules/@ionic/angular/css/normalize.css",
+          "node_modules/@ionic/angular/css/structure.css",
+          "node_modules/@ionic/angular/css/typography.css",
+          "node_modules/@ionic/angular/css/display.css",
+          "node_modules/@ionic/angular/css/padding.css",
+          "node_modules/@ionic/angular/css/float-elements.css",
+          "node_modules/@ionic/angular/css/text-alignment.css",
+          "node_modules/@ionic/angular/css/text-transformation.css",
+          "node_modules/@ionic/angular/css/flex-utils.css",
+          "node_modules/@ionic/angular/css/palettes/dark.system.css"
+        ],
         "scripts": []
       },
       "configurations": {
@@ -59,6 +74,7 @@
           "buildTarget": "tabata-ai:build:production"
         },
         "development": {
+          "open": true,
           "buildTarget": "tabata-ai:build:development"
         }
       },
