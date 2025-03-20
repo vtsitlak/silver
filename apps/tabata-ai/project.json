@@ -1,5 +1,12 @@
 {
   "name": "tabata-ai",
+  "i18n": {
+    "sourceLocale": "en",
+    "locales": {
+      "nl": "apps/tabata-ai/src/locales/messages.nl.json",
+      "el": "apps/tabata-ai/src/locales/messages.el.json"
+    }
+  },
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "prefix": "app",
@@ -10,19 +17,19 @@
       "executor": "@angular-devkit/build-angular:browser",
       "outputs": ["{options.outputPath}"],
       "options": {
+
+        "i18nMissingTranslation": "warning",
         "outputPath": "dist/apps/tabata-ai",
         "index": "apps/tabata-ai/src/index.html",
         "main": "apps/tabata-ai/src/main.ts",
-        "polyfills": ["zone.js"],
+        "polyfills": ["zone.js", "@angular/localize/init"],
         "tsConfig": "apps/tabata-ai/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
-        "assets": [
-          {
-            "glob": "**/*.svg",
-            "input": "node_modules/ionicons/dist/ionicons/svg",
-            "output": "./svg"
-          }
-        ],
+        "assets": [{
+          "glob": "**/*.svg",
+          "input": "node_modules/ionicons/dist/ionicons/svg",
+          "output": "./svg"
+        }],
         "styles": [
           "apps/tabata-ai/src/styles.scss",
           "apps/tabata-ai/src/theme/variables.scss",
@@ -41,9 +48,18 @@
         "scripts": []
       },
       "configurations": {
+        "en": {
+          "localize": ["en"]
+        },
+        "nl": {
+          "localize": ["nl"]
+        },
+        "el": {
+          "localize": ["el"]
+        },
         "production": {
-          "budgets": [
-            {
+          "localize": ["en", "nl", "el"],
+          "budgets": [{
               "type": "initial",
               "maximumWarning": "500kb",
               "maximumError": "1mb"
@@ -57,6 +73,7 @@
           "outputHashing": "all"
         },
         "development": {
+          "localize": false,
           "buildOptimizer": false,
           "optimization": false,
           "vendorChunk": true,
@@ -71,11 +88,17 @@
       "executor": "@angular-devkit/build-angular:dev-server",
       "configurations": {
         "production": {
-          "buildTarget": "tabata-ai:build:production"
+          "buildTarget": "tabata-ai:build:production:en"
         },
         "development": {
           "open": true,
-          "buildTarget": "tabata-ai:build:development"
+          "buildTarget": "tabata-ai:build:development:en"
+        },
+        "el": {
+          "buildTarget": "tabata-ai:build:development:el"
+        },
+        "nl": {
+          "buildTarget": "tabata-ai:build:development:nl"
         }
       },
       "defaultConfiguration": "development"
@@ -83,7 +106,9 @@
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
       "options": {
-        "buildTarget": "tabata-ai:build"
+        "buildTarget": "tabata-ai:build",
+        "outputPath": "apps/tabata-ai/src/locales",
+        "format": "json"
       }
     },
     "lint": {
