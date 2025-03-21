@@ -5,7 +5,7 @@ import {
   IonTitle,
   IonContent,
 } from '@ionic/angular/standalone';
-import { ExploreContainerComponent } from '../explore-container/explore-container.component';
+import { UiToolbarComponent } from '@silver/shared/ui';
 
 @Component({
   selector: 'app-tab1',
@@ -17,7 +17,8 @@ import { ExploreContainerComponent } from '../explore-container/explore-containe
     IonToolbar,
     IonTitle,
     IonContent,
-    ExploreContainerComponent
+    ExploreContainerComponent,
+    UiToolbarComponent
   ],
 })
 export class Tab1Page {

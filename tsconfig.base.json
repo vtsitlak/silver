@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@shared/ui": ["libs/shared/ui/src/index.ts"],
       "@tabata/authentication": ["libs/authentication/src/index.ts"]
     }
   },
