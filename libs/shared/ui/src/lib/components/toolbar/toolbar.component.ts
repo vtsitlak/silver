@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 
@@ -9,4 +9,8 @@ import { IonicModule } from '@ionic/angular';
   styleUrl: './toolbar.component.scss',
   standalone: true
 })
-export class UiToolbarComponent {}
+export class UiToolbarComponent {
+  title = input<string | null>(null);
+  menuOptions = input<string[] | null>([]);
+  logoIcon = input<string | null>(null);
+}

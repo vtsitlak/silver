@@ -17,7 +17,6 @@ import { UiToolbarComponent } from '@silver/shared/ui';
     IonToolbar,
     IonTitle,
     IonContent,
-    ExploreContainerComponent,
     UiToolbarComponent
   ],
 })
