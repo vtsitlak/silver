@@ -1,1 +1,1 @@
-export * from './lib/components/components.component';
+export * from './lib/components/toolbar/toolbar.component';

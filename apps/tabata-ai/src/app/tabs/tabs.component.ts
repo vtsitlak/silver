@@ -7,19 +7,19 @@ import {
   IonLabel,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { triangle, ellipse, square } from 'ionicons/icons';
+import { triangle, ellipse, square, home, barbell, calendar } from 'ionicons/icons';
 
 @Component({
   selector: 'app-tabs',
-  templateUrl: 'tabs.page.html',
-  styleUrls: ['tabs.page.scss'],
+  templateUrl: 'tabs.component.html',
+  styleUrls: ['tabs.component.scss'],
   standalone: true,
   imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel],
 })
-export class TabsPage {
+export class TabsComponent {
   public environmentInjector = inject(EnvironmentInjector);
 
   constructor() {
-    addIcons({ triangle, ellipse, square });
+    addIcons({home,barbell,calendar,ellipse,square,triangle});
   }
 }

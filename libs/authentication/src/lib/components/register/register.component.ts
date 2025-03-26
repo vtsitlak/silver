@@ -1,6 +1,11 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormControl,
+  FormBuilder,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { IonicModule } from '@ionic/angular';
@@ -8,6 +13,7 @@ import { IonicModule } from '@ionic/angular';
 interface LoginForm {
   email: FormControl<string>;
   password: FormControl<string>;
+  displayName: FormControl<string>;
 }
 
 @Component({
@@ -15,7 +21,7 @@ interface LoginForm {
   imports: [CommonModule, ReactiveFormsModule, IonicModule],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
-  standalone: true
+  standalone: true,
 })
 export class RegisterComponent {
   error = false;
@@ -40,11 +46,15 @@ export class RegisterComponent {
         nonNullable: true,
       }
     ),
+    displayName: new FormControl('', {
+      validators: [Validators.required],
+      nonNullable: true,
+    }),
   });
 
   onSubmit(): void {
     const rawForm = this.form.getRawValue();
-    this.authService.register(rawForm.email, rawForm.password).subscribe({
+    this.authService.register(rawForm.email, rawForm.password, rawForm.displayName).subscribe({
       next: () => {
         this.router.navigateByUrl('/home');
       },

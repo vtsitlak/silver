@@ -2,7 +2,7 @@
   "name": "components",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/tabata/components/src",
-  "prefix": "lib",
+  "prefix": "tbt",
   "projectType": "library",
   "tags": [],
   "targets": {

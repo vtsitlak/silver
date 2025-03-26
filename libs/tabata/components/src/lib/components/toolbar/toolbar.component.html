@@ -1,0 +1,34 @@
+<ion-toolbar>
+  <ion-buttons slot="start">
+
+    <ion-button>
+      <ion-icon name="home"></ion-icon>
+    </ion-button>
+
+
+  </ion-buttons>
+
+  @if (title()) {
+  <ion-title>{{ title() }}</ion-title>
+  }
+
+
+  <ion-content>
+    <ng-container #sideMenuContent></ng-container>
+  </ion-content>
+  <ion-buttons slot="end" id="main-content">
+    <ion-menu-button></ion-menu-button>
+  </ion-buttons>
+
+  <ion-menu contentId="main-content">
+    <ion-content>
+      <ion-list>
+        <ion-item button (click)="logout()">
+          <ion-icon slot="start" name="log-out"></ion-icon>
+          <ion-label i18n="@@logout">Logout</ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+
+</ion-toolbar>

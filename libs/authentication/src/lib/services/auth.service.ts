@@ -2,16 +2,15 @@ import { Injectable } from '@angular/core';
 import {
   Auth,
   browserSessionPersistence,
-  GoogleAuthProvider,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signInWithPopup,
   signOut,
   user,
   User,
 } from '@angular/fire/auth';
-import { setPersistence } from 'firebase/auth';
-import { from, Observable } from 'rxjs';
+import { deleteCookie, parseCookie } from '@silver/shared/ui';
+import { setPersistence, updateProfile } from 'firebase/auth';
+import { from, Observable, switchMap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -28,32 +27,30 @@ export class AuthService {
     setPersistence(this.firebaseAuth, browserSessionPersistence);
   }
 
-  login(email: string, password: string): Observable<void> {
-    const promise = signInWithEmailAndPassword(
-      this.firebaseAuth,
-      email,
-      password
-    ).then(() => {
-      //
-    });
-    return from(promise);
+  login(email: string, password: string) {
+    return from(signInWithEmailAndPassword(this.firebaseAuth, email, password));
   }
 
-  register(email: string, password: string): Observable<void> {
-    const promise = createUserWithEmailAndPassword(
-      this.firebaseAuth,
-      email,
-      password
-    ).then(() => {
-      //
-    });
-    return from(promise);
+  register(email: string, password: string, displayName: string) {
+    return from(
+      createUserWithEmailAndPassword(this.firebaseAuth, email, password)
+    ).pipe(
+      switchMap((userCredential) => {
+        return from(updateProfile(userCredential.user, { displayName }));
+      })
+    );
   }
 
   logout(): Observable<void> {
-    const promise = signOut(this.firebaseAuth).then(() => {
-      sessionStorage.clear();
-    });
-    return from(promise);
+    return from(
+      signOut(this.firebaseAuth).then(() => {
+        sessionStorage.clear();
+        deleteCookie('userInfo');
+      })
+    );
+  }
+
+  isLoggedIn(): boolean {
+    return !!parseCookie();
   }
 }

@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -13,7 +13,7 @@ interface LoginForm {
 
 @Component({
   selector: 'tbt-login',
-  imports: [CommonModule, ReactiveFormsModule, IonicModule ],
+  imports: [CommonModule, ReactiveFormsModule, IonicModule, NgIf ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   standalone: true,
@@ -31,10 +31,7 @@ export class LoginComponent {
       ],
       nonNullable: true
     }),
-    password: new FormControl<string>({
-      value: '',
-      disabled: true
-    }, {
+    password: new FormControl<string>('', {
       validators: [Validators.required, Validators.minLength(6)],
       nonNullable: true
     })

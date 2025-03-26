@@ -1,11 +1,9 @@
 import { Component } from '@angular/core';
 import {
   IonHeader,
-  IonToolbar,
-  IonTitle,
   IonContent,
 } from '@ionic/angular/standalone';
-import { UiToolbarComponent } from '@silver/shared/ui';
+import { ToolbarComponent } from '@silver/tabata/components';
 
 @Component({
   selector: 'app-tab1',
@@ -14,10 +12,8 @@ import { UiToolbarComponent } from '@silver/shared/ui';
   standalone: true,
   imports: [
     IonHeader,
-    IonToolbar,
-    IonTitle,
     IonContent,
-    UiToolbarComponent
+    ToolbarComponent
   ],
 })
 export class Tab1Page {
