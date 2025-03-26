@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "serve:tabata-ai": "nx serve tabata-ai",
+    "start:tabata-ai": "nx serve tabata-ai",
     "build-localize:tabata-ai": "nx build tabata-ai  --localize",
     "build-run:tabata-ai": "npx http-server dist/apps/tabata-ai",
     "xi18n:tabata-ai": "ng i18n-extract tabata-ai"

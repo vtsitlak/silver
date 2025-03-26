@@ -17,7 +17,7 @@
     "paths": {
       "@silver/shared/ui": ["libs/shared/ui/src/index.ts"],
       "@silver/tabata/components": ["libs/tabata/components/src/index.ts"],
-      "@tabata/authentication": ["libs/authentication/src/index.ts"]
+      "@silver/tabata/authentication": ["libs/authentication/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

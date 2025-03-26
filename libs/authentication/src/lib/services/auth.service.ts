@@ -8,7 +8,6 @@ import {
   user,
   User,
 } from '@angular/fire/auth';
-import { deleteCookie, parseCookie } from '@silver/shared/ui';
 import { setPersistence, updateProfile } from 'firebase/auth';
 import { from, Observable, switchMap } from 'rxjs';
 
@@ -42,16 +41,14 @@ export class AuthService {
   }
 
   logout(): Observable<void> {
-    return from(
-      signOut(this.firebaseAuth).then(() => {
-        sessionStorage.clear();
-        deleteCookie('userInfo');
-        console.log('sign out called');
-      })
-    );
+    return from(signOut(this.firebaseAuth));
   }
 
-  isLoggedIn(): boolean {
-    return !!parseCookie();
+  getCurrentUser(): User | null {
+    return this.firebaseAuth.currentUser;
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.firebaseAuth.currentUser;
   }
 }
