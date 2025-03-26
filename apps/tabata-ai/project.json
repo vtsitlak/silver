@@ -15,21 +15,27 @@
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:browser",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
-
         "i18nMissingTranslation": "warning",
         "outputPath": "dist/apps/tabata-ai",
         "index": "apps/tabata-ai/src/index.html",
         "main": "apps/tabata-ai/src/main.ts",
-        "polyfills": ["zone.js", "@angular/localize/init"],
+        "polyfills": [
+          "zone.js",
+          "@angular/localize/init"
+        ],
         "tsConfig": "apps/tabata-ai/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
-        "assets": [{
-          "glob": "**/*.svg",
-          "input": "node_modules/ionicons/dist/ionicons/svg",
-          "output": "./svg"
-        }],
+        "assets": [
+          {
+            "glob": "**/*.svg",
+            "input": "node_modules/ionicons/dist/ionicons/svg",
+            "output": "./svg"
+          }
+        ],
         "styles": [
           "apps/tabata-ai/src/styles.scss",
           "apps/tabata-ai/src/theme/variables.scss",
@@ -49,17 +55,28 @@
       },
       "configurations": {
         "en": {
-          "localize": ["en"]
+          "localize": [
+            "en"
+          ]
         },
         "nl": {
-          "localize": ["nl"]
+          "localize": [
+            "nl"
+          ]
         },
         "el": {
-          "localize": ["el"]
+          "localize": [
+            "el"
+          ]
         },
         "production": {
-          "localize": ["en", "nl", "el"],
-          "budgets": [{
+          "localize": [
+            "en",
+            "nl",
+            "el"
+          ],
+          "budgets": [
+            {
               "type": "initial",
               "maximumWarning": "500kb",
               "maximumError": "1mb"
@@ -85,6 +102,9 @@
       "defaultConfiguration": "production"
     },
     "serve": {
+      "options": {
+        "disableHostCheck": true
+      },
       "executor": "@angular-devkit/build-angular:dev-server",
       "configurations": {
         "production": {
@@ -116,7 +136,9 @@
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
         "jestConfig": "apps/tabata-ai/jest.config.ts"
       }

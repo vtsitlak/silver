@@ -9,6 +9,7 @@ export function setCookie(name: string, value: string, days: number): void {
 }
 
 export function deleteCookie(name: string): void {
+  console.log('delete cookie');
   document.cookie = `${encodeURIComponent(name)}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
 }
 

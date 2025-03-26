@@ -46,6 +46,7 @@ export class AuthService {
       signOut(this.firebaseAuth).then(() => {
         sessionStorage.clear();
         deleteCookie('userInfo');
+        console.log('sign out called');
       })
     );
   }

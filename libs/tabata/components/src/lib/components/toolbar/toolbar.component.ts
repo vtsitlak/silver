@@ -20,6 +20,6 @@ export class ToolbarComponent {
   authService = inject(AuthService);
 
   logout(): void {
-    this.authService.logout();
+    this.authService.logout().subscribe();
   }
 }
