@@ -15,9 +15,10 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@silver/shared/ui": ["libs/shared/ui/src/index.ts"],
+      "@silver/tabata/auth": ["libs/tabata/auth/src/index.ts"],
+      "@silver/tabata/authentication": ["libs/authentication/src/index.ts"],
       "@silver/tabata/components": ["libs/tabata/components/src/index.ts"],
-      "@silver/tabata/authentication": ["libs/authentication/src/index.ts"]
+      "@silver/tabata/pages": ["libs/tabata/pages/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

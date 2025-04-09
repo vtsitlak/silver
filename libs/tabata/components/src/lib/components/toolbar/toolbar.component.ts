@@ -1,29 +1,53 @@
 import { Component, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
-import { AuthService } from '@silver/tabata/authentication';
+import {
+  IonButton,
+  IonButtons,
+  IonContent,
+  IonHeader,
+  IonIcon,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonPopover,
+  IonTitle,
+  IonToolbar,
+} from '@ionic/angular/standalone';
+import {  AuthStore } from '@silver/tabata/auth';
 import { addIcons } from 'ionicons';
-import { logOut } from 'ionicons/icons';
-import { Router } from '@angular/router';
-
+import { logOut, home, person, menu } from 'ionicons/icons';
+import { Router, RouterLink } from '@angular/router';
 @Component({
   selector: 'tbt-toolbar',
-  imports: [CommonModule, IonicModule],
+  imports: [
+    CommonModule,
+    IonButtons,
+    IonContent,
+    IonPopover,
+    IonTitle,
+    IonToolbar,
+    IonIcon,
+    IonLabel,
+    IonItem,
+    IonList,
+    IonButton,
+    IonHeader,
+    RouterLink,
+  ],
   templateUrl: './toolbar.component.html',
   styleUrl: './toolbar.component.scss',
   standalone: true,
 })
 export class ToolbarComponent {
   constructor() {
-    addIcons({ logOut });
+    addIcons({ home, menu, person, logOut });
   }
   title = input<string | null>(null);
-  authService = inject(AuthService);
+
   router = inject(Router);
+  private readonly authStore = inject(AuthStore);
 
   logout(): void {
-    this.authService.logout().subscribe(() => {
-      this.router.navigate(['/auth/login']);
-    });
+    this.authStore.logout();
   }
 }
