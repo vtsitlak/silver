@@ -11,8 +11,8 @@
     }
 
 
-    <ion-buttons slot="end" id="click-trigger">
-      <ion-button>
+    <ion-buttons slot="end">
+      <ion-button id="click-trigger" (click)="togglePopover($event)">
         <ion-icon name="menu"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -20,11 +20,15 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-popover trigger="click-trigger" triggerAction="click">
+<ion-popover [isOpen]="showPopover"
+  trigger="click-trigger"
+  triggerAction="click"
+  (didDismiss)="closePopover()"
+  placement="bottom">
   <ng-template>
     <ion-content>
       <ion-list>
-        <ion-item button [routerLink]="['/tabs/profile']">
+        <ion-item button [routerLink]="['/tabs/profile']" (click)="onMenuItemClick()">
           <ion-icon slot="start" name="person"></ion-icon>
           <ion-label i18n="@@profile">Profile</ion-label>
         </ion-item>
