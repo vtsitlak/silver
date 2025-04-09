@@ -1,7 +1,5 @@
-import { Component, inject } from "@angular/core";
+import { Component } from "@angular/core";
 import { IonApp, IonRouterOutlet } from "@ionic/angular/standalone";
-// eslint-disable-next-line @nx/enforce-module-boundaries
-import { AuthStore } from "@silver/tabata/auth";
 
 @Component({
   selector: "app-root",
@@ -9,10 +7,4 @@ import { AuthStore } from "@silver/tabata/auth";
   standalone: true,
   imports: [IonApp, IonRouterOutlet],
 })
-export class AppComponent {
-  protected readonly authStore = inject(AuthStore);
-
-  constructor() {
-    this.authStore.getUser();
-  }
-}
+export class AppComponent {}
