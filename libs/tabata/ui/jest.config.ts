@@ -1,8 +1,8 @@
 export default {
-  displayName: 'components',
+  displayName: 'ui',
   preset: '../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory: '../../../coverage/libs/tabata/components',
+  coverageDirectory: '../../../coverage/libs/tabata/ui',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',

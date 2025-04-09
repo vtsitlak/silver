@@ -14,7 +14,7 @@ import {
   IonButton,
 } from '@ionic/angular/standalone';
 // import { AuthService } from '@silver/tabata/auth';
-import { ToolbarComponent } from '@silver/tabata/components';
+import { ToolbarComponent } from '@silver/tabata/ui';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 

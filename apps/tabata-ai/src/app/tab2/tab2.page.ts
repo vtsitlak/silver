@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { IonContent, IonHeader } from '@ionic/angular/standalone';
-import { ToolbarComponent } from '@silver/tabata/components';
+import { ToolbarComponent } from '@silver/tabata/ui';
 
 @Component({
   selector: 'app-tab2',

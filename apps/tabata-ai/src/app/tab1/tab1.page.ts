@@ -3,7 +3,7 @@ import {
   IonHeader,
   IonContent,
 } from '@ionic/angular/standalone';
-import { ToolbarComponent } from '@silver/tabata/components';
+import { ToolbarComponent } from '@silver/tabata/ui';
 
 @Component({
   selector: 'app-tab1',
