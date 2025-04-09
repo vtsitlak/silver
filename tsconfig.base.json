@@ -18,7 +18,7 @@
       "@silver/tabata/auth": ["libs/tabata/auth/src/index.ts"],
       "@silver/tabata/authentication": ["libs/authentication/src/index.ts"],
       "@silver/tabata/ui": ["libs/tabata/ui/src/index.ts"],
-      "@silver/tabata/pages": ["libs/tabata/pages/src/index.ts"]
+      "@silver/tabata/profile": ["libs/tabata/profile/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

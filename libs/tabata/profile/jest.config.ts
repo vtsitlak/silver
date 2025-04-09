@@ -1,8 +1,8 @@
 export default {
-  displayName: 'pages',
+  displayName: 'profile',
   preset: '../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory: '../../../coverage/libs/tabata/pages',
+  coverageDirectory: '../../../coverage/libs/tabata/profile',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',

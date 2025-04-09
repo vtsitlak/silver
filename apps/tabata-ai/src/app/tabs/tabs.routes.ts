@@ -23,7 +23,7 @@ export const routes: Routes = [
       },
       {
         path: 'profile',
-        loadComponent: () => import('@silver/tabata/pages').then((m) => m.ProfileComponent)
+        loadComponent: () => import('@silver/tabata/profile').then((m) => m.ProfileComponent)
       },
       {
         path: '',
