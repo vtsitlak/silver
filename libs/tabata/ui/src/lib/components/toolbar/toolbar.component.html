@@ -7,24 +7,25 @@
     </ion-buttons>
 
     @if (title()) {
-    <ion-title>{{ title() }}</ion-title>
+      <ion-title>{{ title() }}</ion-title>
     }
 
-
     <ion-buttons slot="end">
-      <ion-button id="click-trigger" (click)="togglePopover($event)">
+      <ion-button (click)="togglePopover($event)">
         <ion-icon name="menu"></ion-icon>
       </ion-button>
     </ion-buttons>
-
   </ion-toolbar>
 </ion-header>
 
-<ion-popover [isOpen]="showPopover"
-  trigger="click-trigger"
-  triggerAction="click"
+<ion-popover
+  [isOpen]="showPopover"
   (didDismiss)="closePopover()"
-  placement="bottom">
+  [event]="popoverEvent"
+  reference="event"
+  size="auto"
+  alignment="center"
+>
   <ng-template>
     <ion-content>
       <ion-list>

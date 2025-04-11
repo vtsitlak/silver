@@ -13,5 +13,5 @@
     "jest.config.ts",
     "src/**/*.test.ts"
   ],
-  "include": ["src/**/*.ts", "../../../apps/tabata-ai/src/app/tabs.routes.ts"]
+  "include": ["src/**/*.ts"]
 }

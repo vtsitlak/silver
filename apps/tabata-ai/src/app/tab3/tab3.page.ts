@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { IonHeader, IonContent } from '@ionic/angular/standalone';
 import { ToolbarComponent } from '@silver/tabata/ui';
 
+
 @Component({
   selector: 'app-tab3',
   templateUrl: 'tab3.page.html',

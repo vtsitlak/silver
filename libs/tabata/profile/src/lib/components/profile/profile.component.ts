@@ -36,6 +36,7 @@ interface ProfileForm {
     IonItem,
     IonInput,
     IonButton,
+
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
