@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@silver/shared/helpers": ["libs/shared/helpers/src/index.ts"],
       "@silver/tabata/auth": ["libs/tabata/auth/src/index.ts"],
       "@silver/tabata/authentication": ["libs/authentication/src/index.ts"],
       "@silver/tabata/history": ["libs/tabata/history/src/index.ts"],
