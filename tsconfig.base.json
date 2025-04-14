@@ -17,9 +17,11 @@
     "paths": {
       "@silver/tabata/auth": ["libs/tabata/auth/src/index.ts"],
       "@silver/tabata/authentication": ["libs/authentication/src/index.ts"],
+      "@silver/tabata/history": ["libs/tabata/history/src/index.ts"],
       "@silver/tabata/home": ["libs/tabata/home/src/index.ts"],
       "@silver/tabata/profile": ["libs/tabata/profile/src/index.ts"],
-      "@silver/tabata/ui": ["libs/tabata/ui/src/index.ts"]
+      "@silver/tabata/ui": ["libs/tabata/ui/src/index.ts"],
+      "@silver/tabata/workouts": ["libs/tabata/workouts/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -33,12 +33,12 @@ export const tabRoutes: Routes = [
       {
         path: 'workouts',
         loadComponent: () =>
-          import('./tab2/tab2.page').then((m) => m.Tab2Page),
+          import('@silver/tabata/workouts').then((m) => m.WorkoutsComponent),
       },
       {
         path: 'history',
         loadComponent: () =>
-          import('./tab3/tab3.page').then((m) => m.Tab3Page),
+          import('@silver/tabata/history').then((m) => m.HistoryComponent),
       },
       {
         path: 'profile',

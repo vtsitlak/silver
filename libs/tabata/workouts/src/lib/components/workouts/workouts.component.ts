@@ -4,12 +4,12 @@ import { ToolbarComponent } from '@silver/tabata/ui';
 
 
 @Component({
-  selector: 'app-tab2',
-  templateUrl: 'tab2.page.html',
-  styleUrls: ['tab2.page.scss'],
+  selector: 'tbt-workouts',
+  templateUrl: 'workouts.component.html',
+  styleUrls: ['workouts.component.scss'],
   standalone: true,
   imports: [IonHeader, ToolbarComponent, IonContent ],
 })
-export class Tab2Page {
-  constructor() {}
+export class WorkoutsComponent {
+
 }

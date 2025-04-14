@@ -4,12 +4,11 @@ import { ToolbarComponent } from '@silver/tabata/ui';
 
 
 @Component({
-  selector: 'app-tab3',
-  templateUrl: 'tab3.page.html',
-  styleUrls: ['tab3.page.scss'],
+  selector: 'tbt-history',
+  templateUrl: 'history.component.html',
+  styleUrls: ['history.component.scss'],
   standalone: true,
   imports: [IonHeader, IonContent, ToolbarComponent],
 })
-export class Tab3Page {
-  constructor() {}
+export class HistoryComponent {
 }
