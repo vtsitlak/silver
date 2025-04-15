@@ -45,9 +45,9 @@ export const AuthStore = signalStore(
                     authService.sign(email, password).pipe(
                         tapResponse({
                             next: ({ user: firebaseUser }) => {
-                                const { uid, displayName, email, photoURL } = firebaseUser;
+                                const profileUser = toProfileUser(firebaseUser)
                                 patchState(store, {
-                                    user: { uid, displayName, email, photoURL } as ProfileUser,
+                                    user: profileUser,
                                     ...{ isLoading: false }
                                 });
                                 router.navigateByUrl('/tabs/home');
@@ -66,9 +66,9 @@ export const AuthStore = signalStore(
                     authService.signInWithGoogle().pipe(
                         tapResponse({
                             next: ({ user: firebaseUser }) => {
-                                const { uid, displayName, email, photoURL } = firebaseUser;
+                                const profileUser = toProfileUser(firebaseUser)
                                 patchState(store, {
-                                    user: { uid, displayName, email, photoURL } as ProfileUser,
+                                    user: profileUser,
                                     ...{ isLoading: false }
                                 });
                                 router.navigateByUrl('/tabs/home');
@@ -87,16 +87,11 @@ export const AuthStore = signalStore(
                     authService.signUp(newUser.email, newUser.password, newUser.displayName).pipe(
                         tapResponse({
                             next: ({ user: firebaseUser }) => {
-                                const { uid, displayName, email, photoURL } = firebaseUser;
-                                patchState(store, {
-                                    user: {
-                                        uid,
-                                        displayName,
-                                        email,
-                                        photoURL
-                                    } as ProfileUser,
-                                    ...{ isLoading: false }
-                                });
+                              const profileUser = toProfileUser(firebaseUser)
+                              patchState(store, {
+                                  user: profileUser,
+                                  ...{ isLoading: false }
+                              });
                                 router.navigateByUrl('/tabs/home');
                             },
                             error: ({ error }) => formErrorsStore.setErrors(error.errors)

@@ -6,7 +6,8 @@
         "start:tabata-ai": "nx serve tabata-ai",
         "build-localize:tabata-ai": "nx build tabata-ai  --localize",
         "build-run:tabata-ai": "npx http-server dist/apps/tabata-ai",
-        "xi18n:tabata-ai": "ng i18n-extract tabata-ai"
+        "xi18n:tabata-ai": "ng i18n-extract tabata-ai",
+        "format": "nx format:write"
     },
     "private": true,
     "dependencies": {
