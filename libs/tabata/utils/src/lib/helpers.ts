@@ -1,5 +1,5 @@
 import { User } from '@angular/fire/auth';
-import { ProfileUser } from '@silver/tabata/auth';
+import { ProfileUser } from './models/user';
 
 export function toProfileUser(user: User | null): ProfileUser | null {
     if (user) {

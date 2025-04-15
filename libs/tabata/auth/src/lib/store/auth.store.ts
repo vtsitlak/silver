@@ -1,15 +1,14 @@
 import { computed, inject } from '@angular/core';
 import { signalStore, withState, withMethods, patchState, withComputed } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { AuthState, LoginUser, NewUser, ProfileUser, authInitialState } from '../models/user';
 
 import { exhaustMap, map, pipe, switchMap, tap } from 'rxjs';
 import { tapResponse } from '@ngrx/operators';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ErrorsStore } from './errors.store';
-// eslint-disable-next-line @nx/enforce-module-boundaries
-import { toProfileUser } from '@silver/tabata/helpers';
+import { LoginUser, NewUser, toProfileUser } from '@silver/tabata/helpers';
+import { AuthState, authInitialState } from '../models/auth-state';
 
 export const AuthStore = signalStore(
     { providedIn: 'root' },
@@ -19,7 +18,7 @@ export const AuthStore = signalStore(
 
     // --- COMPUTED ---
     withComputed(({ user }) => ({
-        isAuthenticated: computed(() => !!user()) // ✅ computed signal
+        isAuthenticated: computed(() => !!user())
     })),
 
     // --- METHODS ---
@@ -45,7 +44,7 @@ export const AuthStore = signalStore(
                     authService.sign(email, password).pipe(
                         tapResponse({
                             next: ({ user: firebaseUser }) => {
-                                const profileUser = toProfileUser(firebaseUser)
+                                const profileUser = toProfileUser(firebaseUser);
                                 patchState(store, {
                                     user: profileUser,
                                     ...{ isLoading: false }
@@ -66,7 +65,7 @@ export const AuthStore = signalStore(
                     authService.signInWithGoogle().pipe(
                         tapResponse({
                             next: ({ user: firebaseUser }) => {
-                                const profileUser = toProfileUser(firebaseUser)
+                                const profileUser = toProfileUser(firebaseUser);
                                 patchState(store, {
                                     user: profileUser,
                                     ...{ isLoading: false }
@@ -87,11 +86,11 @@ export const AuthStore = signalStore(
                     authService.signUp(newUser.email, newUser.password, newUser.displayName).pipe(
                         tapResponse({
                             next: ({ user: firebaseUser }) => {
-                              const profileUser = toProfileUser(firebaseUser)
-                              patchState(store, {
-                                  user: profileUser,
-                                  ...{ isLoading: false }
-                              });
+                                const profileUser = toProfileUser(firebaseUser);
+                                patchState(store, {
+                                    user: profileUser,
+                                    ...{ isLoading: false }
+                                });
                                 router.navigateByUrl('/tabs/home');
                             },
                             error: ({ error }) => formErrorsStore.setErrors(error.errors)

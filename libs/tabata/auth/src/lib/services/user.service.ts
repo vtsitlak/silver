@@ -4,7 +4,7 @@ import { Observable, of, switchMap } from 'rxjs';
 
 import { AuthService } from './auth.service';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ProfileUser } from '../models/user';
+import { ProfileUser } from '../../../../utils/src/lib/models/user';
 
 @Injectable({
     providedIn: 'root'
