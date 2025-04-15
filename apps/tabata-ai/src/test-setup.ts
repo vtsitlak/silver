@@ -3,6 +3,6 @@ import '@angular/localize/init';
 global.TextEncoder = TextEncoder;
 
 setupZoneTestEnv({
-  errorOnUnknownElements: true,
-  errorOnUnknownProperties: true,
+    errorOnUnknownElements: true,
+    errorOnUnknownProperties: true
 });

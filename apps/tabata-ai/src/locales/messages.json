@@ -1,8 +1,8 @@
 {
-  "locale": "en",
-  "translations": {
-    "home": "Home",
-    "workouts": "Workouts",
-    "history": "History"
-  }
+    "locale": "en",
+    "translations": {
+        "home": "Home",
+        "workouts": "Workouts",
+        "history": "History"
+    }
 }

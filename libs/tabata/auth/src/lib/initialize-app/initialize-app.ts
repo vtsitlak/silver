@@ -10,7 +10,6 @@
 // import { take } from 'rxjs/operators';
 // import { AuthService } from '../services/auth.service';
 
-
 // export function initializeAppFactory(appRef: ApplicationRef): () => Promise<any> {
 //   console.log("APP_INITIALIZER: initializeAppFactory called");
 //   return () => {

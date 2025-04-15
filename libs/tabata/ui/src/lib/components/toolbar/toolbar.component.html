@@ -1,43 +1,36 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button>
-        <ion-icon name="home"></ion-icon>
-      </ion-button>
-    </ion-buttons>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button>
+                <ion-icon name="home"></ion-icon>
+            </ion-button>
+        </ion-buttons>
 
-    @if (title()) {
-      <ion-title>{{ title() }}</ion-title>
-    }
+        @if (title()) {
+        <ion-title>{{ title() }}</ion-title>
+        }
 
-    <ion-buttons slot="end">
-      <ion-button (click)="togglePopover($event)">
-        <ion-icon name="menu"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
+        <ion-buttons slot="end">
+            <ion-button (click)="togglePopover($event)">
+                <ion-icon name="menu"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+    </ion-toolbar>
 </ion-header>
 
-<ion-popover
-  [isOpen]="showPopover"
-  (didDismiss)="closePopover()"
-  [event]="popoverEvent"
-  reference="event"
-  size="auto"
-  alignment="center"
->
-  <ng-template>
-    <ion-content>
-      <ion-list>
-        <ion-item button [routerLink]="['/tabs/profile']" (click)="onMenuItemClick()">
-          <ion-icon slot="start" name="person"></ion-icon>
-          <ion-label i18n="@@profile">Profile</ion-label>
-        </ion-item>
-        <ion-item button (click)="logout()">
-          <ion-icon slot="start" name="log-out"></ion-icon>
-          <ion-label i18n="@@logout">Logout</ion-label>
-        </ion-item>
-      </ion-list>
-    </ion-content>
-  </ng-template>
+<ion-popover [isOpen]="showPopover" (didDismiss)="closePopover()" [event]="popoverEvent" reference="event" size="auto" alignment="center">
+    <ng-template>
+        <ion-content>
+            <ion-list>
+                <ion-item button [routerLink]="['/tabs/profile']" (click)="onMenuItemClick()">
+                    <ion-icon slot="start" name="person"></ion-icon>
+                    <ion-label i18n="@@profile">Profile</ion-label>
+                </ion-item>
+                <ion-item button (click)="logout()">
+                    <ion-icon slot="start" name="log-out"></ion-icon>
+                    <ion-label i18n="@@logout">Logout</ion-label>
+                </ion-item>
+            </ion-list>
+        </ion-content>
+    </ng-template>
 </ion-popover>

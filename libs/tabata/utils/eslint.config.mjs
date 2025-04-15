@@ -12,7 +12,7 @@ export default [
                 'error',
                 {
                     type: 'attribute',
-                    prefix: 'tbt',
+                    prefix: 'lib',
                     style: 'camelCase'
                 }
             ],
@@ -20,7 +20,7 @@ export default [
                 'error',
                 {
                     type: 'element',
-                    prefix: 'tbt',
+                    prefix: 'lib',
                     style: 'kebab-case'
                 }
             ]

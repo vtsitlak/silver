@@ -1,33 +1,27 @@
 <ion-header [translucent]="true">
-  <tbt-toolbar i18n-title="@@profile" profile="Profile" title="Profile"></tbt-toolbar>
+    <tbt-toolbar i18n-title="@@profile" profile="Profile" title="Profile"></tbt-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
-    <ion-list>
-      <ion-item>
-        <ion-input label="Display Name" labelPlacement="floating" type="text" formControlName="displayName">
-        </ion-input>
-      </ion-item>
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+        <ion-list>
+            <ion-item>
+                <ion-input label="Display Name" labelPlacement="floating" type="text" formControlName="displayName"> </ion-input>
+            </ion-item>
 
-      <ion-item>
-        <ion-input label="Email" labelPlacement="floating" type="email" formControlName="email">
-        </ion-input>
-      </ion-item>
+            <ion-item>
+                <ion-input label="Email" labelPlacement="floating" type="email" formControlName="email"> </ion-input>
+            </ion-item>
 
-      <ion-item>
-        <ion-input label="New Password" labelPlacement="floating" type="password" formControlName="password">
-        </ion-input>
-      </ion-item>
+            <ion-item>
+                <ion-input label="New Password" labelPlacement="floating" type="password" formControlName="password"> </ion-input>
+            </ion-item>
 
-      <ion-item>
-        <ion-input label="Repeat new Password" labelPlacement="floating" type="password" formControlName="confirmPassword">
-        </ion-input>
-      </ion-item>
+            <ion-item>
+                <ion-input label="Repeat new Password" labelPlacement="floating" type="password" formControlName="confirmPassword"> </ion-input>
+            </ion-item>
 
-      <ion-button expand="block" type="submit">
-        Update Profile
-      </ion-button>
-    </ion-list>
-  </form>
+            <ion-button expand="block" type="submit"> Update Profile </ion-button>
+        </ion-list>
+    </form>
 </ion-content>

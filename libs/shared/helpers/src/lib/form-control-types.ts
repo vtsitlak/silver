@@ -1,7 +1,6 @@
 import { FormControl } from '@angular/forms';
 import { Nullable } from './utilities';
 
-
 export type StringControl = FormControl<NullableString>;
 export type StringArrayControl = FormControl<NullableStringArray>;
 export type NumberArrayControl = FormControl<NullableNumberArray>;

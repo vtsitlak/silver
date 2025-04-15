@@ -1,17 +1,7 @@
 /* eslint-disable @nx/enforce-module-boundaries */
 import { bootstrapApplication } from '@angular/platform-browser';
-import {
-  RouteReuseStrategy,
-  provideRouter,
-  withPreloading,
-  PreloadAllModules,
-  withViewTransitions,
-  withComponentInputBinding,
-} from '@angular/router';
-import {
-  IonicRouteStrategy,
-  provideIonicAngular,
-} from '@ionic/angular/standalone';
+import { RouteReuseStrategy, provideRouter, withPreloading, PreloadAllModules, withViewTransitions, withComponentInputBinding } from '@angular/router';
+import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
 
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
@@ -27,24 +17,22 @@ import { of } from 'rxjs';
 const firebaseApp = initializeApp(environment.firebaseConfig); // Initialize Firebase here
 
 export function initAuthStore() {
-  const authStore = inject(AuthStore);
-  // Call getUser method and return as Observable
-  const userObservable = authStore.getUser();
-  return of(userObservable);
+    const authStore = inject(AuthStore);
+    // Call getUser method and return as Observable
+    const userObservable = authStore.getUser();
+    return of(userObservable);
 }
 
 export const appConfig = {
-  providers: [
-    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    provideIonicAngular(),
-    provideRouter(routes, withViewTransitions(),
-    withComponentInputBinding(), withPreloading(PreloadAllModules)),
-    provideAppInitializer(initAuthStore),
-    provideFirebaseApp(() => firebaseApp),
-    provideFirestore(() => getFirestore()),
-     provideAuth(() => getAuth())
-  ]
+    providers: [
+        { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+        provideIonicAngular(),
+        provideRouter(routes, withViewTransitions(), withComponentInputBinding(), withPreloading(PreloadAllModules)),
+        provideAppInitializer(initAuthStore),
+        provideFirebaseApp(() => firebaseApp),
+        provideFirestore(() => getFirestore()),
+        provideAuth(() => getAuth())
+    ]
 };
 
 bootstrapApplication(AppComponent, appConfig);
-
