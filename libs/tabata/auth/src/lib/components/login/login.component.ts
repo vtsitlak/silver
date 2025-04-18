@@ -5,12 +5,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { IonicModule } from '@ionic/angular';
 import { AuthStore } from '../../store/auth.store';
-
-interface LoginForm {
-    email: FormControl<string>;
-    password: FormControl<string>;
-}
-
+import { LoginForm } from '@silver/tabata/helpers';
 @Component({
     selector: 'tbt-login',
     imports: [CommonModule, ReactiveFormsModule, IonicModule, NgIf],
@@ -27,7 +22,7 @@ export class LoginComponent {
     router: Router = inject(Router);
     form = this.fb.group<LoginForm>({
         email: new FormControl<string>('', {
-            validators: [Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/), Validators.required],
+            validators: [Validators.email, Validators.required],
             nonNullable: true
         }),
         password: new FormControl<string>('', {
@@ -37,9 +32,7 @@ export class LoginComponent {
     });
 
     onSubmit(): void {
-        const rawForm = this.form.getRawValue();
-
-        this.authStore.sign({ email: rawForm.email, password: rawForm.password });
+        this.authStore.sign(this.form.getRawValue());
     }
 
     register(): void {
