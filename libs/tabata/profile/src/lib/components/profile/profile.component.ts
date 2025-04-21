@@ -38,9 +38,9 @@ export class ProfileComponent implements OnInit {
             nonNullable: true
         }),
         newPassword: new FormControl<string>('', {
-          validators: [Validators.required, Validators.minLength(6)],
-          nonNullable: true
-      }),
+            validators: [Validators.required, Validators.minLength(6)],
+            nonNullable: true
+        }),
         confirmNewPassword: new FormControl<string>('', {
             validators: [Validators.required, Validators.minLength(6)],
             nonNullable: true
@@ -55,11 +55,10 @@ export class ProfileComponent implements OnInit {
         if (user) {
             this.profileForm.patchValue(user);
             setTimeout(() => {
-              console.log('usePassword = ', this.authStore.usePassword());
+                console.log('usePassword = ', this.authStore.usePassword());
             }, 50000);
-
         }
-       }
+    }
 
     // user = this.authService.currentUser();
 
