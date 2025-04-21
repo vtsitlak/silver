@@ -1,5 +1,5 @@
 import { computed, inject } from '@angular/core';
-import { signalStore, withState, withMethods, patchState, withComputed, getState } from '@ngrx/signals';
+import { signalStore, withState, withMethods, patchState, withComputed } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 
 import { exhaustMap, map, pipe, switchMap, tap } from 'rxjs';
@@ -25,16 +25,11 @@ export const AuthStore = signalStore(
             pipe(
                 tap(() => patchState(store, { isLoading: true })),
                 switchMap(() => authService.currentUser$),
-                // TODO methods for usePassword, useGoogle etc to get the full store
                 map((user) => userToState(user)),
                 tap((state) => {
-                    console.log('store get = ', getState(store));
                     if (state) {
                         patchState(store, state);
                     }
-
-                    console.log('store user after = ', store.user());
-                    console.log('store usePassword after = ', store.usePassword());
                 })
             )
         ),
