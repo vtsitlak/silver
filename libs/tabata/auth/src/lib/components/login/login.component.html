@@ -32,9 +32,13 @@
         </ion-text>
 
         <div class="ion-padding">
-            <ion-button expand="block" type="submit" [disabled]="!form.valid">Login</ion-button>
-            <ion-button expand="block" fill="outline" (click)="register()">Register</ion-button>
-            <ion-button expand="block" fill="clear" (click)="forgotPassword()">Forgot password</ion-button>
+            <ion-button expand="block" type="submit" [disabled]="!form.valid || isSubmitting">
+                @if(isSubmitting) {
+                <ion-spinner name="crescent"></ion-spinner>
+                } @else { Login }
+            </ion-button>
+            <ion-button expand="block" fill="outline" (click)="register()" [disabled]="isSubmitting">Register</ion-button>
+            <ion-button expand="block" fill="clear" (click)="forgotPassword()" [disabled]="isSubmitting">Forgot password</ion-button>
         </div>
     </form>
 </ion-content>
