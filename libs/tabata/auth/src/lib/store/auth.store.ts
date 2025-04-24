@@ -7,7 +7,7 @@ import { tapResponse } from '@ngrx/operators';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ErrorsStore } from './errors.store';
-import { authInitialState, AuthState, LoginUser, NewUser, toProfileUser, userToState } from '@silver/tabata/helpers';
+import { authInitialState, AuthState, LoginUser, NewUser, ProfileUser, toProfileUser, UpdatePasswordDetails, userToState } from '@silver/tabata/helpers';
 
 export const AuthStore = signalStore(
     { providedIn: 'root' },
@@ -40,23 +40,27 @@ export const AuthStore = signalStore(
                 exhaustMap(({ email, password }) =>
                     authService.sign(email, password).pipe(
                         tapResponse({
-                            next: ({ user: firebaseUser }) => {
-                                const profileUser = toProfileUser(firebaseUser);
+                            next: (userCredential) => {
+                                const profileUser = toProfileUser(userCredential.user);
                                 patchState(store, {
                                     user: profileUser,
-                                    ...{ isLoading: false },
-                                    ...{ usePassword: true }
+                                    isLoading: false,
+                                    usePassword: true
                                 });
                                 router.navigateByUrl('/tabs/home');
                             },
-                            error: ({ error }) => formErrorsStore.setErrors(error.errors)
+                            error: (error: Error) => {
+                                console.error('Sign in error:', error);
+                                formErrorsStore.setErrors({ signIn: error.message });
+                                patchState(store, { isLoading: false });
+                            }
                         })
                     )
                 )
             )
         ),
 
-        signWithGoogle: rxMethod<LoginUser>(
+        signWithGoogle: rxMethod(
             pipe(
                 tap(() => patchState(store, { isLoading: true })),
                 exhaustMap(() =>
@@ -105,8 +109,9 @@ export const AuthStore = signalStore(
                     authService.updateDisplayName(displayName).pipe(
                         tapResponse({
                             next: () => {
-                                patchState(store, { isLoading: false });
-                                router.navigateByUrl('/tabs/profile');
+                                const updatedUser = { ...store.user, displayName } as unknown as ProfileUser;
+                                patchState(store, { user: updatedUser, isLoading: false });
+                                // router.navigateByUrl('/tabs/profile');
                             },
                             error: ({ error }) => formErrorsStore.setErrors(error.errors)
                         })
@@ -114,11 +119,16 @@ export const AuthStore = signalStore(
                 )
             )
         ),
-        updatePassword: rxMethod<string>(
+        updatePassword: rxMethod<UpdatePasswordDetails>(
             pipe(
                 tap(() => patchState(store, { isLoading: true })),
-                exhaustMap((newPassword) =>
-                    authService.updatePassword(newPassword).pipe(
+                exhaustMap(({ email, currentPassword, newPassword }) =>
+                    authService.updatePassword(email, currentPassword, newPassword).pipe(
+                        tap(() => {
+                            console.log('store email = ', email);
+                            console.log('store currentPassword = ', currentPassword);
+                            console.log('store newPassword = ', newPassword);
+                        }),
                         tapResponse({
                             next: () => {
                                 patchState(store, { isLoading: false });

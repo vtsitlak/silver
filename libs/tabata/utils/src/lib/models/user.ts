@@ -18,6 +18,12 @@ export interface NewUser {
     password: string;
 }
 
+export interface UpdatePasswordDetails {
+    email: string;
+    currentPassword: string;
+    newPassword: string;
+}
+
 export enum PROVIDER_ID {
     PASSWORD = 'password',
     GOOGLE = 'google.com'

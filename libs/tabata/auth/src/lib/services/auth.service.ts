@@ -73,7 +73,7 @@ export class AuthService {
         }
     }
 
-    updatePassword(newPassword: string): Observable<void> {
+    updatePassword(email: string, currentPassword: string, newPassword: string): Observable<void> {
         const user = this.auth.currentUser;
 
         if (!user) {
@@ -81,30 +81,12 @@ export class AuthService {
             return of(undefined); // Or return an error Observable
         }
 
-        // **Important: Re-authentication Required**
-        // Firebase requires the user to have recently signed in before
-        // changing their password for security reasons.
-
-        // 1. Get the user's email address (you might need to store this)
-        const userEmail = user.email;
-
-        if (!userEmail) {
-            console.warn('User has no email address, cannot re-authenticate.');
-            return throwError(() => new Error('User has no email address, cannot re-authenticate.'));
-        }
-
-        // 2. Prompt the user to re-enter their password
-        const currentPassword = prompt('Please enter your current password to confirm:');
-
-        if (!currentPassword) {
-            console.warn('User did not enter their current password.');
-            return of(undefined); // Or return an error Observable
-        }
-
-        // 3. Create a credential with the user's email and current password
-        const credential = EmailAuthProvider.credential(userEmail, currentPassword);
-
-        // 4. Re-authenticate the user with the credential
+        // Create a credential with the user's email and current password
+        const credential = EmailAuthProvider.credential(email, currentPassword);
+        console.log('email = ', email);
+        console.log('currentPassword = ', currentPassword);
+        console.log('newPassword = ', newPassword);
+        // Re-authenticate the user with the credential
         return from(reauthenticateWithCredential(user, credential)).pipe(
             switchMap(() => {
                 return from(updatePassword(user, newPassword));

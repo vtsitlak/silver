@@ -1,43 +1,39 @@
 <ion-header [translucent]="true">
-  <tbt-toolbar i18n-title="@@profile" profile="Profile" title="Profile"></tbt-toolbar>
+    <tbt-toolbar i18n-title="@@profile" profile="Profile" title="Profile"></tbt-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
-    <ion-list>
-      <ion-item>
-        <ion-input label="Display Name" labelPlacement="floating" type="text" formControlName="displayName">
-        </ion-input>
-      </ion-item>
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+        <ion-list>
+            <ion-item>
+                <ion-input label="Display Name" labelPlacement="floating" type="text" formControlName="displayName"> </ion-input>
+            </ion-item>
 
-      <ion-item>
-        <ion-input label="Email" labelPlacement="floating" type="email" formControlName="email"> </ion-input>
-      </ion-item>
+            <ion-item>
+                <ion-input label="Email" labelPlacement="floating" type="email" formControlName="email"></ion-input>
+            </ion-item>
 
-      @if(usePassword()) {
-      <ion-item>
-        <ion-toggle justify="end" #togglePassword>Change password</ion-toggle>
-      </ion-item>
-      @if(togglePassword.checked) {
-      <ion-item>
-        <ion-input label="Current Password" labelPlacement="floating" type="password" formControlName="currentPassword">
-        </ion-input>
-      </ion-item>
+            @if(usePassword()) {
+            <ion-item>
+                <ion-toggle justify="end" [checked]="showPasswordField" (ionChange)="togglePasswordField()">Change password</ion-toggle>
+            </ion-item>
+            @if(showPasswordField) {
+            <ion-item>
+                <ion-input label="Current Password" labelPlacement="floating" type="password" formControlName="currentPassword"> </ion-input>
+            </ion-item>
 
-      <ion-item>
-        <ion-input label="New Password" labelPlacement="floating" type="password" formControlName="newPassword">
-        </ion-input>
-      </ion-item>
+            @if(profileForm.controls.currentPassword.value && profileForm.controls.currentPassword.valid) {
+            <ion-item>
+                <ion-input label="New Password" labelPlacement="floating" type="password" formControlName="newPassword"> </ion-input>
+            </ion-item>
 
-      <ion-item>
-        <ion-input label="Confirm new Password" labelPlacement="floating" type="password"
-          formControlName="confirmNewPassword"> </ion-input>
-      </ion-item>
-      }
+            <ion-item>
+                <ion-input label="Confirm new Password" labelPlacement="floating" type="password" formControlName="confirmNewPassword"> </ion-input>
+            </ion-item>
 
-      }
+            } } }
 
-      <ion-button expand="block" type="submit"> Update Profile </ion-button>
-    </ion-list>
-  </form>
+            <ion-button expand="block" type="submit" [disabled]="profileForm.pristine || profileForm.invalid"> Update Profile </ion-button>
+        </ion-list>
+    </form>
 </ion-content>
