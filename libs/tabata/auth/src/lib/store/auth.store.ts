@@ -2,7 +2,7 @@ import { computed, inject } from '@angular/core';
 import { signalStore, withState, withMethods, patchState, withComputed } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 
-import { exhaustMap, map, pipe, switchMap, tap } from 'rxjs';
+import { catchError, exhaustMap, finalize, map, of, pipe, switchMap, tap } from 'rxjs';
 import { tapResponse } from '@ngrx/operators';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
@@ -27,8 +27,12 @@ export const AuthStore = signalStore(
                 switchMap(() => authService.currentUser$),
                 map((user) => userToState(user)),
                 tap((state) => {
+                  console.log('state = ', state);
                     if (state) {
-                        patchState(store, state);
+                        patchState(store, { ...state, isLoading: false });
+                    }
+                    else {
+                        patchState(store, { isLoading: false });
                     }
                 })
             )
@@ -54,7 +58,17 @@ export const AuthStore = signalStore(
                                 formErrorsStore.setErrors({ signIn: error.message });
                                 patchState(store, { isLoading: false });
                             }
-                        })
+                        }),
+                        catchError((error: any) => {
+                          console.error('Sign in error:', error);
+                          formErrorsStore.setErrors({ signIn: error.message }); // Use inject(FormErrorsStore)
+                          patchState(store, { isLoading: false });
+                          return of(null);
+                      }),
+                      finalize(() => {  // <----  Add the finalize operator
+                          // This code runs AFTER success OR error
+                          console.log('Sign-in process finalized');
+                      })
                     )
                 )
             )
