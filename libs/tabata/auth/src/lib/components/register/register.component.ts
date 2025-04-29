@@ -1,22 +1,24 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, computed, inject } from '@angular/core';
 import { FormControl, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { RegisterForm } from '@silver/tabata/helpers';
 import { AuthStore } from '../../store/auth.store';
+import { ErrorsStore } from '../../store/errors.store';
 
 @Component({
     selector: 'tbt-register',
-    imports: [CommonModule, ReactiveFormsModule, IonicModule],
+    imports: [ReactiveFormsModule, IonicModule],
     templateUrl: './register.component.html',
-    styleUrl: './register.component.scss',
-    standalone: true
+    styleUrl: './register.component.scss'
 })
 export class RegisterComponent {
-    error = false;
     fb: FormBuilder = inject(FormBuilder);
     private readonly authStore = inject(AuthStore);
+
+    private readonly errorsStore = inject(ErrorsStore);
+    isLoading = computed(() => this.authStore.isLoading());
+    error = computed(() => this.errorsStore.errors().length > 0);
     router: Router = inject(Router);
     form = this.fb.group<RegisterForm>({
         email: new FormControl<string>('', {

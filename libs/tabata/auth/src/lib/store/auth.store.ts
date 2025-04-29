@@ -27,16 +27,44 @@ export const AuthStore = signalStore(
                 switchMap(() => authService.currentUser$),
                 map((user) => userToState(user)),
                 tap((state) => {
-                  console.log('state = ', state);
                     if (state) {
                         patchState(store, { ...state, isLoading: false });
-                    }
-                    else {
+                    } else {
                         patchState(store, { isLoading: false });
                     }
                 })
             )
         ),
+        sendPasswordResetEmail: rxMethod<string>(
+            pipe(
+                tap(() => patchState(store, { isLoading: true })),
+                exhaustMap((email) =>
+                    authService.sendPasswordResetEmail(email).pipe(
+                        tapResponse({
+                            next: () => {
+                                patchState(store, { isLoading: false });
+                                router.navigateByUrl('/tabs/home');
+                            },
+                            error: (error: Error) => {
+                                console.error('Send password reset email error:', error);
+                                formErrorsStore.setErrors({ resetPassword: error.message });
+                                patchState(store, { isLoading: false });
+                            }
+                        }),
+                        catchError((error: any) => {
+                            console.error('Send password reset email error:', error);
+                            formErrorsStore.setErrors({ resetPassword: error.message });
+                            patchState(store, { isLoading: false });
+                            return of(null);
+                        }),
+                        finalize(() => {
+                            console.log('Send password reset email process finalized');
+                        })
+                    )
+                )
+            )
+        ),
+
 
         sign: rxMethod<LoginUser>(
             pipe(
@@ -60,15 +88,14 @@ export const AuthStore = signalStore(
                             }
                         }),
                         catchError((error: any) => {
-                          console.error('Sign in error:', error);
-                          formErrorsStore.setErrors({ signIn: error.message }); // Use inject(FormErrorsStore)
-                          patchState(store, { isLoading: false });
-                          return of(null);
-                      }),
-                      finalize(() => {  // <----  Add the finalize operator
-                          // This code runs AFTER success OR error
-                          console.log('Sign-in process finalized');
-                      })
+                            console.error('Sign in error:', error);
+                            formErrorsStore.setErrors({ signIn: error.message });
+                            patchState(store, { isLoading: false });
+                            return of(null);
+                        }),
+                        finalize(() => {
+                            console.log('Sign-in process finalized');
+                        })
                     )
                 )
             )
