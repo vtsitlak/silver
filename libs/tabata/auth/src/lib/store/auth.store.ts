@@ -65,7 +65,6 @@ export const AuthStore = signalStore(
             )
         ),
 
-
         sign: rxMethod<LoginUser>(
             pipe(
                 tap(() => patchState(store, { isLoading: true })),
