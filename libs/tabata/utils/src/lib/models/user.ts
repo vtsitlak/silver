@@ -37,6 +37,17 @@ export interface AuthState {
     error: unknown;
 }
 
+export enum AuthErrors  {
+    Sign = 'sign',
+    GetUser = 'getUser',
+    SendPasswordResetEmail = 'sendPasswordResetEmail',
+    SignWithGoogle = 'signWithGoogle',
+    Register = 'register',
+    UpdateDisplayName = 'updateDisplayName',
+    UpdatePassword = 'updatePasswor',
+    Logout = 'logout'
+}
+
 export const authInitialState: AuthState = {
     user: null,
     isLoading: false,

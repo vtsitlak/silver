@@ -7,7 +7,7 @@ import { tapResponse } from '@ngrx/operators';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ErrorsStore } from './errors.store';
-import { authInitialState, AuthState, LoginUser, NewUser, ProfileUser, toProfileUser, UpdatePasswordDetails, userToState } from '@silver/tabata/helpers';
+import { authInitialState, AuthErrors, AuthState, LoginUser, NewUser, ProfileUser, toProfileUser, UpdatePasswordDetails, userToState } from '@silver/tabata/helpers';
 
 export const AuthStore = signalStore(
     { providedIn: 'root' },
@@ -47,7 +47,7 @@ export const AuthStore = signalStore(
                             },
                             error: (error: Error) => {
                                 console.error('Send password reset email error:', error);
-                                formErrorsStore.setErrors({ resetPassword: error.message });
+                                formErrorsStore.setErrors({ [AuthErrors.SendPasswordResetEmail]: error.message });
                                 patchState(store, { isLoading: false });
                             }
                         }),
@@ -82,13 +82,13 @@ export const AuthStore = signalStore(
                             },
                             error: (error: Error) => {
                                 console.error('Sign in error:', error);
-                                formErrorsStore.setErrors({ signIn: error.message });
+                                formErrorsStore.setErrors({ sign: error.message });
                                 patchState(store, { isLoading: false });
                             }
                         }),
                         catchError((error: any) => {
                             console.error('Sign in error:', error);
-                            formErrorsStore.setErrors({ signIn: error.message });
+                            formErrorsStore.setErrors({ sign: error.message });
                             patchState(store, { isLoading: false });
                             return of(null);
                         }),
