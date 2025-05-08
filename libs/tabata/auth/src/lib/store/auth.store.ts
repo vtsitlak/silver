@@ -20,7 +20,7 @@ export const AuthStore = signalStore(
         isAuthenticated: computed(() => !!profileUser())
     })),
     // --- METHODS ---
-    withMethods((store, formErrorsStore = inject(ErrorsStore), authService = inject(AuthService), router = inject(Router)) => ({
+    withMethods((store, errorsStore = inject(ErrorsStore), authService = inject(AuthService), router = inject(Router)) => ({
         getUser: rxMethod<void>(
             pipe(
                 tap(() => patchState(store, { isLoading: true })),
@@ -43,19 +43,21 @@ export const AuthStore = signalStore(
                         tapResponse({
                             next: () => {
                                 patchState(store, { isLoading: false });
+                                errorsStore.setErrors({ [AuthErrors.SendPasswordResetEmail]: '' });
                                 router.navigateByUrl('/tabs/home');
                             },
                             error: (error: Error) => {
-                                console.error('Send password reset email error:', error);
-                                formErrorsStore.setErrors({ [AuthErrors.SendPasswordResetEmail]: error.message });
+                                console.error('Auth error:', error);
+                                errorsStore.setErrors({ [AuthErrors.SendPasswordResetEmail]: error.message });
                                 patchState(store, { isLoading: false });
+                                return of(undefined);
                             }
                         }),
                         catchError((error: any) => {
-                            console.error('Send password reset email error:', error);
-                            formErrorsStore.setErrors({ resetPassword: error.message });
+                            console.error('Auth error:', error);
+                            errorsStore.setErrors({ [AuthErrors.SendPasswordResetEmail]: error.message });
                             patchState(store, { isLoading: false });
-                            return of(null);
+                            return of(undefined);
                         }),
                         finalize(() => {
                             console.log('Send password reset email process finalized');
@@ -78,19 +80,21 @@ export const AuthStore = signalStore(
                                     isLoading: false,
                                     usePassword: true
                                 });
+                                errorsStore.setErrors({ [AuthErrors.Sign]: '' });
                                 router.navigateByUrl('/tabs/home');
                             },
                             error: (error: Error) => {
-                                console.error('Sign in error:', error);
-                                formErrorsStore.setErrors({ sign: error.message });
+                                console.error('Auth error:', error);
+                                errorsStore.setErrors({ [AuthErrors.Sign]: error.message });
                                 patchState(store, { isLoading: false });
+                                return of(undefined);
                             }
                         }),
                         catchError((error: any) => {
-                            console.error('Sign in error:', error);
-                            formErrorsStore.setErrors({ sign: error.message });
+                            console.error('Auth error:', error);
+                            errorsStore.setErrors({ [AuthErrors.Sign]: error.message });
                             patchState(store, { isLoading: false });
-                            return of(null);
+                            return of(undefined);
                         }),
                         finalize(() => {
                             console.log('Sign-in process finalized');
@@ -112,9 +116,15 @@ export const AuthStore = signalStore(
                                     user: profileUser,
                                     ...{ isLoading: false, useGoogle: true }
                                 });
+                                errorsStore.setErrors({ [AuthErrors.SignWithGoogle]: '' });
                                 router.navigateByUrl('/tabs/home');
                             },
-                            error: ({ error }) => formErrorsStore.setErrors(error.errors)
+                            error: (error: Error) => {
+                                console.error('Auth error:', error);
+                                errorsStore.setErrors({ [AuthErrors.SignWithGoogle]: error.message });
+                                patchState(store, { isLoading: false });
+                                return of(undefined);
+                            }
                         })
                     )
                 )
@@ -134,9 +144,15 @@ export const AuthStore = signalStore(
                                     ...{ isLoading: false },
                                     ...{ usePassword: true }
                                 });
+                                errorsStore.setErrors({ [AuthErrors.Register]: '' });
                                 router.navigateByUrl('/tabs/home');
                             },
-                            error: ({ error }) => formErrorsStore.setErrors(error.errors)
+                            error: (error: Error) => {
+                                console.error('Auth error:', error);
+                                errorsStore.setErrors({ [AuthErrors.Register]: error.message });
+                                patchState(store, { isLoading: false });
+                                return of(undefined);
+                            }
                         })
                     )
                 )
@@ -151,9 +167,14 @@ export const AuthStore = signalStore(
                             next: () => {
                                 const updatedUser = { ...store.user, displayName } as unknown as ProfileUser;
                                 patchState(store, { user: updatedUser, isLoading: false });
-                                // router.navigateByUrl('/tabs/profile');
+                                errorsStore.setErrors({ [AuthErrors.UpdateDisplayName]: '' });
                             },
-                            error: ({ error }) => formErrorsStore.setErrors(error.errors)
+                            error: (error: Error) => {
+                                console.error('Auth error:', error);
+                                errorsStore.setErrors({ [AuthErrors.UpdateDisplayName]: error.message });
+                                patchState(store, { isLoading: false });
+                                return of(undefined);
+                            }
                         })
                     )
                 )
@@ -164,17 +185,18 @@ export const AuthStore = signalStore(
                 tap(() => patchState(store, { isLoading: true })),
                 exhaustMap(({ email, currentPassword, newPassword }) =>
                     authService.updatePassword(email, currentPassword, newPassword).pipe(
-                        tap(() => {
-                            console.log('store email = ', email);
-                            console.log('store currentPassword = ', currentPassword);
-                            console.log('store newPassword = ', newPassword);
-                        }),
                         tapResponse({
                             next: () => {
                                 patchState(store, { isLoading: false });
+                                errorsStore.setErrors({ [AuthErrors.UpdatePassword]: '' });
                                 router.navigateByUrl('/tabs/profile');
                             },
-                            error: ({ error }) => formErrorsStore.setErrors(error.errors)
+                            error: (error: Error) => {
+                                console.error('Auth error:', error);
+                                errorsStore.setErrors({ [AuthErrors.UpdatePassword]: error.message });
+                                patchState(store, { isLoading: false });
+                                return of(undefined);
+                            }
                         })
                     )
                 )
@@ -188,9 +210,15 @@ export const AuthStore = signalStore(
                         tapResponse({
                             next: () => {
                                 patchState(store, { user: null }, { isLoading: false });
+                                errorsStore.setErrors({ [AuthErrors.Logout]: '' });
                                 router.navigateByUrl('/auth/login');
                             },
-                            error: ({ error }) => formErrorsStore.setErrors(error.errors)
+                            error: (error: Error) => {
+                                console.error('Auth error:', error);
+                                errorsStore.setErrors({ [AuthErrors.Logout]: error.message });
+                                patchState(store, { isLoading: false });
+                                return of(undefined);
+                            }
                         })
                     )
                 )
