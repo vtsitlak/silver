@@ -6,34 +6,34 @@
     <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
         <ion-list>
             <ion-item>
-                <ion-input label="Display Name" labelPlacement="floating" type="text" formControlName="displayName"> </ion-input>
+                <ion-input label="Display Name" labelPlacement="floating" type="text" formControlName="displayName" i18n-label="@@profileDisplayNameLabel"> </ion-input>
             </ion-item>
 
             <ion-item>
-                <ion-input label="Email" labelPlacement="floating" type="email" formControlName="email"></ion-input>
+                <ion-input label="Email" labelPlacement="floating" type="email" formControlName="email" i18n-label="@@profileEmailLabel"></ion-input>
             </ion-item>
 
             @if(usePassword()) {
             <ion-item>
-                <ion-toggle justify="end" [checked]="showPasswordField" (ionChange)="togglePasswordField()">Change password</ion-toggle>
+                <ion-toggle justify="end" [checked]="showPasswordField" (ionChange)="togglePasswordField()" i18n="@@profileChangePasswordToggle">Change password</ion-toggle>
             </ion-item>
             @if(showPasswordField) {
             <ion-item>
-                <ion-input label="Current Password" labelPlacement="floating" type="password" formControlName="currentPassword"> </ion-input>
+                <ion-input label="Current Password" labelPlacement="floating" type="password" formControlName="currentPassword" i18n-label="@@profileCurrentPasswordLabel"> </ion-input>
             </ion-item>
 
             @if(profileForm.controls.currentPassword.value && profileForm.controls.currentPassword.valid) {
             <ion-item>
-                <ion-input label="New Password" labelPlacement="floating" type="password" formControlName="newPassword"> </ion-input>
+                <ion-input label="New Password" labelPlacement="floating" type="password" formControlName="newPassword" i18n-label="@@profileNewPasswordLabel"> </ion-input>
             </ion-item>
 
             <ion-item>
-                <ion-input label="Confirm new Password" labelPlacement="floating" type="password" formControlName="confirmNewPassword"> </ion-input>
+                <ion-input label="Confirm new Password" labelPlacement="floating" type="password" formControlName="confirmNewPassword" i18n-label="@@profileConfirmNewPasswordLabel"> </ion-input>
             </ion-item>
 
             } } }
 
-            <ion-button expand="block" type="submit" [disabled]="profileForm.pristine || profileForm.invalid"> Update Profile </ion-button>
+            <ion-button expand="block" type="submit" [disabled]="profileForm.pristine || profileForm.invalid" i18n="@@profileUpdateButton"> Update Profile </ion-button>
         </ion-list>
     </form>
 </ion-content>

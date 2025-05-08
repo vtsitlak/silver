@@ -1,40 +1,40 @@
 <ion-content>
     <ion-header>
         <ion-toolbar>
-            <ion-title>Login</ion-title>
+            <ion-title i18n="@@authLoginTitle">Login</ion-title>
         </ion-toolbar>
     </ion-header>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <ion-list>
             <ion-item>
-                <ion-label position="floating">Email</ion-label>
-                <ion-input type="email" formControlName="email" placeholder="Enter your email"> </ion-input>
+                <ion-label position="floating" i18n="@@authEmailLabel">Email</ion-label>
+                <ion-input type="email" formControlName="email" placeholder="Enter your email" i18n-placeholder="@@authEmailPlaceholder"> </ion-input>
             </ion-item>
             @if(form.get('email')?.errors?.['required'] && form.get('email')?.touched) {
             <ion-text color="danger">
-                <p class="ion-padding-start">Email is required</p>
+                <p class="ion-padding-start" i18n="@@authEmailRequired">Email is required</p>
             </ion-text>
             } @if(form.get('email')?.errors?.['pattern'] && form.get('email')?.touched) {
             <ion-text color="danger">
-                <p class="ion-padding-start">Please enter a valid email address</p>
+                <p class="ion-padding-start" i18n="@@authEmailInvalid">Please enter a valid email address</p>
             </ion-text>
             }
 
             <ion-item>
-                <ion-label position="floating">Password</ion-label>
-                <ion-input type="password" formControlName="password" placeholder="Enter your password"> </ion-input>
+                <ion-label position="floating" i18n="@@authPasswordLabel">Password</ion-label>
+                <ion-input type="password" formControlName="password" placeholder="Enter your password" i18n-placeholder="@@authPasswordPlaceholder"> </ion-input>
             </ion-item>
             @if(form.get('password')?.errors?.['required'] && form.get('password')?.touched) {
             <ion-text color="danger">
-                <p class="ion-padding-start">Password is required</p>
+                <p class="ion-padding-start" i18n="@@authPasswordRequired">Password is required</p>
             </ion-text>
             }
         </ion-list>
 
         @if(error()) {
         <ion-text color="danger">
-            <p class="ion-text-center">Invalid email or password</p>
+            <p class="ion-text-center" i18n="@@authLoginInvalid">Invalid email or password</p>
         </ion-text>
         }
 
@@ -43,11 +43,11 @@
                 @if(isLoading()) {
                 <ion-spinner name="crescent"></ion-spinner>
                 } @else {
-                <span>Login</span>
+                <span i18n="@@authLoginButton">Login</span>
                 }
             </ion-button>
-            <ion-button expand="block" fill="outline" (click)="register()">Register</ion-button>
-            <ion-button expand="block" fill="clear" (click)="forgotPassword()">Forgot password</ion-button>
+            <ion-button expand="block" fill="outline" (click)="register()" i18n="@@authRegisterButton">Register</ion-button>
+            <ion-button expand="block" fill="clear" (click)="forgotPassword()" i18n="@@authForgotPasswordButton">Forgot password</ion-button>
         </div>
     </form>
 </ion-content>

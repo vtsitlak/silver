@@ -1,6 +1,7 @@
 import { computed, inject } from '@angular/core';
 import { signalStore, withState, withMethods, patchState, withComputed } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { ɵ$localize as $localize } from '@angular/localize';
 
 import { catchError, exhaustMap, finalize, map, of, pipe, switchMap, tap } from 'rxjs';
 import { tapResponse } from '@ngrx/operators';
@@ -45,7 +46,7 @@ export const AuthStore = signalStore(
                             next: () => {
                                 patchState(store, { isLoading: false });
                                 errorsStore.setErrors({ [AuthErrors.SendPasswordResetEmail]: '' });
-                                toastService.show('Password reset email sent successfully');
+                                toastService.show($localize`:@@authPasswordResetEmailSent:Password reset email sent successfully`);
                                 router.navigateByUrl('/tabs/home');
                             },
                             error: (error: Error) => {
@@ -83,7 +84,7 @@ export const AuthStore = signalStore(
                                     usePassword: true
                                 });
                                 errorsStore.setErrors({ [AuthErrors.Sign]: '' });
-                                toastService.show('Signed in successfully');
+                                toastService.show($localize`:@@authSignedIn:Signed in successfully`);
                                 router.navigateByUrl('/tabs/home');
                             },
                             error: (error: Error) => {
@@ -120,7 +121,7 @@ export const AuthStore = signalStore(
                                     ...{ isLoading: false, useGoogle: true }
                                 });
                                 errorsStore.setErrors({ [AuthErrors.SignWithGoogle]: '' });
-                                toastService.show('Signed in with Google successfully');
+                                toastService.show($localize`:@@authSignedInWithGoogle:Signed in with Google successfully`);
                                 router.navigateByUrl('/tabs/home');
                             },
                             error: (error: Error) => {
@@ -149,7 +150,7 @@ export const AuthStore = signalStore(
                                     ...{ usePassword: true }
                                 });
                                 errorsStore.setErrors({ [AuthErrors.Register]: '' });
-                                toastService.show('Account created successfully');
+                                toastService.show($localize`:@@authAccountCreated:Account created successfully`);
                                 router.navigateByUrl('/tabs/home');
                             },
                             error: (error: Error) => {
@@ -173,7 +174,7 @@ export const AuthStore = signalStore(
                                 const updatedUser = { ...store.user, displayName } as unknown as ProfileUser;
                                 patchState(store, { user: updatedUser, isLoading: false });
                                 errorsStore.setErrors({ [AuthErrors.UpdateDisplayName]: '' });
-                                toastService.show('Display name updated successfully');
+                                toastService.show($localize`:@@authDisplayNameUpdated:Display name updated successfully`);
                             },
                             error: (error: Error) => {
                                 console.error('Auth error:', error);
@@ -195,7 +196,7 @@ export const AuthStore = signalStore(
                             next: () => {
                                 patchState(store, { isLoading: false });
                                 errorsStore.setErrors({ [AuthErrors.UpdatePassword]: '' });
-                                toastService.show('Password updated successfully');
+                                toastService.show($localize`:@@authPasswordUpdated:Password updated successfully`);
                                 router.navigateByUrl('/tabs/profile');
                             },
                             error: (error: Error) => {
@@ -218,7 +219,7 @@ export const AuthStore = signalStore(
                             next: () => {
                                 patchState(store, { user: null }, { isLoading: false });
                                 errorsStore.setErrors({ [AuthErrors.Logout]: '' });
-                                toastService.show('Logged out successfully');
+                                toastService.show($localize`:@@authLoggedOut:Logged out successfully`);
                                 router.navigateByUrl('/auth/login');
                             },
                             error: (error: Error) => {
