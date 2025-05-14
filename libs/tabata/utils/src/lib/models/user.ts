@@ -37,7 +37,7 @@ export interface AuthState {
     error: unknown;
 }
 
-export enum AuthErrors  {
+export enum AuthErrors {
     Sign = 'sign',
     GetUser = 'getUser',
     SendPasswordResetEmail = 'sendPasswordResetEmail',

@@ -1,8 +1,6 @@
 import { Component, computed } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { FormControl, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
 import { inject } from '@angular/core';
 import { AuthStore } from '../../store/auth.store';
 import { ErrorsStore } from '../../store/errors.store';

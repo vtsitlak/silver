@@ -5,9 +5,9 @@ module.exports = {
     content: [join(__dirname, 'src/**/!(*.stories|*.spec).{ts,html}'), ...createGlobPatternsForDependencies(__dirname)],
     theme: {
         extend: {
-          backgroundImage: {
-            'logo': "url('assets/logo-background.png')",
-          },
+            backgroundImage: {
+                logo: "url('assets/logo-background.png')"
+            }
         }
     },
     plugins: []
