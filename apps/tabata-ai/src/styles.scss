@@ -12,3 +12,80 @@
 * For more information on global stylesheets, visit the documentation:
 * https://ionicframework.com/docs/layout/global-stylesheets
 */
+
+@font-face {
+  font-family: 'Figtree';
+  src: url('./theme/fonts/ttf/Figtree-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxP.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  font-family: 'Figtree', 'Roboto', sans-serif;
+}
+
+:root {
+  --color-primary: #3123AE;
+  --color-primary-dark: #24197D;
+  --color-secondary: #C66CD6;
+  --color-secondary-dark: #9B4EA7;
+  --color-error: #B00020;
+}
+
+ion-title, ion-label, ion-popover ion-label {
+  font-family: 'Figtree', 'Roboto', sans-serif !important;
+}
+
+/* Global Styles for Tab, Slide, Button, and Error States */
+
+/* Selected ion-tab (tab bar item) */
+ion-tab-button.tab-selected, ion-tab-bar .tab-selected, ion-tab-button[aria-selected="true"] {
+  color: var(--color-primary-dark) !important;
+}
+
+/* Selected slide (assuming Swiper or Ionic Slides) */
+.swiper-slide-active, .slide-active, ion-slide.swiper-slide-active {
+  color: var(--color-primary-dark) !important;
+}
+
+/* Selected ion-toggle */
+ion-toggle.toggle-checked, ion-toggle[aria-checked="true"] {
+  --handle-background: var(--color-primary-dark) !important;
+  --background-checked: var(--color-primary-dark) !important;
+  --ion-color-primary: var(--color-primary-dark) !important;
+}
+
+/* Ion Button Variations */
+ion-button.primary, ion-button[color="primary"] {
+  background: var(--color-primary);
+  color: #fff;
+}
+ion-button.primary:disabled, ion-button[color="primary"][disabled] {
+  background: #6d63c7; /* lighter version of primary */
+  color: #fff;
+  opacity: 0.7;
+}
+ion-button.secondary, ion-button[color="secondary"] {
+  background: var(--color-secondary);
+  color: #fff;
+}
+ion-button.secondary:disabled, ion-button[color="secondary"][disabled] {
+  background: #e1b3e7; /* lighter version of secondary */
+  color: #fff;
+  opacity: 0.7;
+}
+
+/* Error Messages */
+.error-message, .ion-error, .form-error, ion-text.error {
+  color: var(--color-error) !important;
+}
+

@@ -2,17 +2,17 @@
     <ion-toolbar>
         <ion-buttons slot="start">
             <ion-button>
-                <ion-icon name="home"></ion-icon>
+                <ion-icon class="text-white" name="home"></ion-icon>
             </ion-button>
         </ion-buttons>
 
         @if (title()) {
-        <ion-title>{{ title() }}</ion-title>
+        <ion-title class="text-white">{{ title() }}</ion-title>
         }
 
         <ion-buttons slot="end">
             <ion-button (click)="togglePopover($event)">
-                <ion-icon name="menu"></ion-icon>
+                <ion-icon class="text-white" name="menu"></ion-icon>
             </ion-button>
         </ion-buttons>
     </ion-toolbar>
