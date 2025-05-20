@@ -6,6 +6,7 @@ import { AuthStore } from '../../store/auth.store';
 import { LoginForm } from '@silver/tabata/helpers';
 import { ErrorsStore } from '../../store/errors.store';
 
+
 @Component({
     selector: 'tbt-login',
     imports: [ReactiveFormsModule, IonicModule],
@@ -32,6 +33,10 @@ export class LoginComponent {
     });
 
     onSubmit(): void {
+        if (this.form.invalid) {
+            this.form.markAllAsTouched();
+            return;
+        }
         this.authStore.sign(this.form.getRawValue());
     }
 

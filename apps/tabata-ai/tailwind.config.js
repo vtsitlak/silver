@@ -12,11 +12,11 @@ module.exports = {
                 logo: "url('assets/logo-background.png')"
             },
             colors: {
-                primary: 'rgb(var(--color-primary) / <alpha-value>)',
-                'primary-dark': 'rgb(var(--color-primary-dark) / <alpha-value>)',
-                secondary: 'rgb(var(--color-secondary) / <alpha-value>)',
-                'secondary-dark': 'rgb(var(--color-secondary-dark) / <alpha-value>)',
-                error: 'rgb(var(--color-error) / <alpha-value>)',
+                primary: 'var(--color-primary)',
+                'primary-dark': 'var(--color-primary-dark)',
+                secondary: 'var(--color-secondary)',
+                'secondary-dark': 'var(--color-secondary-dark)',
+                error: 'var(--color-error)',
             }
         }
     },

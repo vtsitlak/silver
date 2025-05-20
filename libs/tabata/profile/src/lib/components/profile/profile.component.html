@@ -3,57 +3,74 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
-        <ion-list>
-            <ion-item>
-                <ion-input label="Display Name" labelPlacement="floating" type="text" formControlName="displayName" i18n-label="@@profileDisplayNameLabel">
-                </ion-input>
-            </ion-item>
+    <div class="flex flex-col">
+        <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="bg-white w-full flex flex-col px-4 py-4">
+            <h2 class="text-xl font-semibold mb-4" i18n="@@profileTitle">Profile Settings</h2>
+            
+            <div class="flex flex-col mb-2">
+                <label for="displayName" i18n="@@profileDisplayNameLabel" class="mb-2">Display Name</label>
+                <input id="displayName" type="text" formControlName="displayName" class="w-full py-2 px-3 border rounded" />
+            </div>
 
-            <ion-item>
-                <ion-input label="Email" labelPlacement="floating" type="email" formControlName="email" i18n-label="@@profileEmailLabel"></ion-input>
-            </ion-item>
+            <div class="flex flex-col mb-2">
+                <label for="email" i18n="@@profileEmailLabel" class="mb-2">Email</label>
+                <input id="email" type="email" formControlName="email" class="w-full py-2 px-3 border rounded" [attr.disabled]="true" />
+            </div>
 
             @if(usePassword()) {
-            <ion-item>
-                <ion-toggle justify="end" [checked]="showPasswordField" (ionChange)="togglePasswordField()" i18n="@@profileChangePasswordToggle"
-                    >Change password</ion-toggle
-                >
-            </ion-item>
-            @if(showPasswordField) {
-            <ion-item>
-                <ion-input
-                    label="Current Password"
-                    labelPlacement="floating"
-                    type="password"
-                    formControlName="currentPassword"
-                    i18n-label="@@profileCurrentPasswordLabel"
-                >
-                </ion-input>
-            </ion-item>
+                <div class="flex items-center justify-between mb-4">
+                    <label for="changePassword" i18n="@@profileChangePasswordToggle" class="text-sm">Change password</label>
+                    <ion-toggle id="changePassword" [checked]="showPasswordField" (ionChange)="togglePasswordField()"></ion-toggle>
+                </div>
 
-            @if(profileForm.controls.currentPassword.value && profileForm.controls.currentPassword.valid) {
-            <ion-item>
-                <ion-input label="New Password" labelPlacement="floating" type="password" formControlName="newPassword" i18n-label="@@profileNewPasswordLabel">
-                </ion-input>
-            </ion-item>
+                @if(showPasswordField) {
+                    <div class="flex flex-col mb-2">
+                        <label for="currentPassword" i18n="@@profileCurrentPasswordLabel" class="mb-2">Current Password</label>
+                        <input id="currentPassword" type="password" formControlName="currentPassword" class="w-full py-2 px-3 border rounded" />
+                        <div class="h-5">
+                            @if(profileForm.controls.currentPassword.touched) {
+                                @if(profileForm.controls.currentPassword.errors?.['minLength']) {
+                                    <p class="text-error text-sm mt-1" i18n="@@profilePasswordMinLength">Password must be at least 6 characters</p>
+                                }
+                            }
+                        </div>
+                    </div>
 
-            <ion-item>
-                <ion-input
-                    label="Confirm new Password"
-                    labelPlacement="floating"
-                    type="password"
-                    formControlName="confirmNewPassword"
-                    i18n-label="@@profileConfirmNewPasswordLabel"
-                >
-                </ion-input>
-            </ion-item>
+                    @if(profileForm.controls.currentPassword.value && profileForm.controls.currentPassword.valid) {
+                        <div class="flex flex-col mb-2">
+                            <label for="newPassword" i18n="@@profileNewPasswordLabel" class="mb-2">New Password</label>
+                            <input id="newPassword" type="password" formControlName="newPassword" class="w-full py-2 px-3 border rounded" />
+                            <div class="h-5">
+                                @if(profileForm.controls.newPassword.touched) {
+                                    @if(profileForm.controls.newPassword.errors?.['minLength']) {
+                                        <p class="text-error text-sm mt-1" i18n="@@profilePasswordMinLength">Password must be at least 6 characters</p>
+                                    }
+                                }
+                            </div>
+                        </div>
 
-            } } }
+                        <div class="flex flex-col mb-2">
+                            <label for="confirmNewPassword" i18n="@@profileConfirmNewPasswordLabel" class="mb-2">Confirm New Password</label>
+                            <input id="confirmNewPassword" type="password" formControlName="confirmNewPassword" class="w-full py-2 px-3 border rounded" />
+                            <div class="h-5">
+                                @if(profileForm.controls.confirmNewPassword.touched) {
+                                    @if(profileForm.controls.confirmNewPassword.errors?.['passwordMismatch']) {
+                                        <p class="text-error text-sm mt-1" i18n="@@profilePasswordMismatch">Passwords do not match</p>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            }
 
-            <ion-button expand="block" type="submit" [disabled]="profileForm.pristine || profileForm.invalid" i18n="@@profileUpdateButton">
-                Update Profile
+            <ion-button expand="block" type="submit" [disabled]="profileForm.pristine || profileForm.invalid">
+                @if(isLoading()) {
+                    <ion-spinner name="crescent"></ion-spinner>
+                } @else {
+                    <span i18n="@@profileUpdateButton">Update Profile</span>
+                }
             </ion-button>
-        </ion-list>
-    </form>
+        </form>
+    </div>
 </ion-content>

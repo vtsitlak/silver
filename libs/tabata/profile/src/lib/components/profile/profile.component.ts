@@ -1,13 +1,13 @@
 import { Component, inject, linkedSignal, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IonHeader, IonContent, IonList, IonItem, IonInput, IonButton, IonToggle } from '@ionic/angular/standalone';
+import { IonHeader, IonContent, IonButton, IonToggle, IonSpinner } from '@ionic/angular/standalone';
 import { ToolbarComponent } from '@silver/tabata/ui';
 import { AuthStore } from '@silver/tabata/auth';
 import { ProfileForm, passwordMatchValidator } from '@silver/tabata/helpers';
 
 @Component({
     selector: 'tbt-profile',
-    imports: [IonToggle, IonHeader, IonContent, ToolbarComponent, ReactiveFormsModule, IonList, IonItem, IonInput, IonButton, IonToggle, FormsModule],
+    imports: [IonToggle, IonHeader, IonContent, ToolbarComponent, ReactiveFormsModule, IonButton, IonToggle, FormsModule, IonSpinner],
     templateUrl: './profile.component.html',
     styleUrl: './profile.component.scss',
     standalone: true
@@ -16,6 +16,7 @@ export class ProfileComponent implements OnInit {
     private readonly authStore = inject(AuthStore);
     private formBuilder = inject(FormBuilder);
     usePassword = linkedSignal(() => this.authStore.usePassword());
+    isLoading = linkedSignal(() => this.authStore.isLoading());
     showPasswordField = false;
 
     profileForm = this.formBuilder.group<ProfileForm>(
