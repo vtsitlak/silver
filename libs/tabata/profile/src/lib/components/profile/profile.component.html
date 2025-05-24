@@ -6,27 +6,43 @@
     <div class="flex flex-col">
         <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="bg-white w-full flex flex-col px-4 py-4">
             <h2 class="text-xl font-semibold mb-4" i18n="@@profileTitle">Profile Settings</h2>
-            
+
             <div class="flex flex-col mb-2">
                 <label for="displayName" i18n="@@profileDisplayNameLabel" class="mb-2">Display Name</label>
-                <input id="displayName" type="text" formControlName="displayName" class="w-full py-2 px-3 border rounded" />
+                <input id="displayName" type="text" formControlName="displayName" placeholder="Enter your display name" i18n-placeholder="@@profileDisplayNamePlaceholder" />
+                <div class="h-5">
+                    @if(profileForm.controls.displayName.touched) {
+                        @if(profileForm.controls.displayName.errors?.['required']) {
+                            <p class="text-error text-sm mt-1" i18n="@@profileDisplayNameRequired">Display name is required</p>
+                        }
+                    }
+                </div>
             </div>
 
             <div class="flex flex-col mb-2">
                 <label for="email" i18n="@@profileEmailLabel" class="mb-2">Email</label>
-                <input id="email" type="email" formControlName="email" class="w-full py-2 px-3 border rounded" [attr.disabled]="true" />
+                <input id="email" type="email" formControlName="email" [attr.disabled]="true" placeholder="Enter your email" i18n-placeholder="@@profileEmailPlaceholder" />
+                <div class="h-5">
+                    @if(profileForm.controls.email.touched) {
+                        @if(profileForm.controls.email.errors?.['required']) {
+                            <p class="text-error text-sm mt-1" i18n="@@profileEmailRequired">Email is required</p>
+                        } @else if(profileForm.controls.email.errors?.['email']) {
+                            <p class="text-error text-sm mt-1" i18n="@@profileEmailInvalid">Please enter a valid email address</p>
+                        }
+                    }
+                </div>
             </div>
 
             @if(usePassword()) {
                 <div class="flex items-center justify-between mb-4">
-                    <label for="changePassword" i18n="@@profileChangePasswordToggle" class="text-sm">Change password</label>
+                    <label for="changePassword" i18n="@@profileChangePasswordToggle" class="font-semibold">Change password</label>
                     <ion-toggle id="changePassword" [checked]="showPasswordField" (ionChange)="togglePasswordField()"></ion-toggle>
                 </div>
 
                 @if(showPasswordField) {
                     <div class="flex flex-col mb-2">
                         <label for="currentPassword" i18n="@@profileCurrentPasswordLabel" class="mb-2">Current Password</label>
-                        <input id="currentPassword" type="password" formControlName="currentPassword" class="w-full py-2 px-3 border rounded" />
+                        <input id="currentPassword" type="password" formControlName="currentPassword" placeholder="Enter your current password" i18n-placeholder="@@profileCurrentPasswordPlaceholder"/>
                         <div class="h-5">
                             @if(profileForm.controls.currentPassword.touched) {
                                 @if(profileForm.controls.currentPassword.errors?.['minLength']) {
@@ -39,7 +55,7 @@
                     @if(profileForm.controls.currentPassword.value && profileForm.controls.currentPassword.valid) {
                         <div class="flex flex-col mb-2">
                             <label for="newPassword" i18n="@@profileNewPasswordLabel" class="mb-2">New Password</label>
-                            <input id="newPassword" type="password" formControlName="newPassword" class="w-full py-2 px-3 border rounded" />
+                            <input id="newPassword" type="password" formControlName="newPassword" placeholder="Enter your new password" i18n-placeholder="@@profileNewPasswordPlaceholder" />
                             <div class="h-5">
                                 @if(profileForm.controls.newPassword.touched) {
                                     @if(profileForm.controls.newPassword.errors?.['minLength']) {
@@ -51,7 +67,7 @@
 
                         <div class="flex flex-col mb-2">
                             <label for="confirmNewPassword" i18n="@@profileConfirmNewPasswordLabel" class="mb-2">Confirm New Password</label>
-                            <input id="confirmNewPassword" type="password" formControlName="confirmNewPassword" class="w-full py-2 px-3 border rounded" />
+                            <input id="confirmNewPassword" type="password" formControlName="confirmNewPassword" placeholder="Confirm your new password" i18n-placeholder="@@profileConfirmNewPasswordPlaceholder" />
                             <div class="h-5">
                                 @if(profileForm.controls.confirmNewPassword.touched) {
                                     @if(profileForm.controls.confirmNewPassword.errors?.['passwordMismatch']) {

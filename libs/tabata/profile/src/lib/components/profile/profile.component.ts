@@ -26,7 +26,10 @@ export class ProfileComponent implements OnInit {
                     disabled: true,
                     value: ''
                 },
-                { nonNullable: true }
+                {
+                    nonNullable: true,
+                    validators: [Validators.required, Validators.email]
+                }
             ),
             currentPassword: new FormControl<string>('', {
                 validators: [Validators.minLength(6)]
@@ -38,7 +41,8 @@ export class ProfileComponent implements OnInit {
                 validators: [Validators.minLength(6)]
             }),
             displayName: new FormControl<string>('', {
-                nonNullable: true
+                nonNullable: true,
+                validators: [Validators.required]
             })
         },
         {

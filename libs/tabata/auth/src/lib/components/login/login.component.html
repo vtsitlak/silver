@@ -5,7 +5,7 @@
                 <h2 class="text-xl font-semibold mb-4" i18n="@@authLoginTitle">Login</h2>
                 <div class="flex flex-col mb-2">
                     <label for="email" i18n="@@authEmailLabel" class="mb-2">Email</label>
-                    <input id="email" type="email" formControlName="email" placeholder="Enter your email" i18n-placeholder="@@authEmailPlaceholder" class="w-full py-2 px-3 border rounded" />
+                    <input id="email" type="email" formControlName="email" placeholder="Enter your email" i18n-placeholder="@@authEmailPlaceholder" />
                     <div class="h-5">
                         @if(form.controls.email.touched) {
                             @if(form.controls.email.errors?.['required']) {
@@ -18,7 +18,7 @@
                 </div>
                 <div class="flex flex-col mb-2">
                     <label for="password" i18n="@@authPasswordLabel" class="mb-2">Password</label>
-                    <input id="password" type="password" formControlName="password" placeholder="Enter your password" i18n-placeholder="@@authPasswordPlaceholder" class="w-full py-2 px-3 border rounded" />
+                    <input id="password" type="password" formControlName="password" placeholder="Enter your password" i18n-placeholder="@@authPasswordPlaceholder" />
                     <div class="h-5">
                         @if(form.controls.password.touched) {
                             @if(form.controls.password.errors?.['required']) {

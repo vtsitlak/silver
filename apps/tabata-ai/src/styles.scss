@@ -179,14 +179,10 @@ ion-item {
   --highlight-color: var(--color-secondary);
   --highlight-color-focused: var(--color-secondary);
   --border-color: transparent;
-  --border-width: 1px;
+  --border-width: 2px;
   --border-style: solid;
   --border-radius: 4px;
-  --padding-start: 8px;
-  --padding-end: 8px;
-  --padding-top: 8px;
-  --padding-bottom: 8px;
-  margin-bottom: 16px;
+
 
   &.item-has-focus {
     --border-color: var(--color-secondary);
@@ -210,7 +206,8 @@ ion-item {
 
 /* Native Input Styles */
 input, textarea {
-  border: 1px solid transparent;
+  border: 2px solid;
+  border-color: var(--color-primary);
   border-radius: 4px;
   padding: 8px;
   width: 100%;
