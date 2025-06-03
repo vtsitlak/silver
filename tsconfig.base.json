@@ -18,6 +18,7 @@
             "@silver/shared/helpers": ["libs/shared/helpers/src/index.ts"],
             "@silver/tabata/auth": ["libs/tabata/auth/src/index.ts"],
             "@silver/tabata/authentication": ["libs/authentication/src/index.ts"],
+            "@silver/tabata/exercises": ["libs/tabata/exercises/src/index.ts"],
             "@silver/tabata/helpers": ["libs/tabata/utils/src/index.ts"],
             "@silver/tabata/history": ["libs/tabata/history/src/index.ts"],
             "@silver/tabata/home": ["libs/tabata/home/src/index.ts"],
