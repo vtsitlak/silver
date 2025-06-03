@@ -25,6 +25,7 @@
                 "tsConfig": "apps/tabata-ai/tsconfig.app.json",
                 "inlineStyleLanguage": "scss",
                 "assets": [
+                    "apps/tabata-ai/src/assets",
                     {
                         "glob": "**/*.svg",
                         "input": "node_modules/ionicons/dist/ionicons/svg",
