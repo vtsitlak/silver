@@ -10,7 +10,7 @@ import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 import { environment } from './app/environments/environment';
-import { inject, provideAppInitializer } from '@angular/core';
+import { inject, provideAppInitializer, provideZoneChangeDetection } from '@angular/core';
 import { AuthStore } from '@silver/tabata/auth';
 import { of } from 'rxjs';
 
@@ -35,4 +35,4 @@ export const appConfig = {
     ]
 };
 
-bootstrapApplication(AppComponent, appConfig);
+bootstrapApplication(AppComponent, {...appConfig, providers: [provideZoneChangeDetection(), ...appConfig.providers]});
