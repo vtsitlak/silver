@@ -1,0 +1,26 @@
+@if (vehicle()) {
+  <mat-grid-list cols="2" class="vehicle-item mat-elevation-z10" rowHeight="180px" gutterSize="20px"
+    role="list">
+    <mat-grid-tile>
+      <div class="description">
+        <h3>{{brand()}}</h3>
+        <h4>{{type()}}</h4>
+        <p>
+          @for (c of colors(); track c; let last = $last) {
+            <span>{{ c }} <span [style.color]="c">#</span>
+            @if (!last) {
+              <span>, </span>
+            }
+          </span>
+        }
+      </p>
+    </div>
+  </mat-grid-tile>
+  <mat-grid-tile>
+    <div class="image">
+      <img [src]="img()" alt="image of vehicle"
+        onError="this.src='assets/images/image-not-found-scaled-1150x647.png'">
+      </div>
+    </mat-grid-tile>
+  </mat-grid-list>
+}

@@ -1,0 +1,16 @@
+@use "../../../style-variables" as *;
+
+mat-spinner {
+  margin: auto;
+  top: 100px;
+}
+
+.vehicles-list {
+  display: flex;
+  flex-flow: row wrap;
+
+  @media screen and (max-width: $break-medium) {
+    margin: auto;
+    display: table;
+  }
+}

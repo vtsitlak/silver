@@ -1,0 +1,26 @@
+@use "../../../../style-variables" as *;
+
+form {
+  background-color: $light-grey;
+  padding: 16px 16px 0 16px;
+
+  @media screen and (max-width: $break-small) {
+    display: grid;
+  }
+}
+
+mat-form-field {
+  width: 33.333%;
+
+  @media screen and (max-width: $break-small) {
+    width: 100%;
+  }
+
+  ::ng-deep .mat-form-field-wrapper {
+    margin: 5px;
+  }
+}
+
+mat-select {
+  width: 100%;
+}
