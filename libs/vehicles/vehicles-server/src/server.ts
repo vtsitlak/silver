@@ -33,7 +33,3 @@ const httpServer = app.listen(9000, () => {
     const port = typeof addr === 'string' ? addr : addr?.port;
     console.log(`HTTP REST API Server running at http://localhost:${port}`);
 });
-
-
-
-

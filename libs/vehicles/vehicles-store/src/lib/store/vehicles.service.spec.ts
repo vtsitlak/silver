@@ -4,9 +4,7 @@ import { HttpClient, HttpErrorResponse, provideHttpClient, withInterceptorsFromD
 import { VehiclesService } from './vehicles.service';
 import { Vehicle } from '../models/vehicle';
 
-
 describe('VehiclesService', () => {
-
   let service: VehiclesService;
   let httpClient: HttpClient;
   let httpTestingController: HttpTestingController;
@@ -18,9 +16,9 @@ describe('VehiclesService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-    imports: [],
-    providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
-});
+      imports: [],
+      providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+    });
     service = TestBed.inject(VehiclesService);
     httpClient = TestBed.inject(HttpClient);
     httpTestingController = TestBed.inject(HttpTestingController);
@@ -73,7 +71,7 @@ describe('VehiclesService', () => {
     const emsg = 'simulated network error';
 
     httpClient.get<Vehicle[]>('api/vehicles').subscribe(
-      data => fail('should have failed with the network error'),
+      () => fail('should have failed with the network error'),
       (error: HttpErrorResponse) => {
         expect(error.error.message).toEqual(emsg, 'message');
       }
@@ -91,35 +89,8 @@ describe('VehiclesService', () => {
     req.error(mockError);
   });
 
-
   afterEach(() => {
     // After every test, assert that there are no more pending requests.
     httpTestingController.verify();
   });
-
-
-
 });
-
-
-// it('should be created', () => {
-//   // const service: VehiclesService = TestBed.get(VehiclesService);
-//   expect(service).toBeTruthy();
-// });
-
-// // describe('#getAll', () => {
-// it('should return an Observable<Vehicle[]>', () => {
-//   const vehiclesMock: Vehicle[] = [
-//     { id: 1, type: 'car', brand: 'citroen', img: '1.jpg', colors: ['black', 'silver'] },
-//     { id: 2, type: 'train', brand: 'train-brand', img: '2.jpg', colors: ['black', 'red'] },
-//   ];
-
-//   service.getAll().subscribe(vehicles => {
-//     expect(vehicles.length).toBe(2);
-//     expect(vehicles).toEqual(vehiclesMock);
-//   });
-
-//   const req = httpMock.expectOne(`api/vehicles`);
-//   expect(req.request.method).toBe('GET');
-//   req.flush(vehiclesMock);
-// });

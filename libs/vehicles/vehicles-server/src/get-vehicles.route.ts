@@ -40,5 +40,3 @@ export function getByFilter(req: Request, res: Response) {
   }, 1000);
 
 }
-
-

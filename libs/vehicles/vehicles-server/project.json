@@ -1,0 +1,15 @@
+{
+    "name": "vehicles-server",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/vehicles/vehicles-server/src",
+    "projectType": "library",
+    "tags": [],
+    "targets": {
+        "server": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "ts-node -P libs/vehicles/vehicles-server/server.tsconfig.json libs/vehicles/vehicles-server/src/server.ts"
+            }
+        }
+    }
+}

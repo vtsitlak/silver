@@ -2,9 +2,9 @@ import { inject } from '@angular/core';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { pipe, switchMap, tap, catchError, of } from 'rxjs';
-import { VehiclesService } from '../services/vehicles.service';
-import { Vehicle } from '../models/vehicle';
+import { VehiclesService } from './vehicles.service';
 import { Filter } from '../models/filter';
+import { Vehicle } from '../models/vehicle';
 
 type VehiclesState = {
   allVehicles: Vehicle[];

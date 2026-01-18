@@ -7,7 +7,7 @@
         "build-localize:tabata-ai": "nx build tabata-ai  --localize",
         "build-run:tabata-ai": "npx http-server dist/apps/tabata-ai",
         "start:vehicles-app": "nx serve vehicles-app",
-        "server:vehicles-app": "nx run vehicles-app:server",
+        "server:vehicles-app": "nx run vehicles-server:server",
         "xi18n:tabata-ai": "ng i18n-extract tabata-ai",
         "format": "nx format:write"
     },

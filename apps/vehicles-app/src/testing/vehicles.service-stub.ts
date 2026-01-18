@@ -1,4 +1,4 @@
-import { Vehicle } from '../app/vehicles/models/vehicle';
+import { Vehicle } from '@silver/vehicles-store';
 import { Observable, of } from 'rxjs';
 
 export const DATA: Vehicle[] = [

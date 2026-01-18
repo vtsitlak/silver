@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { Vehicle } from '../models/vehicle';
-import { Filter } from '../models/filter';
 import { catchError } from 'rxjs/operators';
+import { Filter } from '../models/filter';
+import { Vehicle } from '../models/vehicle';
 
 @Injectable({
   providedIn: 'root'

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { VehicleItemComponent } from './vehicle-item.component';
 import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
-import { Vehicle } from '../../models/vehicle';
+import { Vehicle } from '@silver/vehicles-store';
 
 describe('VehicleItemComponent', () => {
   let component: VehicleItemComponent;
@@ -42,7 +42,7 @@ describe('VehicleItemComponent', () => {
 
     expect(brand.nativeElement.textContent).toContain(vehicle.brand);
     expect(brand.nativeElement.textContent).toContain(vehicle.type);
-    expect(brand.nativeElement.textContent).toContain(vehicle.colors);
+    expect(brand.nativeElement.textContent).toContain(vehicle.colors.join(','));
   });
 
   it('should get the vehicle image link', () => {

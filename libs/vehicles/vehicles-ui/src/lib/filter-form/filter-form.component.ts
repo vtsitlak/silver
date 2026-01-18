@@ -2,7 +2,7 @@ import { Component, effect, input, output, signal } from '@angular/core';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { Field, form } from '@angular/forms/signals';
-import { Filter } from '../../models/filter';
+import { Filter } from '@silver/vehicles-store';
 
 @Component({
     selector: 'app-filter-form',

@@ -1,5 +1,5 @@
 import { Component, computed, input } from '@angular/core';
-import { Vehicle } from '../../models/vehicle';
+import { Vehicle } from '@silver/vehicles-store';
 import { MatGridListModule } from '@angular/material/grid-list';
 
 @Component({

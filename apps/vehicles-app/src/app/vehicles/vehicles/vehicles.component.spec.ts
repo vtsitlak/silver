@@ -1,10 +1,9 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { VehiclesComponent } from './vehicles.component';
-import { VehiclesFacade } from '../store/vehicles.facade';
+import { VehiclesFacade } from '@silver/vehicles-store';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { signal } from '@angular/core';
-import { Vehicle } from '../models/vehicle';
-import { Filter } from '../models/filter';
+import { Filter, Vehicle } from '@silver/vehicles-store';
 
 describe('VehiclesComponent', () => {
   let component: VehiclesComponent;
@@ -30,9 +29,9 @@ describe('VehiclesComponent', () => {
             types: signal<string[]>(['car', 'airplane']),
             brands: signal<string[]>(['Bugatti Veyron', 'Boeing 787']),
             colors: signal<string[]>(['red', 'black', 'white']),
-            loadAll: jasmine.createSpy('loadAll'),
-            loadByFilter: jasmine.createSpy('loadByFilter'),
-            clearError: jasmine.createSpy('clearError'),
+            loadAll: jest.fn(),
+            loadByFilter: jest.fn(),
+            clearError: jest.fn(),
           }
         }
       ]

@@ -1,10 +1,9 @@
 import { Component, OnInit, inject, effect } from '@angular/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { VehiclesFacade } from '../store/vehicles.facade';
-import { Filter } from '../models/filter';
-import { FilterFormComponent } from './filter-form/filter-form.component';
-import { VehicleItemComponent } from './vehicle-item/vehicle-item.component';
+import { VehiclesFacade } from '@silver/vehicles-store';
+import { Filter } from '@silver/vehicles-store';
+import { FilterFormComponent, VehicleItemComponent } from '@silver/vehicles-ui';
 
 @Component({
     selector: 'app-vehicles',

@@ -69,12 +69,6 @@
             },
             "defaultConfiguration": "development"
         },
-        "server": {
-            "executor": "nx:run-commands",
-            "options": {
-                "command": "ts-node -P apps/vehicles-app/server/server.tsconfig.json apps/vehicles-app/server/server.ts"
-            }
-        },
         "lint": {
             "executor": "@nx/eslint:lint"
         },
