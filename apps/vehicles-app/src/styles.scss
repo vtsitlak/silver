@@ -1,18 +1,25 @@
 /* Global styles and Material theming */
 @use '@angular/material' as mat;
-@import url("https://fonts.googleapis.com/icon?family=Material+Icons");
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Core styles for Material (MDC-based components) */
 @include mat.core();
 
 /* Define a simple light theme using built-in palettes (MDC) */
-$theme: mat.define-theme((
-  color: (
-    theme-type: light,
-    primary: mat.$blue-palette,
-    tertiary: mat.$blue-palette, // reuse built-in palette available in the current API
-  ),
-));
+$theme: mat.define-theme(
+    (
+        color: (
+            theme-type: light,
+            primary: mat.$blue-palette,
+            tertiary: mat.$blue-palette,
+            // reuse built-in palette available in the current API
+        )
+    )
+);
 
 /* Apply the theme to all components */
 @include mat.all-component-themes($theme);

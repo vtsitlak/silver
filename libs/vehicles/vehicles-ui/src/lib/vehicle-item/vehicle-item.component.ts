@@ -1,13 +1,12 @@
 import { Component, computed, input } from '@angular/core';
 import { Vehicle } from '@silver/vehicles-store';
-import { MatGridListModule } from '@angular/material/grid-list';
 
 @Component({
     selector: 'app-vehicle-item',
     standalone: true,
     templateUrl: './vehicle-item.component.html',
     styleUrls: ['./vehicle-item.component.scss'],
-    imports: [MatGridListModule]
+    imports: []
 })
 export class VehicleItemComponent {
 

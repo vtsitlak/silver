@@ -1,5 +1,5 @@
-<form class="mat-elevation-z10">
-  <mat-form-field>
+<form class="flex flex-wrap gap-4 rounded-lg bg-slate-100 p-4 shadow-sm">
+  <mat-form-field class="w-full md:w-[31%]">
     <mat-select [field]="filterForm.type" placeholder="Vehicle type">
       <mat-option value="">-- All types --</mat-option>
       @for (t of (types() ?? []); track t) {
@@ -9,7 +9,7 @@
       }
     </mat-select>
   </mat-form-field>
-  <mat-form-field>
+  <mat-form-field class="w-full md:w-[31%]">
     <mat-select [field]="filterForm.brand" placeholder="Vehicle brand">
       <mat-option value="">-- All brands --</mat-option>
       @for (b of (brands() ?? []); track b) {
@@ -19,7 +19,7 @@
       }
     </mat-select>
   </mat-form-field>
-  <mat-form-field>
+  <mat-form-field class="w-full md:w-[31%]">
     <mat-select [field]="filterForm.color" placeholder="Vehicle color">
       <mat-option value="">-- All colors --</mat-option>
       @for (c of (colors() ?? []); track c) {

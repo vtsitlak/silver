@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { VehiclesComponent } from './vehicles/vehicles/vehicles.component';
+import { VehiclesComponent } from '@silver/vehicles-ui';
 
 // Standalone routing configuration for the application.
 export const appRoutes: Routes = [

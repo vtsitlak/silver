@@ -3,7 +3,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { VehiclesFacade } from '@silver/vehicles-store';
 import { Filter } from '@silver/vehicles-store';
-import { FilterFormComponent, VehicleItemComponent } from '@silver/vehicles-ui';
+import { FilterFormComponent } from '../filter-form/filter-form.component';
+import { VehicleItemComponent } from '../vehicle-item/vehicle-item.component';
 
 @Component({
     selector: 'app-vehicles',
