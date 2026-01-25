@@ -26,7 +26,10 @@
             "@silver/tabata/ui": ["libs/tabata/ui/src/index.ts"],
             "@silver/tabata/workouts": ["libs/tabata/workouts/src/index.ts"],
             "@silver/vehicles-store": ["libs/vehicles/vehicles-store/src/index.ts"],
-            "@silver/vehicles-ui": ["libs/vehicles/vehicles-ui/src/index.ts"]
+            "@silver/vehicles-ui": ["libs/vehicles/vehicles-ui/src/index.ts"],
+            "@silver/notes-store": ["libs/notes/notes-store/src/index.ts"],
+            "@silver/notes-ui": ["libs/notes/notes-ui/src/index.ts"],
+            "@silver/notes-auth": ["libs/notes/notes-auth/src/index.ts"]
         }
     },
     "exclude": ["node_modules", "tmp"]

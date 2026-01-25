@@ -12,10 +12,18 @@
 
 ## Run tasks
 
+### Tabata AI App
+
 To run the dev server for your app, use:
 
 ```sh
 npx nx serve tabata-ai
+```
+
+Or use the npm script:
+
+```sh
+npm run start:tabata-ai
 ```
 
 To create a production bundle:
@@ -23,6 +31,38 @@ To create a production bundle:
 ```sh
 npx nx build tabata-ai
 ```
+
+### Vehicles App
+
+To run the vehicles app:
+
+```sh
+npm run start:vehicles-app
+```
+
+To run the vehicles server:
+
+```sh
+npm run server:vehicles-app
+```
+
+### Notes App
+
+To run the notes app:
+
+```sh
+npm run start:notes-app
+```
+
+To run the notes server:
+
+```sh
+npm run server:notes-app
+```
+
+**Note:** For the notes app, you'll need to run both the server and the app in separate terminals:
+1. Start the server: `npm run server:notes-app` (runs on http://localhost:9000)
+2. Start the app: `npm run start:notes-app` (runs on http://localhost:4200)
 
 To see all available targets to run for a project, run:
 

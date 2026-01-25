@@ -1,0 +1,54 @@
+<h2 mat-dialog-title>{{dialogTitle}}</h2>
+
+<mat-dialog-content>
+
+  @if (notesFacade.loading()) {
+    <div class="flex justify-center items-center py-8">
+      <mat-spinner></mat-spinner>
+    </div>
+  }
+
+  <mat-form-field class="block">
+
+    <input matInput placeholder="Note Title" [formField]="noteForm.title">
+    
+    @if (noteForm.title().touched() && noteForm.title().invalid()) {
+      <mat-error>
+        @for (error of noteForm.title().errors(); track error) {
+          {{ error.message }}
+        }
+      </mat-error>
+    }
+
+  </mat-form-field>
+
+      <mat-form-field class="block">
+
+        <textarea matInput placeholder="Note" [formField]="noteForm.body" class="h-[100px] resize-y">
+    </textarea>
+    
+    @if (noteForm.body().touched() && noteForm.body().invalid()) {
+      <mat-error>
+        @for (error of noteForm.body().errors(); track error) {
+          {{ error.message }}
+        }
+      </mat-error>
+    }
+
+  </mat-form-field>
+
+  <mat-slide-toggle [formField]="noteForm.important">Important</mat-slide-toggle>
+
+</mat-dialog-content>
+
+<mat-dialog-actions>
+
+  <button mat-raised-button (click)="onClose()">
+    Close
+  </button>
+
+  <button mat-raised-button color="primary" [disabled]="noteForm().invalid() || notesFacade.loading()" (click)="onSave()">
+    Save
+  </button>
+
+</mat-dialog-actions>

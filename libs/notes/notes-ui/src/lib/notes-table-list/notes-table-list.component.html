@@ -1,0 +1,61 @@
+<mat-form-field class="w-full">
+  <input matInput (keyup)="applyFilter($any($event.target).value)" placeholder="Filter on Title">
+</mat-form-field>
+
+<table mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="w-full mat-elevation-z8">
+  @for (column of columnsToDisplay; track column) {
+    <ng-container [matColumnDef]="column">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="column === 'important'"> {{label[column]}} </th>
+      <td mat-cell *matCellDef="let note">
+        @if (column !== 'important') {
+          @if (column === 'created') {
+            {{ note[column] | date: 'dd/MM/yyyy' }}
+          } @else {
+            {{note[column]}}
+          }
+        } @else {
+          @if (note[column]) {
+            <mat-icon color="warn" matTooltip="Important">error_outline</mat-icon>
+          }
+        }
+      </td>
+    </ng-container>
+  }
+
+  <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
+  <ng-container matColumnDef="expandedDetail">
+    <td mat-cell *matCellDef="let note" [attr.colspan]="columnsToDisplay.length">
+      <div class="overflow-hidden flex detail-expand"
+        [class.expanded]="note == expandedNote"
+        [class.collapsed]="note != expandedNote">
+        <div class="text-left w-4/5">
+       
+            {{note.body}}
+          </div>
+          <div class="text-right w-1/5">
+            <button mat-icon-button color="accent" matTooltip="Edit">
+              <mat-icon class="add-note-btn" (click)="editCourse(note)" >edit</mat-icon>
+            </button>
+
+            <button mat-icon-button color="warn" matTooltip="Delete">
+              <mat-icon class="add-note-btn" (click)="onDeleteCourse(note)">delete</mat-icon>
+            </button>
+          </div>
+      
+      </div>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+  <tr mat-row *matRowDef="let note; columns: columnsToDisplay;" 
+    class="cursor-pointer [&:not(.note-expanded-row)]:hover:bg-gray-600 [&:not(.note-expanded-row)]:active:bg-gray-200"
+    [class.note-expanded-row]="expandedNote === note" 
+    (click)="expandedNote = expandedNote === note ? null : note">
+  </tr>
+  <tr mat-row *matRowDef="let note; columns: ['expandedDetail']" 
+      [class.hidden]="expandedNote !== note"
+      class="note-detail-row">
+  </tr>
+</table>
+
+<mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
