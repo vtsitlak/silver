@@ -1,82 +1,189 @@
-# Vtsitlak
+# Silver
 
 <a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+**Silver** is an [Nx monorepo](https://nx.dev) containing multiple Angular applications and shared libraries. This document describes the workspace structure, technologies, and how to run each project.
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+---
 
-## Finish your CI setup
+## Table of contents
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/kNQAB2l5v1)
+- [Technologies](#technologies)
+- [Workspace structure](#workspace-structure)
+- [Projects overview](#projects-overview)
+- [Getting started](#getting-started)
+- [Running tasks](#running-tasks)
+- [Useful Nx commands](#useful-nx-commands)
+- [Useful links](#useful-links)
 
+---
 
-## Run tasks
+## Technologies
 
-To run the dev server for your app, use:
+| Area | Stack |
+|------|--------|
+| **Monorepo** | [Nx](https://nx.dev) 22.x |
+| **Frontend** | [Angular](https://angular.dev) 21, [Ionic](https://ionicframework.com/) 8 (tabata-ai), [Angular Material](https://material.angular.io/) (other apps) |
+| **State** | [NgRx Signals](https://ngrx.io/guide/signals) (tabata), NgRx Store/Effects (notes, vehicles) |
+| **Auth** | [Angular Fire](https://github.com/angular/angularfire) (Firebase Auth) in tabata-ai |
+| **Mobile** | [Capacitor](https://capacitorjs.com/) 6 (tabata-ai) |
+| **i18n** | [Angular localize](https://angular.dev/guide/i18n-overview) (tabata-ai: en, nl, el) |
+| **Testing** | [Jest](https://jestjs.io/) (unit), [Playwright](https://playwright.dev/) (e2e for tabata-ai) |
+| **Backend** | [Express](https://expressjs.com/) (notes-server, vehicles-server) |
+| **Styling** | SCSS, [Tailwind CSS](https://tailwindcss.com/) where configured |
 
-```sh
-npx nx serve tabata-ai
+---
+
+## Workspace structure
+
+```
+silver/
+├── apps/
+│   ├── tabata-ai/          # Tabata workout app (Angular + Ionic + Firebase) — in progress
+│   ├── tabata-ai-e2e/      # E2E tests for tabata-ai (Playwright)
+│   ├── notes-app/          # Notes Angular app
+│   └── vehicles-app/       # Vehicles Angular app
+├── libs/
+│   ├── tabata/             # Feature libs for tabata-ai
+│   │   ├── auth/           # Auth (login, register, forgot password, Firebase)
+│   │   ├── home/
+│   │   ├── workouts/
+│   │   ├── history/
+│   │   ├── profile/
+│   │   ├── ui/             # Tabs, toolbar, shared UI
+│   │   ├── exercises/      # Exercise DB API service, store, facade
+│   │   └── utils/
+│   ├── notes/              # Notes feature libs
+│   │   ├── notes-auth/
+│   │   ├── notes-ui/
+│   │   ├── notes-store/
+│   │   └── notes-server/
+│   ├── vehicles/           # Vehicles feature libs
+│   │   ├── vehicles-ui/
+│   │   ├── vehicles-store/
+│   │   └── vehicles-server/
+│   └── shared/
+│       └── helpers/        # Shared utilities (e.g. ToastService)
+├── nx.json
+├── package.json
+└── README.md
 ```
 
-To create a production bundle:
+---
+
+## Projects overview
+
+| Project | Type | Description |
+|--------|------|-------------|
+| **tabata-ai** | App | Tabata workout app with auth, tabs (Home, Workouts, History, Profile). **Still in progress — many features are missing.** See [apps/tabata-ai/README.md](apps/tabata-ai/README.md). |
+| **tabata-ai-e2e** | E2E | Playwright tests for tabata-ai. Run after `npx playwright install` if needed. |
+| **notes-app** | App | Notes application (Angular + Express server). |
+| **vehicles-app** | App | Vehicles demo app with JSON server backend. |
+| **auth** | Lib | Firebase auth, login/register/forgot-password, AuthStore/AuthFacade. |
+| **home**, **workouts**, **history**, **profile** | Lib | Tabata tab feature components. |
+| **ui** | Lib | Tabata shared UI (tabs, toolbar). |
+| **exercises** | Lib | Exercise data (ExerciseDB API), ExercisesStore, ExercisesFacade. |
+| **utils** | Lib | Tabata utilities. |
+| **notes-auth**, **notes-ui**, **notes-store**, **notes-server** | Lib | Notes feature and Express server. |
+| **vehicles-ui**, **vehicles-store**, **vehicles-server** | Lib | Vehicles feature and server. |
+| **helpers** | Lib | Shared helpers (e.g. ToastService). |
+
+---
+
+## Getting started
+
+### Prerequisites
+
+- **Node.js** (v20+ recommended)
+- **npm** or **yarn**
+
+### Install dependencies
 
 ```sh
-npx nx build tabata-ai
+npm install
 ```
 
-To see all available targets to run for a project, run:
+### Optional: Playwright browsers (for tabata-ai e2e)
+
+If you plan to run e2e tests for tabata-ai:
+
+```sh
+npx playwright install
+```
+
+---
+
+## Running tasks
+
+### Tabata AI app
+
+> **Note:** This app is **in progress**. Many features are still missing. See [apps/tabata-ai/README.md](apps/tabata-ai/README.md).
+
+| Task | Command |
+|------|---------|
+| Serve (dev) | `npx nx serve tabata-ai` or `npm run start:tabata-ai` |
+| Build | `npx nx build tabata-ai` |
+| Build (localized) | `npm run build-localize:tabata-ai` |
+| Unit tests | `npx nx test tabata-ai` |
+| E2E tests | `npx nx run tabata-ai-e2e:e2e` |
+
+### Notes app
+
+Run both server and app (in separate terminals):
+
+1. **Server:** `npm run server:notes-app` → http://localhost:9000  
+2. **App:** `npm run start:notes-app` → http://localhost:4200  
+
+### Vehicles app
+
+| Task | Command |
+|------|---------|
+| Serve app | `npm run start:vehicles-app` |
+| Run server | `npm run server:vehicles-app` |
+
+### Run any project's targets
+
+List targets for a project:
 
 ```sh
 npx nx show project tabata-ai
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+Run a target:
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```sh
+npx nx <target> <project>
+# e.g. npx nx test auth
+```
+
+---
+
+## Useful Nx commands
+
+| Command | Description |
+|---------|-------------|
+| `npx nx graph` | Visualize project and task dependencies |
+| `npx nx list` | List installed Nx plugins |
+| `npx nx run-many -t test -p auth,home,ui` | Run tests for multiple projects |
+| `npx nx format:write` | Format code (see `npm run format`) |
+
+---
 
 ## Add new projects
 
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
+Use Nx generators instead of manual setup:
 
-Use the plugin's generator to create new projects.
+- **New Angular app:** `npx nx g @nx/angular:app my-app`
+- **New library:** `npx nx g @nx/angular:lib mylib`
 
-To generate a new application, use:
+Use [Nx Console](https://nx.dev/getting-started/editor-setup) in your IDE to browse plugins and generators.
 
-```sh
-npx nx g @nx/angular:app demo
-```
-
-To generate a new library, use:
-
-```sh
-npx nx g @nx/angular:lib mylib
-```
-
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
-
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+---
 
 ## Useful links
 
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- [Nx docs](https://nx.dev)
+- [Angular monorepo tutorial](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial)
+- [Nx on CI](https://nx.dev/ci/intro/ci-with-nx)
+- [Nx Console](https://nx.dev/getting-started/editor-setup)
+- [Nx community (Discord, X, LinkedIn, YouTube, blog)](https://nx.dev/getting-started/community)

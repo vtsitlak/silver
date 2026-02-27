@@ -1,0 +1,13 @@
+<div class="space-y-6">
+    <app-filter-form [types]="types()" [brands]="brands()" [colors]="colors()" (updateFilter)="updateFilter($event)"></app-filter-form>
+    @if (loading()) {
+        <mat-spinner color="accent" diameter="180" class="mx-auto my-12"></mat-spinner>
+    }
+    @if (!loading()) {
+        <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            @for (vehicle of filteredVehicles(); track vehicle) {
+                <app-vehicle-item [vehicle]="vehicle"></app-vehicle-item>
+            }
+        </div>
+    }
+</div>

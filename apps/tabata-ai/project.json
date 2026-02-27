@@ -1,108 +1,141 @@
 {
-  "name": "tabata-ai",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "projectType": "application",
-  "prefix": "app",
-  "sourceRoot": "apps/tabata-ai/src",
-  "tags": [],
-  "targets": {
-    "build": {
-      "executor": "@angular-devkit/build-angular:browser",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/apps/tabata-ai",
-        "index": "apps/tabata-ai/src/index.html",
-        "main": "apps/tabata-ai/src/main.ts",
-        "polyfills": ["zone.js"],
-        "tsConfig": "apps/tabata-ai/tsconfig.app.json",
-        "inlineStyleLanguage": "scss",
-        "assets": [
-          {
-            "glob": "**/*.svg",
-            "input": "node_modules/ionicons/dist/ionicons/svg",
-            "output": "./svg"
-          }
-        ],
-        "styles": [
-          "apps/tabata-ai/src/styles.scss",
-          "apps/tabata-ai/src/theme/variables.scss",
-          "node_modules/@ionic/angular/css/core.css",
-          "node_modules/@ionic/angular/css/normalize.css",
-          "node_modules/@ionic/angular/css/structure.css",
-          "node_modules/@ionic/angular/css/typography.css",
-          "node_modules/@ionic/angular/css/display.css",
-          "node_modules/@ionic/angular/css/padding.css",
-          "node_modules/@ionic/angular/css/float-elements.css",
-          "node_modules/@ionic/angular/css/text-alignment.css",
-          "node_modules/@ionic/angular/css/text-transformation.css",
-          "node_modules/@ionic/angular/css/flex-utils.css",
-          "node_modules/@ionic/angular/css/palettes/dark.system.css"
-        ],
-        "scripts": []
-      },
-      "configurations": {
-        "production": {
-          "budgets": [
-            {
-              "type": "initial",
-              "maximumWarning": "500kb",
-              "maximumError": "1mb"
+    "name": "tabata-ai",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "i18n": {
+        "sourceLocale": "en",
+        "locales": {
+            "nl": "apps/tabata-ai/src/locales/messages.nl.json",
+            "el": "apps/tabata-ai/src/locales/messages.el.json"
+        }
+    },
+    "projectType": "application",
+    "prefix": "app",
+    "sourceRoot": "apps/tabata-ai/src",
+    "tags": [],
+    "targets": {
+        "build": {
+            "executor": "@angular-devkit/build-angular:browser",
+            "outputs": ["{options.outputPath}"],
+            "options": {
+                "i18nMissingTranslation": "warning",
+                "outputPath": "dist/apps/tabata-ai",
+                "index": "apps/tabata-ai/src/index.html",
+                "main": "apps/tabata-ai/src/main.ts",
+                "polyfills": ["zone.js", "@angular/localize/init"],
+                "tsConfig": "apps/tabata-ai/tsconfig.app.json",
+                "inlineStyleLanguage": "scss",
+                "assets": [
+                    "apps/tabata-ai/src/assets",
+                    {
+                        "glob": "**/*.svg",
+                        "input": "node_modules/ionicons/dist/ionicons/svg",
+                        "output": "./svg"
+                    }
+                ],
+                "styles": [
+                    "apps/tabata-ai/src/styles.scss",
+                    "apps/tabata-ai/src/theme/variables.scss",
+                    "node_modules/@ionic/angular/css/core.css",
+                    "node_modules/@ionic/angular/css/normalize.css",
+                    "node_modules/@ionic/angular/css/structure.css",
+                    "node_modules/@ionic/angular/css/typography.css",
+                    "node_modules/@ionic/angular/css/display.css",
+                    "node_modules/@ionic/angular/css/padding.css",
+                    "node_modules/@ionic/angular/css/float-elements.css",
+                    "node_modules/@ionic/angular/css/text-alignment.css",
+                    "node_modules/@ionic/angular/css/text-transformation.css",
+                    "node_modules/@ionic/angular/css/flex-utils.css",
+                    "node_modules/@ionic/angular/css/palettes/dark.system.css"
+                ],
+                "scripts": []
             },
-            {
-              "type": "anyComponentStyle",
-              "maximumWarning": "4kb",
-              "maximumError": "8kb"
+            "configurations": {
+                "en": {
+                    "localize": ["en"]
+                },
+                "nl": {
+                    "localize": ["nl"]
+                },
+                "el": {
+                    "localize": ["el"]
+                },
+                "production": {
+                    "localize": ["en", "nl", "el"],
+                    "budgets": [
+                        {
+                            "type": "initial",
+                            "maximumWarning": "500kb",
+                            "maximumError": "1mb"
+                        },
+                        {
+                            "type": "anyComponentStyle",
+                            "maximumWarning": "4kb",
+                            "maximumError": "8kb"
+                        }
+                    ],
+                    "outputHashing": "all"
+                },
+                "development": {
+                    "localize": false,
+                    "buildOptimizer": false,
+                    "optimization": false,
+                    "vendorChunk": true,
+                    "extractLicenses": false,
+                    "sourceMap": true,
+                    "namedChunks": true
+                }
+            },
+            "defaultConfiguration": "production"
+        },
+        "serve": {
+            "options": {
+                "disableHostCheck": true
+            },
+            "executor": "@angular-devkit/build-angular:dev-server",
+            "configurations": {
+                "production": {
+                    "buildTarget": "tabata-ai:build:production:en"
+                },
+                "development": {
+                    "open": true,
+                    "buildTarget": "tabata-ai:build:development:en"
+                },
+                "el": {
+                    "buildTarget": "tabata-ai:build:development:el"
+                },
+                "nl": {
+                    "buildTarget": "tabata-ai:build:development:nl"
+                }
+            },
+            "defaultConfiguration": "development",
+            "continuous": true
+        },
+        "extract-i18n": {
+            "executor": "@angular-devkit/build-angular:extract-i18n",
+            "options": {
+                "buildTarget": "tabata-ai:build",
+                "outputPath": "apps/tabata-ai/src/locales",
+                "format": "json"
             }
-          ],
-          "outputHashing": "all"
         },
-        "development": {
-          "buildOptimizer": false,
-          "optimization": false,
-          "vendorChunk": true,
-          "extractLicenses": false,
-          "sourceMap": true,
-          "namedChunks": true
-        }
-      },
-      "defaultConfiguration": "production"
-    },
-    "serve": {
-      "executor": "@angular-devkit/build-angular:dev-server",
-      "configurations": {
-        "production": {
-          "buildTarget": "tabata-ai:build:production"
+        "lint": {
+            "executor": "@nx/eslint:lint"
         },
-        "development": {
-          "open": true,
-          "buildTarget": "tabata-ai:build:development"
+        "test": {
+            "executor": "@nx/jest:jest",
+            "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+            "options": {
+                "jestConfig": "apps/tabata-ai/jest.config.ts",
+                "tsConfig": "apps/tabata-ai/tsconfig.spec.json"
+            }
+        },
+        "serve-static": {
+            "executor": "@nx/web:file-server",
+            "options": {
+                "buildTarget": "tabata-ai:build",
+                "port": 4200,
+                "spa": true
+            }
         }
-      },
-      "defaultConfiguration": "development"
-    },
-    "extract-i18n": {
-      "executor": "@angular-devkit/build-angular:extract-i18n",
-      "options": {
-        "buildTarget": "tabata-ai:build"
-      }
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    },
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "jestConfig": "apps/tabata-ai/jest.config.ts"
-      }
-    },
-    "serve-static": {
-      "executor": "@nx/web:file-server",
-      "options": {
-        "buildTarget": "tabata-ai:build",
-        "port": 4200,
-        "spa": true
-      }
     }
-  }
 }

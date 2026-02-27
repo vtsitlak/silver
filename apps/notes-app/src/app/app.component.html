@@ -1,0 +1,34 @@
+<mat-sidenav-container fullscreen>
+    <mat-sidenav #start>
+        <mat-nav-list (click)="start.close()">
+            @if (authFacade.isLoggedOut()) {
+                <a mat-list-item routerLink="/login">
+                    <mat-icon>account_circle</mat-icon>
+                    <span>Login</span>
+                </a>
+            }
+
+            @if (authFacade.isLoggedIn()) {
+                <a mat-list-item (click)="logout()">
+                    <mat-icon>exit_to_app</mat-icon>
+                    <span>Logout</span>
+                </a>
+            }
+        </mat-nav-list>
+    </mat-sidenav>
+
+    <mat-toolbar color="primary">
+        <button class="text-white mat-primary" mat-icon-button (click)="start.open('mouse')" color="primary">
+            <mat-icon>menu</mat-icon>
+        </button>
+        <span class="text-white"> {{ title }} </span>
+    </mat-toolbar>
+
+    @if (loading) {
+        <div class="fixed inset-0 z-10 flex items-center justify-center bg-white bg-opacity-50">
+            <mat-spinner></mat-spinner>
+        </div>
+    }
+
+    <router-outlet></router-outlet>
+</mat-sidenav-container>

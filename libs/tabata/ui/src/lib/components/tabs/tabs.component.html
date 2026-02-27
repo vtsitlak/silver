@@ -1,0 +1,18 @@
+<ion-tabs>
+    <ion-tab-bar slot="bottom">
+        <ion-tab-button tab="home" [routerLink]="['home']">
+            <ion-icon inert name="home"></ion-icon>
+            <ion-label i18n="@@home">Home</ion-label>
+        </ion-tab-button>
+
+        <ion-tab-button tab="workouts" [routerLink]="['workouts']">
+            <ion-icon inert name="barbell"></ion-icon>
+            <ion-label i18n="@@workouts">Workouts</ion-label>
+        </ion-tab-button>
+
+        <ion-tab-button tab="history" [routerLink]="['history']">
+            <ion-icon inert name="calendar"></ion-icon>
+            <ion-label i18n="@@history">History</ion-label>
+        </ion-tab-button>
+    </ion-tab-bar>
+</ion-tabs>

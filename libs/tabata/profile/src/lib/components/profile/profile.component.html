@@ -1,0 +1,114 @@
+<ion-header [translucent]="true">
+    <tbt-toolbar i18n-title="@@profile" profile="Profile" title="Profile"></tbt-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+    <div class="flex flex-col">
+        <form (ngSubmit)="onSubmit()" class="bg-white w-full flex flex-col px-4 py-4">
+            <h2 class="text-xl font-semibold mb-4" i18n="@@profileTitle">Profile Settings</h2>
+
+            <div class="flex flex-col mb-2">
+                <label for="displayName" i18n="@@profileDisplayNameLabel" class="mb-2">Display Name</label>
+                <input
+                    id="displayName"
+                    type="text"
+                    [formField]="profileForm.displayName"
+                    placeholder="Enter your display name"
+                    i18n-placeholder="@@profileDisplayNamePlaceholder"
+                />
+                <div class="h-5">
+                    @if (profileForm.displayName().touched() && profileForm.displayName().invalid()) {
+                        @for (err of profileForm.displayName().errors(); track err.kind) {
+                            <p class="text-error text-sm mt-1">{{ err.message }}</p>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div class="flex flex-col mb-2">
+                <label for="email" i18n="@@profileEmailLabel" class="mb-2">Email</label>
+                <input id="email" type="email" [formField]="profileForm.email" placeholder="Enter your email" i18n-placeholder="@@profileEmailPlaceholder" />
+                <div class="h-5">
+                    @if (profileForm.email().touched() && profileForm.email().invalid()) {
+                        @for (err of profileForm.email().errors(); track err.kind) {
+                            <p class="text-error text-sm mt-1">{{ err.message }}</p>
+                        }
+                    }
+                </div>
+            </div>
+
+            @if (usePassword()) {
+                <div class="flex items-center justify-between mb-4">
+                    <label for="changePassword" i18n="@@profileChangePasswordToggle" class="font-semibold">Change password</label>
+                    <ion-toggle id="changePassword" [checked]="showPasswordField" (ionChange)="togglePasswordField()"></ion-toggle>
+                </div>
+
+                @if (showPasswordField) {
+                    <div class="flex flex-col mb-2">
+                        <label for="currentPassword" i18n="@@profileCurrentPasswordLabel" class="mb-2">Current Password</label>
+                        <input
+                            id="currentPassword"
+                            type="password"
+                            [formField]="profileForm.currentPassword"
+                            placeholder="Enter your current password"
+                            i18n-placeholder="@@profileCurrentPasswordPlaceholder"
+                        />
+                        <div class="h-5">
+                            @if (profileForm.currentPassword().touched() && profileForm.currentPassword().invalid()) {
+                                @for (err of profileForm.currentPassword().errors(); track err.kind) {
+                                    <p class="text-error text-sm mt-1">{{ err.message }}</p>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    @if (profileForm.currentPassword().value() && profileForm.currentPassword().valid()) {
+                        <div class="flex flex-col mb-2">
+                            <label for="newPassword" i18n="@@profileNewPasswordLabel" class="mb-2">New Password</label>
+                            <input
+                                id="newPassword"
+                                type="password"
+                                [formField]="profileForm.newPassword"
+                                placeholder="Enter your new password"
+                                i18n-placeholder="@@profileNewPasswordPlaceholder"
+                            />
+                            <div class="h-5">
+                                @if (profileForm.newPassword().touched() && profileForm.newPassword().invalid()) {
+                                    @for (err of profileForm.newPassword().errors(); track err.kind) {
+                                        <p class="text-error text-sm mt-1">{{ err.message }}</p>
+                                    }
+                                }
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col mb-2">
+                            <label for="confirmNewPassword" i18n="@@profileConfirmNewPasswordLabel" class="mb-2">Confirm New Password</label>
+                            <input
+                                id="confirmNewPassword"
+                                type="password"
+                                [formField]="profileForm.confirmNewPassword"
+                                placeholder="Confirm your new password"
+                                i18n-placeholder="@@profileConfirmNewPasswordPlaceholder"
+                            />
+                            <div class="h-5">
+                                @if (profileForm.confirmNewPassword().touched() && profileForm.confirmNewPassword().invalid()) {
+                                    @for (err of profileForm.confirmNewPassword().errors(); track err.kind) {
+                                        <p class="text-error text-sm mt-1">{{ err.message }}</p>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            }
+
+            <ion-button expand="block" type="submit" [disabled]="!profileForm().dirty() || profileForm().invalid()">
+                @if (isLoading()) {
+                    <ion-spinner name="crescent"></ion-spinner>
+                } @else {
+                    <span i18n="@@profileUpdateButton">Update Profile</span>
+                }
+            </ion-button>
+        </form>
+    </div>
+</ion-content>

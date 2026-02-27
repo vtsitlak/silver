@@ -1,3 +1,21 @@
 {
-  "singleQuote": true
+  "singleQuote": true,
+    "printWidth": 160,
+    "tabWidth": 4,
+    "trailingComma": "none",
+    "proseWrap": "preserve",
+    "htmlWhitespaceSensitivity": "strict",
+    "overrides": [
+        {
+            "files": "['*.json', '*.yaml', '*.yml']",
+            "excludeFiles": "['./openapi.yaml']",
+            "options": {
+                "tabWidth": 2
+            }
+        },
+        {
+            "files": "['tsconfig.base.json']",
+           "options": {}
+        }
+    ]
 }

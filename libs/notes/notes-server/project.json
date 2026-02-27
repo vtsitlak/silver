@@ -1,0 +1,15 @@
+{
+    "name": "notes-server",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/notes/notes-server/src",
+    "projectType": "library",
+    "tags": [],
+    "targets": {
+        "server": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "ts-node -P libs/notes/notes-server/server.tsconfig.json libs/notes/notes-server/src/server.ts"
+            }
+        }
+    }
+}

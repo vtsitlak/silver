@@ -1,0 +1,90 @@
+{
+    "name": "notes-app",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "projectType": "application",
+    "prefix": "app",
+    "sourceRoot": "apps/notes-app/src",
+    "tags": [],
+    "targets": {
+        "build": {
+            "executor": "@angular/build:application",
+            "outputs": ["{options.outputPath}"],
+            "options": {
+                "outputPath": "dist/apps/notes-app",
+                "index": "apps/notes-app/src/index.html",
+                "browser": "apps/notes-app/src/main.ts",
+                "polyfills": ["apps/notes-app/src/polyfills.ts"],
+                "tsConfig": "apps/notes-app/tsconfig.app.json",
+                "inlineStyleLanguage": "scss",
+                "assets": ["apps/notes-app/src/favicon.ico", "apps/notes-app/src/assets"],
+                "styles": ["apps/notes-app/src/styles.scss"]
+            },
+            "configurations": {
+                "production": {
+                    "fileReplacements": [
+                        {
+                            "replace": "apps/notes-app/src/environments/environment.ts",
+                            "with": "apps/notes-app/src/environments/environment.prod.ts"
+                        }
+                    ],
+                    "budgets": [
+                        {
+                            "type": "initial",
+                            "maximumWarning": "2mb",
+                            "maximumError": "5mb"
+                        },
+                        {
+                            "type": "anyComponentStyle",
+                            "maximumWarning": "6kb",
+                            "maximumError": "10kb"
+                        }
+                    ],
+                    "outputHashing": "all"
+                },
+                "development": {
+                    "optimization": false,
+                    "namedChunks": true,
+                    "extractLicenses": false,
+                    "sourceMap": true
+                }
+            },
+            "defaultConfiguration": "production"
+        },
+        "serve": {
+            "continuous": true,
+            "executor": "@angular/build:dev-server",
+            "options": {
+                "proxyConfig": "apps/notes-app/proxy.json"
+            },
+            "configurations": {
+                "production": {
+                    "buildTarget": "notes-app:build:production"
+                },
+                "development": {
+                    "buildTarget": "notes-app:build:development"
+                }
+            },
+            "defaultConfiguration": "development"
+        },
+        "lint": {
+            "executor": "@nx/eslint:lint"
+        },
+        "test": {
+            "executor": "@nx/jest:jest",
+            "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+            "options": {
+                "jestConfig": "apps/notes-app/jest.config.cts",
+                "tsConfig": "apps/notes-app/tsconfig.spec.json"
+            }
+        },
+        "serve-static": {
+            "continuous": true,
+            "executor": "@nx/web:file-server",
+            "options": {
+                "buildTarget": "notes-app:build",
+                "staticFilePath": "dist/apps/notes-app",
+                "spa": true
+            }
+        }
+    }
+}

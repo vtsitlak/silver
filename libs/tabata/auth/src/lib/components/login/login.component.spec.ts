@@ -1,0 +1,41 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { AuthFacade } from '../../store/auth.facade';
+import { LoginComponent } from './login.component';
+
+const mockAuthFacade = {
+    user: () => null,
+    error: () => null,
+    isLoading: () => false,
+    isAuthenticated: () => false,
+    usePassword: () => true,
+    useGoogle: () => false,
+    hasError: () => false,
+    sign: () => {},
+    register: () => {},
+    sendPasswordResetEmail: () => {},
+    updateDisplayName: () => {},
+    updatePassword: () => {},
+    logout: () => {},
+    getUser: () => {}
+};
+
+describe('LoginComponent', () => {
+    let component: LoginComponent;
+    let fixture: ComponentFixture<LoginComponent>;
+
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [LoginComponent],
+            providers: [provideRouter([]), { provide: AuthFacade, useValue: mockAuthFacade }]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(LoginComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
+
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
+});

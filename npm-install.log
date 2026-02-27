@@ -1,0 +1,32 @@
+npm ERR! code ERESOLVE
+npm ERR! ERESOLVE could not resolve
+npm ERR! 
+npm ERR! While resolving: @silver/source@0.0.0
+npm ERR! Found: @angular-devkit/build-angular@19.2.3
+npm ERR! node_modules/@angular-devkit/build-angular
+npm ERR!   dev @angular-devkit/build-angular@"21.0.5" from the root project
+npm ERR!   peer @angular-devkit/build-angular@">= 17.0.0 < 20.0.0" from @nx/angular@20.6.1
+npm ERR!   node_modules/@nx/angular
+npm ERR!     dev @nx/angular@"22.3.3" from the root project
+npm ERR!     peer @nx/angular@"^20.0.0" from @nxext/ionic-angular@20.0.5
+npm ERR!     node_modules/@nxext/ionic-angular
+npm ERR!       dev @nxext/ionic-angular@"^20.0.5" from the root project
+npm ERR! 
+npm ERR! Could not resolve dependency:
+npm ERR! dev @angular-devkit/build-angular@"21.0.5" from the root project
+npm ERR! 
+npm ERR! Conflicting peer dependency: typescript@5.9.3
+npm ERR! node_modules/typescript
+npm ERR!   peer typescript@">=5.9 <6.0" from @angular-devkit/build-angular@21.0.5
+npm ERR!   node_modules/@angular-devkit/build-angular
+npm ERR!     dev @angular-devkit/build-angular@"21.0.5" from the root project
+npm ERR! 
+npm ERR! Fix the upstream dependency conflict, or retry
+npm ERR! this command with --force or --legacy-peer-deps
+npm ERR! to accept an incorrect (and potentially broken) dependency resolution.
+npm ERR! 
+npm ERR! 
+npm ERR! For a full report see:
+npm ERR! C:\Users\vtsitlak\AppData\Local\npm-cache\_logs\2026-01-10T08_49_21_712Z-eresolve-report.txt
+
+npm ERR! A complete log of this run can be found in: C:\Users\vtsitlak\AppData\Local\npm-cache\_logs\2026-01-10T08_49_21_712Z-debug-0.log

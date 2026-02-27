@@ -1,0 +1,64 @@
+<ion-content fullscreen="true">
+    <div class="min-h-screen flex flex-col bg-logo bg-cover bg-center">
+        <div class="form-container flex flex-col w-full mt-auto mb-0 justify-end">
+            <form (ngSubmit)="onSubmit()" class="rounded-t-2xl bg-white w-full flex flex-col px-4 pb-4">
+                <h2 class="text-xl font-semibold mb-4" i18n="@@authRegisterTitle">Register</h2>
+                <div class="flex flex-col mb-2">
+                    <label for="displayName" i18n="@@authDisplayNameLabel" class="mb-2">Display name</label>
+                    <input
+                        id="displayName"
+                        type="text"
+                        [formField]="registerForm.displayName"
+                        placeholder="Enter your display name"
+                        i18n-placeholder="@@authDisplayNamePlaceholder"
+                    />
+                    <div class="h-5">
+                        @if (registerForm.displayName().touched() && registerForm.displayName().invalid()) {
+                            @for (err of registerForm.displayName().errors(); track err.kind) {
+                                <p class="text-error text-sm mt-1">{{ err.message }}</p>
+                            }
+                        }
+                    </div>
+                </div>
+                <div class="flex flex-col mb-2">
+                    <label for="email" i18n="@@authEmailLabel" class="mb-2">Email</label>
+                    <input id="email" type="email" [formField]="registerForm.email" placeholder="Enter your email" i18n-placeholder="@@authEmailPlaceholder" />
+                    <div class="h-5">
+                        @if (registerForm.email().touched() && registerForm.email().invalid()) {
+                            @for (err of registerForm.email().errors(); track err.kind) {
+                                <p class="text-error text-sm mt-1">{{ err.message }}</p>
+                            }
+                        }
+                    </div>
+                </div>
+                <div class="flex flex-col mb-2">
+                    <label for="password" i18n="@@authPasswordLabel" class="mb-2">Password</label>
+                    <input
+                        id="password"
+                        type="password"
+                        [formField]="registerForm.password"
+                        placeholder="Enter your password"
+                        i18n-placeholder="@@authPasswordPlaceholder"
+                    />
+                    <div class="h-5">
+                        @if (registerForm.password().touched() && registerForm.password().invalid()) {
+                            @for (err of registerForm.password().errors(); track err.kind) {
+                                <p class="text-error text-sm mt-1">{{ err.message }}</p>
+                            }
+                        }
+                        @if (error()) {
+                            <p class="text-error text-sm mt-1 text-center" i18n="@@authRegisterFailed">Registration failed. Please try again.</p>
+                        }
+                    </div>
+                </div>
+                <ion-button expand="block" type="submit" [disabled]="registerForm().invalid()">
+                    @if (isLoading()) {
+                        <ion-spinner name="crescent"></ion-spinner>
+                    } @else {
+                        <span i18n="@@authRegisterButton">Register</span>
+                    }
+                </ion-button>
+            </form>
+        </div>
+    </div>
+</ion-content>

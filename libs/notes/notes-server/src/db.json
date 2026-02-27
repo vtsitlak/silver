@@ -1,0 +1,46 @@
+{
+    "notes": [
+        {
+            "id": 1,
+            "title": "mobile bill",
+            "body": "I have to pay my mobile phone bill",
+            "important": true,
+            "created": "Sat Jan 11 2020 18:20:37 GMT+0100 (Central European Standard Time)"
+        },
+        {
+            "id": 2,
+            "title": "shopping",
+            "body": "Out of coffee and cheese",
+            "important": false,
+            "created": "Fri Jan 10 2020 17:20:37 GMT+0100 (Central European Standard Time)"
+        },
+        {
+            "id": 3,
+            "title": "dentist",
+            "body": "I need to call my dentist to arrange my periodical exam",
+            "important": true,
+            "created": "Sat Jan 11 2020 13:20:37 GMT+0100 (Central European Standard Time)"
+        },
+        {
+            "id": 4,
+            "title": "movie",
+            "body": "Lots of friends recommended to see 'Into the Wild' movie",
+            "important": false,
+            "created": "Sat Jan 11 2020 15:10:37 GMT+0100 (Central European Standard Time)"
+        },
+        {
+            "title": "test",
+            "body": "note text",
+            "important": false,
+            "created": "2026-01-24T15:52:04.796Z",
+            "id": 5
+        },
+        {
+            "title": "new note",
+            "body": "test",
+            "important": true,
+            "created": "2026-01-25T15:22:37.738Z",
+            "id": 6
+        }
+    ]
+}

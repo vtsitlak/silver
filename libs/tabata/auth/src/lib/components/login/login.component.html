@@ -1,0 +1,59 @@
+<ion-content fullscreen="true">
+    <div class="min-h-screen flex flex-col bg-logo bg-cover bg-center">
+        <div class="form-container flex flex-col w-full mt-auto mb-0 justify-end">
+            <form (ngSubmit)="onSubmit()" class="rounded-t-2xl bg-white w-full flex flex-col px-4 pb-4">
+                <h2 class="text-xl font-semibold mb-4" i18n="@@authLoginTitle">Login</h2>
+                <div class="flex flex-col mb-2">
+                    <label for="email" i18n="@@authEmailLabel" class="mb-2">Email</label>
+                    <input
+                        id="email"
+                        type="email"
+                        [formField]="loginForm.email"
+                        placeholder="Enter your email"
+                        autocomplete="email"
+                        i18n-placeholder="@@authEmailPlaceholder"
+                    />
+                    <div class="h-5">
+                        @if (loginForm.email().touched() && loginForm.email().invalid()) {
+                            @for (err of loginForm.email().errors(); track err.kind) {
+                                <p class="text-error text-sm mt-1">{{ err.message }}</p>
+                            }
+                        }
+                    </div>
+                </div>
+                <div class="flex flex-col mb-2">
+                    <label for="password" i18n="@@authPasswordLabel" class="mb-2">Password</label>
+                    <input
+                        id="password"
+                        type="password"
+                        [formField]="loginForm.password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        i18n-placeholder="@@authPasswordPlaceholder"
+                    />
+                    <div class="h-5">
+                        @if (loginForm.password().touched() && loginForm.password().invalid()) {
+                            @for (err of loginForm.password().errors(); track err.kind) {
+                                <p class="text-error text-sm mt-1">{{ err.message }}</p>
+                            }
+                        }
+                        @if (error()) {
+                            <p class="text-error text-sm mt-1 text-center" i18n="@@authLoginInvalid">Invalid email or password</p>
+                        }
+                    </div>
+                </div>
+                <ion-button expand="block" type="button" (click)="onSubmit()">
+                    @if (isLoading()) {
+                        <ion-spinner name="crescent"></ion-spinner>
+                    } @else {
+                        <span i18n="@@authLoginButton">Login</span>
+                    }
+                </ion-button>
+                <ion-button expand="block" fill="outline" (click)="register()" i18n="@@authRegisterButton">Register</ion-button>
+                <ion-button expand="block" fill="clear" color="secondary" (click)="forgotPassword()" i18n="@@authForgotPasswordButton"
+                    >Forgot password</ion-button
+                >
+            </form>
+        </div>
+    </div>
+</ion-content>
