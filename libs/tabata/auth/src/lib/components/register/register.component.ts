@@ -1,47 +1,45 @@
-import { Component, computed, inject } from '@angular/core';
-import { FormControl, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Component, computed, inject, signal } from '@angular/core';
+import { email, form, FormField, minLength, required } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
-import { RegisterForm } from '@silver/tabata/helpers';
-import { AuthStore } from '../../store/auth.store';
-import { ErrorsStore } from '../../store/errors.store';
+import { AuthFacade } from '../../store/auth.facade';
+
+interface RegisterFormModel {
+    email: string;
+    password: string;
+    displayName: string;
+}
 
 @Component({
     selector: 'tbt-register',
-    imports: [ReactiveFormsModule, IonicModule],
+    imports: [FormField, IonicModule],
     templateUrl: './register.component.html',
     styleUrl: './register.component.scss'
 })
 export class RegisterComponent {
-    fb: FormBuilder = inject(FormBuilder);
-    private readonly authStore = inject(AuthStore);
+    private readonly authFacade = inject(AuthFacade);
+    private readonly router = inject(Router);
+    isLoading = computed(() => this.authFacade.isLoading());
+    error = computed(() => this.authFacade.hasError());
 
-    private readonly errorsStore = inject(ErrorsStore);
-    isLoading = computed(() => this.authStore.isLoading());
-    error = computed(() => this.errorsStore.errors().length > 0);
-    router: Router = inject(Router);
-    form = this.fb.group<RegisterForm>({
-        email: new FormControl<string>('', {
-            validators: [Validators.email, Validators.required],
-            nonNullable: true
-        }),
-        password: new FormControl<string>(
-            {
-                value: '',
-                disabled: false
-            },
-            {
-                validators: [Validators.required, Validators.minLength(6)],
-                nonNullable: true
-            }
-        ),
-        displayName: new FormControl('', {
-            validators: [Validators.required],
-            nonNullable: true
-        })
+    registerModel = signal<RegisterFormModel>({
+        email: '',
+        password: '',
+        displayName: ''
+    });
+
+    registerForm = form(this.registerModel, (schemaPath) => {
+        required(schemaPath.displayName, { message: 'Display name is required' });
+        required(schemaPath.email, { message: 'Email is required' });
+        email(schemaPath.email, { message: 'Please enter a valid email address' });
+        required(schemaPath.password, { message: 'Password is required' });
+        minLength(schemaPath.password, 6, { message: 'Password must be at least 6 characters' });
     });
 
     onSubmit(): void {
-        this.authStore.register(this.form.getRawValue());
+        if (this.registerForm().invalid()) {
+            return;
+        }
+        this.authFacade.register(this.registerModel());
     }
 }

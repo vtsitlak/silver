@@ -14,226 +14,238 @@
 */
 
 @font-face {
-  font-family: 'Figtree';
-  src: url('./theme/fonts/ttf/Figtree-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
+    font-family: 'Figtree';
+    src: url('./theme/fonts/ttf/Figtree-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
 }
 
 @font-face {
-  font-family: 'Roboto';
-  src: url('https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxP.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
+    font-family: 'Roboto';
+    src: url('https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxP.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
 }
 
 body {
-  font-family: 'Figtree', 'Roboto', sans-serif;
+    font-family: 'Figtree', 'Roboto', sans-serif;
 }
 
 :root {
-  --color-primary: #3123AE;
-  --color-primary-dark: #24197D;
-  --color-secondary: #C66CD6;
-  --color-secondary-rgb: 198, 108, 214;
-  --color-secondary-dark: #9B4EA7;
-  --color-error: #B00020;
-  --ion-color-secondary: var(--color-secondary);
-  --ion-color-secondary-rgb: var(--color-secondary-rgb);
-  --ion-color-secondary-contrast: #ffffff;
-  --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: var(--color-secondary-dark);
-  --ion-color-secondary-tint: #d28edf;
-  --ion-color-danger: var(--color-error);
-  --ion-color-danger-rgb: 176, 0, 32;
-  --ion-color-danger-contrast: #fff;
-  --ion-color-danger-contrast-rgb: 255,255,255;
-  --ion-color-danger-shade: #96001a;
-  --ion-color-danger-tint: #b83342;
+    --color-primary: #3123ae;
+    --color-primary-dark: #24197d;
+    --color-secondary: #c66cd6;
+    --color-secondary-rgb: 198, 108, 214;
+    --color-secondary-dark: #9b4ea7;
+    --color-error: #b00020;
+    --ion-color-secondary: var(--color-secondary);
+    --ion-color-secondary-rgb: var(--color-secondary-rgb);
+    --ion-color-secondary-contrast: #ffffff;
+    --ion-color-secondary-contrast-rgb: 255, 255, 255;
+    --ion-color-secondary-shade: var(--color-secondary-dark);
+    --ion-color-secondary-tint: #d28edf;
+    --ion-color-danger: var(--color-error);
+    --ion-color-danger-rgb: 176, 0, 32;
+    --ion-color-danger-contrast: #fff;
+    --ion-color-danger-contrast-rgb: 255, 255, 255;
+    --ion-color-danger-shade: #96001a;
+    --ion-color-danger-tint: #b83342;
 }
 
-ion-title, ion-label, ion-popover ion-label {
-  font-family: 'Figtree', 'Roboto', sans-serif !important;
+ion-title,
+ion-label,
+ion-popover ion-label {
+    font-family: 'Figtree', 'Roboto', sans-serif !important;
 }
 
 /* Global Styles for Tab, Slide, Button, and Error States */
 
 /* Selected ion-tab (tab bar item) */
-ion-tab-button.tab-selected, ion-tab-bar .tab-selected, ion-tab-button[aria-selected="true"] {
-  color: var(--color-primary-dark) !important;
+ion-tab-button.tab-selected,
+ion-tab-bar .tab-selected,
+ion-tab-button[aria-selected='true'] {
+    color: var(--color-primary-dark) !important;
 }
 
 /* Selected slide (assuming Swiper or Ionic Slides) */
-.swiper-slide-active, .slide-active, ion-slide.swiper-slide-active {
-  color: var(--color-primary-dark) !important;
+.swiper-slide-active,
+.slide-active,
+ion-slide.swiper-slide-active {
+    color: var(--color-primary-dark) !important;
 }
 
 /* Selected ion-toggle */
-ion-toggle.toggle-checked, ion-toggle[aria-checked="true"] {
-  --handle-background: var(--color-primary-dark) !important;
-  --background-checked: var(--color-primary-dark) !important;
-  --ion-color-primary: var(--color-primary-dark) !important;
+ion-toggle.toggle-checked,
+ion-toggle[aria-checked='true'] {
+    --handle-background: var(--color-primary-dark) !important;
+    --background-checked: var(--color-primary-dark) !important;
+    --ion-color-primary: var(--color-primary-dark) !important;
 }
 
 /* Ion Button Variations */
-ion-button.primary, ion-button[color="primary"] {
-  background: var(--color-primary);
-  color: #fff;
+ion-button.primary,
+ion-button[color='primary'] {
+    background: var(--color-primary);
+    color: #fff;
 }
-ion-button.primary:disabled, ion-button[color="primary"][disabled] {
-  background: #6d63c7; /* lighter version of primary */
-  color: #fff;
-  opacity: 0.7;
+ion-button.primary:disabled,
+ion-button[color='primary'][disabled] {
+    background: #6d63c7; /* lighter version of primary */
+    color: #fff;
+    opacity: 0.7;
 }
-ion-button[color="secondary"] {
-  &.button-solid {
-    --background: var(--color-secondary);
-    --color: #ffffff;
-  }
-
-  &.button-clear {
-    --background: transparent;
-    --color: var(--color-secondary);
-    --color-hover: var(--color-secondary);
-    --color-activated: var(--color-secondary);
-    --color-focused: var(--color-secondary);
-  }
-
-  &.button-outline {
-    --border-color: var(--color-secondary);
-    --color: var(--color-secondary);
-  }
-
-  &[disabled] {
+ion-button[color='secondary'] {
     &.button-solid {
-      --background: #e1b3e7;
-      --color: #ffffff;
-      opacity: 0.7;
+        --background: var(--color-secondary);
+        --color: #ffffff;
     }
 
     &.button-clear {
-      --background: transparent;
-      --color: #e1b3e7;
-      opacity: 0.7;
+        --background: transparent;
+        --color: var(--color-secondary);
+        --color-hover: var(--color-secondary);
+        --color-activated: var(--color-secondary);
+        --color-focused: var(--color-secondary);
     }
 
     &.button-outline {
-      --border-color: #e1b3e7;
-      --color: #e1b3e7;
-      opacity: 0.7;
+        --border-color: var(--color-secondary);
+        --color: var(--color-secondary);
     }
-  }
+
+    &[disabled] {
+        &.button-solid {
+            --background: #e1b3e7;
+            --color: #ffffff;
+            opacity: 0.7;
+        }
+
+        &.button-clear {
+            --background: transparent;
+            --color: #e1b3e7;
+            opacity: 0.7;
+        }
+
+        &.button-outline {
+            --border-color: #e1b3e7;
+            --color: #e1b3e7;
+            opacity: 0.7;
+        }
+    }
 }
 
-ion-button[color="secondary"][fill="clear"] {
-  --background: transparent;
-  --color: var(--color-secondary);
-  --background-hover: transparent;
-  --background-activated: transparent;
-  --background-focused: transparent;
-  --color-hover: var(--color-secondary);
-  --color-activated: var(--color-secondary);
-  --color-focused: var(--color-secondary);
-  --ripple-color: transparent;
-  --border-color: transparent;
-  --border-style: none;
-  --border-width: 0;
-  --box-shadow: none;
-  --opacity: 1;
+ion-button[color='secondary'][fill='clear'] {
+    --background: transparent;
+    --color: var(--color-secondary);
+    --background-hover: transparent;
+    --background-activated: transparent;
+    --background-focused: transparent;
+    --color-hover: var(--color-secondary);
+    --color-activated: var(--color-secondary);
+    --color-focused: var(--color-secondary);
+    --ripple-color: transparent;
+    --border-color: transparent;
+    --border-style: none;
+    --border-width: 0;
+    --box-shadow: none;
+    --opacity: 1;
 }
 
-ion-button[color="secondary"][fill="clear"][disabled] {
-  --background: transparent;
-  --color: #e1b3e7;
-  opacity: 0.7;
+ion-button[color='secondary'][fill='clear'][disabled] {
+    --background: transparent;
+    --color: #e1b3e7;
+    opacity: 0.7;
 }
 
 /* Override Ionic's internal button styles */
-ion-button[color="secondary"][fill="clear"]::part(native) {
-  color: var(--color-secondary) !important;
-  background: transparent !important;
+ion-button[color='secondary'][fill='clear']::part(native) {
+    color: var(--color-secondary) !important;
+    background: transparent !important;
 }
 
-ion-button[color="secondary"][fill="clear"][disabled]::part(native) {
-  color: #e1b3e7 !important;
-  background: transparent !important;
-  opacity: 0.7;
+ion-button[color='secondary'][fill='clear'][disabled]::part(native) {
+    color: #e1b3e7 !important;
+    background: transparent !important;
+    opacity: 0.7;
 }
 
 /* Additional override for the specific Ionic selector */
 :host(.button-clear.ion-color) .button-native {
-  &[color="secondary"] {
-    color: var(--color-secondary) !important;
-  }
+    &[color='secondary'] {
+        color: var(--color-secondary) !important;
+    }
 }
 
 /* Error Messages */
-.error-message, .ion-error, .form-error, ion-text.error {
-  color: var(--color-error) !important;
+.error-message,
+.ion-error,
+.form-error,
+ion-text.error {
+    color: var(--color-error) !important;
 }
 
 /* Input Focus Styles */
 ion-item {
-  --highlight-color: var(--color-secondary);
-  --highlight-color-focused: var(--color-secondary);
-  --border-color: transparent;
-  --border-width: 2px;
-  --border-style: solid;
-  --border-radius: 4px;
-
-
-  &.item-has-focus {
-    --border-color: var(--color-secondary);
+    --highlight-color: var(--color-secondary);
+    --highlight-color-focused: var(--color-secondary);
+    --border-color: transparent;
     --border-width: 2px;
-  }
+    --border-style: solid;
+    --border-radius: 4px;
 
-  &.ion-invalid {
-    --border-color: var(--color-error);
-    --border-width: 2px;
-    --highlight-color: var(--color-error);
-    --highlight-color-focused: var(--color-error);
-  }
+    &.item-has-focus {
+        --border-color: var(--color-secondary);
+        --border-width: 2px;
+    }
 
-  ion-input, ion-textarea {
-    --padding-start: 0;
-    --padding-end: 0;
-    --padding-top: 0;
-    --padding-bottom: 0;
-  }
+    &.ion-invalid {
+        --border-color: var(--color-error);
+        --border-width: 2px;
+        --highlight-color: var(--color-error);
+        --highlight-color-focused: var(--color-error);
+    }
+
+    ion-input,
+    ion-textarea {
+        --padding-start: 0;
+        --padding-end: 0;
+        --padding-top: 0;
+        --padding-bottom: 0;
+    }
 }
 
 /* Native Input Styles */
-input, textarea {
-  border: 2px solid;
-  border-color: var(--color-primary);
-  border-radius: 4px;
-  padding: 8px;
-  width: 100%;
-  transition: border-color 0.2s ease-in-out;
+input,
+textarea {
+    border: 2px solid;
+    border-color: var(--color-primary);
+    border-radius: 4px;
+    padding: 8px;
+    width: 100%;
+    transition: border-color 0.2s ease-in-out;
 
-  &:focus {
-    outline: none;
-    border-color: var(--color-secondary);
-    border-width: 2px;
-  }
+    &:focus {
+        outline: none;
+        border-color: var(--color-secondary);
+        border-width: 2px;
+    }
 
-  &.ng-invalid.ng-touched {
-    border-color: var(--color-error);
-    border-width: 2px;
-  }
+    &.ng-invalid.ng-touched {
+        border-color: var(--color-error);
+        border-width: 2px;
+    }
 }
 
 /* Custom Input Container */
 .input-wrapper {
-  position: relative;
-  margin-bottom: 16px;
+    position: relative;
+    margin-bottom: 16px;
 
-  &.ion-focused {
-    ion-label {
-      color: var(--color-secondary);
+    &.ion-focused {
+        ion-label {
+            color: var(--color-secondary);
+        }
     }
-  }
 }
-

@@ -9,11 +9,10 @@ import { Vehicle } from '@silver/vehicles-store';
     imports: []
 })
 export class VehicleItemComponent {
+    vehicle = input.required<Vehicle>();
 
-  vehicle = input.required<Vehicle>();
-
-  brand =  computed(() => this.vehicle().brand);
-  type =  computed(() => this.vehicle().type);
-  colors =  computed(() => this.vehicle().colors);
-  img =  computed(() => this.vehicle().img);
+    brand = computed(() => this.vehicle().brand);
+    type = computed(() => this.vehicle().type);
+    colors = computed(() => this.vehicle().colors);
+    img = computed(() => this.vehicle().img);
 }

@@ -13,21 +13,9 @@ import { AuthFacade } from '@silver/notes-auth';
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
-    imports: [
-        RouterOutlet,
-        RouterLink,
-        MatSidenavContainer,
-        MatSidenav,
-        MatNavList,
-        MatListItem,
-        MatIcon,
-        MatToolbar,
-        MatIconButton,
-        MatProgressSpinner
-    ]
+    imports: [RouterOutlet, RouterLink, MatSidenavContainer, MatSidenav, MatNavList, MatListItem, MatIcon, MatToolbar, MatIconButton, MatProgressSpinner]
 })
 export class AppComponent implements OnInit {
-
     title = 'Notes App';
 
     loading = true;
@@ -36,14 +24,13 @@ export class AppComponent implements OnInit {
     private router = inject(Router);
 
     ngOnInit() {
-
         const userProfile = localStorage.getItem('user');
 
         if (userProfile) {
             this.authFacade.setUser(JSON.parse(userProfile));
         }
 
-        this.router.events.subscribe(event => {
+        this.router.events.subscribe((event) => {
             switch (true) {
                 case event instanceof NavigationStart: {
                     this.loading = true;
@@ -66,5 +53,4 @@ export class AppComponent implements OnInit {
     logout() {
         this.authFacade.logout();
     }
-
 }

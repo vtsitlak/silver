@@ -1,46 +1,58 @@
 <ion-content fullscreen="true">
     <div class="min-h-screen flex flex-col bg-logo bg-cover bg-center">
         <div class="form-container flex flex-col w-full mt-auto mb-0 justify-end">
-            <form [formGroup]="form" (ngSubmit)="onSubmit()" class="rounded-t-2xl bg-white w-full flex flex-col px-4 pb-4">
+            <form (ngSubmit)="onSubmit()" class="rounded-t-2xl bg-white w-full flex flex-col px-4 pb-4">
                 <h2 class="text-xl font-semibold mb-4" i18n="@@authLoginTitle">Login</h2>
                 <div class="flex flex-col mb-2">
                     <label for="email" i18n="@@authEmailLabel" class="mb-2">Email</label>
-                    <input id="email" type="email" formControlName="email" placeholder="Enter your email" i18n-placeholder="@@authEmailPlaceholder" />
+                    <input
+                        id="email"
+                        type="email"
+                        [formField]="loginForm.email"
+                        placeholder="Enter your email"
+                        autocomplete="email"
+                        i18n-placeholder="@@authEmailPlaceholder"
+                    />
                     <div class="h-5">
-                        @if(form.controls.email.touched) {
-                            @if(form.controls.email.errors?.['required']) {
-                                <p class="text-error text-sm mt-1" i18n="@@authEmailRequired">Email is required</p>
-                            } @else if(form.controls.email.errors?.['email']) {
-                                <p class="text-error text-sm mt-1" i18n="@@authEmailInvalid">Please enter a valid email address</p>
+                        @if (loginForm.email().touched() && loginForm.email().invalid()) {
+                            @for (err of loginForm.email().errors(); track err.kind) {
+                                <p class="text-error text-sm mt-1">{{ err.message }}</p>
                             }
                         }
                     </div>
                 </div>
                 <div class="flex flex-col mb-2">
                     <label for="password" i18n="@@authPasswordLabel" class="mb-2">Password</label>
-                    <input id="password" type="password" formControlName="password" placeholder="Enter your password" i18n-placeholder="@@authPasswordPlaceholder" />
+                    <input
+                        id="password"
+                        type="password"
+                        [formField]="loginForm.password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        i18n-placeholder="@@authPasswordPlaceholder"
+                    />
                     <div class="h-5">
-                        @if(form.controls.password.touched) {
-                            @if(form.controls.password.errors?.['required']) {
-                                <p class="text-error text-sm mt-1" i18n="@@authPasswordRequired">Password is required</p>
-                            } @else if(form.controls.password.errors?.['minLength']) {
-                                <p class="text-error text-sm mt-1" i18n="@@authPasswordMinLength">Password must be at least 6 characters</p>
+                        @if (loginForm.password().touched() && loginForm.password().invalid()) {
+                            @for (err of loginForm.password().errors(); track err.kind) {
+                                <p class="text-error text-sm mt-1">{{ err.message }}</p>
                             }
                         }
+                        @if (error()) {
+                            <p class="text-error text-sm mt-1 text-center" i18n="@@authLoginInvalid">Invalid email or password</p>
+                        }
                     </div>
-                    @if(error()) {
-                        <p class="text-error text-sm mt-1 text-center" i18n="@@authLoginInvalid">Invalid email or password</p>
-                    }
                 </div>
-                <ion-button expand="block" type="submit" [disabled]="!form.valid">
-                    @if(isLoading()) {
+                <ion-button expand="block" type="button" (click)="onSubmit()">
+                    @if (isLoading()) {
                         <ion-spinner name="crescent"></ion-spinner>
                     } @else {
                         <span i18n="@@authLoginButton">Login</span>
                     }
                 </ion-button>
                 <ion-button expand="block" fill="outline" (click)="register()" i18n="@@authRegisterButton">Register</ion-button>
-                <ion-button expand="block" fill="clear" color="secondary" (click)="forgotPassword()" i18n="@@authForgotPasswordButton">Forgot password</ion-button>
+                <ion-button expand="block" fill="clear" color="secondary" (click)="forgotPassword()" i18n="@@authForgotPasswordButton"
+                    >Forgot password</ion-button
+                >
             </form>
         </div>
     </div>

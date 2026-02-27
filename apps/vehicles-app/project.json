@@ -16,10 +16,7 @@
                 "polyfills": ["apps/vehicles-app/src/polyfills.ts"],
                 "tsConfig": "apps/vehicles-app/tsconfig.app.json",
                 "inlineStyleLanguage": "scss",
-                "assets": [
-                    "apps/vehicles-app/src/favicon.ico",
-                    "apps/vehicles-app/src/assets"
-                ],
+                "assets": ["apps/vehicles-app/src/favicon.ico", "apps/vehicles-app/src/assets"],
                 "styles": ["apps/vehicles-app/src/styles.scss"]
             },
             "configurations": {

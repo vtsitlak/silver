@@ -4,27 +4,19 @@ import { Observable } from 'rxjs';
 import { Note } from '../models/note';
 import { map } from 'rxjs/operators';
 
-
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class NotesHttpService {
-
-    constructor(private http: HttpClient) {
-
-    }
+    constructor(private http: HttpClient) {}
 
     findAllNotes(): Observable<Note[]> {
-        return this.http.get<Note[]>('/api/notes')
-            .pipe(
-                map((notes: Note[]) => notes)
-            );
+        return this.http.get<Note[]>('/api/notes').pipe(map((notes: Note[]) => notes));
     }
 
     findNoteByUrl(noteId: string): Observable<Note> {
         return this.http.get<Note>(`/api/notes/${noteId}`);
     }
-
 
     saveNote(noteId: string | number, changes: Partial<Note>) {
         return this.http.put('/api/notes/' + noteId, changes);
@@ -37,5 +29,4 @@ export class NotesHttpService {
     deleteNote(noteId: string | number): Observable<void> {
         return this.http.delete<void>(`/api/notes/${noteId}`);
     }
-
 }

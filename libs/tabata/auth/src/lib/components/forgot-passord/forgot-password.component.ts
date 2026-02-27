@@ -1,36 +1,34 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { email, form, FormField, required } from '@angular/forms/signals';
 import { IonicModule } from '@ionic/angular';
-import { FormControl, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { inject } from '@angular/core';
-import { AuthStore } from '../../store/auth.store';
-import { ErrorsStore } from '../../store/errors.store';
+import { AuthFacade } from '../../store/auth.facade';
 
 interface ForgotPasswordForm {
-    email: FormControl<string>;
+    email: string;
 }
 
 @Component({
     selector: 'tbt-forgot-password',
-    imports: [IonicModule, ReactiveFormsModule],
+    imports: [IonicModule, FormField],
     templateUrl: './forgot-password.component.html',
     styleUrl: './forgot-password.component.scss'
 })
 export class ForgotPasswordComponent {
-    private readonly authStore = inject(AuthStore);
-    private readonly errorsStore = inject(ErrorsStore);
-    isLoading = computed(() => this.authStore.isLoading());
-    error = computed(() => this.errorsStore.errors().length > 0);
-    fb: FormBuilder = inject(FormBuilder);
+    private readonly authFacade = inject(AuthFacade);
+    isLoading = computed(() => this.authFacade.isLoading());
+    error = computed(() => this.authFacade.hasError());
 
-    form = this.fb.group<ForgotPasswordForm>({
-        email: new FormControl<string>('', {
-            validators: [Validators.email, Validators.required],
-            nonNullable: true
-        })
+    forgotModel = signal<ForgotPasswordForm>({
+        email: ''
+    });
+
+    forgotForm = form(this.forgotModel, (schemaPath) => {
+        required(schemaPath.email, { message: 'Email is required' });
+        email(schemaPath.email, { message: 'Please enter a valid email address' });
     });
 
     onSubmit(): void {
-        const rawForm = this.form.getRawValue();
-        this.authStore.sendPasswordResetEmail(rawForm.email);
+        const { email } = this.forgotModel();
+        this.authFacade.sendPasswordResetEmail(email);
     }
 }

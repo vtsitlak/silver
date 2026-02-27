@@ -10,5 +10,5 @@ import { MatToolbarModule } from '@angular/material/toolbar';
     imports: [RouterOutlet, MatToolbarModule]
 })
 export class AppComponent {
-  title = 'Vehicles application';
+    title = 'Vehicles application';
 }

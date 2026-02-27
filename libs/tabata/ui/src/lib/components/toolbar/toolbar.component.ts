@@ -1,7 +1,7 @@
 import { Component, inject, input, AfterViewChecked, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 
 import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonPopover, IonTitle, IonToolbar } from '@ionic/angular/standalone';
-import { AuthStore } from '@silver/tabata/auth';
+import { AuthFacade } from '@silver/tabata/auth';
 import { addIcons } from 'ionicons';
 import { logOut, home, person, menu } from 'ionicons/icons';
 import { Router, RouterLink } from '@angular/router';
@@ -16,7 +16,7 @@ import { Router, RouterLink } from '@angular/router';
 export class ToolbarComponent {
     title = input<string | null>(null);
     router = inject(Router);
-    private readonly authStore = inject(AuthStore);
+    private readonly authFacade = inject(AuthFacade);
 
     showPopover = false;
     popoverEvent: any;
@@ -40,6 +40,6 @@ export class ToolbarComponent {
 
     logout() {
         this.closePopover();
-        this.authStore.logout();
+        this.authFacade.logout();
     }
 }

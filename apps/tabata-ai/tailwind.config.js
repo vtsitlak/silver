@@ -6,7 +6,7 @@ module.exports = {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', 'Roboto', 'sans-serif'],
+                sans: ['Figtree', 'Roboto', 'sans-serif']
             },
             backgroundImage: {
                 logo: "url('assets/logo-background.png')"
@@ -16,7 +16,7 @@ module.exports = {
                 'primary-dark': 'var(--color-primary-dark)',
                 secondary: 'var(--color-secondary)',
                 'secondary-dark': 'var(--color-secondary-dark)',
-                error: 'var(--color-error)',
+                error: 'var(--color-error)'
             }
         }
     },

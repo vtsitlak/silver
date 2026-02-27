@@ -1,5 +1,24 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { AuthFacade } from '@silver/tabata/auth';
 import { ToolbarComponent } from './toolbar.component';
+
+const mockAuthFacade = {
+    user: () => null,
+    error: () => null,
+    isLoading: () => false,
+    isAuthenticated: () => false,
+    usePassword: () => true,
+    useGoogle: () => false,
+    hasError: () => false,
+    sign: () => {},
+    register: () => {},
+    sendPasswordResetEmail: () => {},
+    updateDisplayName: () => {},
+    updatePassword: () => {},
+    logout: () => {},
+    getUser: () => {}
+};
 
 describe('ToolbarComponent', () => {
     let component: ToolbarComponent;
@@ -7,7 +26,8 @@ describe('ToolbarComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [ToolbarComponent]
+            imports: [ToolbarComponent],
+            providers: [provideRouter([]), { provide: AuthFacade, useValue: mockAuthFacade }]
         }).compileComponents();
 
         fixture = TestBed.createComponent(ToolbarComponent);

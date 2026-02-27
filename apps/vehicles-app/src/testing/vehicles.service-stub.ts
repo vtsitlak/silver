@@ -46,9 +46,7 @@ export const DATA: Vehicle[] = [
     }
 ];
 
-
 export class VehiclesServiceStub {
-
     getVehicles(): Observable<Vehicle[]> {
         return of(DATA);
     }

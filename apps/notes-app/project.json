@@ -16,10 +16,7 @@
                 "polyfills": ["apps/notes-app/src/polyfills.ts"],
                 "tsConfig": "apps/notes-app/tsconfig.app.json",
                 "inlineStyleLanguage": "scss",
-                "assets": [
-                    "apps/notes-app/src/favicon.ico",
-                    "apps/notes-app/src/assets"
-                ],
+                "assets": ["apps/notes-app/src/favicon.ico", "apps/notes-app/src/assets"],
                 "styles": ["apps/notes-app/src/styles.scss"]
             },
             "configurations": {

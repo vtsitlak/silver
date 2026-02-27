@@ -1,43 +1,43 @@
-import { Component, computed, inject } from '@angular/core';
-import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, computed, inject, signal } from '@angular/core';
+import { email, form, FormField, minLength, required } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
-import { AuthStore } from '../../store/auth.store';
-import { LoginForm } from '@silver/tabata/helpers';
-import { ErrorsStore } from '../../store/errors.store';
+import { AuthFacade } from '../../store/auth.facade';
 
+interface LoginFormModel {
+    email: string;
+    password: string;
+}
 
 @Component({
     selector: 'tbt-login',
-    imports: [ReactiveFormsModule, IonicModule],
+    imports: [FormField, IonicModule],
     templateUrl: './login.component.html',
     styleUrl: './login.component.scss'
 })
 export class LoginComponent {
-    private readonly authStore = inject(AuthStore);
+    private readonly authFacade = inject(AuthFacade);
     private readonly router = inject(Router);
-    private readonly errorsStore = inject(ErrorsStore);
-    isLoading = computed(() => this.authStore.isLoading());
-    error = computed(() => this.errorsStore.errors().length > 0);
+    isLoading = computed(() => this.authFacade.isLoading());
+    error = computed(() => this.authFacade.hasError());
 
-    fb: FormBuilder = inject(FormBuilder);
-    form = this.fb.group<LoginForm>({
-        email: new FormControl<string>('', {
-            validators: [Validators.email, Validators.required],
-            nonNullable: true
-        }),
-        password: new FormControl<string>('', {
-            validators: [Validators.required, Validators.minLength(6)],
-            nonNullable: true
-        })
+    loginModel = signal<LoginFormModel>({
+        email: '',
+        password: ''
+    });
+
+    loginForm = form(this.loginModel, (schemaPath) => {
+        required(schemaPath.email, { message: 'Email is required' });
+        email(schemaPath.email, { message: 'Please enter a valid email address' });
+        required(schemaPath.password, { message: 'Password is required' });
+        minLength(schemaPath.password, 6, { message: 'Password must be at least 6 characters' });
     });
 
     onSubmit(): void {
-        if (this.form.invalid) {
-            this.form.markAllAsTouched();
+        if (this.loginForm().invalid()) {
             return;
         }
-        this.authStore.sign(this.form.getRawValue());
+        this.authFacade.sign(this.loginModel());
     }
 
     register(): void {

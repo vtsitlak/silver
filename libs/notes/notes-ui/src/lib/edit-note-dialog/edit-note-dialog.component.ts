@@ -14,7 +14,20 @@ import { MatButton } from '@angular/material/button';
     templateUrl: './edit-note-dialog.component.html',
     styleUrls: ['./edit-note-dialog.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatProgressSpinner, MatSpinner, FormField, MatFormField, MatInput, MatError, MatSlideToggle, MatDialogActions, MatButton]
+    imports: [
+        MatDialogTitle,
+        CdkScrollable,
+        MatDialogContent,
+        MatProgressSpinner,
+        MatSpinner,
+        FormField,
+        MatFormField,
+        MatInput,
+        MatError,
+        MatSlideToggle,
+        MatDialogActions,
+        MatButton
+    ]
 })
 export class EditNoteDialogComponent {
     private dialogRef = inject(MatDialogRef<EditNoteDialogComponent>);
@@ -22,7 +35,7 @@ export class EditNoteDialogComponent {
     notesFacade = inject(NotesFacade);
 
     dialogTitle = this.data.dialogTitle;
-    note = this.data.note || {} as Note;
+    note = this.data.note || ({} as Note);
     mode = this.data.mode;
 
     noteModel = signal({

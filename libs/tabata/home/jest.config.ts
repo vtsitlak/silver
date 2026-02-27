@@ -1,8 +1,12 @@
 export default {
     displayName: 'home',
     preset: '../../../jest.preset.js',
+    setupFiles: ['<rootDir>/src/jest-global-setup.ts'],
     setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
     coverageDirectory: '../../../coverage/libs/tabata/home',
+    moduleNameMapper: {
+        '^@silver/shared/helpers$': '<rootDir>/src/__mocks__/shared-helpers.ts'
+    },
     transform: {
         '^.+\\.(ts|mjs|js|html)$': [
             'jest-preset-angular',
@@ -12,7 +16,7 @@ export default {
             }
         ]
     },
-    transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
+    transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$|(@ionic|@stencil|ionicons)/)'],
     snapshotSerializers: [
         'jest-preset-angular/build/serializers/no-ng-attributes',
         'jest-preset-angular/build/serializers/ng-snapshot',

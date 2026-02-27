@@ -9,14 +9,9 @@ import { AppComponent } from './app/app.component';
 import { appRoutes } from './app/app.routes';
 
 if (environment.production) {
-  enableProdMode();
+    enableProdMode();
 }
 
 bootstrapApplication(AppComponent, {
-  providers: [
-    provideZoneChangeDetection(),
-    provideRouter(appRoutes),
-    provideHttpClient(withInterceptorsFromDi()),
-    provideAnimations(),
-  ]
-}).catch(err => console.error(err));
+    providers: [provideZoneChangeDetection(), provideRouter(appRoutes), provideHttpClient(withInterceptorsFromDi()), provideAnimations()]
+}).catch((err) => console.error(err));

@@ -1,88 +1,106 @@
-import { Component, inject, linkedSignal, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject, linkedSignal, OnInit, signal } from '@angular/core';
+import { disabled, email, form, FormField, required, validate } from '@angular/forms/signals';
 import { IonHeader, IonContent, IonButton, IonToggle, IonSpinner } from '@ionic/angular/standalone';
 import { ToolbarComponent } from '@silver/tabata/ui';
-import { AuthStore } from '@silver/tabata/auth';
-import { ProfileForm, passwordMatchValidator } from '@silver/tabata/helpers';
+import { AuthFacade } from '@silver/tabata/auth';
+
+interface ProfileFormModel {
+    displayName: string;
+    email: string;
+    currentPassword: string;
+    newPassword: string;
+    confirmNewPassword: string;
+}
 
 @Component({
     selector: 'tbt-profile',
-    imports: [IonToggle, IonHeader, IonContent, ToolbarComponent, ReactiveFormsModule, IonButton, IonToggle, FormsModule, IonSpinner],
+    imports: [IonToggle, IonHeader, IonContent, ToolbarComponent, FormField, IonButton, IonSpinner],
     templateUrl: './profile.component.html',
     styleUrl: './profile.component.scss',
     standalone: true
 })
 export class ProfileComponent implements OnInit {
-    private readonly authStore = inject(AuthStore);
-    private formBuilder = inject(FormBuilder);
-    usePassword = linkedSignal(() => this.authStore.usePassword());
-    isLoading = linkedSignal(() => this.authStore.isLoading());
+    private readonly authFacade = inject(AuthFacade);
+    usePassword = linkedSignal(() => this.authFacade.usePassword());
+    isLoading = linkedSignal(() => this.authFacade.isLoading());
     showPasswordField = false;
 
-    profileForm = this.formBuilder.group<ProfileForm>(
-        {
-            email: new FormControl<string>(
-                {
-                    disabled: true,
-                    value: ''
-                },
-                {
-                    nonNullable: true,
-                    validators: [Validators.required, Validators.email]
-                }
-            ),
-            currentPassword: new FormControl<string>('', {
-                validators: [Validators.minLength(6)]
-            }),
-            newPassword: new FormControl<string>('', {
-                validators: [Validators.minLength(6)]
-            }),
-            confirmNewPassword: new FormControl<string>('', {
-                validators: [Validators.minLength(6)]
-            }),
-            displayName: new FormControl<string>('', {
-                nonNullable: true,
-                validators: [Validators.required]
-            })
-        },
-        {
-            validators: [passwordMatchValidator]
-        }
-    );
+    profileModel = signal<ProfileFormModel>({
+        displayName: '',
+        email: '',
+        currentPassword: '',
+        newPassword: '',
+        confirmNewPassword: ''
+    });
+
+    profileForm = form(this.profileModel, (schemaPath) => {
+        disabled(schemaPath.email, () => true);
+        required(schemaPath.displayName, { message: 'Display name is required' });
+        required(schemaPath.email, { message: 'Email is required' });
+        email(schemaPath.email, { message: 'Please enter a valid email address' });
+        validate(schemaPath.currentPassword, ({ value }) => {
+            const v = value();
+            if (v == null || v === '') return null;
+            return v.length >= 6 ? null : { kind: 'minLength', message: 'Password must be at least 6 characters' };
+        });
+        validate(schemaPath.newPassword, ({ value }) => {
+            const v = value();
+            if (v == null || v === '') return null;
+            return v.length >= 6 ? null : { kind: 'minLength', message: 'Password must be at least 6 characters' };
+        });
+        validate(schemaPath.confirmNewPassword, ({ value, valueOf }) => {
+            const v = value();
+            if (v == null || v === '') return null;
+            if (v.length < 6) return { kind: 'minLength', message: 'Password must be at least 6 characters' };
+            const newPwd = valueOf(schemaPath.newPassword);
+            return newPwd === v ? null : { kind: 'passwordMismatch', message: 'Passwords do not match' };
+        });
+    });
 
     ngOnInit(): void {
-        const user = this.authStore.user();
+        const user = this.authFacade.user();
         if (user) {
-            this.profileForm.patchValue(user);
+            this.profileModel.set({
+                displayName: user.displayName ?? '',
+                email: user.email ?? '',
+                currentPassword: '',
+                newPassword: '',
+                confirmNewPassword: ''
+            });
         }
     }
 
-    togglePasswordField() {
+    togglePasswordField(): void {
         this.showPasswordField = !this.showPasswordField;
         if (!this.showPasswordField) {
-            this.profileForm.controls.currentPassword.reset();
-            this.profileForm.controls.newPassword.reset();
-            this.profileForm.controls.confirmNewPassword.reset();
+            this.profileModel.update((m) => ({
+                ...m,
+                currentPassword: '',
+                newPassword: '',
+                confirmNewPassword: ''
+            }));
         }
     }
 
-    onSubmit() {
-        if (this.profileForm.valid) {
-            if (this.profileForm.controls.displayName.dirty) {
-                this.authStore.updateDisplayName(this.profileForm.controls.displayName.value);
-            }
-            if (
-                this.profileForm.controls.currentPassword.value &&
-                this.profileForm.controls.newPassword.value &&
-                this.profileForm.controls.confirmNewPassword.value
-            ) {
-                this.authStore.updatePassword({
-                    email: this.profileForm.controls.email.value,
-                    currentPassword: this.profileForm.controls.currentPassword.value,
-                    newPassword: this.profileForm.controls.newPassword.value
-                });
-                this.togglePasswordField();
-            }
+    onSubmit(): void {
+        if (this.profileForm().invalid()) return;
+        const model = this.profileModel();
+        if (this.profileForm.displayName().dirty()) {
+            this.authFacade.updateDisplayName(model.displayName);
+        }
+        if (
+            model.currentPassword &&
+            model.newPassword &&
+            model.confirmNewPassword &&
+            this.profileForm.newPassword().valid() &&
+            this.profileForm.confirmNewPassword().valid()
+        ) {
+            this.authFacade.updatePassword({
+                email: model.email,
+                currentPassword: model.currentPassword,
+                newPassword: model.newPassword
+            });
+            this.togglePasswordField();
         }
     }
 }

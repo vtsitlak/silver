@@ -10,7 +10,6 @@ import { MatTabGroup, MatTab } from '@angular/material/tabs';
 import { NotesTableListComponent } from '../notes-table-list/notes-table-list.component';
 import { NotesFacade } from '@silver/notes-store';
 
-
 @Component({
     selector: 'lib-home',
     templateUrl: './home.component.html',
@@ -19,33 +18,28 @@ import { NotesFacade } from '@silver/notes-store';
     imports: [MatMiniFabButton, MatIcon, MatTooltip, MatTabGroup, MatTab, NotesTableListComponent]
 })
 export class HomeComponent implements OnInit {
+    notesFacade = inject(NotesFacade);
+    private dialog = inject(MatDialog);
 
-  notesFacade = inject(NotesFacade);
-  private dialog = inject(MatDialog);
-
-  ngOnInit() {
-    // Only load if data hasn't been loaded yet
-    if (!this.notesFacade.loaded()) {
-      this.notesFacade.loadAll();
+    ngOnInit() {
+        // Only load if data hasn't been loaded yet
+        if (!this.notesFacade.loaded()) {
+            this.notesFacade.loadAll();
+        }
     }
-  }
 
-  reload() {
-    this.notesFacade.loadAll();
-  }
+    reload() {
+        this.notesFacade.loadAll();
+    }
 
-  onAddCourse() {
+    onAddCourse() {
+        const dialogConfig = defaultDialogConfig();
 
-    const dialogConfig = defaultDialogConfig();
+        dialogConfig.data = {
+            dialogTitle: 'Create Note',
+            mode: 'create'
+        };
 
-    dialogConfig.data = {
-      dialogTitle: 'Create Note',
-      mode: 'create'
-    };
-
-    this.dialog.open(EditNoteDialogComponent, dialogConfig);
-
-  }
-
-
+        this.dialog.open(EditNoteDialogComponent, dialogConfig);
+    }
 }

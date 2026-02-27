@@ -7,26 +7,26 @@ import { User } from '../models/user.model';
  * for components to interact with the authentication state management.
  */
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class AuthFacade {
-  private readonly store = inject(AuthStore);
+    private readonly store = inject(AuthStore);
 
-  // State signals
-  readonly user = this.store.user;
-  readonly isLoggedIn = this.store.isLoggedIn;
-  readonly isLoggedOut = this.store.isLoggedOut;
+    // State signals
+    readonly user = this.store.user;
+    readonly isLoggedIn = this.store.isLoggedIn;
+    readonly isLoggedOut = this.store.isLoggedOut;
 
-  // Methods
-  login(email: string, password: string): void {
-    this.store.login({ email, password });
-  }
+    // Methods
+    login(email: string, password: string): void {
+        this.store.login({ email, password });
+    }
 
-  logout(): void {
-    this.store.logout();
-  }
+    logout(): void {
+        this.store.logout();
+    }
 
-  setUser(user: User): void {
-    this.store.setUser(user);
-  }
+    setUser(user: User): void {
+        this.store.setUser(user);
+    }
 }
