@@ -49,3 +49,8 @@ Thumbs.db
 .github/prompts/
 .github/skills/
 AGENTS.md
+
+# Local secrets (never commit)
+.env
+.env.local
+.env.*.local
