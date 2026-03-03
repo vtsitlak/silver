@@ -5,5 +5,12 @@ import { WorkoutsStore } from './workouts.store';
 export class WorkoutsFacade {
     private readonly store = inject(WorkoutsStore);
 
-    // TODO: expose store signals and methods
+    readonly workouts = this.store.workouts;
+    readonly isLoading = this.store.isLoading;
+    readonly error = this.store.error;
+    readonly hasWorkouts = this.store.hasWorkouts;
+
+    loadWorkouts(): void {
+        this.store.loadWorkouts();
+    }
 }

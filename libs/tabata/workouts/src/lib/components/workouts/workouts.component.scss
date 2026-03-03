@@ -1,0 +1,22 @@
+.workouts-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--ion-background-color);
+}
+
+.workouts-search {
+    flex: 1;
+    padding: 0;
+}
+
+.error {
+    color: var(--ion-color-danger);
+    padding: 16px;
+}
+
+.loading {
+    padding: 16px;
+    color: var(--ion-color-medium);
+}
