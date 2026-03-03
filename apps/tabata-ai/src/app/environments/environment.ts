@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 export const environment = {
     production: false,
     /** Set to your Vercel deployment URL when running locally (nx serve) so the app calls the deployed API. Leave empty when deployed on Vercel. */
-    workoutsApiBaseUrl: 'https://silver-dtr6seeef-vtsitlaks-project.vercel.app',
+    workoutsApiBaseUrl: 'https://silver-ae46bexlx-tabata-ai.vercel.app',
     firebaseConfig: {
         apiKey: 'AIzaSyBuBiPCViFoS6G37VvoAf6h800gMqf-Jp8',
         authDomain: 'tabata-ai-player.firebaseapp.com',

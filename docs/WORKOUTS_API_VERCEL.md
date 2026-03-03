@@ -133,18 +133,27 @@ For any new environment (e.g. a second Vercel project or a teammate’s machine)
 
 ## 6. Troubleshooting: 404 NOT_FOUND
 
-If you see **404 NOT_FOUND** (e.g. when calling `GET /api/workouts` from the app or Postman):
+If you see **404 NOT_FOUND** (e.g. when calling `GET /api/workouts` or when opening the app):
+
+**Quick fix (try this first):**
+
+1. In Vercel go to **Project** → **Settings** → **General**.
+2. Set **Root Directory** to **empty** (clear the field and leave it blank). Click **Save**.
+3. **Redeploy**: Deployments → … on latest → **Redeploy** (or push a new commit).
+4. After deploy, open `https://<your-deployment>.vercel.app/api/health`. You should see `{"ok":true}`. Then try `/api/workouts` and the app.
+
+If 404 persists:
 
 1. **Confirm the failing URL**  
    Check the exact request URL in the browser Network tab or in the error. It should be `https://<your-deployment>.vercel.app/api/workouts` (no typo, no extra slash).  
    You can also open `https://<your-deployment>.vercel.app/api/health` in the browser: if it returns `{"ok":true}`, the `api/` folder is deployed and the issue is specific to `/api/workouts`; if it 404s, the whole API layer is missing from the deployment.
 
 2. **Root Directory**  
-   In Vercel → **Project** → **Settings** → **General** → **Root Directory**: leave **empty** (or `.`).  
-   If Root Directory is set to e.g. `apps/tabata-ai`, then the `api/` folder must live under that path (i.e. `apps/tabata-ai/api/workouts.ts`). This repo has both root `api/workouts.ts` and `apps/tabata-ai/api/workouts.ts`; use **one** layout and stick to it (recommended: repo root, so Root Directory empty).
+   In Vercel → **Project** → **Settings** → **General** → **Root Directory**: leave **empty** (or `.`) so Vercel uses the repo root and the root `api/` folder.  
+   If you prefer Root Directory = `apps/tabata-ai`, then the `api/` folder under that path is used (`apps/tabata-ai/api/workouts.ts`, `apps/tabata-ai/api/health.ts`). This repo supports both; use one layout and stick to it (recommended: repo root, so Root Directory empty).
 
 3. **Deployment logs**  
-   In Vercel → **Deployments** → open the latest deployment → **Building** / **Functions**. Ensure the serverless function for `api/workouts` is listed. If only static files are deployed and no functions appear, the project root or build config may be wrong.
+   In Vercel → **Deployments** → open the latest deployment → **Building** / **Functions**. Ensure the serverless function for `api/workouts` (and `api/health`) is listed. If only static files are deployed and no functions appear, the project root or build config may be wrong.
 
 4. **Redeploy**  
    After changing Root Directory or `vercel.json`, trigger a new deployment. The 404 can be from an old deployment that didn’t include the API.
