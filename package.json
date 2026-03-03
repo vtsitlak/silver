@@ -11,7 +11,7 @@
         "server:vehicles-app": "nx run vehicles-server:server",
         "start:notes-app": "nx serve notes-app",
         "server:notes-app": "nx run notes-server:server",
-        "xi18n:tabata-ai": "ng i18n-extract tabata-ai",
+        "xi18n:tabata-ai": "nx run tabata-ai:extract-i18n",
         "format": "nx format:write"
     },
     "private": true,
