@@ -46,19 +46,28 @@ silver/
    UPSTASH_TOKEN=your_upstash_rest_token_here
    ```
 
-3. **Run the app with the proxy** (Angular + `/api` on same origin). From the **repo root**:
-   ```bash
-   vercel dev
-   ```
-   Vercel CLI uses the project’s Root Directory (`apps/tabata-ai`) and finds `.env` at the repo root. Open the URL it prints (e.g. `http://localhost:3000`).  
-   The frontend calls `/api/workouts`; the proxy uses `.env` and talks to Upstash.
+3. **Run the app with the proxy** (Angular + `/api` on same origin). Either:
 
-### 2.2 Without Vercel CLI
+   **Option A – Local API script (recommended for `nx serve`):**
+   - In a first terminal, from **repo root**:
+     ```bash
+     node apps/tabata-ai/scripts/local-workouts-api.cjs
+     ```
+     (Leave it running; it serves `/api/workouts` on port 3100 using `.env`.)
+   - In a second terminal:
+     ```bash
+     nx serve tabata-ai
+     ```
+   - Open `http://localhost:4200`. The dev server proxies `/api` to port 3100.
 
-If you don’t use `vercel dev`:
+   **Option B – Vercel CLI:**  
+   From the **repo root**, run `vercel dev` and open the URL it prints. Vercel serves both the app and the API.
 
-- Run the Angular app as usual: `npx nx serve tabata-ai` (or `npm run start:tabata-ai`).
-- `/api/workouts` will not exist locally; only use this for UI work that doesn’t need the API, or run `vercel dev` when you need the proxy.
+### 2.2 Without the proxy
+
+If you don’t run the local API script or `vercel dev`:
+
+- `nx serve tabata-ai` will run, but requests to `/api/workouts` will 404. Start the local proxy (Option A above) or use `vercel dev` when you need the workouts API.
 
 ---
 
@@ -119,3 +128,26 @@ So the token is only in:
 | Frontend (browser) | ❌ Only calls `/api/workouts`; no token. |
 
 For any new environment (e.g. a second Vercel project or a teammate’s machine), add or create `.env` with `UPSTASH_URL` and `UPSTASH_TOKEN` and never commit them.
+
+---
+
+## 6. Troubleshooting: 404 NOT_FOUND
+
+If you see **404 NOT_FOUND** (e.g. when calling `GET /api/workouts` from the app or Postman):
+
+1. **Confirm the failing URL**  
+   Check the exact request URL in the browser Network tab or in the error. It should be `https://<your-deployment>.vercel.app/api/workouts` (no typo, no extra slash).  
+   You can also open `https://<your-deployment>.vercel.app/api/health` in the browser: if it returns `{"ok":true}`, the `api/` folder is deployed and the issue is specific to `/api/workouts`; if it 404s, the whole API layer is missing from the deployment.
+
+2. **Root Directory**  
+   In Vercel → **Project** → **Settings** → **General** → **Root Directory**: leave **empty** (or `.`).  
+   If Root Directory is set to e.g. `apps/tabata-ai`, then the `api/` folder must live under that path (i.e. `apps/tabata-ai/api/workouts.ts`). This repo has both root `api/workouts.ts` and `apps/tabata-ai/api/workouts.ts`; use **one** layout and stick to it (recommended: repo root, so Root Directory empty).
+
+3. **Deployment logs**  
+   In Vercel → **Deployments** → open the latest deployment → **Building** / **Functions**. Ensure the serverless function for `api/workouts` is listed. If only static files are deployed and no functions appear, the project root or build config may be wrong.
+
+4. **Redeploy**  
+   After changing Root Directory or `vercel.json`, trigger a new deployment. The 404 can be from an old deployment that didn’t include the API.
+
+5. **Vercel NOT_FOUND reference**  
+   [Vercel NOT_FOUND](https://vercel.com/docs/errors/NOT_FOUND): check deployment URL, deployment existence, logs, and permissions.

@@ -4,6 +4,7 @@
     "license": "MIT",
     "scripts": {
         "start:tabata-ai": "nx serve tabata-ai",
+        "api:tabata-ai": "node apps/tabata-ai/scripts/local-workouts-api.cjs",
         "build-localize:tabata-ai": "nx build tabata-ai  --localize",
         "build-run:tabata-ai": "npx http-server dist/apps/tabata-ai",
         "start:vehicles-app": "nx serve vehicles-app",
