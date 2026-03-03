@@ -1,9 +1,0 @@
-{
-    "$schema": "https://openapi.vercel.sh/vercel.json",
-    "buildCommand": "cd ../.. && npx nx build tabata-ai",
-    "outputDirectory": "../../dist/apps/tabata-ai",
-    "framework": null,
-    "rewrites": [
-        { "source": "/((?!api/).*)", "destination": "/" }
-    ]
-}
