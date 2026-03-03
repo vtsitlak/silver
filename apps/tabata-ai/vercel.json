@@ -4,6 +4,6 @@
     "outputDirectory": "../../dist/apps/tabata-ai",
     "framework": null,
     "rewrites": [
-        { "source": "/((?!api/).*)", "destination": "/index.html" }
+        { "source": "/((?!api/).*)", "destination": "/" }
     ]
 }
