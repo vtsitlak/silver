@@ -3,7 +3,36 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-    <div>
-        <p>Some random content</p>
+    <div class="workouts-bar">
+        <ion-searchbar
+            placeholder="Search workouts"
+            [value]="searchTerm()"
+            (ionInput)="onSearchInput($event)"
+            debounce="200"
+            class="workouts-search"
+        ></ion-searchbar>
+        <ion-button fill="solid" (click)="addWorkout()" aria-label="Add workout">
+            <ion-icon name="add"></ion-icon>
+        </ion-button>
     </div>
+
+    @if (error()) {
+        <p class="error">{{ error() }}</p>
+    }
+    @if (isLoading()) {
+        <p class="loading" i18n>Loading…</p>
+    }
+    @if (!isLoading() && !error()) {
+        <ion-list>
+            @for (workout of filteredWorkouts(); track workout.id) {
+                <ion-item>
+                    {{ workout.name }}
+                </ion-item>
+            } @empty {
+                <ion-item lines="none">
+                    <p i18n>No workouts yet.</p>
+                </ion-item>
+            }
+        </ion-list>
+    }
 </ion-content>

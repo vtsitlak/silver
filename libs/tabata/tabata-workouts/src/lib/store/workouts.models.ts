@@ -1,11 +1,15 @@
 // Workout and store state models for tabata-workouts.
 
 export interface WorkoutsState {
-    // TODO: add state shape
+    workouts: TabataWorkout[];
+    isLoading: boolean;
+    error: string | null;
 }
 
 export const workoutsInitialState: WorkoutsState = {
-    // TODO: add initial values
+    workouts: [],
+    isLoading: false,
+    error: null
 };
 
 export interface TabataWorkout {
@@ -13,9 +17,10 @@ export interface TabataWorkout {
   name: string;
   description: string;
   warmup: FreeExercise[];
-  tabata: Tabata;
+  maim: TabataBlock[];
   cooldown: FreeExercise[];
   totalDuration: number;
+  script: string;
 }
 
 export interface FreeExercise {
@@ -25,9 +30,10 @@ export interface FreeExercise {
   weight: number;
   rest: number;
   duration: number;
+  script: string;
 }
 
-export interface Tabata {
+export interface TabataBlock {
   exercisesIds: string[];
   rounds: number;
   rest: number;

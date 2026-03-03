@@ -4,23 +4,25 @@ This project uses a **Vercel serverless proxy** so the Upstash token never appea
 
 ## 1. Repo layout
 
+**Recommended (avoids 404):** API and config at **repo root** so Vercel always finds them.
+
 ```
 silver/
+├── api/
+│   └── workouts.ts       ← Proxy: reads UPSTASH_URL + UPSTASH_TOKEN from env
 ├── apps/
-│   └── tabata-ai/           ← Angular 21 app + API proxy
-│       ├── api/
-│       │   └── workouts.ts  ← Proxy: reads UPSTASH_URL + UPSTASH_TOKEN from env
-│       └── vercel.json     ← Build + rewrites (used when Root Directory = apps/tabata-ai)
+│   └── tabata-ai/        ← Angular 21 app
 ├── libs/
 │   └── tabata/
 │       └── tabata-workouts/   ← Store + WorkoutsService (calls /api/workouts)
-├── .env                    ← Local only, git-ignored (create from .env.example)
-└── .env.example            ← Template (no real values)
+├── .env                  ← Local only, git-ignored (create from .env.example)
+├── .env.example          ← Template (no real values)
+└── vercel.json           ← Build + rewrites (used when Root Directory is empty or ".")
 ```
 
-- **GitHub:** Contains `apps/tabata-ai/api/workouts.ts` and `apps/tabata-ai/vercel.json` (logic only). No token.
+- **GitHub:** Contains `api/workouts.ts` and `vercel.json` at repo root (logic only). No token.
 - **Local:** `.env` at repo root holds `UPSTASH_URL` and `UPSTASH_TOKEN`; it is in `.gitignore`.
-- **Vercel:** Set **Root Directory** to `apps/tabata-ai`. Token is set once in the project’s Environment Variables.
+- **Vercel:** Leave **Root Directory** empty (or set to `.`). Set `UPSTASH_URL` and `UPSTASH_TOKEN` in the project’s Environment Variables.
 
 ---
 
@@ -62,11 +64,12 @@ If you don’t use `vercel dev`:
 
 ## 3. Deploy to Vercel (production)
 
-### 3.1 Connect GitHub and set Root Directory
+### 3.1 Connect GitHub and Root Directory
 
 1. Sign in at [vercel.com](https://vercel.com) with your GitHub account.
 2. **Add New** → **Project** → import the `silver` repository.
-3. In **Settings** → **General**, set **Root Directory** to `apps/tabata-ai` and save. (Vercel will use that folder’s `vercel.json` and `api/`.)
+3. In **Settings** → **General**, leave **Root Directory** empty (or set to `.`). This way Vercel uses the root `vercel.json` and the root `api/` folder, which avoids 404s on `/api/workouts`.
+4. Set **Framework Preset** to **Other** (so Vercel doesn’t look for `.next`).
 
 ### 3.2 Set environment variables (required)
 
@@ -80,9 +83,8 @@ Before deploying:
 
 ### 3.3 Deploy
 
-- **Deploy** the project. With Root Directory = `apps/tabata-ai`, Vercel will:
-  - Run the build command from `vercel.json` (nx build tabata-ai from repo root).
-  - Use the configured output directory for the Angular app.
+- **Deploy** the project. With Root Directory at repo root, Vercel will:
+  - Run `npx nx build tabata-ai` and use `dist/apps/tabata-ai` as the static output.
   - Expose `api/workouts.ts` as `https://<your-project>.vercel.app/api/workouts`.
 
 No token is in the repo or in the browser; only the serverless function uses it.
