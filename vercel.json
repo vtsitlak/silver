@@ -3,10 +3,6 @@
     "buildCommand": "npx nx build tabata-ai",
     "outputDirectory": "dist/apps/tabata-ai",
     "framework": null,
-    "functions": {
-        "api/workouts.ts": {},
-        "api/health.ts": {}
-    },
     "rewrites": [
         { "source": "/((?!api/).*)", "destination": "/index.html" }
     ]
