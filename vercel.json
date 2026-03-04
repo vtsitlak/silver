@@ -3,7 +3,5 @@
     "buildCommand": "npx nx build tabata-ai",
     "outputDirectory": "dist/apps/tabata-ai",
     "framework": null,
-    "rewrites": [
-        { "source": "/((?!api/).*)", "destination": "/en/index.html" }
-    ]
+    "rewrites": [{ "source": "/((?!api/).*)", "destination": "/en/index.html" }]
 }

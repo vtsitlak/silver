@@ -8,16 +8,7 @@ import { WorkoutsFacade } from '@silver/tabata/tabata-workouts';
     templateUrl: 'workouts.component.html',
     styleUrls: ['workouts.component.scss'],
     standalone: true,
-    imports: [
-        IonHeader,
-        ToolbarComponent,
-        IonContent,
-        IonSearchbar,
-        IonButton,
-        IonList,
-        IonItem,
-        IonIcon
-    ]
+    imports: [IonHeader, ToolbarComponent, IonContent, IonSearchbar, IonButton, IonList, IonItem, IonIcon]
 })
 export class WorkoutsComponent {
     private readonly facade = inject(WorkoutsFacade);

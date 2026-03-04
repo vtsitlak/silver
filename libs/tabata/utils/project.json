@@ -4,7 +4,7 @@
     "sourceRoot": "libs/tabata/utils/src",
     "prefix": "lib",
     "projectType": "library",
-    "tags": [],
+    "tags": ["scope:tabata"],
     "targets": {
         "test": {
             "executor": "@nx/jest:jest",

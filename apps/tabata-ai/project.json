@@ -11,7 +11,7 @@
     "projectType": "application",
     "prefix": "app",
     "sourceRoot": "apps/tabata-ai/src",
-    "tags": [],
+    "tags": ["scope:tabata"],
     "targets": {
         "build": {
             "executor": "@angular-devkit/build-angular:browser",

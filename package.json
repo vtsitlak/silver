@@ -4,7 +4,6 @@
     "license": "MIT",
     "scripts": {
         "start:tabata-ai": "nx serve tabata-ai",
-        "api:tabata-ai": "node apps/tabata-ai/scripts/local-workouts-api.cjs",
         "build-localize:tabata-ai": "nx build tabata-ai  --localize",
         "build-run:tabata-ai": "npx http-server dist/apps/tabata-ai",
         "start:vehicles-app": "nx serve vehicles-app",
@@ -12,7 +11,13 @@
         "start:notes-app": "nx serve notes-app",
         "server:notes-app": "nx run notes-server:server",
         "xi18n:tabata-ai": "nx run tabata-ai:extract-i18n",
-        "format": "nx format:write"
+        "format": "nx format:write",
+        "test": "nx run-many -t test",
+        "test:tabata": "nx run-many -t test --projects=tag:scope:tabata",
+        "test:vehicles": "nx run-many -t test --projects=tag:scope:vehicles",
+        "test:notes": "nx run-many -t test --projects=tag:scope:notes",
+        "test:shared": "nx run-many -t test --projects=tag:scope:shared",
+        "e2e:tabata-ai": "nx e2e tabata-ai-e2e"
     },
     "private": true,
     "overrides": {

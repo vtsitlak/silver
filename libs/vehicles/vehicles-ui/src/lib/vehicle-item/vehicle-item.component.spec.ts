@@ -36,17 +36,19 @@ describe('VehicleItemComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should diplay the vehicle brand, type and colors', () => {
-        const brand = fixture.debugElement.query(By.css('.description'));
+    it('should display the vehicle brand, type and colors', () => {
+        const heading = fixture.debugElement.query(By.css('h3'));
+        const subheading = fixture.debugElement.query(By.css('h4'));
+        const colors = fixture.debugElement.query(By.css('p'));
 
-        expect(brand.nativeElement.textContent).toContain(vehicle.brand);
-        expect(brand.nativeElement.textContent).toContain(vehicle.type);
-        expect(brand.nativeElement.textContent).toContain(vehicle.colors.join(','));
+        expect(heading.nativeElement.textContent).toContain(vehicle.brand);
+        expect(subheading.nativeElement.textContent).toContain(vehicle.type);
+        expect(colors.nativeElement.textContent).toContain(vehicle.colors[0]);
     });
 
     it('should get the vehicle image link', () => {
-        const link = fixture.debugElement.query(By.css('.image>img'));
+        const img = fixture.debugElement.query(By.css('img'));
 
-        expect(link.nativeElement.src).toContain(vehicle.img);
+        expect(img.nativeElement.src).toContain(vehicle.img);
     });
 });
