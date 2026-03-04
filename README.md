@@ -140,9 +140,9 @@ Run both server and app (in separate terminals):
 1. **Server:** `npm run server:notes-app` → http://localhost:9000
 2. **App:** `npm run start:notes-app` → http://localhost:4200
 
-| Task       | Command                 |
-| ---------- | ----------------------- |
-| Unit tests | `npm run test:notes`    |
+| Task       | Command              |
+| ---------- | -------------------- |
+| Unit tests | `npm run test:notes` |
 
 ### Vehicles app
 
@@ -173,14 +173,14 @@ npx nx <target> <project>
 
 Projects are organized by scope using Nx tags (`scope:tabata`, `scope:vehicles`, `scope:notes`, `scope:shared`). Use the npm scripts to run tests by scope:
 
-| Command                | Description                                |
-| ---------------------- | ------------------------------------------ |
-| `npm run test`         | Run all unit tests in the monorepo         |
-| `npm run test:tabata`  | Run tests for all tabata-related projects  |
-| `npm run test:vehicles`| Run tests for all vehicles-related projects|
-| `npm run test:notes`   | Run tests for all notes-related projects   |
-| `npm run test:shared`  | Run tests for shared libraries             |
-| `npm run e2e:tabata-ai`| Run Playwright e2e tests for tabata-ai     |
+| Command                 | Description                                 |
+| ----------------------- | ------------------------------------------- |
+| `npm run test`          | Run all unit tests in the monorepo          |
+| `npm run test:tabata`   | Run tests for all tabata-related projects   |
+| `npm run test:vehicles` | Run tests for all vehicles-related projects |
+| `npm run test:notes`    | Run tests for all notes-related projects    |
+| `npm run test:shared`   | Run tests for shared libraries              |
+| `npm run e2e:tabata-ai` | Run Playwright e2e tests for tabata-ai      |
 
 Before running e2e tests, install Playwright browsers:
 
@@ -192,12 +192,12 @@ npx playwright install
 
 ## Useful Nx commands
 
-| Command                                            | Description                             |
-| -------------------------------------------------- | --------------------------------------- |
-| `npx nx graph`                                     | Visualize project and task dependencies |
-| `npx nx list`                                      | List installed Nx plugins               |
-| `npx nx run-many -t test --projects=tag:scope:*`  | Run tests for projects by tag           |
-| `npx nx format:write`                              | Format code (see `npm run format`)      |
+| Command                                          | Description                             |
+| ------------------------------------------------ | --------------------------------------- |
+| `npx nx graph`                                   | Visualize project and task dependencies |
+| `npx nx list`                                    | List installed Nx plugins               |
+| `npx nx run-many -t test --projects=tag:scope:*` | Run tests for projects by tag           |
+| `npx nx format:write`                            | Format code (see `npm run format`)      |
 
 ---
 

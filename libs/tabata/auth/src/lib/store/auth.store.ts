@@ -1,13 +1,11 @@
 import { computed, inject } from '@angular/core';
 import { signalStore, withState, withMethods, patchState, withComputed } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { ɵ$localize as $localize } from '@angular/localize';
 
 import { catchError, exhaustMap, finalize, map, of, pipe, switchMap, tap } from 'rxjs';
 import { Subject } from 'rxjs';
 import { tapResponse } from '@ngrx/operators';
-import { AuthService } from '../services/auth.service';
-import { AuthEventsService } from './auth-events.service';
+import { AuthService } from './auth.service';
 import { authInitialState, AuthState, LoginUser, NewUser, ProfileUser, toProfileUser, UpdatePasswordDetails, userToState } from './auth.models';
 
 export const AuthStore = signalStore(
@@ -21,7 +19,11 @@ export const AuthStore = signalStore(
         isAuthenticated: computed(() => !!profileUser())
     })),
     // --- METHODS ---
-    withMethods((store, authService = inject(AuthService), authEvents = inject(AuthEventsService)) => ({
+    withMethods((store, authService = inject(AuthService)) => ({
+        clearError(): void {
+            patchState(store, { error: null });
+        },
+
         getUser: (() => {
             const getUserTrigger = new Subject<void>();
             rxMethod<void>(
@@ -40,6 +42,7 @@ export const AuthStore = signalStore(
             )(getUserTrigger);
             return () => getUserTrigger.next();
         })(),
+
         sendPasswordResetEmail: rxMethod<string>(
             pipe(
                 tap(() => patchState(store, { isLoading: true, error: null })),
@@ -48,26 +51,16 @@ export const AuthStore = signalStore(
                         tapResponse({
                             next: () => {
                                 patchState(store, { isLoading: false, error: null });
-                                authEvents.emit({
-                                    kind: 'sendPasswordResetEmailSuccess',
-                                    message: $localize`:@@authPasswordResetEmailSent:Password reset email sent successfully`,
-                                    navigateTo: '/tabs/home'
-                                });
                             },
                             error: (error: Error) => {
                                 console.error('Auth error:', error);
                                 patchState(store, { isLoading: false, error: error.message });
-                                authEvents.emit({ kind: 'sendPasswordResetEmailError', message: error.message });
                                 return of(undefined);
                             }
                         }),
                         catchError((error: unknown) => {
                             console.error('Auth error:', error);
                             patchState(store, { isLoading: false, error: error instanceof Error ? error.message : String(error) });
-                            authEvents.emit({
-                                kind: 'sendPasswordResetEmailError',
-                                message: error instanceof Error ? error.message : String(error)
-                            });
                             return of(undefined);
                         }),
                         finalize(() => {
@@ -101,26 +94,16 @@ export const AuthStore = signalStore(
                                         isLoading: false,
                                         usePassword: true
                                     });
-                                    authEvents.emit({
-                                        kind: 'signSuccess',
-                                        message: $localize`:@@authSignedIn:Signed in successfully`,
-                                        navigateTo: '/tabs/home'
-                                    });
                                 },
                                 error: (error: Error) => {
                                     console.error('[AuthStore.sign] Error', error);
                                     patchState(store, { isLoading: false, error: error.message });
-                                    authEvents.emit({ kind: 'signError', message: error.message });
                                     return of(undefined);
                                 }
                             }),
                             catchError((error: unknown) => {
                                 console.error('[AuthStore.sign] CatchError', error);
                                 patchState(store, { isLoading: false, error: error instanceof Error ? error.message : String(error) });
-                                authEvents.emit({
-                                    kind: 'signError',
-                                    message: error instanceof Error ? error.message : String(error)
-                                });
                                 return of(undefined);
                             }),
                             finalize(() => {
@@ -148,18 +131,13 @@ export const AuthStore = signalStore(
                                     const profileUser = toProfileUser(firebaseUser);
                                     patchState(store, {
                                         user: profileUser,
-                                        ...{ isLoading: false, useGoogle: true }
-                                    });
-                                    authEvents.emit({
-                                        kind: 'signWithGoogleSuccess',
-                                        message: $localize`:@@authSignedInWithGoogle:Signed in with Google successfully`,
-                                        navigateTo: '/tabs/home'
+                                        isLoading: false,
+                                        useGoogle: true
                                     });
                                 },
                                 error: (error: Error) => {
                                     console.error('Auth error:', error);
                                     patchState(store, { isLoading: false, error: error.message });
-                                    authEvents.emit({ kind: 'signWithGoogleError', message: error.message });
                                     return of(undefined);
                                 }
                             })
@@ -180,19 +158,13 @@ export const AuthStore = signalStore(
                                 const profileUser = toProfileUser(firebaseUser);
                                 patchState(store, {
                                     user: profileUser,
-                                    ...{ isLoading: false },
-                                    ...{ usePassword: true }
-                                });
-                                authEvents.emit({
-                                    kind: 'registerSuccess',
-                                    message: $localize`:@@authAccountCreated:Account created successfully`,
-                                    navigateTo: '/tabs/home'
+                                    isLoading: false,
+                                    usePassword: true
                                 });
                             },
                             error: (error: Error) => {
                                 console.error('Auth error:', error);
                                 patchState(store, { isLoading: false, error: error.message });
-                                authEvents.emit({ kind: 'registerError', message: error.message });
                                 return of(undefined);
                             }
                         })
@@ -200,6 +172,7 @@ export const AuthStore = signalStore(
                 )
             )
         ),
+
         updateDisplayName: rxMethod<string>(
             pipe(
                 tap(() => patchState(store, { isLoading: true, error: null })),
@@ -209,15 +182,10 @@ export const AuthStore = signalStore(
                             next: () => {
                                 const updatedUser = { ...store.user, displayName } as unknown as ProfileUser;
                                 patchState(store, { user: updatedUser, isLoading: false });
-                                authEvents.emit({
-                                    kind: 'updateDisplayNameSuccess',
-                                    message: $localize`:@@authDisplayNameUpdated:Display name updated successfully`
-                                });
                             },
                             error: (error: Error) => {
                                 console.error('Auth error:', error);
                                 patchState(store, { isLoading: false, error: error.message });
-                                authEvents.emit({ kind: 'updateDisplayNameError', message: error.message });
                                 return of(undefined);
                             }
                         })
@@ -225,6 +193,7 @@ export const AuthStore = signalStore(
                 )
             )
         ),
+
         updatePassword: rxMethod<UpdatePasswordDetails>(
             pipe(
                 tap(() => patchState(store, { isLoading: true, error: null })),
@@ -233,16 +202,10 @@ export const AuthStore = signalStore(
                         tapResponse({
                             next: () => {
                                 patchState(store, { isLoading: false });
-                                authEvents.emit({
-                                    kind: 'updatePasswordSuccess',
-                                    message: $localize`:@@authPasswordUpdated:Password updated successfully`,
-                                    navigateTo: '/tabs/profile'
-                                });
                             },
                             error: (error: Error) => {
                                 console.error('Auth error:', error);
                                 patchState(store, { isLoading: false, error: error.message });
-                                authEvents.emit({ kind: 'updatePasswordError', message: error.message });
                                 return of(undefined);
                             }
                         })
@@ -250,6 +213,7 @@ export const AuthStore = signalStore(
                 )
             )
         ),
+
         logout: (() => {
             const logoutTrigger = new Subject<void>();
             rxMethod<void>(
@@ -259,17 +223,11 @@ export const AuthStore = signalStore(
                         authService.logout().pipe(
                             tapResponse({
                                 next: () => {
-                                    patchState(store, { user: null }, { isLoading: false });
-                                    authEvents.emit({
-                                        kind: 'logoutSuccess',
-                                        message: $localize`:@@authLoggedOut:Logged out successfully`,
-                                        navigateTo: '/auth/login'
-                                    });
+                                    patchState(store, { user: null, isLoading: false });
                                 },
                                 error: (error: Error) => {
                                     console.error('Auth error:', error);
                                     patchState(store, { isLoading: false, error: error.message });
-                                    authEvents.emit({ kind: 'logoutError', message: error.message });
                                     return of(undefined);
                                 }
                             })

@@ -26,17 +26,17 @@ Expect breaking changes and incomplete flows until the project reaches a stable 
 
 ## Tech stack
 
-| Layer         | Technology                                                                       |
-| ------------- | -------------------------------------------------------------------------------- |
-| Framework     | Angular 21, Ionic 8 (standalone components)                                      |
-| Auth          | Firebase (Angular Fire), AuthGuard                                               |
+| Layer         | Technology                                                                           |
+| ------------- | ------------------------------------------------------------------------------------ |
+| Framework     | Angular 21, Ionic 8 (standalone components)                                          |
+| Auth          | Firebase (Angular Fire), AuthGuard                                                   |
 | State         | NgRx Signals (AuthStore, AuthFacade; ExercisesStore, ExercisesFacade; WorkoutsStore) |
-| Exercises API | [ExerciseDB](https://www.exercisedb.dev) (public API)                            |
-| Workouts API  | Upstash Redis via Vercel serverless proxy (`/api/workouts`)                      |
-| Mobile        | Capacitor 6                                                                      |
-| i18n          | Angular localize (en, nl, el)                                                    |
-| Tests         | Jest (unit), Playwright (e2e)                                                    |
-| Deployment    | Vercel (static + serverless functions)                                           |
+| Exercises API | [ExerciseDB](https://www.exercisedb.dev) (public API)                                |
+| Workouts API  | Upstash Redis via Vercel serverless proxy (`/api/workouts`)                          |
+| Mobile        | Capacitor 6                                                                          |
+| i18n          | Angular localize (en, nl, el)                                                        |
+| Tests         | Jest (unit), Playwright (e2e)                                                        |
+| Deployment    | Vercel (static + serverless functions)                                               |
 
 ---
 
@@ -87,6 +87,7 @@ Routes: `/auth/login`, `/auth/register`, `/auth/forgot-password`, `/tabs/home`, 
 The app is deployed to Vercel with serverless functions for the workouts API. See [docs/WORKOUTS_API_VERCEL.md](../../docs/WORKOUTS_API_VERCEL.md) for setup instructions.
 
 Key points:
+
 - **Root Directory** in Vercel should be **empty** (repo root).
 - Environment variables `UPSTASH_URL` and `UPSTASH_TOKEN` must be set in Vercel.
 - The `/api/workouts` endpoint proxies requests to Upstash Redis.

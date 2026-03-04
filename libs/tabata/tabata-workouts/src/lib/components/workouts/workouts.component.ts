@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { IonContent, IonHeader, IonSearchbar, IonButton, IonList, IonItem, IonIcon } from '@ionic/angular/standalone';
 import { ToolbarComponent } from '@silver/tabata/ui';
-import { WorkoutsFacade } from '@silver/tabata/tabata-workouts';
+import { WorkoutsFacade } from '../../store/workouts.facade';
 
 @Component({
     selector: 'tbt-workouts',

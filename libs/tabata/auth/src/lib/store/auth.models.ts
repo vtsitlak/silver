@@ -34,18 +34,7 @@ export interface AuthState {
     isLoading: boolean;
     usePassword: boolean;
     useGoogle: boolean;
-    error: unknown;
-}
-
-export enum AuthErrors {
-    Sign = 'sign',
-    GetUser = 'getUser',
-    SendPasswordResetEmail = 'sendPasswordResetEmail',
-    SignWithGoogle = 'signWithGoogle',
-    Register = 'register',
-    UpdateDisplayName = 'updateDisplayName',
-    UpdatePassword = 'updatePassword',
-    Logout = 'logout'
+    error: string | null;
 }
 
 export const authInitialState: AuthState = {
