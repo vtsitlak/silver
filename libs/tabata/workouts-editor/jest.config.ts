@@ -1,9 +1,9 @@
 export default {
-    displayName: 'workouts',
+    displayName: 'workouts-editor',
     preset: '../../../jest.preset.js',
     setupFiles: ['<rootDir>/src/jest-global-setup.ts'],
     setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-    coverageDirectory: '../../../coverage/libs/tabata/workouts',
+    coverageDirectory: '../../../coverage/libs/tabata/workouts-editor',
     moduleNameMapper: {
         '^@silver/shared/helpers$': '<rootDir>/../utils/src/testing/shared-helpers.mock.ts'
     },

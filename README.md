@@ -48,7 +48,7 @@ silver/
 │   ├── tabata/             # Feature libs for tabata-ai (tag: scope:tabata)
 │   │   ├── auth/           # Auth (login, register, forgot password, Firebase)
 │   │   ├── home/
-│   │   ├── workouts/
+│   │   ├── workouts-editor/# Workout editor components
 │   │   ├── tabata-workouts/# Workouts store, service, facade (Upstash backend)
 │   │   ├── history/
 │   │   ├── profile/
@@ -85,7 +85,7 @@ silver/
 | **notes-app**                                                   | App  | Notes application (Angular + Express server).                                                                                                                                       |
 | **vehicles-app**                                                | App  | Vehicles demo app with JSON server backend.                                                                                                                                         |
 | **auth**                                                        | Lib  | Firebase auth, login/register/forgot-password, AuthStore/AuthFacade.                                                                                                                |
-| **home**, **workouts**, **history**, **profile**                | Lib  | Tabata tab feature components.                                                                                                                                                      |
+| **home**, **workouts-editor**, **history**, **profile**         | Lib  | Tabata tab feature components.                                                                                                                                                      |
 | **ui**                                                          | Lib  | Tabata shared UI (tabs, toolbar).                                                                                                                                                   |
 | **exercises**                                                   | Lib  | Exercise data (ExerciseDB API), ExercisesStore, ExercisesFacade.                                                                                                                    |
 | **utils**                                                       | Lib  | Tabata utilities.                                                                                                                                                                   |

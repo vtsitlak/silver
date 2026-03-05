@@ -25,7 +25,7 @@
             "@silver/tabata/home": ["libs/tabata/home/src/index.ts"],
             "@silver/tabata/profile": ["libs/tabata/profile/src/index.ts"],
             "@silver/tabata/ui": ["libs/tabata/ui/src/index.ts"],
-            "@silver/tabata/workouts": ["libs/tabata/workouts/src/index.ts"],
+            "@silver/tabata/workouts-editor": ["libs/tabata/workouts-editor/src/index.ts"],
             "@silver/vehicles-store": ["libs/vehicles/vehicles-store/src/index.ts"],
             "@silver/vehicles-ui": ["libs/vehicles/vehicles-ui/src/index.ts"],
             "@silver/notes-store": ["libs/notes/notes-store/src/index.ts"],
