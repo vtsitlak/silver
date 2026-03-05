@@ -4,7 +4,7 @@
     "sourceRoot": "libs/tabata/tabata-workouts/src",
     "prefix": "tbt",
     "projectType": "library",
-    "tags": [],
+    "tags": ["scope:tabata"],
     "targets": {
         "test": {
             "executor": "@nx/jest:jest",

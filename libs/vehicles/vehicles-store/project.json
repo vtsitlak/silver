@@ -4,7 +4,7 @@
     "sourceRoot": "libs/vehicles/vehicles-store/src",
     "prefix": "lib",
     "projectType": "library",
-    "tags": [],
+    "tags": ["scope:vehicles"],
     "targets": {
         "test": {
             "executor": "@nx/jest:jest",

@@ -4,7 +4,7 @@
     "sourceRoot": "libs/shared/helpers/src",
     "prefix": "tbt",
     "projectType": "library",
-    "tags": [],
+    "tags": ["scope:shared"],
     "targets": {
         "test": {
             "executor": "@nx/jest:jest",

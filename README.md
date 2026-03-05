@@ -20,17 +20,17 @@
 
 ## Technologies
 
-| Area | Stack |
-|------|--------|
-| **Monorepo** | [Nx](https://nx.dev) 22.x |
+| Area         | Stack                                                                                                                                                |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Monorepo** | [Nx](https://nx.dev) 22.x                                                                                                                            |
 | **Frontend** | [Angular](https://angular.dev) 21, [Ionic](https://ionicframework.com/) 8 (tabata-ai), [Angular Material](https://material.angular.io/) (other apps) |
-| **State** | [NgRx Signals](https://ngrx.io/guide/signals) (tabata), NgRx Store/Effects (notes, vehicles) |
-| **Auth** | [Angular Fire](https://github.com/angular/angularfire) (Firebase Auth) in tabata-ai |
-| **Mobile** | [Capacitor](https://capacitorjs.com/) 6 (tabata-ai) |
-| **i18n** | [Angular localize](https://angular.dev/guide/i18n-overview) (tabata-ai: en, nl, el) |
-| **Testing** | [Jest](https://jestjs.io/) (unit), [Playwright](https://playwright.dev/) (e2e for tabata-ai) |
-| **Backend** | [Express](https://expressjs.com/) (notes-server, vehicles-server) |
-| **Styling** | SCSS, [Tailwind CSS](https://tailwindcss.com/) where configured |
+| **State**    | [NgRx Signals](https://ngrx.io/guide/signals) (tabata), NgRx Store/Effects (notes, vehicles)                                                         |
+| **Auth**     | [Angular Fire](https://github.com/angular/angularfire) (Firebase Auth) in tabata-ai                                                                  |
+| **Mobile**   | [Capacitor](https://capacitorjs.com/) 6 (tabata-ai)                                                                                                  |
+| **i18n**     | [Angular localize](https://angular.dev/guide/i18n-overview) (tabata-ai: en, nl, el)                                                                  |
+| **Testing**  | [Jest](https://jestjs.io/) (unit), [Playwright](https://playwright.dev/) (e2e for tabata-ai)                                                         |
+| **Backend**  | [Express](https://expressjs.com/) (notes-server, vehicles-server)                                                                                    |
+| **Styling**  | SCSS, [Tailwind CSS](https://tailwindcss.com/) where configured                                                                                      |
 
 ---
 
@@ -38,32 +38,37 @@
 
 ```
 silver/
+├── api/                    # Vercel serverless functions (workouts proxy, health check)
 ├── apps/
 │   ├── tabata-ai/          # Tabata workout app (Angular + Ionic + Firebase) — in progress
 │   ├── tabata-ai-e2e/      # E2E tests for tabata-ai (Playwright)
 │   ├── notes-app/          # Notes Angular app
 │   └── vehicles-app/       # Vehicles Angular app
 ├── libs/
-│   ├── tabata/             # Feature libs for tabata-ai
+│   ├── tabata/             # Feature libs for tabata-ai (tag: scope:tabata)
 │   │   ├── auth/           # Auth (login, register, forgot password, Firebase)
 │   │   ├── home/
 │   │   ├── workouts/
+│   │   ├── tabata-workouts/# Workouts store, service, facade (Upstash backend)
 │   │   ├── history/
 │   │   ├── profile/
 │   │   ├── ui/             # Tabs, toolbar, shared UI
 │   │   ├── exercises/      # Exercise DB API service, store, facade
-│   │   └── utils/
-│   ├── notes/              # Notes feature libs
+│   │   └── utils/          # Helpers + centralized test mocks
+│   ├── notes/              # Notes feature libs (tag: scope:notes)
 │   │   ├── notes-auth/
 │   │   ├── notes-ui/
 │   │   ├── notes-store/
 │   │   └── notes-server/
-│   ├── vehicles/           # Vehicles feature libs
+│   ├── vehicles/           # Vehicles feature libs (tag: scope:vehicles)
 │   │   ├── vehicles-ui/
 │   │   ├── vehicles-store/
 │   │   └── vehicles-server/
-│   └── shared/
+│   └── shared/             # Shared libs (tag: scope:shared)
 │       └── helpers/        # Shared utilities (e.g. ToastService)
+├── docs/
+│   └── WORKOUTS_API_VERCEL.md  # Vercel + Upstash setup guide
+├── vercel.json             # Vercel deployment config (Root Directory = empty)
 ├── nx.json
 ├── package.json
 └── README.md
@@ -73,20 +78,20 @@ silver/
 
 ## Projects overview
 
-| Project | Type | Description |
-|--------|------|-------------|
-| **tabata-ai** | App | Tabata workout app with auth, tabs (Home, Workouts, History, Profile). **Still in progress — many features are missing.** See [apps/tabata-ai/README.md](apps/tabata-ai/README.md). |
-| **tabata-ai-e2e** | E2E | Playwright tests for tabata-ai. Run after `npx playwright install` if needed. |
-| **notes-app** | App | Notes application (Angular + Express server). |
-| **vehicles-app** | App | Vehicles demo app with JSON server backend. |
-| **auth** | Lib | Firebase auth, login/register/forgot-password, AuthStore/AuthFacade. |
-| **home**, **workouts**, **history**, **profile** | Lib | Tabata tab feature components. |
-| **ui** | Lib | Tabata shared UI (tabs, toolbar). |
-| **exercises** | Lib | Exercise data (ExerciseDB API), ExercisesStore, ExercisesFacade. |
-| **utils** | Lib | Tabata utilities. |
-| **notes-auth**, **notes-ui**, **notes-store**, **notes-server** | Lib | Notes feature and Express server. |
-| **vehicles-ui**, **vehicles-store**, **vehicles-server** | Lib | Vehicles feature and server. |
-| **helpers** | Lib | Shared helpers (e.g. ToastService). |
+| Project                                                         | Type | Description                                                                                                                                                                         |
+| --------------------------------------------------------------- | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **tabata-ai**                                                   | App  | Tabata workout app with auth, tabs (Home, Workouts, History, Profile). **Still in progress — many features are missing.** See [apps/tabata-ai/README.md](apps/tabata-ai/README.md). |
+| **tabata-ai-e2e**                                               | E2E  | Playwright tests for tabata-ai. Run after `npx playwright install` if needed.                                                                                                       |
+| **notes-app**                                                   | App  | Notes application (Angular + Express server).                                                                                                                                       |
+| **vehicles-app**                                                | App  | Vehicles demo app with JSON server backend.                                                                                                                                         |
+| **auth**                                                        | Lib  | Firebase auth, login/register/forgot-password, AuthStore/AuthFacade.                                                                                                                |
+| **home**, **workouts**, **history**, **profile**                | Lib  | Tabata tab feature components.                                                                                                                                                      |
+| **ui**                                                          | Lib  | Tabata shared UI (tabs, toolbar).                                                                                                                                                   |
+| **exercises**                                                   | Lib  | Exercise data (ExerciseDB API), ExercisesStore, ExercisesFacade.                                                                                                                    |
+| **utils**                                                       | Lib  | Tabata utilities.                                                                                                                                                                   |
+| **notes-auth**, **notes-ui**, **notes-store**, **notes-server** | Lib  | Notes feature and Express server.                                                                                                                                                   |
+| **vehicles-ui**, **vehicles-store**, **vehicles-server**        | Lib  | Vehicles feature and server.                                                                                                                                                        |
+| **helpers**                                                     | Lib  | Shared helpers (e.g. ToastService).                                                                                                                                                 |
 
 ---
 
@@ -119,27 +124,33 @@ npx playwright install
 
 > **Note:** This app is **in progress**. Many features are still missing. See [apps/tabata-ai/README.md](apps/tabata-ai/README.md).
 
-| Task | Command |
-|------|---------|
-| Serve (dev) | `npx nx serve tabata-ai` or `npm run start:tabata-ai` |
-| Build | `npx nx build tabata-ai` |
-| Build (localized) | `npm run build-localize:tabata-ai` |
-| Unit tests | `npx nx test tabata-ai` |
-| E2E tests | `npx nx run tabata-ai-e2e:e2e` |
+| Task              | Command                                               |
+| ----------------- | ----------------------------------------------------- |
+| Serve (dev)       | `npx nx serve tabata-ai` or `npm run start:tabata-ai` |
+| Build             | `npx nx build tabata-ai`                              |
+| Build (localized) | `npm run build-localize:tabata-ai`                    |
+| Unit tests        | `npm run test:tabata`                                 |
+| E2E tests         | `npm run e2e:tabata-ai`                               |
+| Extract i18n      | `npm run xi18n:tabata-ai`                             |
 
 ### Notes app
 
 Run both server and app (in separate terminals):
 
-1. **Server:** `npm run server:notes-app` → http://localhost:9000  
-2. **App:** `npm run start:notes-app` → http://localhost:4200  
+1. **Server:** `npm run server:notes-app` → http://localhost:9000
+2. **App:** `npm run start:notes-app` → http://localhost:4200
+
+| Task       | Command              |
+| ---------- | -------------------- |
+| Unit tests | `npm run test:notes` |
 
 ### Vehicles app
 
-| Task | Command |
-|------|---------|
-| Serve app | `npm run start:vehicles-app` |
+| Task       | Command                       |
+| ---------- | ----------------------------- |
+| Serve app  | `npm run start:vehicles-app`  |
 | Run server | `npm run server:vehicles-app` |
+| Unit tests | `npm run test:vehicles`       |
 
 ### Run any project's targets
 
@@ -158,14 +169,35 @@ npx nx <target> <project>
 
 ---
 
+## Testing
+
+Projects are organized by scope using Nx tags (`scope:tabata`, `scope:vehicles`, `scope:notes`, `scope:shared`). Use the npm scripts to run tests by scope:
+
+| Command                 | Description                                 |
+| ----------------------- | ------------------------------------------- |
+| `npm run test`          | Run all unit tests in the monorepo          |
+| `npm run test:tabata`   | Run tests for all tabata-related projects   |
+| `npm run test:vehicles` | Run tests for all vehicles-related projects |
+| `npm run test:notes`    | Run tests for all notes-related projects    |
+| `npm run test:shared`   | Run tests for shared libraries              |
+| `npm run e2e:tabata-ai` | Run Playwright e2e tests for tabata-ai      |
+
+Before running e2e tests, install Playwright browsers:
+
+```sh
+npx playwright install
+```
+
+---
+
 ## Useful Nx commands
 
-| Command | Description |
-|---------|-------------|
-| `npx nx graph` | Visualize project and task dependencies |
-| `npx nx list` | List installed Nx plugins |
-| `npx nx run-many -t test -p auth,home,ui` | Run tests for multiple projects |
-| `npx nx format:write` | Format code (see `npm run format`) |
+| Command                                          | Description                             |
+| ------------------------------------------------ | --------------------------------------- |
+| `npx nx graph`                                   | Visualize project and task dependencies |
+| `npx nx list`                                    | List installed Nx plugins               |
+| `npx nx run-many -t test --projects=tag:scope:*` | Run tests for projects by tag           |
+| `npx nx format:write`                            | Format code (see `npm run format`)      |
 
 ---
 

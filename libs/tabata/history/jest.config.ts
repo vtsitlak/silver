@@ -5,7 +5,7 @@ export default {
     setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
     coverageDirectory: '../../../coverage/libs/tabata/history',
     moduleNameMapper: {
-        '^@silver/shared/helpers$': '<rootDir>/src/__mocks__/shared-helpers.ts'
+        '^@silver/shared/helpers$': '<rootDir>/../utils/src/testing/shared-helpers.mock.ts'
     },
     transform: {
         '^.+\\.(ts|mjs|js|html)$': [

@@ -5,4 +5,3 @@ export * from './lib/auth.routes';
 
 export * from './lib/store/auth.store';
 export * from './lib/store/auth.facade';
-export * from './lib/store/auth-events.service';

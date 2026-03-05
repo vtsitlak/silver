@@ -16,26 +16,25 @@ export const WorkoutsStore = signalStore(
     })),
     withMethods((store, workoutsService = inject(WorkoutsService)) => {
         const loadTrigger = new Subject<void>();
-        rxMethod<void>(
-            (trigger$) =>
-                trigger$.pipe(
-                    tap(() => patchState(store, { isLoading: true, error: null })),
-                    switchMap(() =>
-                        workoutsService.getWorkouts().pipe(
-                            tapResponse({
-                                next: (workouts) => patchState(store, { workouts, isLoading: false }),
-                                error: (err: Error) => patchState(store, { error: err.message, isLoading: false })
-                            }),
-                            catchError((err: unknown) => {
-                                patchState(store, {
-                                    error: err instanceof Error ? err.message : String(err),
-                                    isLoading: false
-                                });
-                                return of([]);
-                            })
-                        )
+        rxMethod<void>((trigger$) =>
+            trigger$.pipe(
+                tap(() => patchState(store, { isLoading: true, error: null })),
+                switchMap(() =>
+                    workoutsService.getWorkouts().pipe(
+                        tapResponse({
+                            next: (workouts) => patchState(store, { workouts, isLoading: false }),
+                            error: (err: Error) => patchState(store, { error: err.message, isLoading: false })
+                        }),
+                        catchError((err: unknown) => {
+                            patchState(store, {
+                                error: err instanceof Error ? err.message : String(err),
+                                isLoading: false
+                            });
+                            return of([]);
+                        })
                     )
                 )
+            )
         )(loadTrigger);
         return {
             loadWorkouts: () => loadTrigger.next()

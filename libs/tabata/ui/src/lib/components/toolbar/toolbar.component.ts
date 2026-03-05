@@ -1,4 +1,4 @@
-import { Component, inject, input, AfterViewChecked, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, input, ChangeDetectionStrategy } from '@angular/core';
 
 import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonPopover, IonTitle, IonToolbar } from '@ionic/angular/standalone';
 import { AuthFacade } from '@silver/tabata/auth';
@@ -19,7 +19,7 @@ export class ToolbarComponent {
     private readonly authFacade = inject(AuthFacade);
 
     showPopover = false;
-    popoverEvent: any;
+    popoverEvent: unknown;
 
     constructor() {
         addIcons({ home, menu, person, logOut });

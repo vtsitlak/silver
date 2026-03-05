@@ -14,10 +14,10 @@ const CORS_HEADERS: Record<string, string> = {
 };
 
 function missingEnv(): Response {
-    return new Response(
-        JSON.stringify({ error: 'UPSTASH_URL and UPSTASH_TOKEN must be set (e.g. in .env or Vercel)' }),
-        { status: 500, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS } }
-    );
+    return new Response(JSON.stringify({ error: 'UPSTASH_URL and UPSTASH_TOKEN must be set (e.g. in .env or Vercel)' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+    });
 }
 
 function jsonResponse(body: string, status: number, extraHeaders?: Record<string, string>): Response {
@@ -48,7 +48,7 @@ export default {
             if (method === 'GET') {
                 const response = await fetch(`${UPSTASH_URL}/JSON.GET/tabata_workouts`, { headers });
                 const data = await response.json();
-                const parsed = typeof data.result === 'string' ? JSON.parse(data.result) : data.result ?? [];
+                const parsed = typeof data.result === 'string' ? JSON.parse(data.result) : (data.result ?? []);
                 return jsonResponse(JSON.stringify(Array.isArray(parsed) ? parsed : []), 200);
             }
 

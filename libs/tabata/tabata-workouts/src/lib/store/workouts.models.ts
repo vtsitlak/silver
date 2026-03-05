@@ -12,30 +12,49 @@ export const workoutsInitialState: WorkoutsState = {
     error: null
 };
 
+/**
+ * Represents the entire Tabata session structure.
+ */
 export interface TabataWorkout {
-  id: string;
-  name: string;
-  description: string;
-  warmup: FreeExercise[];
-  maim: TabataBlock[];
-  cooldown: FreeExercise[];
-  totalDuration: number;
-  script: string;
+    id: string;
+    name: string;
+    description?: string;
+    totalDurationMinutes: number;
+    warmup?: Phase;
+    blocks: TabataBlock[];
+    cooldown?: Phase;
+    script?: string;
+    createdAt: string;
+    updatedAt?: string;
+    updatedByUserId: string;
+    createdByUserId: string;
+    generatedByAi: boolean;
 }
 
-export interface FreeExercise {
-  exerciseId: string;
-  sets: number;
-  reps: number;
-  weight: number;
-  rest: number;
-  duration: number;
-  script: string;
+/**
+ * A standard phase (Warmup/Cooldown) consisting of continuous movements.
+ */
+export interface Phase {
+    totalDurationSeconds: number;
+    movements: ExerciseItem[];
 }
 
+/**
+ * A specific 4-minute Tabata Block.
+ */
 export interface TabataBlock {
-  exercisesIds: string[];
-  rounds: number;
-  rest: number;
-  duration: number;
+    blockName: string; // e.g., "Cardio" or "Lower Body"
+    rounds: number; // Usually 8
+    workDurationSeconds: number; // Usually 20
+    restDurationSeconds: number; // Usually 10
+    exercises: string[]; // e.g., ["Burpees", "Mountain Climbers"]
+    interBlockRestSeconds: number; // Recovery time after the 8 rounds (e.g., 60s)
+}
+
+/**
+ * Individual exercise details for phases.
+ */
+export interface ExerciseItem {
+    exerciseId: string;
+    durationSeconds: number;
 }

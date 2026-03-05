@@ -8,10 +8,10 @@ const UPSTASH_URL = process.env['UPSTASH_URL'];
 const UPSTASH_TOKEN = process.env['UPSTASH_TOKEN'];
 
 function missingEnv(): Response {
-    return new Response(
-        JSON.stringify({ error: 'UPSTASH_URL and UPSTASH_TOKEN must be set (e.g. in .env or Vercel)' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'UPSTASH_URL and UPSTASH_TOKEN must be set (e.g. in .env or Vercel)' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+    });
 }
 
 export default {
@@ -32,7 +32,7 @@ export default {
                 const response = await fetch(`${UPSTASH_URL}/JSON.GET/tabata_workouts`, { headers });
                 const data = await response.json();
                 // Upstash Redis JSON.GET returns stringified JSON; parse if needed
-                const parsed = typeof data.result === 'string' ? JSON.parse(data.result) : data.result ?? [];
+                const parsed = typeof data.result === 'string' ? JSON.parse(data.result) : (data.result ?? []);
                 return new Response(JSON.stringify(Array.isArray(parsed) ? parsed : []), {
                     status: 200,
                     headers: { 'Content-Type': 'application/json' }

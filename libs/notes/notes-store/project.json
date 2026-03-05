@@ -4,7 +4,7 @@
     "sourceRoot": "libs/notes/notes-store/src",
     "prefix": "lib",
     "projectType": "library",
-    "tags": [],
+    "tags": ["scope:notes"],
     "targets": {
         "test": {
             "executor": "@nx/jest:jest",

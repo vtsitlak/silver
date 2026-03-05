@@ -3,7 +3,7 @@
     "$schema": "../../../node_modules/nx/schemas/project-schema.json",
     "sourceRoot": "libs/vehicles/vehicles-server/src",
     "projectType": "library",
-    "tags": [],
+    "tags": ["scope:vehicles"],
     "targets": {
         "server": {
             "executor": "nx:run-commands",

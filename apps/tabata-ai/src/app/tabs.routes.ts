@@ -12,7 +12,7 @@ export const routes: Routes = [
             },
             {
                 path: 'workouts',
-                loadComponent: () => import('@silver/tabata/workouts').then((m) => m.WorkoutsComponent)
+                loadComponent: () => import('@silver/tabata/tabata-workouts').then((m) => m.WorkoutsComponent)
             },
             {
                 path: 'history',
