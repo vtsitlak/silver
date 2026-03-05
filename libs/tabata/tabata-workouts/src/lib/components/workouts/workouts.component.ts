@@ -1,5 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { IonContent, IonHeader, IonSearchbar, IonButton, IonList, IonItem, IonIcon } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { add } from 'ionicons/icons';
 import { ToolbarComponent } from '@silver/tabata/ui';
 import { WorkoutsFacade } from '../../store/workouts.facade';
 
@@ -12,6 +15,12 @@ import { WorkoutsFacade } from '../../store/workouts.facade';
 })
 export class WorkoutsComponent {
     private readonly facade = inject(WorkoutsFacade);
+    private readonly router = inject(Router);
+
+    constructor() {
+        addIcons({ add });
+        this.facade.loadWorkouts();
+    }
 
     readonly searchTerm = signal('');
     readonly workouts = this.facade.workouts;
@@ -25,16 +34,12 @@ export class WorkoutsComponent {
         return list.filter((w) => w.name.toLowerCase().includes(term));
     });
 
-    constructor() {
-        this.facade.loadWorkouts();
-    }
-
     onSearchInput(ev: Event): void {
         const customEv = ev as CustomEvent<{ value: string }>;
         this.searchTerm.set(customEv.detail?.value ?? '');
     }
 
     addWorkout(): void {
-        // TODO: create new workout - not implemented yet
+        this.router.navigate(['/tabs/workouts/create']);
     }
 }

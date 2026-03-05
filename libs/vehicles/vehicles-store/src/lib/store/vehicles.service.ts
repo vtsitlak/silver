@@ -4,14 +4,14 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Filter } from '../models/filter';
 import { Vehicle } from '../models/vehicle';
-import { ToastService } from '@silver/shared/helpers';
+import { SnackBarService } from '@silver/shared/helpers';
 
 @Injectable({
     providedIn: 'root'
 })
 export class VehiclesService {
     private http = inject(HttpClient);
-    private toastService = inject(ToastService);
+    private snackBarService = inject(SnackBarService);
 
     getAll(): Observable<Vehicle[]> {
         return this.http.get<Vehicle[]>(`/api/vehicles`, { observe: 'body', responseType: 'json' }).pipe(catchError(this.handleError));
@@ -25,10 +25,10 @@ export class VehiclesService {
         if (error.error instanceof ErrorEvent) {
             // A client-side or network error occurred. Handle it accordingly.
             console.error('An error occurred:', error.error.message);
-            void this.toastService.show(error.error.message);
+            this.snackBarService.show(error.error.message);
         }
         if (!(error.error instanceof ErrorEvent)) {
-            void this.toastService.show('An error occurred while loading vehicles.');
+            this.snackBarService.show('An error occurred while loading vehicles.');
         }
         // return an observable with a user-facing error message
         return throwError(() => new Error(error.error.message));

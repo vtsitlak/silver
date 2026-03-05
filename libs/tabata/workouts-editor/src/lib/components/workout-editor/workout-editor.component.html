@@ -1,0 +1,38 @@
+<ion-header [translucent]="true">
+    <tbt-toolbar [title]="pageTitle()">
+        <ion-buttons slot="start">
+            <ion-back-button defaultHref="/tabs/workouts"></ion-back-button>
+        </ion-buttons>
+    </tbt-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+    <ion-list>
+        <ion-item>
+            <ion-input
+                label="Workout Name"
+                labelPlacement="stacked"
+                placeholder="Enter workout name"
+                [value]="workoutName()"
+                (ionInput)="workoutName.set($any($event).detail.value ?? '')"
+            ></ion-input>
+        </ion-item>
+
+        <ion-item>
+            <ion-textarea
+                label="Description"
+                labelPlacement="stacked"
+                placeholder="Enter workout description"
+                [value]="workoutDescription()"
+                (ionInput)="workoutDescription.set($any($event).detail.value ?? '')"
+                [autoGrow]="true"
+                rows="3"
+            ></ion-textarea>
+        </ion-item>
+    </ion-list>
+
+    <div class="actions">
+        <ion-button expand="block" (click)="onSave()"> {{ isEditMode() ? 'Update' : 'Create' }} Workout </ion-button>
+        <ion-button expand="block" fill="outline" (click)="onCancel()"> Cancel </ion-button>
+    </div>
+</ion-content>

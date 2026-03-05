@@ -1,6 +1,5 @@
 /**
- * Mock for @silver/shared/helpers used in unit tests.
- * Import via @silver/tabata/testing in jest moduleNameMapper.
+ * Mock for @silver/tabata/helpers (ToastService) used in unit tests.
  */
-export const ToastService = class {};
-export const ToastController = class {};
+export const ToastServiceMock = class {};
+export const ToastControllerMock = class {};

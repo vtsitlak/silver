@@ -11,8 +11,7 @@ import {
     reauthenticateWithCredential,
     signInWithPopup,
     GoogleAuthProvider,
-    sendPasswordResetEmail,
-    getAuth
+    sendPasswordResetEmail
 } from '@angular/fire/auth';
 import { catchError, from, Observable, of, switchMap, throwError } from 'rxjs';
 
@@ -45,8 +44,7 @@ export class AuthService {
     }
 
     sendPasswordResetEmail(email: string): Observable<void> {
-        const auth = getAuth();
-        return from(sendPasswordResetEmail(auth, email)).pipe(
+        return from(sendPasswordResetEmail(this.auth, email)).pipe(
             catchError((error) => {
                 // Handle errors during password reset email sending
                 console.error('Error sending password reset email:', error);

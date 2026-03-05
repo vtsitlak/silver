@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FilterFormComponent } from './filter-form.component';
-import { provideAnimations } from '@angular/platform-browser/animations';
 
 describe('FilterFormComponent', () => {
     let component: FilterFormComponent;
@@ -8,8 +7,7 @@ describe('FilterFormComponent', () => {
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
-            imports: [FilterFormComponent],
-            providers: [provideAnimations()]
+            imports: [FilterFormComponent]
         }).compileComponents();
     }));
 

@@ -1,7 +1,7 @@
 import { Component, effect, input, output, signal } from '@angular/core';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { Field, form } from '@angular/forms/signals';
+import { FormField, form } from '@angular/forms/signals';
 import { Filter } from '@silver/vehicles-store';
 
 @Component({
@@ -9,7 +9,7 @@ import { Filter } from '@silver/vehicles-store';
     standalone: true,
     templateUrl: './filter-form.component.html',
     styleUrls: ['./filter-form.component.scss'],
-    imports: [MatFormFieldModule, MatSelectModule, Field]
+    imports: [MatFormFieldModule, MatSelectModule, FormField]
 })
 export class FilterFormComponent {
     private filterModel = signal<Filter>({ type: '', brand: '', color: '' });
