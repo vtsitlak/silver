@@ -12,7 +12,7 @@ module.exports = {
             }
         ]
     },
-    transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$|(@ionic|@stencil|ionicons)/)'],
+    transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$|@ionic|@stencil|ionicons|@angular/forms)'],
     snapshotSerializers: [
         'jest-preset-angular/build/serializers/no-ng-attributes',
         'jest-preset-angular/build/serializers/ng-snapshot',

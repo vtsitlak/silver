@@ -15,6 +15,14 @@ export const routes: Routes = [
                 loadComponent: () => import('@silver/tabata/tabata-workouts').then((m) => m.WorkoutsComponent)
             },
             {
+                path: 'workouts/create',
+                loadComponent: () => import('@silver/tabata/workouts-editor').then((m) => m.WorkoutEditorComponent)
+            },
+            {
+                path: 'workouts/edit/:workoutId',
+                loadComponent: () => import('@silver/tabata/workouts-editor').then((m) => m.WorkoutEditorComponent)
+            },
+            {
                 path: 'history',
                 loadComponent: () => import('@silver/tabata/history').then((m) => m.HistoryComponent)
             },

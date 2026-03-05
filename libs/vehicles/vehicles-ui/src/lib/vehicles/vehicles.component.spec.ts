@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { VehiclesComponent } from './vehicles.component';
 import { VehiclesFacade } from '@silver/vehicles-store';
-import { provideAnimations } from '@angular/platform-browser/animations';
 import { signal } from '@angular/core';
 import { Filter, Vehicle } from '@silver/vehicles-store';
 
@@ -19,7 +18,6 @@ describe('VehiclesComponent', () => {
         TestBed.configureTestingModule({
             imports: [VehiclesComponent],
             providers: [
-                provideAnimations(),
                 {
                     provide: VehiclesFacade,
                     useValue: {
