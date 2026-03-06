@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { WORKOUTS_API_BASE_URL, type TabataWorkout } from '@silver/tabata/tabata-workouts';
+import { WORKOUTS_API_BASE_URL, type TabataWorkout } from '@silver/tabata/states/workouts';
 import type { CreateWorkoutPayload, UpdateWorkoutPayload } from './workout-editor.models';
 
 @Injectable({ providedIn: 'root' })

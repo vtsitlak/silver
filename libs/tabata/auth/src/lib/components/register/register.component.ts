@@ -2,7 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { email, form, FormField, minLength, required } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
-import { AuthFacade } from '../../store/auth.facade';
+import { AuthFacade } from '@silver/tabata/states/auth';
 
 interface RegisterFormModel {
     email: string;

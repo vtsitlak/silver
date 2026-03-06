@@ -3,5 +3,5 @@ export * from './lib/components/login/login.component';
 export * from './lib/components/register/register.component';
 export * from './lib/auth.routes';
 
-export * from './lib/store/auth.store';
-export * from './lib/store/auth.facade';
+// Re-export auth state from centralized state library
+export * from '@silver/tabata/states/auth';

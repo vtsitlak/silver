@@ -1,6 +1,4 @@
-export * from './lib/store/workouts.models';
-export * from './lib/store/workouts-api-base-url';
-export * from './lib/store/workouts.service';
-export * from './lib/store/workouts.store';
-export * from './lib/store/workouts.facade';
 export * from './lib/components/workouts/workouts.component';
+
+// Re-export workouts state from centralized state library
+export * from '@silver/tabata/states/workouts';

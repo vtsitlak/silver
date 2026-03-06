@@ -4,7 +4,7 @@ import { IonContent, IonHeader, IonSearchbar, IonButton, IonList, IonItem, IonIc
 import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
 import { ToolbarComponent } from '@silver/tabata/ui';
-import { WorkoutsFacade } from '../../store/workouts.facade';
+import { WorkoutsFacade } from '@silver/tabata/states/workouts';
 
 @Component({
     selector: 'tbt-workouts',

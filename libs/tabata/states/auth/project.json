@@ -1,0 +1,21 @@
+{
+    "name": "auth-state",
+    "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/tabata/states/auth/src",
+    "prefix": "tbt",
+    "projectType": "library",
+    "tags": ["scope:tabata", "type:state"],
+    "targets": {
+        "test": {
+            "executor": "@nx/jest:jest",
+            "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+            "options": {
+                "jestConfig": "libs/tabata/states/auth/jest.config.cts",
+                "tsConfig": "libs/tabata/states/auth/tsconfig.spec.json"
+            }
+        },
+        "lint": {
+            "executor": "@nx/eslint:lint"
+        }
+    }
+}

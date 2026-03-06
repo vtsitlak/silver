@@ -1,9 +1,8 @@
-export default {
-    displayName: 'tabata-ai',
-    preset: '../../jest.preset.js',
+module.exports = {
+    displayName: 'exercises-state',
+    preset: '../../../../jest.preset.js',
     setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-    coverageDirectory: '../../coverage/apps/tabata-ai',
-    testPathIgnorePatterns: ['<rootDir>/e2e/'],
+    coverageDirectory: '../../../../coverage/libs/tabata/states/exercises',
     transform: {
         '^.+\\.(ts|mjs|js|html)$': [
             'jest-preset-angular',
@@ -13,7 +12,7 @@ export default {
             }
         ]
     },
-    transformIgnorePatterns: ['<rootDir>/node_modules/(?!(@ionic/core|@ionic/angular|@stencil/core|.*.mjs$))'],
+    transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
     snapshotSerializers: [
         'jest-preset-angular/build/serializers/no-ng-attributes',
         'jest-preset-angular/build/serializers/ng-snapshot',

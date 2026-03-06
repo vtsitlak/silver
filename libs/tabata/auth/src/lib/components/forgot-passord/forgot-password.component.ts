@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { email, form, FormField, required } from '@angular/forms/signals';
 import { IonicModule } from '@ionic/angular';
-import { AuthFacade } from '../../store/auth.facade';
+import { AuthFacade } from '@silver/tabata/states/auth';
 
 interface ForgotPasswordForm {
     email: string;

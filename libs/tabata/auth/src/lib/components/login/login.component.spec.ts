@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { AuthFacade } from '../../store/auth.facade';
+import { AuthFacade } from '@silver/tabata/states/auth';
 import { LoginComponent } from './login.component';
 
 const mockAuthFacade = {
