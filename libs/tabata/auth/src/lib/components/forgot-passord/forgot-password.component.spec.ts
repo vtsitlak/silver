@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AuthFacade } from '../../store/auth.facade';
+import { AuthFacade } from '@silver/tabata/states/auth';
 import { ForgotPasswordComponent } from './forgot-password.component';
 
 const mockAuthFacade = {

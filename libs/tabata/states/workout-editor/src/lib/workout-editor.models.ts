@@ -1,4 +1,4 @@
-import type { TabataWorkout } from '@silver/tabata/tabata-workouts';
+import type { TabataWorkout } from '@silver/tabata/states/workouts';
 
 export interface WorkoutEditorState {
     workout: TabataWorkout | null;

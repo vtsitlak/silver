@@ -1,0 +1,21 @@
+{
+    "name": "workout-editor-state",
+    "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/tabata/states/workout-editor/src",
+    "prefix": "tbt",
+    "projectType": "library",
+    "tags": ["scope:tabata", "type:state"],
+    "targets": {
+        "test": {
+            "executor": "@nx/jest:jest",
+            "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+            "options": {
+                "jestConfig": "libs/tabata/states/workout-editor/jest.config.cts",
+                "tsConfig": "libs/tabata/states/workout-editor/tsconfig.spec.json"
+            }
+        },
+        "lint": {
+            "executor": "@nx/eslint:lint"
+        }
+    }
+}
