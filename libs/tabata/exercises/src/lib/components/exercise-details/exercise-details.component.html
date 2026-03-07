@@ -1,0 +1,131 @@
+<ion-header [translucent]="true">
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button defaultHref="/tabs/exercises"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Exercise Details</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+    @if (isLoading()) {
+        <div class="flex justify-center items-center h-full">
+            <ion-spinner name="crescent"></ion-spinner>
+        </div>
+    } @else if (error()) {
+        <p class="text-center text-red-500">{{ error() }}</p>
+    } @else if (exercise(); as ex) {
+        <div class="exercise-header mb-6">
+            <h1 class="text-2xl font-bold mb-4">{{ ex.name }}</h1>
+
+            @if (ex.gifUrl) {
+                <div class="gif-container mb-4">
+                    <img [src]="ex.gifUrl" [alt]="ex.name" class="exercise-gif rounded-lg" />
+                </div>
+            }
+        </div>
+
+        <ion-card>
+            <ion-card-header>
+                <ion-card-title class="flex items-center gap-2 text-lg">
+                    <ion-icon name="body-outline"></ion-icon>
+                    Target Muscles
+                </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+                <div class="flex flex-wrap gap-2">
+                    @for (muscle of ex.targetMuscles; track muscle) {
+                        <ion-chip color="primary">
+                            <ion-label>{{ formatMuscle(muscle) }}</ion-label>
+                        </ion-chip>
+                    } @empty {
+                        <p class="text-gray-500">No target muscles specified</p>
+                    }
+                </div>
+            </ion-card-content>
+        </ion-card>
+
+        @if (ex.secondaryMuscles && ex.secondaryMuscles.length > 0) {
+            <ion-card>
+                <ion-card-header>
+                    <ion-card-title class="flex items-center gap-2 text-lg">
+                        <ion-icon name="fitness-outline"></ion-icon>
+                        Secondary Muscles
+                    </ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                    <div class="flex flex-wrap gap-2">
+                        @for (muscle of ex.secondaryMuscles; track muscle) {
+                            <ion-chip color="secondary">
+                                <ion-label>{{ formatMuscle(muscle) }}</ion-label>
+                            </ion-chip>
+                        }
+                    </div>
+                </ion-card-content>
+            </ion-card>
+        }
+
+        <ion-card>
+            <ion-card-header>
+                <ion-card-title class="flex items-center gap-2 text-lg">
+                    <ion-icon name="body-outline"></ion-icon>
+                    Body Parts
+                </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+                <div class="flex flex-wrap gap-2">
+                    @for (part of ex.bodyParts; track part) {
+                        <ion-chip color="tertiary">
+                            <ion-label>{{ formatMuscle(part) }}</ion-label>
+                        </ion-chip>
+                    } @empty {
+                        <p class="text-gray-500">No body parts specified</p>
+                    }
+                </div>
+            </ion-card-content>
+        </ion-card>
+
+        <ion-card>
+            <ion-card-header>
+                <ion-card-title class="flex items-center gap-2 text-lg">
+                    <ion-icon name="barbell-outline"></ion-icon>
+                    Equipment
+                </ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+                <div class="flex flex-wrap gap-2">
+                    @for (equipment of ex.equipments; track equipment) {
+                        <ion-chip color="medium">
+                            <ion-label>{{ formatMuscle(equipment) }}</ion-label>
+                        </ion-chip>
+                    } @empty {
+                        <p class="text-gray-500">No equipment required</p>
+                    }
+                </div>
+            </ion-card-content>
+        </ion-card>
+
+        @if (ex.instructions && ex.instructions.length > 0) {
+            <ion-card>
+                <ion-card-header>
+                    <ion-card-title class="flex items-center gap-2 text-lg">
+                        <ion-icon name="list-outline"></ion-icon>
+                        Instructions
+                    </ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                    <ion-list lines="none" class="instructions-list">
+                        @for (instruction of ex.instructions; track $index; let i = $index) {
+                            <ion-item class="instruction-item">
+                                <span class="step-number">{{ i + 1 }}</span>
+                                <ion-label class="ion-text-wrap">{{ instruction }}</ion-label>
+                            </ion-item>
+                        }
+                    </ion-list>
+                </ion-card-content>
+            </ion-card>
+        }
+    } @else {
+        <p class="text-center text-gray-500" i18n>Exercise not found.</p>
+    }
+</ion-content>

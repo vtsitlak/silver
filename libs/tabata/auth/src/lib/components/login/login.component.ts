@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { email, form, FormField, minLength, required } from '@angular/forms/signals';
 import { Router } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { IonContent, IonButton, IonSpinner } from '@ionic/angular/standalone';
 import { AuthFacade } from '@silver/tabata/states/auth';
 
 interface LoginFormModel {
@@ -11,7 +11,7 @@ interface LoginFormModel {
 
 @Component({
     selector: 'tbt-login',
-    imports: [FormField, IonicModule],
+    imports: [FormField, IonContent, IonButton, IonSpinner],
     templateUrl: './login.component.html',
     styleUrl: './login.component.scss'
 })

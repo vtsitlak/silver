@@ -12,7 +12,7 @@ import { AppComponent } from './app/app.component';
 import { environment } from './app/environments/environment';
 import { inject, provideAppInitializer, provideZoneChangeDetection } from '@angular/core';
 import { AuthFacade } from '@silver/tabata/auth';
-import { WORKOUTS_API_BASE_URL } from '@silver/tabata/tabata-workouts';
+import { WORKOUTS_API_BASE_URL } from '@silver/tabata/workouts';
 import { of } from 'rxjs';
 
 export function initAuthStore() {

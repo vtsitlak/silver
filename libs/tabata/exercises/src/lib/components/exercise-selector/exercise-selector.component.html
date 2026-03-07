@@ -1,0 +1,110 @@
+<ion-header [translucent]="true">
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button (click)="cancel()">
+                <ion-icon name="close"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title>Select Exercise{{ multiple() ? 's' : '' }}</ion-title>
+        <ion-buttons slot="end">
+            <ion-button (click)="confirm()" [disabled]="selectedCount() === 0" color="primary">
+                <ion-icon name="checkmark"></ion-icon>
+                Done
+            </ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+    <div class="selector-header">
+        <ion-searchbar
+            placeholder="Search exercises..."
+            [value]="searchTerm()"
+            (ionInput)="onSearchInput($event)"
+            debounce="300"
+            class="exercise-search"
+        ></ion-searchbar>
+
+        <div class="filters-row">
+            <ion-select placeholder="Muscle" [value]="selectedMuscle()" (ionChange)="onMuscleChange($event)" interface="popover" class="filter-select">
+                <ion-select-option [value]="null">All Muscles</ion-select-option>
+                @for (muscle of musclesList(); track muscle) {
+                    <ion-select-option [value]="muscle">{{ formatName(muscle) }}</ion-select-option>
+                }
+            </ion-select>
+
+            <ion-select placeholder="Equipment" [value]="selectedEquipment()" (ionChange)="onEquipmentChange($event)" interface="popover" class="filter-select">
+                <ion-select-option [value]="null">All Equipment</ion-select-option>
+                @for (equipment of equipmentList(); track equipment) {
+                    <ion-select-option [value]="equipment">{{ formatName(equipment) }}</ion-select-option>
+                }
+            </ion-select>
+
+            <ion-select placeholder="Body Part" [value]="selectedBodyPart()" (ionChange)="onBodyPartChange($event)" interface="popover" class="filter-select">
+                <ion-select-option [value]="null">All Body Parts</ion-select-option>
+                @for (bodyPart of bodyPartList(); track bodyPart) {
+                    <ion-select-option [value]="bodyPart">{{ formatName(bodyPart) }}</ion-select-option>
+                }
+            </ion-select>
+        </div>
+
+        @if (selectedMuscle() || selectedEquipment() || selectedBodyPart()) {
+            <ion-button fill="clear" size="small" (click)="clearFilters()" class="clear-filters-btn"> Clear Filters </ion-button>
+        }
+    </div>
+
+    @if (selectedCount() > 0) {
+        <div class="selection-summary">
+            <span class="selection-count">{{ selectedCount() }} selected</span>
+            @if (maxSelection() !== null) {
+                <span class="selection-limit">(max {{ maxSelection() }})</span>
+            }
+        </div>
+    }
+
+    @if (isLoading() && exercises().length === 0) {
+        <div class="flex justify-center items-center py-8">
+            <ion-spinner name="crescent"></ion-spinner>
+        </div>
+    } @else if (error()) {
+        <p class="text-center text-red-500 p-4">{{ error() }}</p>
+    } @else {
+        <ion-list>
+            @for (exercise of filteredExercises(); track exercise.exerciseId) {
+                <ion-item
+                    button
+                    (click)="toggleSelection(exercise)"
+                    [class.selected]="isSelected(exercise)"
+                    [disabled]="!isSelected(exercise) && !canSelectMore()"
+                >
+                    @if (exercise.gifUrl) {
+                        <img [src]="exercise.gifUrl" [alt]="exercise.name" class="exercise-thumbnail" slot="start" />
+                    }
+                    <ion-label>
+                        <h2 class="font-medium">{{ exercise.name }}</h2>
+                        <p class="text-sm text-gray-500">
+                            @for (muscle of exercise.targetMuscles; track muscle; let last = $last) {
+                                {{ formatName(muscle) }}{{ !last ? ', ' : '' }}
+                            }
+                        </p>
+                    </ion-label>
+                    @if (multiple()) {
+                        <ion-checkbox slot="end" [checked]="isSelected(exercise)" [disabled]="!isSelected(exercise) && !canSelectMore()"></ion-checkbox>
+                    } @else {
+                        @if (isSelected(exercise)) {
+                            <ion-icon name="checkmark" slot="end" color="primary"></ion-icon>
+                        }
+                    }
+                </ion-item>
+            } @empty {
+                <ion-item lines="none">
+                    <ion-label class="text-center text-gray-500">No exercises found</ion-label>
+                </ion-item>
+            }
+        </ion-list>
+
+        <ion-infinite-scroll (ionInfinite)="loadMore($event)">
+            <ion-infinite-scroll-content loadingSpinner="crescent" loadingText="Loading more exercises..."> </ion-infinite-scroll-content>
+        </ion-infinite-scroll>
+    }
+</ion-content>

@@ -1,0 +1,9 @@
+.workout-item {
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --inner-padding-end: 8px;
+
+    &::part(native) {
+        border-bottom: 1px solid var(--ion-color-light);
+    }
+}

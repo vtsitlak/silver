@@ -1,0 +1,117 @@
+<ion-header [translucent]="true">
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button defaultHref="/tabs/workouts"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Workout Details</ion-title>
+        <ion-buttons slot="end">
+            <ion-button (click)="editWorkout()">
+                <ion-icon name="create-outline"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+    @if (isLoading()) {
+        <p class="text-center text-gray-500" i18n>Loading...</p>
+    } @else if (error()) {
+        <p class="text-center text-red-500">{{ error() }}</p>
+    } @else if (workout(); as w) {
+        <div class="workout-header mb-6">
+            <h1 class="text-2xl font-bold mb-2">{{ w.name }}</h1>
+            @if (w.description) {
+                <p class="text-gray-500 mb-4">{{ w.description }}</p>
+            }
+
+            <div class="flex items-center gap-4 mb-4">
+                <ion-chip color="primary">
+                    <ion-icon name="time-outline"></ion-icon>
+                    <ion-label>{{ formatDuration(w.totalDurationMinutes) }}</ion-label>
+                </ion-chip>
+                <ion-chip color="secondary">
+                    <ion-icon name="fitness-outline"></ion-icon>
+                    <ion-label>{{ w.blocks.length }} {{ w.blocks.length === 1 ? 'block' : 'blocks' }}</ion-label>
+                </ion-chip>
+                @if (w.generatedByAi) {
+                    <ion-chip color="tertiary">
+                        <ion-icon name="flash-outline"></ion-icon>
+                        <ion-label>AI Generated</ion-label>
+                    </ion-chip>
+                }
+            </div>
+
+            <ion-button expand="block" color="primary" (click)="startWorkout()">
+                <ion-icon slot="start" name="play-circle"></ion-icon>
+                Start Workout
+            </ion-button>
+        </div>
+
+        @if (w.warmup) {
+            <ion-card>
+                <ion-card-header>
+                    <ion-card-title class="text-lg">Warmup</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                    <p class="text-sm text-gray-500"> Duration: {{ formatSecondsToMinutes(w.warmup.totalDurationSeconds) }} min </p>
+                    @if (w.warmup.movements.length > 0) {
+                        <p class="text-sm text-gray-400 mt-1"> {{ w.warmup.movements.length }} exercises </p>
+                    }
+                </ion-card-content>
+            </ion-card>
+        }
+
+        <h2 class="text-lg font-semibold mt-6 mb-3">Tabata Blocks</h2>
+
+        @for (block of w.blocks; track $index) {
+            <ion-card>
+                <ion-card-header>
+                    <ion-card-title class="text-base">{{ block.blockName }}</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <span class="text-sm text-gray-500 flex items-center gap-1">
+                            <ion-icon name="time-outline"></ion-icon>
+                            ~{{ getBlockDuration(block) }} min
+                        </span>
+                        <span class="text-sm text-gray-500">|</span>
+                        <span class="text-sm text-gray-500">{{ block.rounds }} rounds</span>
+                        <span class="text-sm text-gray-500">|</span>
+                        <span class="text-sm text-gray-500">{{ block.workDurationSeconds }}s work / {{ block.restDurationSeconds }}s rest</span>
+                    </div>
+
+                    <ion-list lines="none" class="exercises-list">
+                        @for (exercise of block.exercises; track $index) {
+                            <ion-item class="exercise-item">
+                                <ion-label class="text-sm">{{ exercise }}</ion-label>
+                            </ion-item>
+                        }
+                    </ion-list>
+
+                    @if (block.interBlockRestSeconds > 0) {
+                        <p class="text-sm text-gray-400 mt-2 flex items-center gap-1">
+                            <ion-icon name="pause-outline"></ion-icon>
+                            {{ block.interBlockRestSeconds }}s rest after block
+                        </p>
+                    }
+                </ion-card-content>
+            </ion-card>
+        }
+
+        @if (w.cooldown) {
+            <ion-card>
+                <ion-card-header>
+                    <ion-card-title class="text-lg">Cooldown</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                    <p class="text-sm text-gray-500"> Duration: {{ formatSecondsToMinutes(w.cooldown.totalDurationSeconds) }} min </p>
+                    @if (w.cooldown.movements.length > 0) {
+                        <p class="text-sm text-gray-400 mt-1"> {{ w.cooldown.movements.length }} exercises </p>
+                    }
+                </ion-card-content>
+            </ion-card>
+        }
+    } @else {
+        <p class="text-center text-gray-500" i18n>Workout not found.</p>
+    }
+</ion-content>

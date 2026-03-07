@@ -12,7 +12,7 @@ export const routes: Routes = [
             },
             {
                 path: 'workouts',
-                loadComponent: () => import('@silver/tabata/tabata-workouts').then((m) => m.WorkoutsComponent)
+                loadComponent: () => import('@silver/tabata/workouts').then((m) => m.WorkoutsComponent)
             },
             {
                 path: 'workouts/create',
@@ -21,6 +21,10 @@ export const routes: Routes = [
             {
                 path: 'workouts/edit/:workoutId',
                 loadComponent: () => import('@silver/tabata/workouts-editor').then((m) => m.WorkoutEditorComponent)
+            },
+            {
+                path: 'workouts/:workoutId',
+                loadComponent: () => import('@silver/tabata/workouts').then((m) => m.WorkoutDetailsComponent)
             },
             {
                 path: 'history',

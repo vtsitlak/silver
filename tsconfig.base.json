@@ -31,7 +31,7 @@
             "@silver/notes-store": ["libs/notes/notes-store/src/index.ts"],
             "@silver/notes-ui": ["libs/notes/notes-ui/src/index.ts"],
             "@silver/notes-auth": ["libs/notes/notes-auth/src/index.ts"],
-            "@silver/tabata/tabata-workouts": ["libs/tabata/tabata-workouts/src/index.ts"],
+            "@silver/tabata/workouts": ["libs/tabata/workouts/src/index.ts"],
             "@silver/tabata/states/auth": ["libs/tabata/states/auth/src/index.ts"],
             "@silver/tabata/states/exercises": ["libs/tabata/states/exercises/src/index.ts"],
             "@silver/tabata/states/workouts": ["libs/tabata/states/workouts/src/index.ts"],
