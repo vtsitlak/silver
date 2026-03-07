@@ -20,7 +20,14 @@
         "test:vehicles": "nx run-many -t test --projects=tag:scope:vehicles",
         "test:notes": "nx run-many -t test --projects=tag:scope:notes",
         "test:shared": "nx run-many -t test --projects=tag:scope:shared",
-        "e2e:tabata-ai": "nx e2e tabata-ai-e2e"
+        "e2e:tabata-ai": "nx e2e tabata-ai-e2e",
+        "cap:sync:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync",
+        "cap:android:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync android && powershell -ExecutionPolicy Bypass -File ../../scripts/open-android-studio.ps1",
+        "cap:ios:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync ios && npx cap open ios",
+        "cap:run:android:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync android && npx cap run android",
+        "cap:run:ios:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync ios && npx cap run ios",
+        "cap:live:android:tabata-ai": "cd apps/tabata-ai && npx cap run android --livereload --external",
+        "cap:live:ios:tabata-ai": "cd apps/tabata-ai && npx cap run ios --livereload --external"
     },
     "private": true,
     "overrides": {

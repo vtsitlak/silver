@@ -1,0 +1,19 @@
+<ion-item button (click)="onClick()" class="workout-item">
+    <ion-label>
+        <h2 class="font-semibold text-base">{{ workout().name }}</h2>
+        @if (workout().description) {
+            <p class="text-sm text-gray-500 line-clamp-2">{{ workout().description }}</p>
+        }
+        <div class="flex items-center gap-4 mt-2 text-sm text-gray-400">
+            <span class="flex items-center gap-1">
+                <ion-icon name="time-outline"></ion-icon>
+                {{ formattedDuration }}
+            </span>
+            <span class="flex items-center gap-1">
+                <ion-icon name="fitness-outline"></ion-icon>
+                {{ blocksCount }} {{ blocksCount === 1 ? 'block' : 'blocks' }}
+            </span>
+        </div>
+    </ion-label>
+    <ion-icon name="chevron-forward" slot="end" class="text-gray-400"></ion-icon>
+</ion-item>

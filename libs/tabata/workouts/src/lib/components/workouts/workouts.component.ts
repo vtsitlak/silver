@@ -1,17 +1,19 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonContent, IonHeader, IonSearchbar, IonButton, IonList, IonItem, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
 import { ToolbarComponent } from '@silver/tabata/ui';
-import { WorkoutsFacade } from '@silver/tabata/states/workouts';
+import { WorkoutsFacade, TabataWorkout } from '@silver/tabata/states/workouts';
+import { WorkoutItemComponent } from '../workout-item/workout-item.component';
 
 @Component({
     selector: 'tbt-workouts',
     templateUrl: 'workouts.component.html',
     styleUrls: ['workouts.component.scss'],
     standalone: true,
-    imports: [IonHeader, ToolbarComponent, IonContent, IonSearchbar, IonButton, IonList, IonItem, IonIcon]
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [IonHeader, ToolbarComponent, IonContent, IonSearchbar, IonButton, IonList, IonItem, IonIcon, WorkoutItemComponent]
 })
 export class WorkoutsComponent {
     private readonly facade = inject(WorkoutsFacade);
@@ -41,5 +43,9 @@ export class WorkoutsComponent {
 
     addWorkout(): void {
         this.router.navigate(['/tabs/workouts/create']);
+    }
+
+    onWorkoutClick(workout: TabataWorkout): void {
+        this.router.navigate(['/tabs/workouts', workout.id]);
     }
 }

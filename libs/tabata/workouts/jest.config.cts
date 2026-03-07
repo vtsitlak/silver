@@ -1,8 +1,8 @@
 module.exports = {
-    displayName: 'tabata-workouts',
+    displayName: 'workouts',
     preset: '../../../jest.preset.js',
     setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-    coverageDirectory: '../../../coverage/libs/tabata/tabata-workouts',
+    coverageDirectory: '../../../coverage/libs/tabata/workouts',
     transform: {
         '^.+\\.(ts|mjs|js|html)$': [
             'jest-preset-angular',

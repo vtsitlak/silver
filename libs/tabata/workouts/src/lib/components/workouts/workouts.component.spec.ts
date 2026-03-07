@@ -11,13 +11,13 @@ const mockAuthFacade = {
     usePassword: () => true,
     useGoogle: () => false,
     hasError: () => false,
-    sign: () => {},
-    register: () => {},
-    sendPasswordResetEmail: () => {},
-    updateDisplayName: () => {},
-    updatePassword: () => {},
-    logout: () => {},
-    getUser: () => {}
+    sign: jest.fn(),
+    register: jest.fn(),
+    sendPasswordResetEmail: jest.fn(),
+    updateDisplayName: jest.fn(),
+    updatePassword: jest.fn(),
+    logout: jest.fn(),
+    getUser: jest.fn()
 };
 
 describe('WorkoutsComponent', () => {

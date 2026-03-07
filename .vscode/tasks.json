@@ -1,0 +1,72 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Tabata AI: Build & Sync",
+            "type": "shell",
+            "command": "npm run cap:sync:tabata-ai",
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "Build the app and sync to native platforms"
+        },
+        {
+            "label": "Tabata AI: Open Android Studio",
+            "type": "shell",
+            "command": "npm run cap:android:tabata-ai",
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "Build, sync, and open in Android Studio"
+        },
+        {
+            "label": "Tabata AI: Open Xcode (iOS)",
+            "type": "shell",
+            "command": "npm run cap:ios:tabata-ai",
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "Build, sync, and open in Xcode"
+        },
+        {
+            "label": "Tabata AI: Run on Android Device/Emulator",
+            "type": "shell",
+            "command": "npm run cap:run:android:tabata-ai",
+            "group": "test",
+            "problemMatcher": [],
+            "detail": "Build, sync, and run on connected Android device or emulator"
+        },
+        {
+            "label": "Tabata AI: Run on iOS Simulator",
+            "type": "shell",
+            "command": "npm run cap:run:ios:tabata-ai",
+            "group": "test",
+            "problemMatcher": [],
+            "detail": "Build, sync, and run on iOS simulator"
+        },
+        {
+            "label": "Tabata AI: Live Reload Android",
+            "type": "shell",
+            "command": "npm run cap:live:android:tabata-ai",
+            "group": "test",
+            "problemMatcher": [],
+            "isBackground": true,
+            "detail": "Run on Android with live reload (requires running dev server)"
+        },
+        {
+            "label": "Tabata AI: Live Reload iOS",
+            "type": "shell",
+            "command": "npm run cap:live:ios:tabata-ai",
+            "group": "test",
+            "problemMatcher": [],
+            "isBackground": true,
+            "detail": "Run on iOS with live reload (requires running dev server)"
+        },
+        {
+            "label": "Tabata AI: Start Dev Server",
+            "type": "shell",
+            "command": "npm run start:tabata-ai",
+            "group": "build",
+            "problemMatcher": [],
+            "isBackground": true,
+            "detail": "Start the Angular dev server for web preview"
+        }
+    ]
+}

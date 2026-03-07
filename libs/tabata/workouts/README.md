@@ -1,10 +1,10 @@
-# tabata-workouts
+# workouts
 
 This library was generated with [Nx](https://nx.dev).
 
 ## Overview
 
-The `tabata-workouts` library provides the state management and API integration for workouts in the tabata-ai app. It includes:
+The `workouts` library provides the UI components and state management integration for workouts in the tabata-ai app. It includes:
 
 - **WorkoutsStore** — NgRx Signals store for workout state.
 - **WorkoutsService** — HTTP client for the `/api/workouts` endpoint.
@@ -23,4 +23,4 @@ See **[docs/WORKOUTS_API_VERCEL.md](../../../docs/WORKOUTS_API_VERCEL.md)** for 
 
 ## Running unit tests
 
-Run `npm run test:tabata` to execute all tabata-related tests, or `nx test tabata-workouts` for this library only.
+Run `npm run test:tabata` to execute all tabata-related tests, or `nx test workouts` for this library only.
