@@ -54,3 +54,7 @@ AGENTS.md
 .env
 .env.local
 .env.*.local
+
+# Bundle analysis
+bundle-report.html
+bundle-analysis.json

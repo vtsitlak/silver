@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { email, form, FormField, required } from '@angular/forms/signals';
-import { IonicModule } from '@ionic/angular';
+import { IonContent, IonButton, IonSpinner } from '@ionic/angular/standalone';
 import { AuthFacade } from '@silver/tabata/states/auth';
 
 interface ForgotPasswordForm {
@@ -9,7 +9,7 @@ interface ForgotPasswordForm {
 
 @Component({
     selector: 'tbt-forgot-password',
-    imports: [IonicModule, FormField],
+    imports: [IonContent, IonButton, IonSpinner, FormField],
     templateUrl: './forgot-password.component.html',
     styleUrl: './forgot-password.component.scss'
 })
