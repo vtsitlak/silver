@@ -4,15 +4,28 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, tap, switchMap, catchError } from 'rxjs';
 import { of } from 'rxjs';
 import { tapResponse } from '@ngrx/operators';
-import { workoutEditorInitialState, type WorkoutEditorState, type CreateWorkoutPayload, type UpdateWorkoutPayload } from './workout-editor.models';
+import {
+    workoutEditorInitialState,
+    type WorkoutEditorState,
+    type CreateWorkoutPayload,
+    type UpdateWorkoutPayload,
+    type WorkoutDraft
+} from './workout-editor.models';
 import { WorkoutEditorService } from './workout-editor.service';
 
 export const WorkoutEditorStore = signalStore(
     { providedIn: 'root' },
     withState<WorkoutEditorState>(workoutEditorInitialState),
-    withComputed(({ workout, isLoading, isSaving }) => ({
+    withComputed(({ workout, workoutDraft, isLoading, isSaving }) => ({
         isEditMode: computed(() => workout() !== null),
-        isBusy: computed(() => isLoading() || isSaving())
+        isBusy: computed(() => isLoading() || isSaving()),
+        hasDraftChanges: computed(() => Object.keys(workoutDraft()).length > 0),
+        mergedWorkout: computed(() => {
+            const current = workout();
+            const draft = workoutDraft();
+            if (!current) return draft;
+            return { ...current, ...draft };
+        })
     })),
     withMethods((store, service = inject(WorkoutEditorService)) => {
         const loadWorkout = rxMethod<string>(
@@ -80,6 +93,15 @@ export const WorkoutEditorStore = signalStore(
             createWorkout,
             updateWorkout: (id: string, payload: UpdateWorkoutPayload) => updateWorkout({ id, payload }),
             deleteWorkout,
+            updateDraft: (changes: WorkoutDraft) => patchState(store, { workoutDraft: { ...store.workoutDraft(), ...changes } }),
+            setDraft: (draft: WorkoutDraft) => patchState(store, { workoutDraft: draft }),
+            clearDraft: () => patchState(store, { workoutDraft: {} }),
+            initDraftFromWorkout: () => {
+                const workout = store.workout();
+                if (workout) {
+                    patchState(store, { workoutDraft: { ...workout } });
+                }
+            },
             reset: () => patchState(store, workoutEditorInitialState)
         };
     })
