@@ -25,7 +25,7 @@ jobs:
             - uses: actions/setup-java@v4
               with:
                   distribution: 'temurin'
-                  java-version: '17'
+                  java-version: '21'
 
             - name: Setup Android SDK
               uses: android-actions/setup-android@v3
@@ -45,6 +45,8 @@ jobs:
                   chmod +x ./gradlew
                   ./gradlew clean assembleDebug --no-daemon
               working-directory: apps/tabata-ai/android
+              env:
+                  GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"
 
             - name: Upload APK artifact
               uses: actions/upload-artifact@v4
