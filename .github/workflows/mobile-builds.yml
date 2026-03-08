@@ -43,7 +43,7 @@ jobs:
             - name: Build Android (Debug)
               run: |
                   chmod +x ./gradlew
-                  ./gradlew assembleDebug
+                  ./gradlew clean assembleDebug --no-daemon
               working-directory: apps/tabata-ai/android
 
             - name: Upload APK artifact
