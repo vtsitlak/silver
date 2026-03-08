@@ -40,10 +40,13 @@ jobs:
               run: npx cap sync android
               working-directory: apps/tabata-ai
 
+            - name: Clear Gradle cache
+              run: rm -rf ~/.gradle/caches/jars-*
+
             - name: Build Android (Debug)
               run: |
                   chmod +x ./gradlew
-                  ./gradlew clean assembleDebug --no-daemon
+                  ./gradlew clean assembleDebug --no-daemon --refresh-dependencies
               working-directory: apps/tabata-ai/android
 
             - name: Upload APK artifact
