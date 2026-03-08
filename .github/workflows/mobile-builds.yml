@@ -41,7 +41,9 @@ jobs:
               working-directory: apps/tabata-ai
 
             - name: Build Android (Debug)
-              run: ./gradlew assembleDebug
+              run: |
+                  chmod +x ./gradlew
+                  ./gradlew assembleDebug
               working-directory: apps/tabata-ai/android
 
             - name: Upload APK artifact
