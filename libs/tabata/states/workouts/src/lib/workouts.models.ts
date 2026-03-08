@@ -29,6 +29,9 @@ export interface TabataWorkout {
     updatedByUserId: string;
     createdByUserId: string;
     generatedByAi: boolean;
+    targetMuscles: string[];
+    targetBodyParts: string[];
+    useEquipment: boolean;
 }
 
 /**
