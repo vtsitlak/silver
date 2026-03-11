@@ -120,7 +120,16 @@
             }
         },
         "lint": {
-            "executor": "@nx/eslint:lint"
+            "executor": "@nx/eslint:lint",
+            "options": {
+                "lintFilePatterns": [
+                    "apps/tabata-ai/src/**/*.ts",
+                    "apps/tabata-ai/src/**/*.html",
+                    "apps/tabata-ai/e2e/**/*.ts",
+                    "apps/tabata-ai/*.ts",
+                    "apps/tabata-ai/*.mjs"
+                ]
+            }
         },
         "test": {
             "executor": "@nx/jest:jest",

@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { MatDialog } from '@angular/material/dialog';
-import { signal } from '@angular/core';
 import { NotesTableListComponent } from './notes-table-list.component';
 import { NotesFacade } from '@silver/notes-store';
 import { Note } from '@silver/notes-store';

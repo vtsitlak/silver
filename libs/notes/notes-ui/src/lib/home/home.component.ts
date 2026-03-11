@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
-import { Note } from '@silver/notes-store';
 import { defaultDialogConfig } from '../shared/default-dialog-config';
 import { EditNoteDialogComponent } from '../edit-note-dialog/edit-note-dialog.component';
 import { MatDialog } from '@angular/material/dialog';

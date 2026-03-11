@@ -1,12 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NotesHttpService } from './notes-http.service';
 import { Note } from '../models/note';
 
 describe('NotesHttpService', () => {
     let service: NotesHttpService;
-    let httpClient: HttpClient;
     let httpTestingController: HttpTestingController;
 
     const mockNotes: Note[] = [
@@ -20,7 +19,6 @@ describe('NotesHttpService', () => {
             providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
         });
         service = TestBed.inject(NotesHttpService);
-        httpClient = TestBed.inject(HttpClient);
         httpTestingController = TestBed.inject(HttpTestingController);
     });
 

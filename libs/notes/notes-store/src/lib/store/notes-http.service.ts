@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Note } from '../models/note';
@@ -8,7 +8,7 @@ import { map } from 'rxjs/operators';
     providedIn: 'root'
 })
 export class NotesHttpService {
-    constructor(private http: HttpClient) {}
+    private readonly http = inject(HttpClient);
 
     findAllNotes(): Observable<Note[]> {
         return this.http.get<Note[]>('/api/notes').pipe(map((notes: Note[]) => notes));
