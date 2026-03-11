@@ -30,6 +30,12 @@ export const targetBodypartsOptions: TargetBodyRegions[] = [
 
 export type EquipmentCategory = 'Machine' | 'Free Weight' | 'Functional Tool' | 'Accessory' | 'Bodyweight';
 
+/** Equipment categories for workout editor (excludes Bodyweight). */
+export const EQUIPMENT_CATEGORY_OPTIONS: EquipmentCategory[] = ['Machine', 'Free Weight', 'Functional Tool', 'Accessory'];
+
+/** All body regions for main/secondary target selects. */
+export const BODY_REGION_OPTIONS: BodyRegion[] = ['Upper Body', 'Lower Body', 'Core', 'Cardio', 'Full Body'];
+
 export interface EquipmentItem {
     equipmentCategory: EquipmentCategory;
     equipmentOptions: string[];

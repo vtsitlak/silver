@@ -1,0 +1,63 @@
+<ion-header [translucent]="true">
+    <tbt-toolbar [title]="pageTitle()">
+        <ion-buttons slot="start">
+            <ion-back-button defaultHref="/tabs/workouts"></ion-back-button>
+        </ion-buttons>
+    </tbt-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+    <form (ngSubmit)="onSubmit()" class="workout-info-form" novalidate>
+        <ion-list>
+            <ion-item>
+                <ion-input [required]="true" id="workout-name" type="text" placeholder="Enter workout name" [formField]="infoForm.name">
+                    <ion-label position="stacked">Workout Name <span>*</span></ion-label>
+                </ion-input>
+            </ion-item>
+
+            <ion-item>
+                <ion-textarea [required]="true" id="workout-description" placeholder="Enter workout description" [formField]="infoForm.description" rows="3">
+                    <ion-label position="stacked">Description <span>*</span></ion-label>
+                </ion-textarea>
+            </ion-item>
+
+            <ion-item>
+                <ion-label position="stacked">Available equipment</ion-label>
+                <ion-select placeholder="Select equipment" [formField]="infoForm.availableEquipments" multiple="true" interface="action-sheet">
+                    @for (eq of equipmentOptions; track eq) {
+                        <ion-select-option [value]="eq">{{ eq }}</ion-select-option>
+                    }
+                </ion-select>
+            </ion-item>
+
+            <ion-item>
+                <ion-label position="stacked">Main target <span>*</span></ion-label>
+                <ion-select placeholder="Select main target" [formField]="infoForm.mainTargetBodypart" interface="action-sheet">
+                    @for (region of bodyRegionOptions; track region) {
+                        <ion-select-option [value]="region" [disabled]="mainTargetDisabled()(region)">
+                            {{ region }}
+                        </ion-select-option>
+                    }
+                </ion-select>
+            </ion-item>
+
+            <ion-item>
+                <ion-label position="stacked">Secondary targets</ion-label>
+                <ion-select placeholder="Select secondary targets" [formField]="infoForm.secondaryTargetBodyparts" multiple="true" interface="action-sheet">
+                    @for (region of bodyRegionOptions; track region) {
+                        <ion-select-option [value]="region" [disabled]="secondaryTargetDisabled()(region)">
+                            {{ region }}
+                        </ion-select-option>
+                    }
+                </ion-select>
+            </ion-item>
+        </ion-list>
+
+        <ion-button expand="block" type="button" (click)="onGenerateWithAi()" [disabled]="!isFormValid()" class="ion-margin-top"> Generate with AI </ion-button>
+
+        <div class="ion-margin-top">
+            <ion-button expand="block" fill="outline" type="button" (click)="onCancel()">Cancel</ion-button>
+            <ion-button expand="block" type="button" (click)="onSubmit()" [disabled]="!isFormValid()">Next</ion-button>
+        </div>
+    </form>
+</ion-content>

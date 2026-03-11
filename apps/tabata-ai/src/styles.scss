@@ -87,14 +87,29 @@ ion-toggle[aria-checked='true'] {
 /* Ion Button Variations */
 ion-button.primary,
 ion-button[color='primary'] {
+    --background: var(--color-primary);
+    --color: #ffffff;
+    --color-hover: #ffffff;
+    --color-activated: #ffffff;
+    --color-focused: #ffffff;
     background: var(--color-primary);
     color: #fff;
 }
+ion-button.primary::part(native),
+ion-button[color='primary']::part(native) {
+    color: #ffffff !important;
+}
 ion-button.primary:disabled,
 ion-button[color='primary'][disabled] {
-    background: #6d63c7; /* lighter version of primary */
+    --background: #6d63c7;
+    --color: #ffffff;
+    background: #6d63c7;
     color: #fff;
     opacity: 0.7;
+}
+ion-button.primary[disabled]::part(native),
+ion-button[color='primary'][disabled]::part(native) {
+    color: #ffffff !important;
 }
 ion-button[color='secondary'] {
     &.button-solid {
@@ -207,6 +222,14 @@ ion-item {
         --highlight-color-focused: var(--color-error);
     }
 
+    &.selected {
+        --background: rgb(243 244 246); /* gray-100, lighter background */
+    }
+
+    &[disabled] {
+        opacity: 0.5;
+    }
+
     ion-input,
     ion-textarea {
         --padding-start: 0;
@@ -236,6 +259,22 @@ textarea {
         border-color: var(--color-error);
         border-width: 2px;
     }
+}
+
+/* Exercise selector modal sheet (presented via ModalController) */
+.exercise-selector-modal-sheet {
+    --height: 85%;
+    --min-height: 70vh;
+    --max-height: 90vh;
+    --border-radius: 12px 12px 0 0;
+}
+
+/* Exercise details modal sheet (presented via ModalController) */
+.exercise-details-modal-sheet {
+    --height: 85%;
+    --min-height: 70vh;
+    --max-height: 90vh;
+    --border-radius: 12px 12px 0 0;
 }
 
 /* Custom Input Container */

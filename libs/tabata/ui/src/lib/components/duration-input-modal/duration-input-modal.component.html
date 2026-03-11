@@ -1,0 +1,32 @@
+<ion-modal [isOpen]="isOpen()" (didDismiss)="onDismiss()" [initialBreakpoint]="0.5" [breakpoints]="[0, 0.5]">
+    @if (getExerciseNameDisplay() !== '') {
+        <ion-header>
+            <ion-toolbar>
+                <ion-title>Duration</ion-title>
+                <ion-buttons slot="end">
+                    <ion-button (click)="onDismiss()">Cancel</ion-button>
+                    <ion-button (click)="onSave()" color="primary">Save</ion-button>
+                </ion-buttons>
+            </ion-toolbar>
+        </ion-header>
+        <ion-content class="ion-padding">
+            <p class="ion-padding-bottom">{{ getExerciseNameDisplay() }}</p>
+            <ion-item>
+                <ion-label position="stacked">Duration (seconds)</ion-label>
+                <ion-input type="number" min="1" [value]="durationSeconds()" (ionInput)="onDurationInput($event)" placeholder="60"></ion-input>
+            </ion-item>
+        </ion-content>
+    } @else {
+        <ion-header>
+            <ion-toolbar>
+                <ion-title>Duration</ion-title>
+                <ion-buttons slot="end">
+                    <ion-button (click)="onDismiss()">Close</ion-button>
+                </ion-buttons>
+            </ion-toolbar>
+        </ion-header>
+        <ion-content class="ion-padding">
+            <p>No exercise selected.</p>
+        </ion-content>
+    }
+</ion-modal>

@@ -9,7 +9,7 @@
         }
     },
     "projectType": "application",
-    "prefix": "app",
+    "prefix": "tbt",
     "sourceRoot": "apps/tabata-ai/src",
     "tags": ["scope:tabata"],
     "targets": {
@@ -89,7 +89,8 @@
         },
         "serve": {
             "options": {
-                "disableHostCheck": true
+                "disableHostCheck": true,
+                "proxyConfig": "apps/tabata-ai/proxy.json"
             },
             "executor": "@angular-devkit/build-angular:dev-server",
             "configurations": {

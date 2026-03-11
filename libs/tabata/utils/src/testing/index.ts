@@ -1,5 +1,8 @@
 /**
  * Central location for all test mocks used across tabata libs.
  */
+export * from './activated-route.mock';
+export * from './facades.mock';
+export { mockModalController } from './ionic.mock';
 export * from './shared-helpers.mock';
 export * as IonicMocks from './ionic.mock';

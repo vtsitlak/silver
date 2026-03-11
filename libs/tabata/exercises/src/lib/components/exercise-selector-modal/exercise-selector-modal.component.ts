@@ -1,43 +1,42 @@
-import { Component, ChangeDetectionStrategy, inject, input, output, signal, computed, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, inject, input, signal, computed, OnInit } from '@angular/core';
 import {
-    IonContent,
     IonHeader,
     IonToolbar,
     IonTitle,
     IonButtons,
     IonButton,
+    IonBadge,
+    IonContent,
     IonSearchbar,
     IonList,
     IonItem,
     IonLabel,
     IonCheckbox,
     IonIcon,
-    IonChip,
     IonSpinner,
     IonInfiniteScroll,
     IonInfiniteScrollContent,
-    IonModal,
     IonSelect,
     IonSelectOption
 } from '@ionic/angular/standalone';
+import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { close, checkmark, filterOutline } from 'ionicons/icons';
+import { checkmark } from 'ionicons/icons';
 import { ExercisesFacade, Exercise } from '@silver/tabata/states/exercises';
 
 @Component({
-    selector: 'lib-exercise-selector',
-    templateUrl: 'exercise-selector.component.html',
-    styleUrls: ['exercise-selector.component.scss'],
+    selector: 'tbt-exercise-selector-modal',
+    templateUrl: 'exercise-selector-modal.component.html',
+    styleUrls: ['exercise-selector-modal.component.scss'],
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
-        CommonModule,
         IonHeader,
         IonToolbar,
         IonTitle,
         IonButtons,
         IonButton,
+        IonBadge,
         IonContent,
         IonSearchbar,
         IonList,
@@ -45,24 +44,20 @@ import { ExercisesFacade, Exercise } from '@silver/tabata/states/exercises';
         IonLabel,
         IonCheckbox,
         IonIcon,
-        IonChip,
         IonSpinner,
         IonInfiniteScroll,
         IonInfiniteScrollContent,
-        IonModal,
         IonSelect,
         IonSelectOption
     ]
 })
-export class ExerciseSelectorComponent implements OnInit {
+export class ExerciseSelectorModalComponent implements OnInit {
     private readonly facade = inject(ExercisesFacade);
+    private readonly modalCtrl = inject(ModalController);
 
-    readonly multiple = input<boolean>(false);
+    readonly multiple = input<boolean>(true);
     readonly preselectedIds = input<string[]>([]);
     readonly maxSelection = input<number | null>(null);
-
-    readonly selectionConfirmed = output<Exercise[]>();
-    readonly selectionCancelled = output<void>();
 
     readonly exercises = this.facade.exercises;
     readonly isLoading = this.facade.isLoading;
@@ -72,15 +67,27 @@ export class ExerciseSelectorComponent implements OnInit {
     readonly bodyPartList = this.facade.bodyPartList;
 
     readonly searchTerm = signal('');
-    readonly selectedMuscle = signal<string | null>(null);
-    readonly selectedEquipment = signal<string | null>(null);
-    readonly selectedBodyPart = signal<string | null>(null);
+    readonly selectedMuscles = signal<string[]>([]);
+    readonly selectedEquipment = signal<string[]>([]);
+    readonly selectedBodyParts = signal<string[]>([]);
     readonly selectedExercises = signal<Map<string, Exercise>>(new Map());
 
     private currentOffset = 0;
     private readonly pageSize = 20;
+    private lastLoadMoreTime = 0;
+    private readonly loadMoreThrottleMs = 1500;
 
     readonly selectedCount = computed(() => this.selectedExercises().size);
+
+    readonly newlySelectedCount = computed(() => {
+        const selected = this.selectedExercises();
+        const preselectedIds = this.preselectedIds();
+        let count = 0;
+        selected.forEach((_, id) => {
+            if (!preselectedIds.includes(id)) count++;
+        });
+        return count;
+    });
 
     readonly canSelectMore = computed(() => {
         const max = this.maxSelection();
@@ -90,9 +97,9 @@ export class ExerciseSelectorComponent implements OnInit {
 
     readonly filteredExercises = computed(() => {
         const term = this.searchTerm().toLowerCase().trim();
-        const muscle = this.selectedMuscle();
+        const muscles = this.selectedMuscles();
         const equipment = this.selectedEquipment();
-        const bodyPart = this.selectedBodyPart();
+        const bodyParts = this.selectedBodyParts();
 
         let result = this.exercises();
 
@@ -100,23 +107,26 @@ export class ExerciseSelectorComponent implements OnInit {
             result = result.filter((ex) => ex.name.toLowerCase().includes(term));
         }
 
-        if (muscle) {
-            result = result.filter((ex) => ex.targetMuscles.some((m) => m.toLowerCase() === muscle.toLowerCase()));
+        if (muscles.length > 0) {
+            const lower = muscles.map((m) => m.toLowerCase());
+            result = result.filter((ex) => ex.targetMuscles.some((m) => lower.includes(m.toLowerCase())));
         }
 
-        if (equipment) {
-            result = result.filter((ex) => ex.equipments.some((e) => e.toLowerCase() === equipment.toLowerCase()));
+        if (equipment.length > 0) {
+            const lower = equipment.map((e) => e.toLowerCase());
+            result = result.filter((ex) => ex.equipments.some((e) => lower.includes(e.toLowerCase())));
         }
 
-        if (bodyPart) {
-            result = result.filter((ex) => ex.bodyParts.some((bp) => bp.toLowerCase() === bodyPart.toLowerCase()));
+        if (bodyParts.length > 0) {
+            const lower = bodyParts.map((bp) => bp.toLowerCase());
+            result = result.filter((ex) => ex.bodyParts.some((bp) => lower.includes(bp.toLowerCase())));
         }
 
         return result;
     });
 
     constructor() {
-        addIcons({ close, checkmark, filterOutline });
+        addIcons({ checkmark });
     }
 
     ngOnInit(): void {
@@ -151,38 +161,66 @@ export class ExerciseSelectorComponent implements OnInit {
         }
     }
 
+    onDidDismiss(): void {
+        // No-op when presented via ModalController; backdrop dismiss is handled by Ionic
+    }
+
     onSearchInput(ev: Event): void {
         const customEv = ev as CustomEvent<{ value: string }>;
         this.searchTerm.set(customEv.detail?.value ?? '');
     }
 
     onMuscleChange(ev: Event): void {
-        const customEv = ev as CustomEvent<{ value: string }>;
-        this.selectedMuscle.set(customEv.detail?.value || null);
+        const customEv = ev as CustomEvent<{ value: string | string[] }>;
+        const v = customEv.detail?.value;
+        this.selectedMuscles.set(Array.isArray(v) ? v : v ? [v] : []);
     }
 
     onEquipmentChange(ev: Event): void {
-        const customEv = ev as CustomEvent<{ value: string }>;
-        this.selectedEquipment.set(customEv.detail?.value || null);
+        const customEv = ev as CustomEvent<{ value: string | string[] }>;
+        const v = customEv.detail?.value;
+        this.selectedEquipment.set(Array.isArray(v) ? v : v ? [v] : []);
     }
 
     onBodyPartChange(ev: Event): void {
-        const customEv = ev as CustomEvent<{ value: string }>;
-        this.selectedBodyPart.set(customEv.detail?.value || null);
+        const customEv = ev as CustomEvent<{ value: string | string[] }>;
+        const v = customEv.detail?.value;
+        this.selectedBodyParts.set(Array.isArray(v) ? v : v ? [v] : []);
     }
 
     clearFilters(): void {
-        this.selectedMuscle.set(null);
-        this.selectedEquipment.set(null);
-        this.selectedBodyPart.set(null);
+        this.selectedMuscles.set([]);
+        this.selectedEquipment.set([]);
+        this.selectedBodyParts.set([]);
         this.searchTerm.set('');
+    }
+
+    resetSelections(): void {
+        const preselected = this.preselectedIds();
+        if (preselected.length === 0) {
+            this.selectedExercises.set(new Map());
+            return;
+        }
+        const exercises = this.exercises();
+        const map = new Map<string, Exercise>();
+        preselected.forEach((id) => {
+            const exercise = exercises.find((ex) => ex.exerciseId === id);
+            if (exercise) map.set(id, exercise);
+        });
+        this.selectedExercises.set(map);
     }
 
     isSelected(exercise: Exercise): boolean {
         return this.selectedExercises().has(exercise.exerciseId);
     }
 
+    isPreselected(exercise: Exercise): boolean {
+        return this.preselectedIds().includes(exercise.exerciseId);
+    }
+
     toggleSelection(exercise: Exercise): void {
+        if (this.isPreselected(exercise)) return;
+
         const map = new Map(this.selectedExercises());
 
         if (map.has(exercise.exerciseId)) {
@@ -203,21 +241,32 @@ export class ExerciseSelectorComponent implements OnInit {
     loadMore(event: Event): void {
         const infiniteScroll = event.target as HTMLIonInfiniteScrollElement;
 
+        if (this.isLoading()) {
+            infiniteScroll.complete();
+            return;
+        }
+        if (Date.now() - this.lastLoadMoreTime < this.loadMoreThrottleMs) {
+            infiniteScroll.complete();
+            return;
+        }
+
+        this.lastLoadMoreTime = Date.now();
         this.facade.getAllExercises({ limit: this.pageSize, offset: this.currentOffset });
         this.currentOffset += this.pageSize;
 
         setTimeout(() => {
             infiniteScroll.complete();
-        }, 500);
+        }, 800);
     }
 
     confirm(): void {
-        const selected = Array.from(this.selectedExercises().values());
-        this.selectionConfirmed.emit(selected);
+        const preselectedIds = this.preselectedIds();
+        const selected = Array.from(this.selectedExercises().values()).filter((ex) => !preselectedIds.includes(ex.exerciseId));
+        this.modalCtrl.dismiss({ selected }, 'confirm');
     }
 
     cancel(): void {
-        this.selectionCancelled.emit();
+        this.modalCtrl.dismiss(null, 'cancel');
     }
 
     formatName(name: string): string {

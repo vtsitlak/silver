@@ -1,0 +1,27 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.modal-scroll-content {
+    --background: var(--ion-background-color);
+    background: var(--ion-background-color);
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-ion-content {
+    flex: 1;
+    min-height: 0;
+}
+
+ion-checkbox {
+    --size: 24px;
+}
+
+ion-button ion-badge {
+    margin-inline-start: 6px;
+}

@@ -33,7 +33,7 @@ export interface TabataWorkout {
     targetMuscles: string[];
     mainTargetBodypart: BodyRegion;
     secondaryTargetBodyparts: BodyRegion[];
-    equipmentCategories: EquipmentCategory[];
+    availableEquipments: EquipmentCategory[];
 }
 
 /**

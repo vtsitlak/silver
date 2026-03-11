@@ -1,0 +1,12 @@
+/* Exercise details modal (presented via ModalController) */
+:host {
+    display: block;
+    height: 100%;
+}
+
+/* Ionic ion-item overrides for instruction list (shadow parts / CSS vars) */
+.instruction-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    --background: transparent;
+}

@@ -1,12 +1,11 @@
-import { Component, ChangeDetectionStrategy, inject, input, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, effect, inject, input, OnDestroy } from '@angular/core';
 import {
-    IonContent,
     IonHeader,
     IonToolbar,
     IonTitle,
     IonButtons,
-    IonBackButton,
+    IonButton,
+    IonContent,
     IonCard,
     IonCardHeader,
     IonCardTitle,
@@ -18,23 +17,23 @@ import {
     IonItem,
     IonSpinner
 } from '@ionic/angular/standalone';
+import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { bodyOutline, barbellOutline, fitnessOutline, listOutline } from 'ionicons/icons';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
 
 @Component({
-    selector: 'lib-exercise-details',
-    templateUrl: 'exercise-details.component.html',
-    styleUrls: ['exercise-details.component.scss'],
+    selector: 'tbt-exercise-details-modal',
+    templateUrl: './exercise-details-modal.component.html',
+    styleUrl: './exercise-details-modal.component.scss',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
-        CommonModule,
         IonHeader,
         IonToolbar,
         IonTitle,
         IonButtons,
-        IonBackButton,
+        IonButton,
         IonContent,
         IonCard,
         IonCardHeader,
@@ -48,10 +47,11 @@ import { ExercisesFacade } from '@silver/tabata/states/exercises';
         IonSpinner
     ]
 })
-export class ExerciseDetailsComponent implements OnInit, OnDestroy {
+export class ExerciseDetailsModalComponent implements OnDestroy {
+    private readonly modalCtrl = inject(ModalController);
     private readonly facade = inject(ExercisesFacade);
 
-    readonly exerciseId = input.required<string>();
+    readonly exerciseId = input<string>('');
 
     readonly exercise = this.facade.selectedExercise;
     readonly isLoading = this.facade.isLoading;
@@ -59,14 +59,20 @@ export class ExerciseDetailsComponent implements OnInit, OnDestroy {
 
     constructor() {
         addIcons({ bodyOutline, barbellOutline, fitnessOutline, listOutline });
-    }
-
-    ngOnInit(): void {
-        this.facade.getExerciseById(this.exerciseId());
+        effect(() => {
+            const id = this.exerciseId();
+            if (id) {
+                this.facade.getExerciseById(id);
+            }
+        });
     }
 
     ngOnDestroy(): void {
         this.facade.clearSelectedExercise();
+    }
+
+    onClose(): void {
+        this.modalCtrl.dismiss();
     }
 
     formatMuscle(muscle: string): string {

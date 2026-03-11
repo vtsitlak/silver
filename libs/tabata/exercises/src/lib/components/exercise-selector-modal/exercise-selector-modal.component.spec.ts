@@ -1,0 +1,132 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
+import { ExerciseSelectorModalComponent } from './exercise-selector-modal.component';
+import { ExercisesFacade, Exercise } from '@silver/tabata/states/exercises';
+import { ModalController } from '@ionic/angular/standalone';
+
+const mockExercises: Exercise[] = [
+    {
+        exerciseId: '1',
+        name: 'Push Up',
+        gifUrl: '',
+        targetMuscles: ['chest'],
+        bodyParts: ['upper body'],
+        equipments: ['body weight'],
+        secondaryMuscles: [],
+        instructions: []
+    }
+];
+
+const mockFacade = {
+    exercises: signal(mockExercises),
+    isLoading: signal(false),
+    error: signal<string | null>(null),
+    musclesList: signal([]),
+    equipmentList: signal([]),
+    bodyPartList: signal([]),
+    getAllExercises: jest.fn(),
+    filterExercises: jest.fn(),
+    getMusclesList: jest.fn(),
+    getEquipmentList: jest.fn(),
+    getBodyPartList: jest.fn()
+};
+
+const mockModalCtrl = {
+    dismiss: jest.fn()
+};
+
+describe('ExerciseSelectorModalComponent', () => {
+    let component: ExerciseSelectorModalComponent;
+    let fixture: ComponentFixture<ExerciseSelectorModalComponent>;
+
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [ExerciseSelectorModalComponent],
+            providers: [
+                { provide: ExercisesFacade, useValue: mockFacade },
+                { provide: ModalController, useValue: mockModalCtrl }
+            ]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(ExerciseSelectorModalComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
+
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
+
+    it('should dismiss with cancel role when cancel is called', () => {
+        component.cancel();
+        expect(mockModalCtrl.dismiss).toHaveBeenCalledWith(null, 'cancel');
+    });
+
+    it('should dismiss with selected exercises and confirm role on confirm', () => {
+        component.toggleSelection(mockExercises[0]);
+        component.confirm();
+        expect(mockModalCtrl.dismiss).toHaveBeenCalledWith({ selected: [mockExercises[0]] }, 'confirm');
+    });
+
+    it('should call dismiss when onDidDismiss is called (no-op, no error)', () => {
+        expect(() => component.onDidDismiss()).not.toThrow();
+    });
+
+    it('should clear selections when resetSelections is called (no preselected)', () => {
+        component.toggleSelection(mockExercises[0]);
+        expect(component.selectedCount()).toBe(1);
+        component.resetSelections();
+        expect(component.selectedCount()).toBe(0);
+    });
+
+    it('should treat preselected exercises as disabled and exclude from count', () => {
+        fixture.componentRef.setInput('preselectedIds', ['1']);
+        fixture.detectChanges();
+        component['initializePreselected']();
+        expect(component.selectedCount()).toBe(1);
+        expect(component.newlySelectedCount()).toBe(0);
+        expect(component.isPreselected(mockExercises[0])).toBe(true);
+        component.confirm();
+        expect(mockModalCtrl.dismiss).toHaveBeenCalledWith({ selected: [] }, 'confirm');
+    });
+
+    it('should only return newly selected on confirm when preselected exist', () => {
+        const ex2: Exercise = {
+            ...mockExercises[0],
+            exerciseId: '2',
+            name: 'Squat'
+        };
+        mockFacade.exercises.set([mockExercises[0], ex2]);
+        fixture.componentRef.setInput('preselectedIds', ['1']);
+        fixture.detectChanges();
+        component['initializePreselected']();
+        component.toggleSelection(ex2);
+        expect(component.newlySelectedCount()).toBe(1);
+        component.confirm();
+        expect(mockModalCtrl.dismiss).toHaveBeenCalledWith({ selected: [ex2] }, 'confirm');
+    });
+
+    it('should not toggle preselected exercise', () => {
+        fixture.componentRef.setInput('preselectedIds', ['1']);
+        fixture.detectChanges();
+        component['initializePreselected']();
+        component.toggleSelection(mockExercises[0]);
+        expect(component.selectedCount()).toBe(1);
+        component.toggleSelection(mockExercises[0]);
+        expect(component.selectedCount()).toBe(1);
+    });
+
+    it('resetSelections with preselected should keep only preselected', () => {
+        const ex2: Exercise = { ...mockExercises[0], exerciseId: '2', name: 'Squat' };
+        mockFacade.exercises.set([mockExercises[0], ex2]);
+        fixture.componentRef.setInput('preselectedIds', ['1']);
+        fixture.detectChanges();
+        component['initializePreselected']();
+        component.toggleSelection(ex2);
+        expect(component.selectedCount()).toBe(2);
+        component.resetSelections();
+        expect(component.selectedCount()).toBe(1);
+        expect(component.isSelected(mockExercises[0])).toBe(true);
+        expect(component.isSelected(ex2)).toBe(false);
+    });
+});

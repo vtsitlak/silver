@@ -34,7 +34,7 @@ export const WorkoutEditorStore = signalStore(
                 switchMap((id) =>
                     service.getWorkoutById(id).pipe(
                         tapResponse({
-                            next: (workout) => patchState(store, { workout, isLoading: false }),
+                            next: (workout) => patchState(store, { workout, workoutDraft: workout ? { ...workout } : {}, isLoading: false }),
                             error: (err: Error) => patchState(store, { error: err.message, isLoading: false })
                         }),
                         catchError(() => of(null))
