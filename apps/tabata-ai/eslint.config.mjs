@@ -6,6 +6,9 @@ export default [
   ...nx.configs['flat/angular'],
   ...nx.configs['flat/angular-template'],
   {
+    ignores: ['**/android/**', '**/build/**', '**/dist/**'],
+  },
+  {
     files: ['**/*.ts'],
     rules: {
       '@angular-eslint/directive-selector': [
