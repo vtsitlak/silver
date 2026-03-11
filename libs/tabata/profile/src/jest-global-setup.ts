@@ -5,6 +5,8 @@ if (typeof globalThis.fetch === 'undefined') {
 if (typeof globalThis.Response === 'undefined') {
     (globalThis as unknown as { Response: unknown }).Response = class {
         ok = true;
-        constructor() {}
+        constructor() {
+            return;
+        }
     };
 }

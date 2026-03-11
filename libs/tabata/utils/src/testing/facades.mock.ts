@@ -6,7 +6,7 @@
 /// <reference types="jest" />
 
 function mockFn(): jest.Mock {
-    return typeof jest !== 'undefined' ? jest.fn() : ((() => {}) as unknown as jest.Mock);
+    return typeof jest !== 'undefined' ? jest.fn() : ((() => { return; }) as unknown as jest.Mock);
 }
 
 /** Mock for AuthFacade (e.g. when testing components that use ToolbarComponent). */
