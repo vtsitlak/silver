@@ -23,6 +23,10 @@ export const routes: Routes = [
                 loadComponent: () => import('@silver/tabata/workouts-editor').then((m) => m.WorkoutPhaseComponent)
             },
             {
+                path: 'workouts/create/main-workout',
+                loadComponent: () => import('@silver/tabata/workouts-editor').then((m) => m.MainWorkoutComponent)
+            },
+            {
                 path: 'workouts/create/cooldown',
                 loadComponent: () => import('@silver/tabata/workouts-editor').then((m) => m.WorkoutPhaseComponent)
             },
@@ -38,6 +42,10 @@ export const routes: Routes = [
             {
                 path: 'workouts/edit/:workoutId/warmup',
                 loadComponent: () => import('@silver/tabata/workouts-editor').then((m) => m.WorkoutPhaseComponent)
+            },
+            {
+                path: 'workouts/edit/:workoutId/main-workout',
+                loadComponent: () => import('@silver/tabata/workouts-editor').then((m) => m.MainWorkoutComponent)
             },
             {
                 path: 'workouts/edit/:workoutId/cooldown',

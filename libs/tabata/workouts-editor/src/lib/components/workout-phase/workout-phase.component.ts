@@ -65,10 +65,11 @@ export class WorkoutPhaseComponent implements OnInit {
 
     readonly backHref = computed(() => {
         const id = this.workoutId();
+        const phase = this.phaseType();
         if (this.isEditMode() && id) {
-            return `/tabs/workouts/edit/${id}/info`;
+            return phase === 'cooldown' ? `/tabs/workouts/edit/${id}/main-workout` : `/tabs/workouts/edit/${id}/info`;
         }
-        return '/tabs/workouts/create/info';
+        return phase === 'cooldown' ? '/tabs/workouts/create/main-workout' : '/tabs/workouts/create/info';
     });
 
     readonly allHaveDuration = computed(() => {
@@ -123,13 +124,13 @@ export class WorkoutPhaseComponent implements OnInit {
         const id = this.workoutId();
         if (this.isEditMode() && id) {
             if (phase === 'warmup') {
-                this.router.navigate(['/tabs/workouts/edit', id, 'cooldown']);
+                this.router.navigate(['/tabs/workouts/edit', id, 'main-workout']);
             } else {
                 this.router.navigate(['/tabs/workouts']);
             }
         } else {
             if (phase === 'warmup') {
-                this.router.navigate(['/tabs/workouts/create/cooldown']);
+                this.router.navigate(['/tabs/workouts/create/main-workout']);
             } else {
                 this.router.navigate(['/tabs/workouts']);
             }

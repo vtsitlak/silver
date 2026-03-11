@@ -16,5 +16,11 @@ export const mockModalController = {
                   present: jest.fn(),
                   onDidDismiss: jest.fn().mockResolvedValue({})
               })
-            : ((() => Promise.resolve({ present: () => { return; }, onDidDismiss: Promise.resolve({}) })) as unknown as jest.Mock)
+            : ((() =>
+                  Promise.resolve({
+                      present: () => {
+                          return;
+                      },
+                      onDidDismiss: Promise.resolve({})
+                  })) as unknown as jest.Mock)
 };
