@@ -15,12 +15,38 @@ export const routes: Routes = [
                 loadComponent: () => import('@silver/tabata/workouts').then((m) => m.WorkoutsComponent)
             },
             {
+                path: 'workouts/create/info',
+                loadComponent: () => import('@silver/tabata/workouts-editor').then((m) => m.WorkoutInfoComponent)
+            },
+            {
+                path: 'workouts/create/warmup',
+                loadComponent: () => import('@silver/tabata/workouts-editor').then((m) => m.WorkoutPhaseComponent)
+            },
+            {
+                path: 'workouts/create/cooldown',
+                loadComponent: () => import('@silver/tabata/workouts-editor').then((m) => m.WorkoutPhaseComponent)
+            },
+            {
                 path: 'workouts/create',
-                loadComponent: () => import('@silver/tabata/workouts-editor').then((m) => m.WorkoutEditorComponent)
+                redirectTo: 'workouts/create/info',
+                pathMatch: 'full'
+            },
+            {
+                path: 'workouts/edit/:workoutId/info',
+                loadComponent: () => import('@silver/tabata/workouts-editor').then((m) => m.WorkoutInfoComponent)
+            },
+            {
+                path: 'workouts/edit/:workoutId/warmup',
+                loadComponent: () => import('@silver/tabata/workouts-editor').then((m) => m.WorkoutPhaseComponent)
+            },
+            {
+                path: 'workouts/edit/:workoutId/cooldown',
+                loadComponent: () => import('@silver/tabata/workouts-editor').then((m) => m.WorkoutPhaseComponent)
             },
             {
                 path: 'workouts/edit/:workoutId',
-                loadComponent: () => import('@silver/tabata/workouts-editor').then((m) => m.WorkoutEditorComponent)
+                redirectTo: 'workouts/edit/:workoutId/info',
+                pathMatch: 'full'
             },
             {
                 path: 'workouts/:workoutId',

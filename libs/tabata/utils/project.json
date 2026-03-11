@@ -2,7 +2,7 @@
     "name": "utils",
     "$schema": "../../../node_modules/nx/schemas/project-schema.json",
     "sourceRoot": "libs/tabata/utils/src",
-    "prefix": "lib",
+    "prefix": "tbt",
     "projectType": "library",
     "tags": ["scope:tabata"],
     "targets": {

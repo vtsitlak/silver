@@ -51,7 +51,11 @@ export const ExercisesStore = signalStore(
                     const { limit = 10, offset = 0 } = params ?? {};
                     return exercisesService.getAllExercises(limit, offset).pipe(
                         tapResponse({
-                            next: (exercises) => patchState(store, { exercises, isLoading: false }),
+                            next: (exercises) => {
+                                const current = store.exercises();
+                                const nextExercises = offset > 0 ? [...current, ...exercises] : exercises;
+                                patchState(store, { exercises: nextExercises, isLoading: false });
+                            },
                             error: (err: Error) => patchState(store, { error: err.message, isLoading: false })
                         }),
                         catchError((err: unknown) => {
@@ -174,7 +178,12 @@ export const ExercisesStore = signalStore(
                     switchMap((options) =>
                         exercisesService.filterExercises(options).pipe(
                             tapResponse({
-                                next: (exercises) => patchState(store, { exercises, isLoading: false }),
+                                next: (exercises) => {
+                                    const current = store.exercises();
+                                    const offset = options.offset ?? 0;
+                                    const nextExercises = offset > 0 ? [...current, ...exercises] : exercises;
+                                    patchState(store, { exercises: nextExercises, isLoading: false });
+                                },
                                 error: (err: Error) => patchState(store, { error: err.message, isLoading: false })
                             }),
                             catchError((err: unknown) => {

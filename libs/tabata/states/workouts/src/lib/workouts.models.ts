@@ -1,5 +1,6 @@
-// Workout and store state models for tabata-workouts.
+import type { BodyRegion, EquipmentCategory } from '@silver/shared/helpers';
 
+// Workout and store state models for tabata-workouts.
 export interface WorkoutsState {
     workouts: TabataWorkout[];
     isLoading: boolean;
@@ -30,8 +31,9 @@ export interface TabataWorkout {
     createdByUserId: string;
     generatedByAi: boolean;
     targetMuscles: string[];
-    targetBodyParts: string[];
-    useEquipment: boolean;
+    mainTargetBodypart: BodyRegion;
+    secondaryTargetBodyparts: BodyRegion[];
+    availableEquipments: EquipmentCategory[];
 }
 
 /**

@@ -11,13 +11,13 @@ const mockAuthFacade = {
     usePassword: () => true,
     useGoogle: () => false,
     hasError: () => false,
-    sign: () => {},
-    register: () => {},
-    sendPasswordResetEmail: () => {},
-    updateDisplayName: () => {},
-    updatePassword: () => {},
-    logout: () => {},
-    getUser: () => {}
+    sign: () => { return; },
+    register: () => { return; },
+    sendPasswordResetEmail: () => { return; },
+    updateDisplayName: () => { return; },
+    updatePassword: () => { return; },
+    logout: () => { return; },
+    getUser: () => { return; }
 };
 
 describe('LoginComponent', () => {

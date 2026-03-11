@@ -1,0 +1,67 @@
+<ion-header [translucent]="true">
+    <tbt-toolbar [title]="pageTitle()">
+        <ion-buttons slot="start">
+            <ion-back-button [defaultHref]="backHref()"></ion-back-button>
+        </ion-buttons>
+    </tbt-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+    <p class="ion-text-center ion-color-medium ion-padding-bottom">
+        {{ phaseType() === 'warmup' ? 'Add exercises and set duration for each.' : 'Add exercises and set duration for each.' }}
+    </p>
+
+    <ion-button expand="block" (click)="openExerciseSelectorModal()"> Add exercises </ion-button>
+
+    @if (phaseItems().length > 0) {
+        <div class="phase-list ion-margin-top">
+            <h3 class="ion-padding-start">{{ phaseType() === 'warmup' ? 'Warmup exercises' : 'Cooldown exercises' }}</h3>
+            <div class="flex justify-between items-center ion-padding-start ion-padding-end ion-padding-bottom">
+                <span class="text-gray-600">{{ phaseItems().length }} {{ phaseItems().length === 1 ? 'exercise' : 'exercises' }}</span>
+                <span class="font-medium">Total: {{ formatDuration(totalDurationSeconds()) }}</span>
+            </div>
+            <ion-list lines="full">
+                @for (item of phaseItems(); track item.exercise.exerciseId; let i = $index) {
+                    <ion-item>
+                        <ion-label>
+                            <button
+                                type="button"
+                                class="cursor-pointer font-medium hover:underline text-left w-full py-1"
+                                (click)="openExerciseDetailsModal(item.exercise.exerciseId)"
+                                (keydown.enter)="openExerciseDetailsModal(item.exercise.exerciseId)"
+                                (keydown.space)="openExerciseDetailsModal(item.exercise.exerciseId); $event.preventDefault()"
+                            >
+                                {{ formatName(item.exercise.name) }}
+                            </button>
+                        </ion-label>
+                        <div class="flex items-center gap-1" slot="end">
+                            <ion-button fill="clear" size="small" (click)="openDurationModal(i)" aria-label="Edit duration">
+                                <span class="text-gray-600">{{ formatDuration(item.durationSeconds ?? 60) }}</span>
+                                <ion-icon name="create-outline"></ion-icon>
+                            </ion-button>
+                            <ion-button fill="clear" color="danger" size="small" (click)="removePhaseItem(i)" aria-label="Remove">
+                                <ion-icon name="trash-outline"></ion-icon>
+                            </ion-button>
+                        </div>
+                    </ion-item>
+                }
+            </ion-list>
+        </div>
+    }
+
+    <tbt-duration-input-modal
+        [isOpen]="durationModalOpen()"
+        [exerciseName]="durationModalExerciseName()"
+        [durationSeconds]="durationInputSeconds()"
+        (didDismiss)="closeDurationModal()"
+        (durationChange)="durationInputSeconds.set($event)"
+        (save)="saveDuration()"
+    ></tbt-duration-input-modal>
+</ion-content>
+
+<ion-footer class="ion-no-border">
+    <div class="ion-padding">
+        <ion-button expand="block" fill="outline" type="button" (click)="onCancel()">Cancel</ion-button>
+        <ion-button expand="block" type="button" (click)="onNext()" [disabled]="!allHaveDuration()">Next</ion-button>
+    </div>
+</ion-footer>

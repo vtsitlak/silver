@@ -1,0 +1,14 @@
+{
+    "/api/workouts": {
+        "target": "https://silver-tabata-ai.vercel.app",
+        "secure": true
+    },
+    "/api/exercisedb/**": {
+        "target": "https://www.exercisedb.dev",
+        "secure": true,
+        "changeOrigin": true,
+        "pathRewrite": {
+            "^/api/exercisedb": "/api/v1"
+        }
+    }
+}

@@ -2,7 +2,7 @@
     "name": "exercises",
     "$schema": "../../../node_modules/nx/schemas/project-schema.json",
     "sourceRoot": "libs/tabata/exercises/src",
-    "prefix": "lib",
+    "prefix": "tbt",
     "projectType": "library",
     "tags": ["scope:tabata"],
     "targets": {
