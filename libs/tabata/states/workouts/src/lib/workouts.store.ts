@@ -37,7 +37,17 @@ export const WorkoutsStore = signalStore(
             )
         )(loadTrigger);
         return {
-            loadWorkouts: () => loadTrigger.next()
+            loadWorkouts: () => loadTrigger.next(),
+            removeWorkout: (id: string) =>
+                workoutsService.deleteWorkout(id).pipe(
+                    tap(() => patchState(store, { workouts: store.workouts().filter((w) => w.id !== id) })),
+                    catchError((err: unknown) => {
+                        patchState(store, {
+                            error: err instanceof Error ? err.message : String(err)
+                        });
+                        return of({ success: false });
+                    })
+                )
         };
     })
 );

@@ -25,6 +25,10 @@ export class WorkoutsService {
         return this.http.get<TabataWorkout | null>(this.apiUrl(`/api/workouts/${encodeURIComponent(id)}`));
     }
 
+    deleteWorkout(id: string): Observable<{ success: boolean }> {
+        return this.http.delete<{ success: boolean }>(this.apiUrl(`/api/workouts/${encodeURIComponent(id)}`));
+    }
+
     /** POST a new workout (proxied to Upstash JSON.ARRAPPEND). */
     addWorkout(workout: TabataWorkout): Observable<{ success: boolean }> {
         return this.http.post<{ success: boolean }>(this.apiUrl('/api/workouts'), workout);

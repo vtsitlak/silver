@@ -21,16 +21,15 @@ export interface TabataWorkout {
     name: string;
     description?: string;
     totalDurationMinutes: number;
-    warmup?: Phase;
+    warmup: Phase;
     blocks: TabataBlock[];
-    cooldown?: Phase;
+    cooldown: Phase;
     script?: string;
     createdAt: string;
     updatedAt?: string;
     updatedByUserId: string;
     createdByUserId: string;
     generatedByAi: boolean;
-    targetMuscles: string[];
     mainTargetBodypart: BodyRegion;
     secondaryTargetBodyparts: BodyRegion[];
     availableEquipments: EquipmentCategory[];

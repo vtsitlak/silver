@@ -1,11 +1,14 @@
 import { Component, ChangeDetectionStrategy, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonContent, IonHeader, IonSearchbar, IonButton, IonList, IonItem, IonIcon } from '@ionic/angular/standalone';
+import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
 import { ToolbarComponent } from '@silver/tabata/ui';
 import { WorkoutsFacade, TabataWorkout } from '@silver/tabata/states/workouts';
+import { ToastService } from '@silver/tabata/helpers';
 import { WorkoutItemComponent } from '../workout-item/workout-item.component';
+import { WorkoutDetailsModalComponent } from '../workout-details-modal/workout-details-modal.component';
 
 @Component({
     selector: 'tbt-workouts',
@@ -18,6 +21,8 @@ import { WorkoutItemComponent } from '../workout-item/workout-item.component';
 export class WorkoutsComponent {
     private readonly facade = inject(WorkoutsFacade);
     private readonly router = inject(Router);
+    private readonly modalCtrl = inject(ModalController);
+    private readonly toast = inject(ToastService);
 
     constructor() {
         addIcons({ add });
@@ -45,7 +50,34 @@ export class WorkoutsComponent {
         this.router.navigate(['/tabs/workouts/create']);
     }
 
-    onWorkoutClick(workout: TabataWorkout): void {
+    async onDetailsClick(workout: TabataWorkout): Promise<void> {
+        const modal = await this.modalCtrl.create({
+            component: WorkoutDetailsModalComponent,
+            componentProps: { workout }
+        });
+        await modal.present();
+    }
+
+    onEditClick(workout: TabataWorkout): void {
+        this.router.navigate(['/tabs/workouts/edit', workout.id, 'info']);
+    }
+
+    onPlayClick(workout: TabataWorkout): void {
         this.router.navigate(['/tabs/workouts', workout.id]);
+    }
+
+    onRemoveClick(workout: TabataWorkout): void {
+        this.facade.removeWorkout(workout.id).subscribe({
+            next: (res) => {
+                if (res?.success) {
+                    this.toast.showSuccess('Workout removed');
+                } else {
+                    this.toast.showError(this.facade.error() ?? 'Failed to remove workout');
+                }
+            },
+            error: () => {
+                this.toast.showError(this.facade.error() ?? 'Failed to remove workout');
+            }
+        });
     }
 }

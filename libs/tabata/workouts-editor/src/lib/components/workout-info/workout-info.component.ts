@@ -25,6 +25,7 @@ interface WorkoutInfoFormModel {
     mainTargetBodypart: BodyRegion | null;
     availableEquipments: EquipmentCategory[];
     secondaryTargetBodyparts: BodyRegion[];
+    generatedByAi: boolean;
 }
 
 @Component({
@@ -71,7 +72,8 @@ export class WorkoutInfoComponent implements OnInit {
         description: '',
         mainTargetBodypart: null,
         availableEquipments: [],
-        secondaryTargetBodyparts: []
+        secondaryTargetBodyparts: [],
+        generatedByAi: false
     });
 
     infoForm = form(this.infoModel, (schemaPath) => {
@@ -97,7 +99,8 @@ export class WorkoutInfoComponent implements OnInit {
                         description: d.description ?? '',
                         mainTargetBodypart: d.mainTargetBodypart ?? null,
                         availableEquipments: d.availableEquipments ?? [],
-                        secondaryTargetBodyparts: d.secondaryTargetBodyparts ?? []
+                        secondaryTargetBodyparts: d.secondaryTargetBodyparts ?? [],
+                        generatedByAi: d.generatedByAi ?? false
                     });
                 });
             }
@@ -116,6 +119,10 @@ export class WorkoutInfoComponent implements OnInit {
 
     onGenerateWithAi(): void {
         if (this.infoForm().invalid()) return;
+        this.infoModel.set({ ...this.infoModel(), generatedByAi: true });
+        this.facade.updateDraft({
+            generatedByAi: true
+        });
         // TODO: wire to AI generation
     }
 
@@ -131,8 +138,9 @@ export class WorkoutInfoComponent implements OnInit {
             name: m.name || undefined,
             description: m.description || undefined,
             mainTargetBodypart: m.mainTargetBodypart ?? undefined,
-            availableEquipments: m.availableEquipments.length > 0 ? m.availableEquipments : undefined,
-            secondaryTargetBodyparts: m.secondaryTargetBodyparts.length > 0 ? m.secondaryTargetBodyparts : undefined
+            availableEquipments: m.availableEquipments,
+            secondaryTargetBodyparts: m.secondaryTargetBodyparts,
+            generatedByAi: m.generatedByAi
         });
         const id = this.workoutId();
         if (id) {

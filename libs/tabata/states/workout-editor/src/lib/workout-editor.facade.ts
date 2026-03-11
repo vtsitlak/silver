@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { WorkoutEditorStore } from './workout-editor.store';
 import type { CreateWorkoutPayload, UpdateWorkoutPayload, WorkoutDraft } from './workout-editor.models';
+import type { TabataWorkout } from '@silver/tabata/states/workouts';
 
 @Injectable({ providedIn: 'root' })
 export class WorkoutEditorFacade {
@@ -26,6 +27,21 @@ export class WorkoutEditorFacade {
 
     updateWorkout(id: string, payload: UpdateWorkoutPayload): void {
         this.store.updateWorkout(id, payload);
+    }
+
+    /** Call before a save started outside the store (e.g. from WorkoutSubmitService). */
+    startSave(): void {
+        this.store.startSave();
+    }
+
+    /** Update store with the workout returned from create/update API. */
+    setWorkoutFromResponse(workout: TabataWorkout): void {
+        this.store.setWorkoutFromResponse(workout);
+    }
+
+    /** Set save error when create/update fails outside the store. */
+    setSaveError(message: string): void {
+        this.store.setSaveError(message);
     }
 
     deleteWorkout(id: string): void {

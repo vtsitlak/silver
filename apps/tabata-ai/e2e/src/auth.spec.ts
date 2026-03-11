@@ -25,8 +25,16 @@ test.describe('Authentication', () => {
     });
 
     test('should successfully login with valid credentials', async ({ page }) => {
-        await page.getByLabel('Email').or(page.locator('#email')).first().fill(TEST_USER_EMAIL ?? '');
-        await page.getByLabel('Password').or(page.locator('#password')).first().fill(TEST_USER_PASSWORD ?? '');
+        await page
+            .getByLabel('Email')
+            .or(page.locator('#email'))
+            .first()
+            .fill(TEST_USER_EMAIL ?? '');
+        await page
+            .getByLabel('Password')
+            .or(page.locator('#password'))
+            .first()
+            .fill(TEST_USER_PASSWORD ?? '');
 
         await Promise.all([page.waitForURL(/\/tabs\/home/, { timeout: 15000 }), page.getByRole('button', { name: 'Login' }).click()]);
 

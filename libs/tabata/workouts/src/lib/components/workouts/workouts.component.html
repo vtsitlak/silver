@@ -25,7 +25,13 @@
     @if (!isLoading() && !error()) {
         <ion-list>
             @for (workout of filteredWorkouts(); track workout.id) {
-                <tbt-workout-item [workout]="workout" (workoutClick)="onWorkoutClick($event)"></tbt-workout-item>
+                <tbt-workout-item
+                    [workout]="workout"
+                    (detailsClick)="onDetailsClick($event)"
+                    (editClick)="onEditClick($event)"
+                    (playClick)="onPlayClick($event)"
+                    (removeClick)="onRemoveClick($event)"
+                ></tbt-workout-item>
             } @empty {
                 <ion-item lines="none">
                     <p i18n>No workouts yet.</p>

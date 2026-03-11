@@ -1,0 +1,108 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-title>Workout details</ion-title>
+        <ion-buttons slot="end">
+            <ion-button (click)="onClose()" aria-label="Close">
+                <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding">
+    @if (workout(); as w) {
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold mb-2">{{ w.name }}</h1>
+            @if (w.description) {
+                <p class="text-gray-500 mb-4">{{ w.description }}</p>
+            }
+        </div>
+
+        <div class="flex flex-wrap gap-2 mb-4">
+            <ion-chip color="primary">
+                <ion-icon name="time-outline"></ion-icon>
+                <ion-label>{{ formatDuration(w.totalDurationMinutes) }}</ion-label>
+            </ion-chip>
+            <ion-chip color="secondary">
+                <ion-icon name="fitness-outline"></ion-icon>
+                <ion-label>{{ w.blocks.length }} {{ w.blocks.length === 1 ? 'block' : 'blocks' }}</ion-label>
+            </ion-chip>
+            @if (w.generatedByAi) {
+                <ion-chip color="tertiary">
+                    <ion-icon name="flash-outline"></ion-icon>
+                    <ion-label>AI Generated</ion-label>
+                </ion-chip>
+            }
+        </div>
+
+        <div class="flex gap-2 mb-6">
+            <ion-button expand="block" color="primary" (click)="onPlay()">
+                <ion-icon slot="start" name="play-circle"></ion-icon>
+                Play
+            </ion-button>
+            <ion-button expand="block" fill="outline" (click)="onEdit()">
+                <ion-icon slot="start" name="create-outline"></ion-icon>
+                Edit
+            </ion-button>
+        </div>
+
+        @if (w.warmup) {
+            <ion-card class="mb-3">
+                <ion-card-header>
+                    <ion-card-title class="text-lg">Warmup</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                    <p class="text-sm text-gray-500">Duration: {{ formatSecondsToMinutes(w.warmup.totalDurationSeconds) }} min</p>
+                    @if (w.warmup.movements.length > 0) {
+                        <p class="text-sm text-gray-400 mt-1">{{ w.warmup.movements.length }} exercises</p>
+                    }
+                </ion-card-content>
+            </ion-card>
+        }
+
+        <h2 class="text-lg font-semibold mt-6 mb-3">Tabata Blocks</h2>
+        @for (block of w.blocks; track $index) {
+            <ion-card class="mb-3">
+                <ion-card-header>
+                    <ion-card-title class="text-base">Block {{ $index + 1 }}</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                    <div class="flex flex-wrap gap-2 mb-3 text-sm text-gray-500">
+                        <span class="flex items-center gap-1">
+                            <ion-icon name="time-outline"></ion-icon>
+                            ~{{ getBlockDuration(block) }} min
+                        </span>
+                        <span>|</span>
+                        <span>{{ block.rounds }} rounds</span>
+                        <span>|</span>
+                        <span>{{ block.workDurationSeconds }}s work / {{ block.restDurationSeconds }}s rest</span>
+                    </div>
+                    <ion-list lines="none" class="p-0 bg-transparent">
+                        <ion-item class="bg-transparent">
+                            <ion-label class="text-sm">{{ block.exerciseId }}</ion-label>
+                        </ion-item>
+                    </ion-list>
+                    @if (block.interBlockRestSeconds > 0) {
+                        <p class="text-sm text-gray-400 mt-2 flex items-center gap-1">
+                            <ion-icon name="pause-outline"></ion-icon>
+                            {{ block.interBlockRestSeconds }}s rest after block
+                        </p>
+                    }
+                </ion-card-content>
+            </ion-card>
+        }
+
+        @if (w.cooldown) {
+            <ion-card class="mb-3">
+                <ion-card-header>
+                    <ion-card-title class="text-lg">Cooldown</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                    <p class="text-sm text-gray-500">Duration: {{ formatSecondsToMinutes(w.cooldown.totalDurationSeconds) }} min</p>
+                    @if (w.cooldown.movements.length > 0) {
+                        <p class="text-sm text-gray-400 mt-1">{{ w.cooldown.movements.length }} exercises</p>
+                    }
+                </ion-card-content>
+            </ion-card>
+        }
+    }
+</ion-content>

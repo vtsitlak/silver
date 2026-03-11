@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { WorkoutsStore } from './workouts.store';
+import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class WorkoutsFacade {
@@ -12,5 +13,9 @@ export class WorkoutsFacade {
 
     loadWorkouts(): void {
         this.store.loadWorkouts();
+    }
+
+    removeWorkout(id: string): Observable<{ success: boolean }> {
+        return this.store.removeWorkout(id);
     }
 }

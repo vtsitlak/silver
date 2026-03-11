@@ -8,6 +8,7 @@ import { ToolbarComponent, DurationInputModalComponent } from '@silver/tabata/ui
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { Exercise, ExerciseSelectorModalComponent, ExerciseDetailsModalComponent } from '@silver/tabata/exercises';
 import type { Phase } from '@silver/tabata/states/workouts';
+import { WorkoutSubmitService } from '../../services/workout-submit.service';
 
 export type WorkoutPhaseType = 'warmup' | 'cooldown';
 
@@ -41,6 +42,7 @@ export class WorkoutPhaseComponent implements OnInit {
     private readonly router = inject(Router);
     private readonly facade = inject(WorkoutEditorFacade);
     private readonly modalCtrl = inject(ModalController);
+    private readonly workoutSubmitService = inject(WorkoutSubmitService);
 
     constructor() {
         addIcons({ createOutline, trashOutline });
@@ -62,6 +64,7 @@ export class WorkoutPhaseComponent implements OnInit {
     });
 
     readonly draft = this.facade.workoutDraft;
+    readonly isSaving = this.facade.isSaving;
 
     readonly backHref = computed(() => {
         const id = this.workoutId();
@@ -78,6 +81,8 @@ export class WorkoutPhaseComponent implements OnInit {
     });
 
     readonly totalDurationSeconds = computed(() => this.phaseItems().reduce((sum, p) => sum + (p.durationSeconds ?? 0), 0));
+
+    readonly nextButtonLabel = computed(() => (this.phaseType() === 'cooldown' ? 'Finish' : 'Next'));
 
     readonly editingItem = computed(() => {
         const idx = this.durationModalItemIndex();
@@ -121,19 +126,20 @@ export class WorkoutPhaseComponent implements OnInit {
         } else {
             this.facade.updateDraft({ cooldown: phaseData });
         }
-        const id = this.workoutId();
-        if (this.isEditMode() && id) {
-            if (phase === 'warmup') {
+        if (phase === 'warmup') {
+            const id = this.workoutId();
+            if (this.isEditMode() && id) {
                 this.router.navigate(['/tabs/workouts/edit', id, 'main-workout']);
             } else {
-                this.router.navigate(['/tabs/workouts']);
+                this.router.navigate(['/tabs/workouts/create/main-workout']);
             }
         } else {
-            if (phase === 'warmup') {
-                this.router.navigate(['/tabs/workouts/create/main-workout']);
-            } else {
-                this.router.navigate(['/tabs/workouts']);
-            }
+            this.workoutSubmitService.submitWorkout().subscribe({
+                next: () => this.router.navigate(['/tabs/workouts']),
+                error: () => {
+                    /* Error is reflected in facade.error(); navigation is skipped. */
+                }
+            });
         }
     }
 
