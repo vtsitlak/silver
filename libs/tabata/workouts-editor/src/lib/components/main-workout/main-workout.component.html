@@ -1,0 +1,67 @@
+<ion-header [translucent]="true">
+    <tbt-toolbar [title]="pageTitle()">
+        <ion-buttons slot="start">
+            <ion-back-button [defaultHref]="backHref()"></ion-back-button>
+        </ion-buttons>
+    </tbt-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+    <div class="ion-text-center ion-color-medium ion-padding-bottom space-y-1">
+        <p> Add blocks and exercises. Work {{ workSeconds }}s / Rest {{ restSeconds }}s · 8 rounds (fixed) per block. </p>
+        <p> Rest {{ interBlockRestSeconds }}s between blocks. Total main phase: {{ totalDurationMinutes() }} min. </p>
+    </div>
+
+    <ion-accordion-group [value]="addBlockAccordionValue()">
+        @for (block of blocks(); track $index; let i = $index) {
+            <ion-accordion [value]="'block-' + i">
+                <ion-item slot="header" class="accordion-header">
+                    <ion-label>
+                        <h2 class="font-medium">Block {{ i + 1 }}</h2>
+                        <p class="text-sm text-gray-500"> 8 rounds · {{ block.exercise ? '1 exercise' : 'No exercise' }} </p>
+                    </ion-label>
+                </ion-item>
+                <div slot="content" class="accordion-content ion-padding">
+                    <p class="text-sm text-gray-500 mb-2">Work {{ workSeconds }}s / Rest {{ restSeconds }}s · 8 rounds (fixed)</p>
+
+                    <div class="mb-2 flex items-center justify-between">
+                        <span class="font-medium">Exercise</span>
+                        <ion-button fill="outline" size="small" (click)="openExerciseSelectorForBlock(i)">
+                            <ion-icon name="create-outline"></ion-icon>
+                            {{ block.exercise ? 'Change exercise' : 'Add exercise' }}
+                        </ion-button>
+                    </div>
+                    @if (block.exercise) {
+                        <ion-item>
+                            <ion-label>
+                                <button
+                                    type="button"
+                                    class="cursor-pointer font-medium hover:underline text-left w-full py-1"
+                                    (click)="openExerciseDetailsModal(block.exercise.exerciseId)"
+                                >
+                                    {{ formatName(block.exercise.name) }}
+                                </button>
+                            </ion-label>
+                            <ion-button fill="clear" color="danger" size="small" slot="end" (click)="clearExerciseFromBlock(i)" aria-label="Remove">
+                                <ion-icon name="trash-outline"></ion-icon>
+                            </ion-button>
+                        </ion-item>
+                    } @else {
+                        <p class="text-sm text-gray-500 ion-padding-start">No exercise yet. Add an exercise to this block.</p>
+                    }
+
+                    <ion-button fill="clear" color="danger" size="small" class="ion-margin-top" (click)="removeBlock(i)">Remove block</ion-button>
+                </div>
+            </ion-accordion>
+        }
+    </ion-accordion-group>
+
+    <ion-button expand="block" fill="outline" class="ion-margin-top" (click)="addBlock()"> Add block </ion-button>
+</ion-content>
+
+<ion-footer class="ion-no-border">
+    <div class="ion-padding">
+        <ion-button expand="block" fill="outline" type="button" (click)="onCancel()">Cancel</ion-button>
+        <ion-button expand="block" type="button" (click)="onNext()" [disabled]="!canGoNext()">Next</ion-button>
+    </div>
+</ion-footer>

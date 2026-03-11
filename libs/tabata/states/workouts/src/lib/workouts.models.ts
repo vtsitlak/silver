@@ -48,11 +48,10 @@ export interface Phase {
  * A specific 4-minute Tabata Block.
  */
 export interface TabataBlock {
-    blockName: string; // e.g., "Cardio" or "Lower Body"
     rounds: number; // Usually 8
     workDurationSeconds: number; // Usually 20
     restDurationSeconds: number; // Usually 10
-    exercises: string[]; // e.g., ["Burpees", "Mountain Climbers"]
+    exerciseId: string;
     interBlockRestSeconds: number; // Recovery time after the 8 rounds (e.g., 60s)
 }
 

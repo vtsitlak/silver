@@ -1,0 +1,29 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+ion-header {
+    flex-shrink: 0;
+}
+
+ion-content {
+    flex: 1;
+    min-height: 0;
+    --padding-bottom: 100px;
+}
+
+ion-footer {
+    flex-shrink: 0;
+    background: var(--ion-background-color);
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.accordion-header {
+    --min-height: 56px;
+}
+
+.accordion-content {
+    background: var(--ion-background-color);
+}

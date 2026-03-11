@@ -11,11 +11,10 @@ const mockWorkout: TabataWorkout = {
     totalDurationMinutes: 30,
     blocks: [
         {
-            blockName: 'Cardio Block',
             rounds: 8,
             workDurationSeconds: 20,
             restDurationSeconds: 10,
-            exercises: ['Burpees', 'Mountain Climbers'],
+            exerciseId: 'Burpees',
             interBlockRestSeconds: 60
         }
     ],
@@ -76,11 +75,10 @@ describe('WorkoutDetailsComponent', () => {
 
     it('should calculate block duration correctly', () => {
         const block: TabataBlock = {
-            blockName: 'Test',
             rounds: 8,
             workDurationSeconds: 20,
             restDurationSeconds: 10,
-            exercises: ['Ex1'],
+            exerciseId: 'Ex1',
             interBlockRestSeconds: 60
         };
         const duration = component.getBlockDuration(block);

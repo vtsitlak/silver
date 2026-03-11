@@ -9,11 +9,10 @@ const mockWorkout: TabataWorkout = {
     totalDurationMinutes: 30,
     blocks: [
         {
-            blockName: 'Block 1',
             rounds: 8,
             workDurationSeconds: 20,
             restDurationSeconds: 10,
-            exercises: ['Burpees', 'Squats'],
+            exerciseId: 'burpees',
             interBlockRestSeconds: 60
         }
     ],
