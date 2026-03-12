@@ -4,6 +4,8 @@ import { signal } from '@angular/core';
 import { WorkoutDetailsComponent } from './workout-details.component';
 import { WorkoutsFacade, TabataWorkout, TabataBlock } from '@silver/tabata/states/workouts';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
+import { mockAuthFacade } from '@silver/tabata/testing';
+import { AuthFacade } from '@silver/tabata/auth';
 
 const mockWorkout: TabataWorkout = {
     id: '1',
@@ -63,6 +65,7 @@ describe('WorkoutDetailsComponent', () => {
             imports: [WorkoutDetailsComponent],
             providers: [
                 provideRouter([]),
+                { provide: AuthFacade, useValue: mockAuthFacade },
                 { provide: WorkoutsFacade, useValue: mockWorkoutsFacade },
                 { provide: ExercisesFacade, useValue: mockExercisesFacade }
             ]
