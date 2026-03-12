@@ -10,6 +10,7 @@ import { createMockActivatedRoute, mockAuthFacade } from '@silver/tabata/testing
 
 const mockFacade = {
     workoutDraft: signal({}),
+    workout: () => null,
     loadWorkout: jest.fn(),
     updateDraft: jest.fn()
 };

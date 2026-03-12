@@ -1,17 +1,6 @@
 import { Component, computed, effect, inject, OnInit, signal, untracked } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import {
-    IonHeader,
-    IonContent,
-    IonFooter,
-    IonButton,
-    IonButtons,
-    IonBackButton,
-    IonLabel,
-    IonItem,
-    IonIcon,
-    IonList
-} from '@ionic/angular/standalone';
+import { IonHeader, IonContent, IonFooter, IonButton, IonButtons, IonBackButton, IonLabel, IonItem, IonIcon, IonList } from '@ionic/angular/standalone';
 import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { createOutline, trashOutline } from 'ionicons/icons';
@@ -38,19 +27,7 @@ export interface MainWorkoutBlockItem {
     templateUrl: 'main-workout.component.html',
     styleUrls: ['main-workout.component.scss'],
     standalone: true,
-    imports: [
-        IonHeader,
-        IonContent,
-        IonFooter,
-        IonButton,
-        IonButtons,
-        IonBackButton,
-        IonLabel,
-        IonItem,
-        IonIcon,
-        IonList,
-        ToolbarComponent
-    ]
+    imports: [IonHeader, IonContent, IonFooter, IonButton, IonButtons, IonBackButton, IonLabel, IonItem, IonIcon, IonList, ToolbarComponent]
 })
 export class MainWorkoutComponent implements OnInit {
     private readonly route = inject(ActivatedRoute);

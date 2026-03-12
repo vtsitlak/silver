@@ -41,7 +41,7 @@ export const WorkoutsStore = signalStore(
             removeWorkout: (id: string) => {
                 patchState(store, { workouts: store.workouts().filter((w) => w.id !== id), error: null });
                 return workoutsService.deleteWorkout(id).pipe(
-                    tap(() => {}),
+                    tap(() => undefined),
                     catchError((err: unknown) => {
                         patchState(store, {
                             error: err instanceof Error ? err.message : String(err)

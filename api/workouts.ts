@@ -46,13 +46,10 @@ export default {
 
         const url = new URL(request.url);
         const pathParts = url.pathname.replace(/^\/+/, '').split('/');
-        const pathId = pathParts.length === 3 && pathParts[0] === 'api' && pathParts[1] === 'workouts'
-            ? decodeURIComponent(pathParts[2]!)
-            : null;
+        const pathId = pathParts.length === 3 && pathParts[0] === 'api' && pathParts[1] === 'workouts' ? decodeURIComponent(pathParts[2]!) : null;
         const queryId = url.searchParams.get('id');
         const id = pathId ?? queryId;
         const isIdRoute = id != null && id !== '';
-
 
         try {
             if (isIdRoute) {

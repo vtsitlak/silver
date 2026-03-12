@@ -32,7 +32,7 @@ export const appConfig = {
         provideFirestore(() => getFirestore()),
         provideAuth(() => getAuth()),
         { provide: WORKOUTS_API_BASE_URL, useValue: environment.production ? '' : (environment.workoutsApiBaseUrl ?? '') },
-        { provide: EXERCISES_API_BASE_URL, useValue: environment.production ? 'https://www.exercisedb.dev/api/v1' : '/api/exercisedb' }
+        { provide: EXERCISES_API_BASE_URL, useValue: '/api/exercisedb' }
     ]
 };
 

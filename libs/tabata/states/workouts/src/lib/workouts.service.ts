@@ -28,9 +28,7 @@ export class WorkoutsService {
 
     /** DELETE workout. Accepts 200/204; does not require JSON body. */
     deleteWorkout(id: string): Observable<{ success: boolean }> {
-        return this.http
-            .delete(this.apiUrl(`/api/workouts/${encodeURIComponent(id)}`), { responseType: 'text' })
-            .pipe(map(() => ({ success: true })));
+        return this.http.delete(this.apiUrl(`/api/workouts/${encodeURIComponent(id)}`), { responseType: 'text' }).pipe(map(() => ({ success: true })));
     }
 
     /** POST a new workout (proxied to Upstash JSON.ARRAPPEND). */
