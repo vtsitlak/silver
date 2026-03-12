@@ -39,6 +39,11 @@ export class WorkoutEditorFacade {
         this.store.setWorkoutFromResponse(workout);
     }
 
+    /** Set current workout from list/cache (no API call). Use when opening edit from workouts list. */
+    setWorkout(workout: TabataWorkout | null): void {
+        this.store.setWorkout(workout);
+    }
+
     /** Set save error when create/update fails outside the store. */
     setSaveError(message: string): void {
         this.store.setSaveError(message);

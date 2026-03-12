@@ -21,6 +21,7 @@ import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { playCircle, createOutline, timeOutline, fitnessOutline, flashOutline, pauseOutline, closeOutline } from 'ionicons/icons';
 import type { TabataWorkout, TabataBlock } from '@silver/tabata/states/workouts';
+import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 
 @Component({
     selector: 'tbt-workout-details-modal',
@@ -49,6 +50,7 @@ import type { TabataWorkout, TabataBlock } from '@silver/tabata/states/workouts'
 export class WorkoutDetailsModalComponent {
     private readonly modalCtrl = inject(ModalController);
     private readonly router = inject(Router);
+    private readonly workoutEditorFacade = inject(WorkoutEditorFacade);
 
     readonly workout = input.required<TabataWorkout>();
 
@@ -70,6 +72,7 @@ export class WorkoutDetailsModalComponent {
 
     onEdit(): void {
         const w = this.workout();
+        this.workoutEditorFacade.setWorkout(w);
         this.modalCtrl.dismiss().then(() => {
             this.router.navigate(['/tabs/workouts/edit', w.id, 'info']);
         });

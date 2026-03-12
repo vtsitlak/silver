@@ -21,6 +21,7 @@ import {
 import { addIcons } from 'ionicons';
 import { playCircle, createOutline, timeOutline, fitnessOutline, flashOutline, pauseOutline } from 'ionicons/icons';
 import { WorkoutsFacade, TabataBlock } from '@silver/tabata/states/workouts';
+import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 
 @Component({
     selector: 'tbt-workout-details',
@@ -50,6 +51,7 @@ import { WorkoutsFacade, TabataBlock } from '@silver/tabata/states/workouts';
 export class WorkoutDetailsComponent implements OnInit {
     private readonly facade = inject(WorkoutsFacade);
     private readonly router = inject(Router);
+    private readonly workoutEditorFacade = inject(WorkoutEditorFacade);
 
     readonly workoutId = input.required<string>();
 
@@ -72,8 +74,11 @@ export class WorkoutDetailsComponent implements OnInit {
     }
 
     editWorkout(): void {
-        const id = this.workoutId();
-        this.router.navigate(['/tabs/workouts/edit', id]);
+        const w = this.workout();
+        if (w) {
+            this.workoutEditorFacade.setWorkout(w);
+            this.router.navigate(['/tabs/workouts/edit', w.id, 'info']);
+        }
     }
 
     startWorkout(): void {

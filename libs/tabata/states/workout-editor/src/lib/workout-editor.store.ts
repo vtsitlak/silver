@@ -97,6 +97,16 @@ export const WorkoutEditorStore = signalStore(
             patchState(store, { workout, isSaving: false });
         };
 
+        /** Set current workout from list/cache (no API call). Use when opening edit from workouts list. */
+        const setWorkout = (workout: TabataWorkout | null): void => {
+            patchState(store, {
+                workout,
+                workoutDraft: workout ? { ...workout } : {},
+                isLoading: false,
+                error: null
+            });
+        };
+
         const setSaveError = (message: string): void => {
             patchState(store, { error: message, isSaving: false });
         };
@@ -108,6 +118,7 @@ export const WorkoutEditorStore = signalStore(
             deleteWorkout,
             startSave,
             setWorkoutFromResponse,
+            setWorkout,
             setSaveError,
             updateDraft: (changes: WorkoutDraft) => patchState(store, { workoutDraft: { ...store.workoutDraft(), ...changes } }),
             setDraft: (draft: WorkoutDraft) => patchState(store, { workoutDraft: draft }),

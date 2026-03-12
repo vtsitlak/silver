@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { ModalController } from '@ionic/angular/standalone';
 import { WorkoutDetailsModalComponent } from './workout-details-modal.component';
 import type { TabataWorkout } from '@silver/tabata/states/workouts';
+import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 
 const mockWorkout: TabataWorkout = {
     id: '1',
@@ -33,6 +34,10 @@ const mockModalController = {
     dismiss: jest.fn(() => Promise.resolve())
 };
 
+const mockWorkoutEditorFacade = {
+    setWorkout: jest.fn()
+};
+
 describe('WorkoutDetailsModalComponent', () => {
     let component: WorkoutDetailsModalComponent;
     let fixture: ComponentFixture<WorkoutDetailsModalComponent>;
@@ -40,7 +45,11 @@ describe('WorkoutDetailsModalComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [WorkoutDetailsModalComponent],
-            providers: [provideRouter([]), { provide: ModalController, useValue: mockModalController }]
+            providers: [
+                provideRouter([]),
+                { provide: ModalController, useValue: mockModalController },
+                { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade }
+            ]
         }).compileComponents();
 
         fixture = TestBed.createComponent(WorkoutDetailsModalComponent);

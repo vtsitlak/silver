@@ -9,7 +9,7 @@ const UPSTASH_TOKEN = process.env['UPSTASH_TOKEN'];
 
 const CORS_HEADERS: Record<string, string> = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
@@ -44,7 +44,41 @@ export default {
             'Content-Type': 'application/json'
         };
 
+        const url = new URL(request.url);
+        const pathParts = url.pathname.replace(/^\/+/, '').split('/');
+        const isIdRoute = pathParts.length === 3 && pathParts[0] === 'api' && pathParts[1] === 'workouts';
+        const id = isIdRoute ? decodeURIComponent(pathParts[2]!) : null;
+
         try {
+            if (isIdRoute && id) {
+                if (method === 'GET') {
+                    const response = await fetch(`${UPSTASH_URL}/JSON.GET/tabata_workouts`, { headers });
+                    const data = await response.json();
+                    const parsed = typeof data.result === 'string' ? JSON.parse(data.result) : (data.result ?? []);
+                    const list = Array.isArray(parsed) ? parsed : [];
+                    const workout = list.find((w: { id?: string }) => String(w?.id) === id) ?? null;
+                    return jsonResponse(JSON.stringify(workout), 200);
+                }
+                if (method === 'DELETE') {
+                    const response = await fetch(`${UPSTASH_URL}/JSON.GET/tabata_workouts`, { headers });
+                    const data = await response.json();
+                    const parsed = typeof data.result === 'string' ? JSON.parse(data.result) : (data.result ?? []);
+                    const list = Array.isArray(parsed) ? parsed : [];
+                    const filtered = list.filter((w: { id?: string }) => String(w?.id) !== id);
+                    const setRes = await fetch(UPSTASH_URL, {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify(['JSON.SET', 'tabata_workouts', '$', JSON.stringify(filtered)])
+                    });
+                    const setData = await setRes.json();
+                    if (setData.error) {
+                        return jsonResponse(JSON.stringify({ error: setData.error }), 400);
+                    }
+                    return jsonResponse(JSON.stringify({ success: true }), 200);
+                }
+                return jsonResponse(JSON.stringify({ error: 'Method not allowed' }), 405);
+            }
+
             if (method === 'GET') {
                 const response = await fetch(`${UPSTASH_URL}/JSON.GET/tabata_workouts`, { headers });
                 const data = await response.json();

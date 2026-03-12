@@ -113,7 +113,10 @@ export class WorkoutInfoComponent implements OnInit {
             this.workoutId.set(id);
             this.isEditMode.set(true);
             this.pageTitle.set('Edit Workout');
-            this.facade.loadWorkout(id);
+            const existing = this.facade.workout();
+            if (existing?.id !== id) {
+                this.facade.loadWorkout(id);
+            }
         }
     }
 
