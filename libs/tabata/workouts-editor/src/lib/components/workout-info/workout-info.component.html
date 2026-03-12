@@ -54,10 +54,18 @@
         </ion-list>
 
         <ion-button expand="block" type="button" (click)="onGenerateWithAi()" [disabled]="!isFormValid()" class="ion-margin-top"> Generate with AI </ion-button>
-
-        <div class="ion-margin-top">
-            <ion-button expand="block" fill="outline" type="button" (click)="onCancel()">Cancel</ion-button>
-            <ion-button expand="block" type="button" (click)="onSubmit()" [disabled]="!isFormValid()">Next</ion-button>
-        </div>
     </form>
 </ion-content>
+
+<ion-footer class="ion-no-border">
+    <div class="flex justify-between items-center ion-padding">
+        <ion-button fill="clear" type="button" (click)="onCancel()" class="ion-no-padding">
+            <ion-icon name="arrow-back-outline"></ion-icon>
+            <span class="ion-padding-start">Workouts</span>
+        </ion-button>
+        <ion-button fill="clear" type="button" (click)="onSubmit()" [disabled]="!isFormValid()" class="ion-no-padding">
+            <span class="ion-padding-end">Warmup</span>
+            <ion-icon name="arrow-forward-outline"></ion-icon>
+        </ion-button>
+    </div>
+</ion-footer>

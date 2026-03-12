@@ -23,3 +23,9 @@ ion-footer {
 .block-item {
     --min-height: 56px;
 }
+
+.blocks-list {
+    .block-item::part(native) {
+        border-bottom: 1px solid var(--ion-color-light);
+    }
+}

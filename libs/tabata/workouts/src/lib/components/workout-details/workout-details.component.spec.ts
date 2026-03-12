@@ -1,66 +1,22 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { fakeAsync, tick } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { signal } from '@angular/core';
 import { WorkoutDetailsComponent } from './workout-details.component';
-import { WorkoutsFacade, TabataWorkout, TabataBlock } from '@silver/tabata/states/workouts';
+import { WorkoutsFacade, TabataBlock } from '@silver/tabata/states/workouts';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
-import { mockAuthFacade } from '@silver/tabata/testing';
+import { mockAuthFacade, createMockWorkoutsFacade, createMockExercisesFacade, mockTabataWorkout } from '@silver/tabata/testing';
 import { AuthFacade } from '@silver/tabata/auth';
 
-const mockWorkout: TabataWorkout = {
-    id: '1',
-    name: 'Test Workout',
-    description: 'A test workout description',
-    totalDurationMinutes: 30,
-    blocks: [
-        {
-            rounds: 8,
-            workDurationSeconds: 20,
-            restDurationSeconds: 10,
-            exerciseId: 'Burpees',
-            interBlockRestSeconds: 60
-        }
-    ],
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedByUserId: 'user1',
-    createdByUserId: 'user1',
-    generatedByAi: false
-};
-
-const mockWorkoutsFacade = {
-    workouts: signal([mockWorkout]),
-    loadedWorkout: signal<TabataWorkout | null>(mockWorkout),
-    isLoading: signal(false),
-    error: signal<string | null>(null),
-    loadWorkouts: jest.fn(),
-    loadWorkoutById: jest.fn((id: string) => {
-        if (id === 'non-existent') {
-            mockWorkoutsFacade.loadedWorkout.set(null);
-        }
-    })
-};
-
-const mockExercise = {
-    exerciseId: 'Burpees',
-    name: 'Burpees',
-    gifUrl: 'https://example.com/burpee.gif',
-    targetMuscles: [],
-    bodyParts: [],
-    equipments: [],
-    secondaryMuscles: [],
-    instructions: []
-};
-
-const mockExercisesFacade = {
-    exercisesMap: signal<Record<string, typeof mockExercise>>({ Burpees: mockExercise }),
-    loadExercisesMap: jest.fn()
-};
+let mockWorkoutsFacade: ReturnType<typeof createMockWorkoutsFacade>;
+let mockExercisesFacade: ReturnType<typeof createMockExercisesFacade>;
 
 describe('WorkoutDetailsComponent', () => {
     let component: WorkoutDetailsComponent;
     let fixture: ComponentFixture<WorkoutDetailsComponent>;
 
     beforeEach(async () => {
+        mockWorkoutsFacade = createMockWorkoutsFacade();
+        mockExercisesFacade = createMockExercisesFacade();
         await TestBed.configureTestingModule({
             imports: [WorkoutDetailsComponent],
             providers: [
@@ -82,14 +38,15 @@ describe('WorkoutDetailsComponent', () => {
     });
 
     it('should find workout by id', () => {
-        expect(component.workout()?.name).toBe('Test Workout');
+        expect(component.workout()?.name).toBe(mockTabataWorkout.name);
     });
 
-    it('should return null for non-existent workout', () => {
+    it('should return null for non-existent workout', fakeAsync(() => {
         fixture.componentRef.setInput('workoutId', 'non-existent');
         fixture.detectChanges();
+        tick();
         expect(component.workout()).toBeNull();
-    });
+    }));
 
     it('should format duration in minutes', () => {
         expect(component.formatDurationMinutes(30)).toBe('30 min');

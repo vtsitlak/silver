@@ -1,11 +1,24 @@
 import { Component, computed, effect, inject, OnInit, signal, untracked } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IonHeader, IonContent, IonFooter, IonButton, IonButtons, IonBackButton, IonLabel, IonItem, IonList, IonIcon } from '@ionic/angular/standalone';
+import {
+    IonHeader,
+    IonContent,
+    IonFooter,
+    IonButton,
+    IonButtons,
+    IonBackButton,
+    IonItem,
+    IonList,
+    IonIcon,
+    IonReorderGroup,
+    IonReorder
+} from '@ionic/angular/standalone';
 import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { createOutline, trashOutline } from 'ionicons/icons';
+import { createOutline, trashOutline, arrowBackOutline, arrowForwardOutline, flagOutline } from 'ionicons/icons';
 import { ToolbarComponent, DurationInputModalComponent } from '@silver/tabata/ui';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
+import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { Exercise, ExerciseSelectorModalComponent, ExerciseDetailsModalComponent } from '@silver/tabata/exercises';
 import type { Phase } from '@silver/tabata/states/workouts';
 import { WorkoutSubmitService } from '../../services/workout-submit.service';
@@ -29,10 +42,11 @@ export interface PhaseExerciseItem {
         IonButton,
         IonButtons,
         IonBackButton,
-        IonLabel,
         IonItem,
         IonList,
         IonIcon,
+        IonReorderGroup,
+        IonReorder,
         ToolbarComponent,
         DurationInputModalComponent
     ]
@@ -41,13 +55,14 @@ export class WorkoutPhaseComponent implements OnInit {
     private readonly route = inject(ActivatedRoute);
     private readonly router = inject(Router);
     private readonly facade = inject(WorkoutEditorFacade);
+    private readonly exercisesFacade = inject(ExercisesFacade);
     private readonly modalCtrl = inject(ModalController);
     private readonly workoutSubmitService = inject(WorkoutSubmitService);
 
     private readonly hasSyncedPhaseFromDraft = signal<WorkoutPhaseType | null>(null);
 
     constructor() {
-        addIcons({ createOutline, trashOutline });
+        addIcons({ createOutline, trashOutline, arrowBackOutline, arrowForwardOutline, flagOutline });
         const path = this.route.snapshot.routeConfig?.path ?? '';
         const phase = path.endsWith('cooldown') ? 'cooldown' : 'warmup';
         this.phaseType.set(phase);
@@ -77,6 +92,13 @@ export class WorkoutPhaseComponent implements OnInit {
                         }))
                     );
                 });
+            }
+        });
+        effect(() => {
+            const items = this.phaseItems();
+            const ids = [...new Set(items.map((p) => p.exercise.exerciseId).filter(Boolean))];
+            if (ids.length > 0) {
+                this.exercisesFacade.loadExercisesMap(ids);
             }
         });
     }
@@ -125,7 +147,7 @@ export class WorkoutPhaseComponent implements OnInit {
 
     readonly durationModalExerciseName = computed(() => {
         const item = this.editingItem();
-        return item?.exercise ? this.formatName(item.exercise.name) : null;
+        return item?.exercise ? this.getExerciseName(item.exercise.exerciseId) : null;
     });
 
     ngOnInit(): void {
@@ -145,6 +167,10 @@ export class WorkoutPhaseComponent implements OnInit {
 
     onCancel(): void {
         this.router.navigate(['/tabs/workouts']);
+    }
+
+    navigateBack(): void {
+        this.router.navigateByUrl(this.backHref());
     }
 
     onNext(): void {
@@ -220,6 +246,29 @@ export class WorkoutPhaseComponent implements OnInit {
         }
     }
 
+    handleReorderEnd(event: CustomEvent<{ from: number; to: number; complete: (data?: boolean | unknown[]) => void }>): void {
+        const { from, to, complete } = event.detail;
+        if (from === to) {
+            complete(true);
+            return;
+        }
+        const items = [...this.phaseItems()];
+        const [moved] = items.splice(from, 1);
+        items.splice(to, 0, moved);
+        this.phaseItems.set(items);
+        const editingIndex = this.durationModalItemIndex();
+        if (editingIndex !== null) {
+            if (editingIndex === from) {
+                this.durationModalItemIndex.set(to);
+            } else if (from < editingIndex && to >= editingIndex) {
+                this.durationModalItemIndex.set(editingIndex - 1);
+            } else if (from > editingIndex && to <= editingIndex) {
+                this.durationModalItemIndex.set(editingIndex + 1);
+            }
+        }
+        complete(true);
+    }
+
     openDurationModal(index: number): void {
         const items = this.phaseItems();
         const item = items[index];
@@ -265,13 +314,6 @@ export class WorkoutPhaseComponent implements OnInit {
         return s ? `${m}m ${s}s` : `${m}m`;
     }
 
-    formatName(name: string): string {
-        return name
-            .split(' ')
-            .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-            .join(' ');
-    }
-
     private formatIdAsDisplayName(id: string): string {
         if (!id) return id;
         return id
@@ -279,5 +321,13 @@ export class WorkoutPhaseComponent implements OnInit {
             .split(/\s+/)
             .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
             .join(' ');
+    }
+
+    getExerciseName(exerciseId: string): string {
+        return this.exercisesFacade.exercisesMap()[exerciseId]?.name ?? this.formatIdAsDisplayName(exerciseId);
+    }
+
+    getExerciseImage(exerciseId: string): string {
+        return this.exercisesFacade.exercisesMap()[exerciseId]?.gifUrl ?? '';
     }
 }

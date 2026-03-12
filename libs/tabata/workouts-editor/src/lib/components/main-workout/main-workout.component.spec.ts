@@ -4,9 +4,15 @@ import { provideRouter } from '@angular/router';
 import { signal } from '@angular/core';
 import { MainWorkoutComponent } from './main-workout.component';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
+import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { AuthFacade } from '@silver/tabata/auth';
 import { ModalController } from '@ionic/angular/standalone';
 import { createMockActivatedRoute, mockAuthFacade } from '@silver/tabata/testing';
+
+const mockExercisesFacade = {
+    exercisesMap: () => ({}),
+    loadExercisesMap: jest.fn()
+};
 
 const mockFacade = {
     workoutDraft: signal({}),
@@ -30,6 +36,7 @@ describe('MainWorkoutComponent', () => {
             providers: [
                 provideRouter([]),
                 { provide: WorkoutEditorFacade, useValue: mockFacade },
+                { provide: ExercisesFacade, useValue: mockExercisesFacade },
                 { provide: ModalController, useValue: mockModalCtrl },
                 { provide: AuthFacade, useValue: mockAuthFacade },
                 { provide: ActivatedRoute, useValue: createMockActivatedRoute({ paramMap: { get: (k: string) => (k === 'workoutId' ? 'w1' : null) } }) }
@@ -47,8 +54,8 @@ describe('MainWorkoutComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should add one block on init when draft has no blocks', () => {
-        expect(component.blocks().length).toBe(1);
+    it('should start with 0 blocks in create mode', () => {
+        expect(component.blocks().length).toBe(0);
     });
 
     it('should navigate to cooldown on next when canGoNext', () => {

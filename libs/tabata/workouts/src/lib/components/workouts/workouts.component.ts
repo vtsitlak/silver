@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -21,7 +21,7 @@ import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [IonHeader, ToolbarComponent, IonContent, IonSearchbar, IonButton, IonList, IonItem, IonIcon, WorkoutItemComponent]
 })
-export class WorkoutsComponent implements OnInit {
+export class WorkoutsComponent {
     private readonly facade = inject(WorkoutsFacade);
     private readonly router = inject(Router);
     private readonly toast = inject(ToastService);
@@ -39,10 +39,6 @@ export class WorkoutsComponent implements OnInit {
         toObservable(this.searchTerm)
             .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
             .subscribe((term) => this.facade.loadWorkouts(term || undefined));
-    }
-
-    ngOnInit(): void {
-        this.facade.loadWorkouts();
     }
 
     private isWorkoutsListUrl(): boolean {

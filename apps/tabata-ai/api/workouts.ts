@@ -2,7 +2,7 @@
  * Vercel serverless proxy for Upstash (workouts).
  * Token is read from env (UPSTASH_URL, UPSTASH_TOKEN) — never in repo.
  * Local: run vercel dev from repo root; .env at repo root. Production: Vercel project env vars.
- * Kept in sync with repo root api/workouts.ts (GET list, GET by id, POST, DELETE).
+ * Kept in sync with repo root api/workouts.ts (GET list, GET by id, POST, PUT, DELETE).
  */
 
 const UPSTASH_URL = process.env['UPSTASH_URL'];
@@ -10,7 +10,7 @@ const UPSTASH_TOKEN = process.env['UPSTASH_TOKEN'];
 
 const CORS_HEADERS: Record<string, string> = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
@@ -76,6 +76,30 @@ export default {
                         return jsonResponse(JSON.stringify({ error: setData.error }), 400);
                     }
                     return jsonResponse(JSON.stringify({ success: true }), 200);
+                }
+                if (method === 'PUT') {
+                    const body = await request.json();
+                    const response = await fetch(`${UPSTASH_URL}/JSON.GET/tabata_workouts`, { headers });
+                    const data = await response.json();
+                    const parsed = typeof data.result === 'string' ? JSON.parse(data.result) : (data.result ?? []);
+                    const list = Array.isArray(parsed) ? parsed : [];
+                    const index = list.findIndex((w: { id?: string }) => String(w?.id) === id);
+                    if (index === -1) {
+                        return jsonResponse(JSON.stringify({ error: 'Workout not found' }), 404);
+                    }
+                    const updated = { ...body, id };
+                    const newList = [...list];
+                    newList[index] = updated;
+                    const setRes = await fetch(UPSTASH_URL, {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify(['JSON.SET', 'tabata_workouts', '$', JSON.stringify(newList)])
+                    });
+                    const setData = await setRes.json();
+                    if (setData.error) {
+                        return jsonResponse(JSON.stringify({ error: setData.error }), 400);
+                    }
+                    return jsonResponse(JSON.stringify(updated), 200);
                 }
                 return jsonResponse(JSON.stringify({ error: 'Method not allowed' }), 405);
             }
