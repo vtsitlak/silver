@@ -24,7 +24,7 @@
     }
     @if (!isLoading() && !error()) {
         <ion-list>
-            @for (workout of filteredWorkouts(); track workout.id) {
+            @for (workout of workouts(); track workout.id) {
                 <tbt-workout-item
                     [workout]="workout"
                     (detailsClick)="onDetailsClick($event)"

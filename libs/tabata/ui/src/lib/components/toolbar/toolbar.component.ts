@@ -15,6 +15,10 @@ import { Router, RouterLink } from '@angular/router';
 })
 export class ToolbarComponent {
     title = input<string | null>(null);
+    /** When true, show projected content for start (e.g. back button) instead of the default logo. */
+    showStartContent = input<boolean>(false);
+    /** When true, show projected content for end (e.g. edit button) instead of the default menu. */
+    showEndContent = input<boolean>(false);
     router = inject(Router);
     private readonly authFacade = inject(AuthFacade);
 

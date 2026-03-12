@@ -1,3 +1,15 @@
+/* Toolbar buttons projected into tbt-toolbar – keep icons/buttons white on primary background */
+.toolbar-buttons-white {
+    ion-back-button,
+    ion-button {
+        --color: white;
+    }
+
+    ion-icon {
+        color: white;
+    }
+}
+
 .workout-header {
     padding-bottom: 16px;
     border-bottom: 1px solid var(--ion-color-light);

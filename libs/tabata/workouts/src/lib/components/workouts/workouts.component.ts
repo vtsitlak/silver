@@ -1,16 +1,16 @@
-import { Component, ChangeDetectionStrategy, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit, signal } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, skip } from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { IonContent, IonHeader, IonSearchbar, IonButton, IonList, IonItem, IonIcon } from '@ionic/angular/standalone';
-import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
 import { ToolbarComponent } from '@silver/tabata/ui';
 import { WorkoutsFacade, TabataWorkout } from '@silver/tabata/states/workouts';
 import { ToastService } from '@silver/tabata/helpers';
 import { WorkoutItemComponent } from '../workout-item/workout-item.component';
-import { WorkoutDetailsModalComponent } from '../workout-details-modal/workout-details-modal.component';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 
 @Component({
@@ -24,7 +24,6 @@ import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 export class WorkoutsComponent implements OnInit {
     private readonly facade = inject(WorkoutsFacade);
     private readonly router = inject(Router);
-    private readonly modalCtrl = inject(ModalController);
     private readonly toast = inject(ToastService);
     private readonly workoutEditorFacade = inject(WorkoutEditorFacade);
 
@@ -36,7 +35,10 @@ export class WorkoutsComponent implements OnInit {
                 filter(() => this.isWorkoutsListUrl()),
                 takeUntilDestroyed()
             )
-            .subscribe(() => this.facade.loadWorkouts());
+            .subscribe(() => this.facade.loadWorkouts(this.searchTerm() || undefined));
+        toObservable(this.searchTerm)
+            .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
+            .subscribe((term) => this.facade.loadWorkouts(term || undefined));
     }
 
     ngOnInit(): void {
@@ -53,13 +55,6 @@ export class WorkoutsComponent implements OnInit {
     readonly isLoading = this.facade.isLoading;
     readonly error = this.facade.error;
 
-    readonly filteredWorkouts = computed(() => {
-        const term = this.searchTerm().trim().toLowerCase();
-        const list = this.workouts();
-        if (!term) return list;
-        return list.filter((w) => w.name.toLowerCase().includes(term));
-    });
-
     onSearchInput(ev: Event): void {
         const customEv = ev as CustomEvent<{ value: string }>;
         this.searchTerm.set(customEv.detail?.value ?? '');
@@ -70,12 +65,8 @@ export class WorkoutsComponent implements OnInit {
         this.router.navigate(['/tabs/workouts/create']);
     }
 
-    async onDetailsClick(workout: TabataWorkout): Promise<void> {
-        const modal = await this.modalCtrl.create({
-            component: WorkoutDetailsModalComponent,
-            componentProps: { workout }
-        });
-        await modal.present();
+    onDetailsClick(workout: TabataWorkout): void {
+        this.router.navigate(['/tabs/workouts', workout.id]);
     }
 
     onEditClick(workout: TabataWorkout): void {
@@ -84,7 +75,8 @@ export class WorkoutsComponent implements OnInit {
     }
 
     onPlayClick(workout: TabataWorkout): void {
-        this.router.navigate(['/tabs/workouts', workout.id]);
+        void workout;
+        // TODO: Implement workout player navigation
     }
 
     onRemoveClick(workout: TabataWorkout): void {

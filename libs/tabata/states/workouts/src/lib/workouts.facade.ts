@@ -7,12 +7,17 @@ export class WorkoutsFacade {
     private readonly store = inject(WorkoutsStore);
 
     readonly workouts = this.store.workouts;
+    readonly loadedWorkout = this.store.loadedWorkout;
     readonly isLoading = this.store.isLoading;
     readonly error = this.store.error;
     readonly hasWorkouts = this.store.hasWorkouts;
 
-    loadWorkouts(): void {
-        this.store.loadWorkouts();
+    loadWorkouts(search?: string): void {
+        this.store['loadWorkouts'](search);
+    }
+
+    loadWorkoutById(id: string): void {
+        this.store.loadWorkoutById(id);
     }
 
     removeWorkout(id: string): Observable<{ success: boolean }> {

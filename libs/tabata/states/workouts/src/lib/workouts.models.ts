@@ -3,12 +3,15 @@ import type { BodyRegion, EquipmentCategory } from '@silver/shared/helpers';
 // Workout and store state models for tabata-workouts.
 export interface WorkoutsState {
     workouts: TabataWorkout[];
+    /** Single workout loaded by id (e.g. for details view). Cleared when loading list. */
+    loadedWorkout: TabataWorkout | null;
     isLoading: boolean;
     error: string | null;
 }
 
 export const workoutsInitialState: WorkoutsState = {
     workouts: [],
+    loadedWorkout: null,
     isLoading: false,
     error: null
 };
