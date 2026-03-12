@@ -1,11 +1,25 @@
 import { Component, computed, effect, inject, OnInit, signal, untracked } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IonHeader, IonContent, IonFooter, IonButton, IonButtons, IonBackButton, IonLabel, IonItem, IonIcon, IonList } from '@ionic/angular/standalone';
+import {
+    IonHeader,
+    IonContent,
+    IonFooter,
+    IonButton,
+    IonButtons,
+    IonBackButton,
+    IonLabel,
+    IonItem,
+    IonIcon,
+    IonList,
+    IonReorderGroup,
+    IonReorder
+} from '@ionic/angular/standalone';
 import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { createOutline, trashOutline } from 'ionicons/icons';
+import { createOutline, trashOutline, arrowBackOutline, arrowForwardOutline } from 'ionicons/icons';
 import { ToolbarComponent } from '@silver/tabata/ui';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
+import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { Exercise, ExerciseSelectorModalComponent, ExerciseDetailsModalComponent } from '@silver/tabata/exercises';
 import type { TabataBlock } from '@silver/tabata/states/workouts';
 
@@ -27,12 +41,27 @@ export interface MainWorkoutBlockItem {
     templateUrl: 'main-workout.component.html',
     styleUrls: ['main-workout.component.scss'],
     standalone: true,
-    imports: [IonHeader, IonContent, IonFooter, IonButton, IonButtons, IonBackButton, IonLabel, IonItem, IonIcon, IonList, ToolbarComponent]
+    imports: [
+        IonHeader,
+        IonContent,
+        IonFooter,
+        IonButton,
+        IonButtons,
+        IonBackButton,
+        IonLabel,
+        IonItem,
+        IonIcon,
+        IonList,
+        IonReorderGroup,
+        IonReorder,
+        ToolbarComponent
+    ]
 })
 export class MainWorkoutComponent implements OnInit {
     private readonly route = inject(ActivatedRoute);
     private readonly router = inject(Router);
     private readonly facade = inject(WorkoutEditorFacade);
+    private readonly exercisesFacade = inject(ExercisesFacade);
     private readonly modalCtrl = inject(ModalController);
 
     readonly workoutId = signal<string | null>(null);
@@ -75,7 +104,7 @@ export class MainWorkoutComponent implements OnInit {
     private readonly hasSyncedDraft = signal(false);
 
     constructor() {
-        addIcons({ createOutline, trashOutline });
+        addIcons({ createOutline, trashOutline, arrowBackOutline, arrowForwardOutline });
         effect(() => {
             const d = this.draft();
             const synced = this.hasSyncedDraft();
@@ -111,6 +140,13 @@ export class MainWorkoutComponent implements OnInit {
                 });
             }
         });
+        effect(() => {
+            const blks = this.blocks();
+            const ids = blks.map((b) => b.exercise?.exerciseId).filter(Boolean) as string[];
+            if (ids.length > 0) {
+                this.exercisesFacade.loadExercisesMap(ids);
+            }
+        });
     }
 
     ngOnInit(): void {
@@ -123,13 +159,14 @@ export class MainWorkoutComponent implements OnInit {
                 this.facade.loadWorkout(id);
             }
         }
-        if (this.blocks().length === 0 && !this.draft().blocks?.length) {
-            this.addBlock();
-        }
     }
 
     onCancel(): void {
         this.router.navigate(['/tabs/workouts']);
+    }
+
+    navigateBack(): void {
+        this.router.navigateByUrl(this.backHref());
     }
 
     onNext(): void {
@@ -162,6 +199,54 @@ export class MainWorkoutComponent implements OnInit {
                 interBlockRestSeconds: DEFAULT_INTER_BLOCK_REST_SECONDS
             }
         ]);
+    }
+
+    /** Opens exercise selector to add a new block; on confirm adds a block with the selected exercise. */
+    openExerciseSelectorForNewBlock(): void {
+        this.modalCtrl
+            .create({
+                component: ExerciseSelectorModalComponent,
+                componentProps: {
+                    multiple: signal(false),
+                    preselectedIds: signal([]),
+                    maxSelection: signal<number | null>(null)
+                },
+                cssClass: 'exercise-selector-modal-sheet'
+            })
+            .then((modal) => {
+                modal.onDidDismiss().then(({ data, role }) => {
+                    if (role === 'confirm' && data?.selected?.length) {
+                        this.addBlockWithExercise(data.selected[0]);
+                    }
+                });
+                return modal.present();
+            });
+    }
+
+    private addBlockWithExercise(exercise: Exercise): void {
+        this.blocks.update((prev) => [
+            ...prev,
+            {
+                rounds: DEFAULT_ROUNDS,
+                workDurationSeconds: WORK_SECONDS,
+                restDurationSeconds: REST_SECONDS,
+                exercise,
+                interBlockRestSeconds: DEFAULT_INTER_BLOCK_REST_SECONDS
+            }
+        ]);
+    }
+
+    handleReorderEnd(event: CustomEvent<{ from: number; to: number; complete: (data?: boolean | unknown[]) => void }>): void {
+        const { from, to, complete } = event.detail;
+        if (from === to) {
+            complete(true);
+            return;
+        }
+        const blks = [...this.blocks()];
+        const [moved] = blks.splice(from, 1);
+        blks.splice(to, 0, moved);
+        this.blocks.set(blks);
+        complete(true);
     }
 
     removeBlock(index: number): void {
@@ -197,6 +282,10 @@ export class MainWorkoutComponent implements OnInit {
         this.blocks.update((prev) => prev.map((b, i) => (i === blockIndex ? { ...b, exercise } : b)));
     }
 
+    getExerciseName(exerciseId: string): string {
+        return this.exercisesFacade.exercisesMap()[exerciseId]?.name ?? this.formatIdAsDisplayName(exerciseId);
+    }
+
     clearExerciseFromBlock(blockIndex: number): void {
         this.blocks.update((prev) => prev.map((b, i) => (i === blockIndex ? { ...b, exercise: null } : b)));
     }
@@ -211,13 +300,6 @@ export class MainWorkoutComponent implements OnInit {
                 cssClass: 'exercise-details-modal-sheet'
             })
             .then((modal) => modal.present());
-    }
-
-    formatName(name: string): string {
-        return name
-            .split(' ')
-            .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-            .join(' ');
     }
 
     /** Format a raw exercise id as a readable label when we don't have the full exercise (e.g. from draft). */

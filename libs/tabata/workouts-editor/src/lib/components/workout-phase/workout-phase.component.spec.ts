@@ -4,10 +4,16 @@ import { of } from 'rxjs';
 import { ModalController } from '@ionic/angular/standalone';
 import { AuthFacade } from '@silver/tabata/auth';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
+import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { createMockActivatedRoute, mockAuthFacade, mockModalController, mockWorkoutEditorFacade } from '@silver/tabata/testing';
 import { WorkoutPhaseComponent } from './workout-phase.component';
 import { WorkoutSubmitService } from '../../services/workout-submit.service';
 import type { TabataWorkout } from '@silver/tabata/states/workouts';
+
+const mockExercisesFacade = {
+    exercisesMap: () => ({}),
+    loadExercisesMap: () => {}
+};
 
 const mockWorkoutSubmitService = {
     submitWorkout: () => of({} as TabataWorkout)
@@ -24,6 +30,7 @@ describe('WorkoutPhaseComponent', () => {
             providers: [
                 provideRouter([]),
                 { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade },
+                { provide: ExercisesFacade, useValue: mockExercisesFacade },
                 { provide: ActivatedRoute, useValue: createMockActivatedRoute() },
                 { provide: ModalController, useValue: mockModalController },
                 { provide: AuthFacade, useValue: mockAuthFacade },
@@ -48,6 +55,7 @@ describe('WorkoutPhaseComponent', () => {
             providers: [
                 provideRouter([]),
                 { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade },
+                { provide: ExercisesFacade, useValue: mockExercisesFacade },
                 { provide: ActivatedRoute, useValue: createMockActivatedRoute({ routeConfig: { path: 'warmup' } }) },
                 { provide: ModalController, useValue: mockModalController },
                 { provide: AuthFacade, useValue: mockAuthFacade },
@@ -66,6 +74,7 @@ describe('WorkoutPhaseComponent', () => {
             providers: [
                 provideRouter([]),
                 { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade },
+                { provide: ExercisesFacade, useValue: mockExercisesFacade },
                 { provide: ActivatedRoute, useValue: createMockActivatedRoute({ routeConfig: { path: 'cooldown' } }) },
                 { provide: ModalController, useValue: mockModalController },
                 { provide: AuthFacade, useValue: mockAuthFacade },
@@ -90,6 +99,7 @@ describe('WorkoutPhaseComponent', () => {
             providers: [
                 provideRouter([]),
                 { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade },
+                { provide: ExercisesFacade, useValue: mockExercisesFacade },
                 { provide: ActivatedRoute, useValue: createMockActivatedRoute({ routeConfig: { path: 'cooldown' } }) },
                 { provide: ModalController, useValue: mockModalController },
                 { provide: AuthFacade, useValue: mockAuthFacade },
@@ -108,6 +118,7 @@ describe('WorkoutPhaseComponent', () => {
             providers: [
                 provideRouter([]),
                 { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade },
+                { provide: ExercisesFacade, useValue: mockExercisesFacade },
                 { provide: ActivatedRoute, useValue: createMockActivatedRoute({ routeConfig: { path: 'cooldown' } }) },
                 { provide: ModalController, useValue: mockModalController },
                 { provide: AuthFacade, useValue: mockAuthFacade },
@@ -138,5 +149,31 @@ describe('WorkoutPhaseComponent', () => {
         comp.onNext();
         expect(submitSpy).toHaveBeenCalled();
         expect(navSpy).toHaveBeenCalledWith(['/tabs/workouts']);
+    });
+
+    it('should reorder phase items on ionReorderEnd and update duration modal index', () => {
+        const items = [
+            {
+                exercise: { exerciseId: 'a', name: 'A', gifUrl: '', targetMuscles: [], bodyParts: [], equipments: [], secondaryMuscles: [], instructions: [] },
+                durationSeconds: 30
+            },
+            {
+                exercise: { exerciseId: 'b', name: 'B', gifUrl: '', targetMuscles: [], bodyParts: [], equipments: [], secondaryMuscles: [], instructions: [] },
+                durationSeconds: 45
+            },
+            {
+                exercise: { exerciseId: 'c', name: 'C', gifUrl: '', targetMuscles: [], bodyParts: [], equipments: [], secondaryMuscles: [], instructions: [] },
+                durationSeconds: 60
+            }
+        ];
+        component.phaseItems.set([...items]);
+        fixture.detectChanges();
+        const completeSpy = jest.fn();
+        component.handleReorderEnd({
+            detail: { from: 2, to: 0, complete: completeSpy },
+            preventDefault: () => {}
+        } as unknown as CustomEvent<{ from: number; to: number; complete: (data?: boolean | unknown[]) => void }>);
+        expect(component.phaseItems().map((p) => p.exercise.exerciseId)).toEqual(['c', 'a', 'b']);
+        expect(completeSpy).toHaveBeenCalledWith(true);
     });
 });

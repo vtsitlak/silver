@@ -10,6 +10,28 @@
 
 .workout-name-label {
     cursor: pointer;
+    color: var(--color-primary, var(--ion-color-primary));
+    line-height: 1.35;
+
+    h2 {
+        margin-bottom: 0.15em;
+    }
+
+    p {
+        color: inherit;
+        margin-top: 0;
+        margin-bottom: 0.15em;
+        line-height: 1.35;
+    }
+}
+
+.workout-meta {
+    color: var(--color-primary, var(--ion-color-primary));
+    margin-top: 0.15em;
+
+    ion-icon {
+        color: inherit;
+    }
 }
 
 .workout-actions {

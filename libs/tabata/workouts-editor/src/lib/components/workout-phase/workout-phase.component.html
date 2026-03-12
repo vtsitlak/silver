@@ -20,31 +20,40 @@
                 <span class="text-gray-600">{{ phaseItems().length }} {{ phaseItems().length === 1 ? 'exercise' : 'exercises' }}</span>
                 <span class="font-medium">Total: {{ formatDuration(totalDurationSeconds()) }}</span>
             </div>
-            <ion-list lines="full">
-                @for (item of phaseItems(); track item.exercise.exerciseId; let i = $index) {
-                    <ion-item>
-                        <ion-label>
-                            <button
-                                type="button"
-                                class="cursor-pointer font-medium hover:underline text-left w-full py-1"
+            <ion-list lines="full" class="exercises-list">
+                <ion-reorder-group [disabled]="false" (ionReorderEnd)="handleReorderEnd($event)">
+                    @for (item of phaseItems(); track item.exercise.exerciseId; let i = $index) {
+                        <ion-item class="exercise-item">
+                            <ion-reorder slot="start"></ion-reorder>
+                            @if (getExerciseImage(item.exercise.exerciseId)) {
+                                <img
+                                    [src]="getExerciseImage(item.exercise.exerciseId)"
+                                    [alt]="getExerciseName(item.exercise.exerciseId)"
+                                    class="w-12 h-12 object-cover rounded-lg bg-gray-100 mr-3"
+                                    slot="start"
+                                />
+                            }
+
+                            <ion-button
+                                fill="clear"
                                 (click)="openExerciseDetailsModal(item.exercise.exerciseId)"
                                 (keydown.enter)="openExerciseDetailsModal(item.exercise.exerciseId)"
                                 (keydown.space)="openExerciseDetailsModal(item.exercise.exerciseId); $event.preventDefault()"
                             >
-                                {{ formatName(item.exercise.name) }}
-                            </button>
-                        </ion-label>
-                        <div class="flex items-center gap-1" slot="end">
-                            <ion-button fill="clear" size="small" (click)="openDurationModal(i)" aria-label="Edit duration">
-                                <span class="text-gray-600">{{ formatDuration(item.durationSeconds ?? 60) }}</span>
-                                <ion-icon name="create-outline"></ion-icon>
+                                {{ getExerciseName(item.exercise.exerciseId) }}
                             </ion-button>
-                            <ion-button fill="clear" color="danger" size="small" (click)="removePhaseItem(i)" aria-label="Remove">
-                                <ion-icon name="trash-outline"></ion-icon>
-                            </ion-button>
-                        </div>
-                    </ion-item>
-                }
+
+                            <div class="flex items-center gap-1" slot="end">
+                                <ion-button fill="clear" size="small" (click)="openDurationModal(i)" aria-label="Edit duration" class="lowercase">
+                                    {{ item.durationSeconds ?? 60 }}s
+                                </ion-button>
+                                <ion-button fill="clear" color="danger" size="small" (click)="removePhaseItem(i)" aria-label="Remove">
+                                    <ion-icon name="trash-outline"></ion-icon>
+                                </ion-button>
+                            </div>
+                        </ion-item>
+                    }
+                </ion-reorder-group>
             </ion-list>
         </div>
     }
@@ -60,8 +69,23 @@
 </ion-content>
 
 <ion-footer class="ion-no-border">
-    <div class="ion-padding">
-        <ion-button expand="block" fill="outline" type="button" (click)="onCancel()">Cancel</ion-button>
-        <ion-button expand="block" type="button" (click)="onNext()" [disabled]="!allHaveDuration() || isSaving()">{{ nextButtonLabel() }}</ion-button>
+    <div class="flex justify-between items-center ion-padding">
+        <ion-button fill="clear" type="button" (click)="navigateBack()" class="ion-no-padding">
+            <ion-icon name="arrow-back-outline"></ion-icon>
+            @if (phaseType() === 'warmup') {
+                <span class="ion-padding-start">Info</span>
+            } @else {
+                <span class="ion-padding-start">Main workout</span>
+            }
+        </ion-button>
+        <ion-button fill="clear" type="button" (click)="onNext()" [disabled]="!allHaveDuration() || isSaving()" class="ion-no-padding">
+            @if (phaseType() === 'warmup') {
+                <span class="ion-padding-end">Main workout</span>
+                <ion-icon name="arrow-forward-outline"></ion-icon>
+            } @else {
+                <span class="ion-padding-end">Finish</span>
+                <ion-icon name="flag-outline"></ion-icon>
+            }
+        </ion-button>
     </div>
 </ion-footer>

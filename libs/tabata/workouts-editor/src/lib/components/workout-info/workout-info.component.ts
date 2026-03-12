@@ -13,11 +13,15 @@ import {
     IonBackButton,
     IonSelect,
     IonSelectOption,
-    IonLabel
+    IonLabel,
+    IonFooter,
+    IonIcon
 } from '@ionic/angular/standalone';
 import { ToolbarComponent } from '@silver/tabata/ui';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { EQUIPMENT_CATEGORY_OPTIONS, BODY_REGION_OPTIONS, type EquipmentCategory, type BodyRegion } from '@silver/shared/helpers';
+import { addIcons } from 'ionicons';
+import { arrowBackOutline, arrowForwardOutline } from 'ionicons/icons';
 
 interface WorkoutInfoFormModel {
     name: string;
@@ -46,6 +50,8 @@ interface WorkoutInfoFormModel {
         IonSelect,
         IonSelectOption,
         IonLabel,
+        IonFooter,
+        IonIcon,
         FormField,
         ToolbarComponent
     ]
@@ -87,6 +93,7 @@ export class WorkoutInfoComponent implements OnInit {
     private readonly hasSyncedDraftToForm = signal(false);
 
     constructor() {
+        addIcons({ arrowBackOutline, arrowForwardOutline });
         effect(() => {
             const d = this.draft();
             const isEdit = this.isEditMode();
