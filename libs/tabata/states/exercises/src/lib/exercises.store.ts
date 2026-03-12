@@ -3,6 +3,7 @@ import { signalStore, withState, withMethods, patchState, withComputed } from '@
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { catchError, of, pipe, switchMap, tap } from 'rxjs';
 import { Subject } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { tapResponse } from '@ngrx/operators';
 import { Exercise } from './exercise.model';
 import { ExercisesService } from './exercises.service';
@@ -16,6 +17,8 @@ export interface ExerciseState {
     musclesList: string[];
     equipmentList: string[];
     bodyPartList: string[];
+    /** Map of exerciseId -> Exercise for the current context (e.g. workout details). */
+    exercisesMap: Record<string, Exercise>;
 }
 
 export const exerciseInitialState: ExerciseState = {
@@ -25,7 +28,8 @@ export const exerciseInitialState: ExerciseState = {
     error: null,
     musclesList: [],
     equipmentList: [],
-    bodyPartList: []
+    bodyPartList: [],
+    exercisesMap: {}
 };
 
 export const ExercisesStore = signalStore(
@@ -268,7 +272,24 @@ export const ExercisesStore = signalStore(
             ),
 
             clearSelectedExercise: () => patchState(store, { selectedExercise: null }),
-            clearError: () => patchState(store, { error: null })
+            clearError: () => patchState(store, { error: null }),
+
+            loadExercisesMap: (ids: string[]) => {
+                exercisesService
+                    .getExercisesMap(ids)
+                    .pipe(
+                        take(1),
+                        tapResponse({
+                            next: (exercisesMap) => patchState(store, { exercisesMap }),
+                            error: (err: Error) => patchState(store, { error: err.message })
+                        }),
+                        catchError((err: unknown) => {
+                            patchState(store, { error: err instanceof Error ? err.message : String(err) });
+                            return of({});
+                        })
+                    )
+                    .subscribe();
+            }
         };
     })
 );

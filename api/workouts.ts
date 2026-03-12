@@ -85,7 +85,20 @@ export default {
                 const response = await fetch(`${UPSTASH_URL}/JSON.GET/tabata_workouts`, { headers });
                 const data = await response.json();
                 const parsed = typeof data.result === 'string' ? JSON.parse(data.result) : (data.result ?? []);
-                return jsonResponse(JSON.stringify(Array.isArray(parsed) ? parsed : []), 200);
+                const list = Array.isArray(parsed) ? parsed : [];
+                const searchRaw = url.searchParams.get('search');
+                const search = typeof searchRaw === 'string' ? searchRaw.trim() : '';
+                const filtered =
+                    search.length > 0
+                        ? list.filter((w: Record<string, unknown>) => {
+                              const name = typeof w?.name === 'string' ? w.name.toLowerCase() : '';
+                              const description = typeof w?.description === 'string' ? w.description.toLowerCase() : '';
+                              const id = typeof w?.id === 'string' ? w.id.toLowerCase() : String(w?.id ?? '').toLowerCase();
+                              const term = search.toLowerCase();
+                              return name.includes(term) || description.includes(term) || id.includes(term);
+                          })
+                        : list;
+                return jsonResponse(JSON.stringify(filtered), 200);
             }
 
             if (method === 'POST') {

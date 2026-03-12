@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { forkJoin, of } from 'rxjs';
 import { Exercise, ExerciseListResponse, ExerciseSingleResponse, NameListResponse, SortBy, SortOrder } from './exercise.model';
 import { EXERCISES_API_BASE_URL } from './exercises-api-base-url';
 
@@ -62,6 +63,24 @@ export class ExercisesService {
         return this.http
             .get<ExerciseSingleResponse>(`${this.getBaseUrl()}/exercises/${encodeURIComponent(exerciseId)}`)
             .pipe(map((res) => (res.success ? res.data : null)));
+    }
+
+    /** Get a map of exercises by IDs (exerciseId -> Exercise). Fetches each id and returns a record. */
+    getExercisesMap(ids: string[]): Observable<Record<string, Exercise>> {
+        const uniqueIds = [...new Set(ids)].filter(Boolean);
+        if (uniqueIds.length === 0) {
+            return of({});
+        }
+        return forkJoin(uniqueIds.map((id) => this.getExerciseById(id))).pipe(
+            map((results) => {
+                const map: Record<string, Exercise> = {};
+                uniqueIds.forEach((id, i) => {
+                    const ex = results[i];
+                    if (ex) map[id] = ex;
+                });
+                return map;
+            })
+        );
     }
 
     /** Get exercises by body part (GET /api/v1/bodyparts/{bodyPartName}/exercises) */

@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { TabataWorkout } from './workouts.models';
@@ -16,9 +16,11 @@ export class WorkoutsService {
         return base ? `${base}${p}` : p;
     }
 
-    /** GET all workouts (proxied to Upstash via Vercel or same-origin). */
-    getWorkouts(): Observable<TabataWorkout[]> {
-        return this.http.get<TabataWorkout[]>(this.apiUrl('/api/workouts'));
+    /** GET all workouts (optional search filters by name server-side). */
+    getWorkouts(search?: string): Observable<TabataWorkout[]> {
+        const trimmed = search?.trim();
+        const params = trimmed ? new HttpParams().set('search', trimmed) : undefined;
+        return this.http.get<TabataWorkout[]>(this.apiUrl('/api/workouts'), { params });
     }
 
     /** GET a single workout by id (if your proxy supports it). */

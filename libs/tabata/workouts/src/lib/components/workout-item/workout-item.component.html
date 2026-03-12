@@ -1,8 +1,8 @@
 <ion-item class="workout-item" lines="full">
     <ion-label (click)="onDetailsClick()" class="workout-name-label cursor-pointer">
-        <h2 class="font-semibold text-base">{{ workout().name }}</h2>
+        <h2 class="font-semibold text-base truncate">{{ workout().name }}</h2>
         @if (workout().description) {
-            <p class="text-sm text-gray-500 line-clamp-2">{{ workout().description }}</p>
+            <p class="text-sm text-gray-500 line-clamp-2 truncate">{{ workout().description }}</p>
         }
         <div class="flex items-center gap-4 mt-2 text-sm text-gray-400">
             <span class="flex items-center gap-1">

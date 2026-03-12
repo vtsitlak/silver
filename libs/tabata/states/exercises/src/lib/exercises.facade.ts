@@ -13,21 +13,22 @@ export class ExercisesFacade {
     readonly musclesList = this.store.musclesList;
     readonly equipmentList = this.store.equipmentList;
     readonly bodyPartList = this.store.bodyPartList;
+    readonly exercisesMap = this.store.exercisesMap;
 
     readonly hasExercises = this.store.hasExercises;
     readonly hasSelectedExercise = this.store.hasSelectedExercise;
     readonly hasError = computed(() => !!this.store.error());
 
     getAllExercises(params?: { limit?: number; offset?: number }): void {
-        this.store.getAllExercises(params);
+        this.store['getAllExercises'](params);
     }
 
     getExerciseById(exerciseId: string): void {
-        this.store.getExerciseById(exerciseId);
+        this.store['getExerciseById'](exerciseId);
     }
 
     searchExercises(q: string, limit?: number, offset?: number, threshold?: number): void {
-        this.store.searchExercises({ q, limit, offset, threshold });
+        this.store['searchExercises']({ q, limit, offset, threshold });
     }
 
     filterExercises(options: {
@@ -40,38 +41,43 @@ export class ExercisesFacade {
         sortBy?: SortBy;
         sortOrder?: SortOrder;
     }): void {
-        this.store.filterExercises(options);
+        this.store['filterExercises'](options);
     }
 
     getExercisesByBodyPart(bodyPartName: string, limit?: number, offset?: number): void {
-        this.store.getExercisesByBodyPart({ bodyPartName, limit, offset });
+        this.store['getExercisesByBodyPart']({ bodyPartName, limit, offset });
     }
 
     getExercisesByEquipment(equipmentName: string, limit?: number, offset?: number): void {
-        this.store.getExercisesByEquipment({ equipmentName, limit, offset });
+        this.store['getExercisesByEquipment']({ equipmentName, limit, offset });
     }
 
     getExercisesByMuscle(muscleName: string, limit?: number, offset?: number, includeSecondary?: boolean): void {
-        this.store.getExercisesByMuscle({ muscleName, limit, offset, includeSecondary });
+        this.store['getExercisesByMuscle']({ muscleName, limit, offset, includeSecondary });
     }
 
     getMusclesList(): void {
-        this.store.getMusclesList();
+        this.store['getMusclesList']();
     }
 
     getEquipmentList(): void {
-        this.store.getEquipmentList();
+        this.store['getEquipmentList']();
     }
 
     getBodyPartList(): void {
-        this.store.getBodyPartList();
+        this.store['getBodyPartList']();
+    }
+
+    /** Load a map of exercises by IDs (e.g. for workout details). Sets exercisesMap signal. */
+    loadExercisesMap(ids: string[]): void {
+        this.store['loadExercisesMap'](ids);
     }
 
     clearSelectedExercise(): void {
-        this.store.clearSelectedExercise();
+        this.store['clearSelectedExercise']();
     }
 
     clearError(): void {
-        this.store.clearError();
+        this.store['clearError']();
     }
 }

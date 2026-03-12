@@ -1,15 +1,14 @@
 <ion-header [translucent]="true">
-    <ion-toolbar>
-        <ion-buttons slot="start">
+    <tbt-toolbar title="Workout Details" [showStartContent]="true" [showEndContent]="true">
+        <ion-buttons slot="start" class="toolbar-buttons-white">
             <ion-back-button defaultHref="/tabs/workouts"></ion-back-button>
         </ion-buttons>
-        <ion-title>Workout Details</ion-title>
-        <ion-buttons slot="end">
-            <ion-button (click)="editWorkout()">
+        <ion-buttons slot="end" class="toolbar-buttons-white">
+            <ion-button (click)="editWorkout()" aria-label="Edit workout">
                 <ion-icon name="create-outline"></ion-icon>
             </ion-button>
         </ion-buttons>
-    </ion-toolbar>
+    </tbt-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
@@ -27,7 +26,7 @@
             <div class="flex items-center gap-4 mb-4">
                 <ion-chip color="primary">
                     <ion-icon name="time-outline"></ion-icon>
-                    <ion-label>{{ formatDuration(w.totalDurationMinutes) }}</ion-label>
+                    <ion-label>{{ formatDurationMinutes(w.totalDurationMinutes) }}</ion-label>
                 </ion-chip>
                 <ion-chip color="secondary">
                     <ion-icon name="fitness-outline"></ion-icon>
@@ -53,9 +52,24 @@
                     <ion-card-title class="text-lg">Warmup</ion-card-title>
                 </ion-card-header>
                 <ion-card-content>
-                    <p class="text-sm text-gray-500"> Duration: {{ formatSecondsToMinutes(w.warmup.totalDurationSeconds) }} min </p>
+                    <p class="text-sm text-gray-500 mb-2"> Duration: {{ formatSecondsToMinutes(w.warmup.totalDurationSeconds) }} min </p>
                     @if (w.warmup.movements.length > 0) {
-                        <p class="text-sm text-gray-400 mt-1"> {{ w.warmup.movements.length }} exercises </p>
+                        <ion-list lines="none" class="exercises-list">
+                            @for (movement of w.warmup.movements; track $index) {
+                                <ion-item class="exercise-item">
+                                    @if (getExerciseImage(movement.exerciseId)) {
+                                        <img
+                                            [src]="getExerciseImage(movement.exerciseId)"
+                                            [alt]="getExerciseName(movement.exerciseId)"
+                                            class="w-12 h-12 object-cover rounded-lg bg-gray-100 mr-3"
+                                            slot="start"
+                                        />
+                                    }
+                                    <ion-label class="text-sm">{{ getExerciseName(movement.exerciseId) }}</ion-label>
+                                    <ion-note slot="end" class="text-sm text-gray-500">{{ movement.durationSeconds }}s</ion-note>
+                                </ion-item>
+                            }
+                        </ion-list>
                     }
                 </ion-card-content>
             </ion-card>
@@ -72,7 +86,7 @@
                     <div class="flex flex-wrap gap-2 mb-3">
                         <span class="text-sm text-gray-500 flex items-center gap-1">
                             <ion-icon name="time-outline"></ion-icon>
-                            ~{{ getBlockDuration(block) }} min
+                            ~{{ getBlockDurationMinutes(block) }} min
                         </span>
                         <span class="text-sm text-gray-500">|</span>
                         <span class="text-sm text-gray-500">{{ block.rounds }} rounds</span>
@@ -82,7 +96,15 @@
 
                     <ion-list lines="none" class="exercises-list">
                         <ion-item class="exercise-item">
-                            <ion-label class="text-sm">{{ block.exerciseId }}</ion-label>
+                            @if (getExerciseImage(block.exerciseId)) {
+                                <img
+                                    [src]="getExerciseImage(block.exerciseId)"
+                                    [alt]="getExerciseName(block.exerciseId)"
+                                    class="w-12 h-12 object-cover rounded-lg bg-gray-100 mr-3"
+                                    slot="start"
+                                />
+                            }
+                            <ion-label class="text-sm">{{ getExerciseName(block.exerciseId) }}</ion-label>
                         </ion-item>
                     </ion-list>
 
@@ -102,9 +124,24 @@
                     <ion-card-title class="text-lg">Cooldown</ion-card-title>
                 </ion-card-header>
                 <ion-card-content>
-                    <p class="text-sm text-gray-500"> Duration: {{ formatSecondsToMinutes(w.cooldown.totalDurationSeconds) }} min </p>
+                    <p class="text-sm text-gray-500 mb-2"> Duration: {{ formatSecondsToMinutes(w.cooldown.totalDurationSeconds) }} min </p>
                     @if (w.cooldown.movements.length > 0) {
-                        <p class="text-sm text-gray-400 mt-1"> {{ w.cooldown.movements.length }} exercises </p>
+                        <ion-list lines="none" class="exercises-list">
+                            @for (movement of w.cooldown.movements; track $index) {
+                                <ion-item class="exercise-item">
+                                    @if (getExerciseImage(movement.exerciseId)) {
+                                        <img
+                                            [src]="getExerciseImage(movement.exerciseId)"
+                                            [alt]="getExerciseName(movement.exerciseId)"
+                                            class="w-12 h-12 object-cover rounded-lg bg-gray-100 mr-3"
+                                            slot="start"
+                                        />
+                                    }
+                                    <ion-label class="text-sm">{{ getExerciseName(movement.exerciseId) }}</ion-label>
+                                    <ion-note slot="end" class="text-sm text-gray-500">{{ movement.durationSeconds }}s</ion-note>
+                                </ion-item>
+                            }
+                        </ion-list>
                     }
                 </ion-card-content>
             </ion-card>
