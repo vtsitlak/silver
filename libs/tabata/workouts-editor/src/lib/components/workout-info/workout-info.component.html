@@ -23,7 +23,7 @@
 
             <ion-item>
                 <ion-label position="stacked">Available equipment</ion-label>
-                <ion-select placeholder="Select equipment" [formField]="infoForm.availableEquipments" multiple="true" interface="action-sheet">
+                <ion-select placeholder="Select equipment" [formField]="infoForm.availableEquipments" multiple="true" interface="alert">
                     @for (eq of equipmentOptions; track eq) {
                         <ion-select-option [value]="eq">{{ eq }}</ion-select-option>
                     }
@@ -43,7 +43,7 @@
 
             <ion-item>
                 <ion-label position="stacked">Secondary targets</ion-label>
-                <ion-select placeholder="Select secondary targets" [formField]="infoForm.secondaryTargetBodyparts" multiple="true" interface="action-sheet">
+                <ion-select placeholder="Select secondary targets" [formField]="infoForm.secondaryTargetBodyparts" multiple="true" interface="alert">
                     @for (region of bodyRegionOptions; track region) {
                         <ion-select-option [value]="region" [disabled]="secondaryTargetDisabled()(region)">
                             {{ region }}

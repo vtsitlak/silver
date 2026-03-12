@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, signal, untracked } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IonHeader, IonContent, IonFooter, IonButton, IonButtons, IonBackButton, IonLabel, IonItem, IonList, IonIcon } from '@ionic/angular/standalone';
 import { ModalController } from '@ionic/angular/standalone';
@@ -8,6 +8,7 @@ import { ToolbarComponent, DurationInputModalComponent } from '@silver/tabata/ui
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { Exercise, ExerciseSelectorModalComponent, ExerciseDetailsModalComponent } from '@silver/tabata/exercises';
 import type { Phase } from '@silver/tabata/states/workouts';
+import { WorkoutSubmitService } from '../../services/workout-submit.service';
 
 export type WorkoutPhaseType = 'warmup' | 'cooldown';
 
@@ -41,9 +42,43 @@ export class WorkoutPhaseComponent implements OnInit {
     private readonly router = inject(Router);
     private readonly facade = inject(WorkoutEditorFacade);
     private readonly modalCtrl = inject(ModalController);
+    private readonly workoutSubmitService = inject(WorkoutSubmitService);
+
+    private readonly hasSyncedPhaseFromDraft = signal<WorkoutPhaseType | null>(null);
 
     constructor() {
         addIcons({ createOutline, trashOutline });
+        const path = this.route.snapshot.routeConfig?.path ?? '';
+        const phase = path.endsWith('cooldown') ? 'cooldown' : 'warmup';
+        this.phaseType.set(phase);
+        effect(() => {
+            const d = this.draft();
+            const phase = this.phaseType();
+            const syncedPhase = this.hasSyncedPhaseFromDraft();
+            if (syncedPhase === phase) return;
+            const phaseData = phase === 'warmup' ? d.warmup : d.cooldown;
+            const movements = phaseData?.movements;
+            if (movements?.length) {
+                this.hasSyncedPhaseFromDraft.set(phase);
+                untracked(() => {
+                    this.phaseItems.set(
+                        movements.map((m) => ({
+                            exercise: {
+                                exerciseId: m.exerciseId,
+                                name: this.formatIdAsDisplayName(m.exerciseId),
+                                gifUrl: '',
+                                targetMuscles: [],
+                                bodyParts: [],
+                                equipments: [],
+                                secondaryMuscles: [],
+                                instructions: []
+                            } as Exercise,
+                            durationSeconds: m.durationSeconds ?? 60
+                        }))
+                    );
+                });
+            }
+        });
     }
 
     readonly workoutId = signal<string | null>(null);
@@ -62,6 +97,7 @@ export class WorkoutPhaseComponent implements OnInit {
     });
 
     readonly draft = this.facade.workoutDraft;
+    readonly isSaving = this.facade.isSaving;
 
     readonly backHref = computed(() => {
         const id = this.workoutId();
@@ -78,6 +114,8 @@ export class WorkoutPhaseComponent implements OnInit {
     });
 
     readonly totalDurationSeconds = computed(() => this.phaseItems().reduce((sum, p) => sum + (p.durationSeconds ?? 0), 0));
+
+    readonly nextButtonLabel = computed(() => (this.phaseType() === 'cooldown' ? 'Finish' : 'Next'));
 
     readonly editingItem = computed(() => {
         const idx = this.durationModalItemIndex();
@@ -98,7 +136,10 @@ export class WorkoutPhaseComponent implements OnInit {
         if (id) {
             this.workoutId.set(id);
             this.isEditMode.set(true);
-            this.facade.loadWorkout(id);
+            const existing = this.facade.workout();
+            if (existing?.id !== id) {
+                this.facade.loadWorkout(id);
+            }
         }
     }
 
@@ -121,19 +162,20 @@ export class WorkoutPhaseComponent implements OnInit {
         } else {
             this.facade.updateDraft({ cooldown: phaseData });
         }
-        const id = this.workoutId();
-        if (this.isEditMode() && id) {
-            if (phase === 'warmup') {
+        if (phase === 'warmup') {
+            const id = this.workoutId();
+            if (this.isEditMode() && id) {
                 this.router.navigate(['/tabs/workouts/edit', id, 'main-workout']);
             } else {
-                this.router.navigate(['/tabs/workouts']);
+                this.router.navigate(['/tabs/workouts/create/main-workout']);
             }
         } else {
-            if (phase === 'warmup') {
-                this.router.navigate(['/tabs/workouts/create/main-workout']);
-            } else {
-                this.router.navigate(['/tabs/workouts']);
-            }
+            this.workoutSubmitService.submitWorkout().subscribe({
+                next: () => this.router.navigate(['/tabs/workouts']),
+                error: () => {
+                    /* Error is reflected in facade.error(); navigation is skipped. */
+                }
+            });
         }
     }
 
@@ -226,6 +268,15 @@ export class WorkoutPhaseComponent implements OnInit {
     formatName(name: string): string {
         return name
             .split(' ')
+            .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+            .join(' ');
+    }
+
+    private formatIdAsDisplayName(id: string): string {
+        if (!id) return id;
+        return id
+            .replace(/[-_]/g, ' ')
+            .split(/\s+/)
             .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
             .join(' ');
     }

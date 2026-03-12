@@ -20,10 +20,6 @@ ion-footer {
     box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.accordion-header {
+.block-item {
     --min-height: 56px;
-}
-
-.accordion-content {
-    background: var(--ion-background-color);
 }

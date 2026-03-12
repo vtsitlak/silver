@@ -7,6 +7,7 @@ const mockWorkout: TabataWorkout = {
     name: 'Test Workout',
     description: 'A test workout description',
     totalDurationMinutes: 30,
+    warmup: { totalDurationSeconds: 300, movements: [] },
     blocks: [
         {
             rounds: 8,
@@ -16,10 +17,14 @@ const mockWorkout: TabataWorkout = {
             interBlockRestSeconds: 60
         }
     ],
+    cooldown: { totalDurationSeconds: 120, movements: [] },
     createdAt: '2024-01-01T00:00:00Z',
     updatedByUserId: 'user1',
     createdByUserId: 'user1',
-    generatedByAi: false
+    generatedByAi: false,
+    mainTargetBodypart: 'back',
+    secondaryTargetBodyparts: [],
+    availableEquipments: []
 };
 
 describe('WorkoutItemComponent', () => {
@@ -65,9 +70,27 @@ describe('WorkoutItemComponent', () => {
         expect(component.formattedDuration).toBe('2h');
     });
 
-    it('should emit workoutClick when clicked', () => {
-        const emitSpy = jest.spyOn(component.workoutClick, 'emit');
-        component.onClick();
+    it('should emit detailsClick when name is clicked', () => {
+        const emitSpy = jest.spyOn(component.detailsClick, 'emit');
+        component.onDetailsClick();
+        expect(emitSpy).toHaveBeenCalledWith(mockWorkout);
+    });
+
+    it('should emit editClick when edit button is clicked', () => {
+        const emitSpy = jest.spyOn(component.editClick, 'emit');
+        component.onEditClick(new Event('click'));
+        expect(emitSpy).toHaveBeenCalledWith(mockWorkout);
+    });
+
+    it('should emit playClick when play button is clicked', () => {
+        const emitSpy = jest.spyOn(component.playClick, 'emit');
+        component.onPlayClick(new Event('click'));
+        expect(emitSpy).toHaveBeenCalledWith(mockWorkout);
+    });
+
+    it('should emit removeClick when remove button is clicked', () => {
+        const emitSpy = jest.spyOn(component.removeClick, 'emit');
+        component.onRemoveClick(new Event('click'));
         expect(emitSpy).toHaveBeenCalledWith(mockWorkout);
     });
 });

@@ -10,8 +10,7 @@ import {
     IonLabel,
     IonItem,
     IonIcon,
-    IonAccordionGroup,
-    IonAccordion
+    IonList
 } from '@ionic/angular/standalone';
 import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -49,8 +48,7 @@ export interface MainWorkoutBlockItem {
         IonLabel,
         IonItem,
         IonIcon,
-        IonAccordionGroup,
-        IonAccordion,
+        IonList,
         ToolbarComponent
     ]
 })
@@ -63,7 +61,6 @@ export class MainWorkoutComponent implements OnInit {
     readonly workoutId = signal<string | null>(null);
     readonly isEditMode = signal(false);
     readonly blocks = signal<MainWorkoutBlockItem[]>([]);
-    readonly addBlockAccordionValue = signal<string | null>(null);
     readonly blockIndexForExerciseModal = signal<number | null>(null);
 
     readonly draft = this.facade.workoutDraft;
@@ -105,9 +102,10 @@ export class MainWorkoutComponent implements OnInit {
         effect(() => {
             const d = this.draft();
             const synced = this.hasSyncedDraft();
+            const isEdit = this.route.snapshot.paramMap.get('workoutId');
             if (synced) return;
             const draftBlocks = d.blocks;
-            if (draftBlocks?.length) {
+            if (draftBlocks?.length && isEdit) {
                 this.hasSyncedDraft.set(true);
                 untracked(() => {
                     this.blocks.set(
@@ -120,7 +118,7 @@ export class MainWorkoutComponent implements OnInit {
                                 exercise: id
                                     ? ({
                                           exerciseId: id,
-                                          name: id,
+                                          name: this.formatIdAsDisplayName(id),
                                           gifUrl: '',
                                           targetMuscles: [],
                                           bodyParts: [],
@@ -143,7 +141,10 @@ export class MainWorkoutComponent implements OnInit {
         if (id) {
             this.workoutId.set(id);
             this.isEditMode.set(true);
-            this.facade.loadWorkout(id);
+            const existing = this.facade.workout();
+            if (existing?.id !== id) {
+                this.facade.loadWorkout(id);
+            }
         }
         if (this.blocks().length === 0 && !this.draft().blocks?.length) {
             this.addBlock();
@@ -174,7 +175,6 @@ export class MainWorkoutComponent implements OnInit {
     }
 
     addBlock(): void {
-        const next = this.blocks().length + 1;
         this.blocks.update((prev) => [
             ...prev,
             {
@@ -185,7 +185,6 @@ export class MainWorkoutComponent implements OnInit {
                 interBlockRestSeconds: DEFAULT_INTER_BLOCK_REST_SECONDS
             }
         ]);
-        this.addBlockAccordionValue.set(`block-${next - 1}`);
     }
 
     removeBlock(index: number): void {
@@ -240,6 +239,16 @@ export class MainWorkoutComponent implements OnInit {
     formatName(name: string): string {
         return name
             .split(' ')
+            .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+            .join(' ');
+    }
+
+    /** Format a raw exercise id as a readable label when we don't have the full exercise (e.g. from draft). */
+    private formatIdAsDisplayName(id: string): string {
+        if (!id) return id;
+        return id
+            .replace(/[-_]/g, ' ')
+            .split(/\s+/)
             .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
             .join(' ');
     }

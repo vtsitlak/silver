@@ -23,6 +23,8 @@ export const mockWorkoutEditorFacade = {
     workoutDraft: () => ({}),
     mergedWorkout: () => ({}),
     workout: () => null,
+    isEditMode: () => false,
+    isSaving: () => false,
     loadWorkout: mockFn(),
     updateDraft: mockFn(),
     clearDraft: mockFn(),

@@ -122,10 +122,23 @@ export const ExercisesStore = signalStore(
         )(getBodyPartListTrigger);
 
         return {
-            getAllExercises: (params?: { limit?: number; offset?: number }) => getAllTrigger.next(params),
-            getMusclesList: () => getMusclesListTrigger.next(),
-            getEquipmentList: () => getEquipmentListTrigger.next(),
-            getBodyPartList: () => getBodyPartListTrigger.next(),
+            getAllExercises: (params?: { limit?: number; offset?: number }) => {
+                const { limit = 10, offset = 0 } = params ?? {};
+                if (offset === 0 && store.exercises().length > 0) return;
+                getAllTrigger.next(params);
+            },
+            getMusclesList: () => {
+                if (store.musclesList().length > 0) return;
+                getMusclesListTrigger.next();
+            },
+            getEquipmentList: () => {
+                if (store.equipmentList().length > 0) return;
+                getEquipmentListTrigger.next();
+            },
+            getBodyPartList: () => {
+                if (store.bodyPartList().length > 0) return;
+                getBodyPartListTrigger.next();
+            },
 
             getExerciseById: rxMethod<string>(
                 pipe(

@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { IonItem, IonLabel, IonIcon } from '@ionic/angular/standalone';
+import { IonItem, IonLabel, IonIcon, IonButton, IonButtons } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { chevronForward, timeOutline, fitnessOutline } from 'ionicons/icons';
+import { chevronForward, timeOutline, fitnessOutline, createOutline, playCircle, trashOutline } from 'ionicons/icons';
 import { TabataWorkout } from '@silver/tabata/states/workouts';
 
 @Component({
@@ -10,18 +10,36 @@ import { TabataWorkout } from '@silver/tabata/states/workouts';
     styleUrls: ['workout-item.component.scss'],
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [IonItem, IonLabel, IonIcon]
+    imports: [IonItem, IonLabel, IonIcon, IonButton, IonButtons]
 })
 export class WorkoutItemComponent {
     readonly workout = input.required<TabataWorkout>();
-    readonly workoutClick = output<TabataWorkout>();
+    readonly detailsClick = output<TabataWorkout>();
+    readonly editClick = output<TabataWorkout>();
+    readonly playClick = output<TabataWorkout>();
+    readonly removeClick = output<TabataWorkout>();
 
     constructor() {
-        addIcons({ chevronForward, timeOutline, fitnessOutline });
+        addIcons({ chevronForward, timeOutline, fitnessOutline, createOutline, playCircle, trashOutline });
     }
 
-    onClick(): void {
-        this.workoutClick.emit(this.workout());
+    onDetailsClick(): void {
+        this.detailsClick.emit(this.workout());
+    }
+
+    onEditClick(event: Event): void {
+        event.stopPropagation();
+        this.editClick.emit(this.workout());
+    }
+
+    onPlayClick(event: Event): void {
+        event.stopPropagation();
+        this.playClick.emit(this.workout());
+    }
+
+    onRemoveClick(event: Event): void {
+        event.stopPropagation();
+        this.removeClick.emit(this.workout());
     }
 
     get blocksCount(): number {

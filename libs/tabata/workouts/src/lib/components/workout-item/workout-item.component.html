@@ -1,5 +1,5 @@
-<ion-item button (click)="onClick()" class="workout-item">
-    <ion-label>
+<ion-item class="workout-item" lines="full">
+    <ion-label (click)="onDetailsClick()" class="workout-name-label cursor-pointer">
         <h2 class="font-semibold text-base">{{ workout().name }}</h2>
         @if (workout().description) {
             <p class="text-sm text-gray-500 line-clamp-2">{{ workout().description }}</p>
@@ -15,5 +15,15 @@
             </span>
         </div>
     </ion-label>
-    <ion-icon name="chevron-forward" slot="end" class="text-gray-400"></ion-icon>
+    <ion-buttons slot="end" class="workout-actions">
+        <ion-button fill="clear" size="small" (click)="onEditClick($event)" aria-label="Edit workout">
+            <ion-icon name="create-outline"></ion-icon>
+        </ion-button>
+        <ion-button fill="clear" size="small" (click)="onPlayClick($event)" aria-label="Play workout">
+            <ion-icon name="play-circle"></ion-icon>
+        </ion-button>
+        <ion-button fill="clear" size="small" color="danger" (click)="onRemoveClick($event)" aria-label="Remove workout">
+            <ion-icon name="trash-outline"></ion-icon>
+        </ion-button>
+    </ion-buttons>
 </ion-item>

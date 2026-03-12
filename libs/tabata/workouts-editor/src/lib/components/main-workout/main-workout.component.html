@@ -12,49 +12,38 @@
         <p> Rest {{ interBlockRestSeconds }}s between blocks. Total main phase: {{ totalDurationMinutes() }} min. </p>
     </div>
 
-    <ion-accordion-group [value]="addBlockAccordionValue()">
+    <ion-list lines="full">
         @for (block of blocks(); track $index; let i = $index) {
-            <ion-accordion [value]="'block-' + i">
-                <ion-item slot="header" class="accordion-header">
-                    <ion-label>
-                        <h2 class="font-medium">Block {{ i + 1 }}</h2>
-                        <p class="text-sm text-gray-500"> 8 rounds · {{ block.exercise ? '1 exercise' : 'No exercise' }} </p>
-                    </ion-label>
-                </ion-item>
-                <div slot="content" class="accordion-content ion-padding">
-                    <p class="text-sm text-gray-500 mb-2">Work {{ workSeconds }}s / Rest {{ restSeconds }}s · 8 rounds (fixed)</p>
-
-                    <div class="mb-2 flex items-center justify-between">
-                        <span class="font-medium">Exercise</span>
-                        <ion-button fill="outline" size="small" (click)="openExerciseSelectorForBlock(i)">
-                            <ion-icon name="create-outline"></ion-icon>
-                            {{ block.exercise ? 'Change exercise' : 'Add exercise' }}
-                        </ion-button>
-                    </div>
+            <ion-item class="block-item">
+                <ion-label class="block-label">
+                    <h2 class="font-medium">Block {{ i + 1 }}</h2>
                     @if (block.exercise) {
-                        <ion-item>
-                            <ion-label>
-                                <button
-                                    type="button"
-                                    class="cursor-pointer font-medium hover:underline text-left w-full py-1"
-                                    (click)="openExerciseDetailsModal(block.exercise.exerciseId)"
-                                >
-                                    {{ formatName(block.exercise.name) }}
-                                </button>
-                            </ion-label>
-                            <ion-button fill="clear" color="danger" size="small" slot="end" (click)="clearExerciseFromBlock(i)" aria-label="Remove">
-                                <ion-icon name="trash-outline"></ion-icon>
-                            </ion-button>
-                        </ion-item>
+                        <button
+                            type="button"
+                            class="cursor-pointer text-sm text-primary hover:underline text-left p-0 m-0"
+                            (click)="openExerciseDetailsModal(block.exercise.exerciseId)"
+                        >
+                            {{ formatName(block.exercise.name) }}
+                        </button>
                     } @else {
-                        <p class="text-sm text-gray-500 ion-padding-start">No exercise yet. Add an exercise to this block.</p>
+                        <p class="text-sm text-gray-500">No exercise</p>
                     }
-
-                    <ion-button fill="clear" color="danger" size="small" class="ion-margin-top" (click)="removeBlock(i)">Remove block</ion-button>
-                </div>
-            </ion-accordion>
+                </ion-label>
+                <ion-buttons slot="end">
+                    <ion-button fill="outline" size="small" (click)="openExerciseSelectorForBlock(i)">
+                        <ion-icon name="create-outline"></ion-icon>
+                        {{ block.exercise ? 'Change' : 'Add' }}
+                    </ion-button>
+                    @if (block.exercise) {
+                        <ion-button fill="clear" size="small" (click)="clearExerciseFromBlock(i)" aria-label="Clear exercise">Clear</ion-button>
+                    }
+                    <ion-button fill="clear" color="danger" size="small" (click)="removeBlock(i)" aria-label="Remove block">
+                        <ion-icon name="trash-outline"></ion-icon>
+                    </ion-button>
+                </ion-buttons>
+            </ion-item>
         }
-    </ion-accordion-group>
+    </ion-list>
 
     <ion-button expand="block" fill="outline" class="ion-margin-top" (click)="addBlock()"> Add block </ion-button>
 </ion-content>
