@@ -5,7 +5,8 @@
     },
     "/api/exercises-db": {
         "target": "https://silver-tabata-ai.vercel.app",
-        "secure": true
+        "secure": true,
+        "pathRewrite": { "^/api/exercises-db": "/api/exercises-db" }
     },
     "/api/exercisedb/**": {
         "target": "https://www.exercisedb.dev",
