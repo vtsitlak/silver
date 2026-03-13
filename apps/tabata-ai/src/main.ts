@@ -11,9 +11,11 @@ import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 import { environment } from './app/environments/environment';
 import { inject, provideAppInitializer, provideZoneChangeDetection } from '@angular/core';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { AuthFacade } from '@silver/tabata/auth';
 import { WORKOUTS_API_BASE_URL } from '@silver/tabata/workouts';
 import { EXERCISES_API_BASE_URL } from '@silver/tabata/states/exercises';
+import { rateLimitInterceptor } from './app/interceptors/rate-limit.interceptor';
 import { of } from 'rxjs';
 
 export function initAuthStore() {
@@ -27,12 +29,13 @@ export const appConfig = {
         { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
         provideIonicAngular(),
         provideRouter(routes, withComponentInputBinding(), withPreloading(PreloadAllModules)),
+        provideHttpClient(withInterceptors([rateLimitInterceptor])),
         provideAppInitializer(initAuthStore),
         provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
         provideFirestore(() => getFirestore()),
         provideAuth(() => getAuth()),
         { provide: WORKOUTS_API_BASE_URL, useValue: environment.production ? '' : (environment.workoutsApiBaseUrl ?? '') },
-        { provide: EXERCISES_API_BASE_URL, useValue: '/api/exercisedb' }
+        { provide: EXERCISES_API_BASE_URL, useValue: '/api/exercises-db' }
     ]
 };
 

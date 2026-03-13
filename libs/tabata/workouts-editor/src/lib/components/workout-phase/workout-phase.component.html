@@ -69,22 +69,19 @@
 </ion-content>
 
 <ion-footer class="ion-no-border">
-    <div class="flex justify-between items-center ion-padding">
-        <ion-button fill="clear" type="button" (click)="navigateBack()" class="ion-no-padding">
+    <div class="flex justify-between items-center ion-padding gap-2">
+        <ion-button fill="clear" type="button" (click)="navigateBack()" class="ion-no-padding flex-1 min-w-0">
             <ion-icon name="arrow-back-outline"></ion-icon>
-            @if (phaseType() === 'warmup') {
-                <span class="ion-padding-start">Info</span>
-            } @else {
-                <span class="ion-padding-start">Main workout</span>
-            }
+            <span class="ion-padding-start">Back</span>
         </ion-button>
-        <ion-button fill="clear" type="button" (click)="onNext()" [disabled]="!allHaveDuration() || isSaving()" class="ion-no-padding">
+        <ion-button fill="clear" type="button" (click)="onCancel()" class="ion-no-padding flex-1 min-w-0">Cancel</ion-button>
+        <ion-button fill="clear" type="button" (click)="onNext()" [disabled]="!allHaveDuration() || isSaving()" class="ion-no-padding flex-1 min-w-0">
             @if (phaseType() === 'warmup') {
-                <span class="ion-padding-end">Main workout</span>
+                <span class="ion-padding-end">Next</span>
                 <ion-icon name="arrow-forward-outline"></ion-icon>
             } @else {
                 <span class="ion-padding-end">Finish</span>
-                <ion-icon name="flag-outline"></ion-icon>
+                <ion-icon name="save-outline"></ion-icon>
             }
         </ion-button>
     </div>

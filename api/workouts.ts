@@ -27,6 +27,23 @@ function jsonResponse(body: string, status: number, extraHeaders?: Record<string
     });
 }
 
+const ALPHANUMERIC = 'abcdefghijklmnopqrstuvwxyz0123456789';
+function generateWorkoutId(): string {
+    const randomPart = Array.from({ length: 6 }, () => ALPHANUMERIC[Math.floor(Math.random() * ALPHANUMERIC.length)]).join('');
+    return `${Date.now()}${randomPart}`;
+}
+
+function timestamp(): string {
+    const d = new Date();
+    const y = d.getFullYear();
+    const M = String(d.getMonth() + 1).padStart(2, '0');
+    const D = String(d.getDate()).padStart(2, '0');
+    const h = String(d.getHours()).padStart(2, '0');
+    const m = String(d.getMinutes()).padStart(2, '0');
+    const s = String(d.getSeconds()).padStart(2, '0');
+    return `${y}-${M}-${D}-${h}:${m}:${s}`;
+}
+
 export default {
     async fetch(request: Request): Promise<Response> {
         if (request.method === 'OPTIONS') {
@@ -88,7 +105,9 @@ export default {
                     if (index === -1) {
                         return jsonResponse(JSON.stringify({ error: 'Workout not found' }), 404);
                     }
-                    const updated = { ...body, id };
+                    const existing = list[index] as Record<string, unknown>;
+                    const omit = (o: Record<string, unknown>, keys: string[]) => Object.fromEntries(Object.entries(o).filter(([k]) => !keys.includes(k)));
+                    const updated = { ...existing, ...omit(body as Record<string, unknown>, ['updatedAt']), id, updatedAt: timestamp() };
                     const newList = [...list];
                     newList[index] = updated;
                     const setRes = await fetch(UPSTASH_URL, {
@@ -126,17 +145,25 @@ export default {
             }
 
             if (method === 'POST') {
-                const body = await request.json();
+                const body = (await request.json()) as Record<string, unknown>;
+                const omit = (o: Record<string, unknown>, keys: string[]) => Object.fromEntries(Object.entries(o).filter(([k]) => !keys.includes(k)));
+                const createdAt = timestamp();
+                const workout = {
+                    ...omit(body, ['id', 'createdAt', 'updatedAt']),
+                    id: generateWorkoutId(),
+                    createdAt,
+                    updatedAt: createdAt
+                };
                 const response = await fetch(`${UPSTASH_URL}/JSON.ARRAPPEND/tabata_workouts/$`, {
                     method: 'POST',
                     headers,
-                    body: JSON.stringify(body)
+                    body: JSON.stringify(workout)
                 });
                 const data = await response.json();
                 if (!response.ok) {
                     return jsonResponse(JSON.stringify({ error: data.error ?? 'Upstash error' }), response.status);
                 }
-                return jsonResponse(JSON.stringify({ success: true }), 201);
+                return jsonResponse(JSON.stringify(workout), 201);
             }
 
             return jsonResponse(JSON.stringify({ error: 'Method not allowed' }), 405);

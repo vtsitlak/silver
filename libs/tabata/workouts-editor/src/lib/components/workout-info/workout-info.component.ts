@@ -19,6 +19,7 @@ import {
 } from '@ionic/angular/standalone';
 import { ToolbarComponent } from '@silver/tabata/ui';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
+import { WorkoutEditorCancelService } from '../../services/workout-editor-cancel.service';
 import { EQUIPMENT_CATEGORY_OPTIONS, BODY_REGION_OPTIONS, type EquipmentCategory, type BodyRegion } from '@silver/shared/helpers';
 import { addIcons } from 'ionicons';
 import { arrowBackOutline, arrowForwardOutline } from 'ionicons/icons';
@@ -60,6 +61,7 @@ export class WorkoutInfoComponent implements OnInit {
     private readonly route = inject(ActivatedRoute);
     private readonly router = inject(Router);
     private readonly facade = inject(WorkoutEditorFacade);
+    private readonly cancelService = inject(WorkoutEditorCancelService);
 
     readonly workoutId = signal<string | null>(null);
     readonly isEditMode = signal(false);
@@ -112,6 +114,22 @@ export class WorkoutInfoComponent implements OnInit {
                 });
             }
         });
+        effect(() => {
+            const model = this.infoModel();
+            const canPushToDraft = !this.isEditMode() || this.hasSyncedDraftToForm();
+            if (canPushToDraft) {
+                untracked(() => {
+                    this.facade.updateDraft({
+                        name: model.name || undefined,
+                        description: model.description || undefined,
+                        mainTargetBodypart: model.mainTargetBodypart ?? undefined,
+                        availableEquipments: model.availableEquipments,
+                        secondaryTargetBodyparts: model.secondaryTargetBodyparts,
+                        generatedByAi: model.generatedByAi
+                    });
+                });
+            }
+        });
     }
 
     ngOnInit(): void {
@@ -130,28 +148,18 @@ export class WorkoutInfoComponent implements OnInit {
     onGenerateWithAi(): void {
         if (this.infoForm().invalid()) return;
         this.infoModel.set({ ...this.infoModel(), generatedByAi: true });
-        this.facade.updateDraft({
-            generatedByAi: true
-        });
-        // TODO: wire to AI generation
+        // TODO: wire to AI generation (draft is synced via effect)
     }
 
-    onCancel(): void {
-        this.facade.clearDraft();
-        this.router.navigate(['/tabs/workouts']);
+    async onCancel(): Promise<void> {
+        const stay = await this.cancelService.confirmCancel();
+        if (!stay) {
+            this.router.navigate(['/tabs/workouts']);
+        }
     }
 
     onSubmit(): void {
         if (this.infoForm().invalid()) return;
-        const m = this.infoModel();
-        this.facade.updateDraft({
-            name: m.name || undefined,
-            description: m.description || undefined,
-            mainTargetBodypart: m.mainTargetBodypart ?? undefined,
-            availableEquipments: m.availableEquipments,
-            secondaryTargetBodyparts: m.secondaryTargetBodyparts,
-            generatedByAi: m.generatedByAi
-        });
         const id = this.workoutId();
         if (id) {
             this.router.navigate(['/tabs/workouts/edit', id, 'warmup']);

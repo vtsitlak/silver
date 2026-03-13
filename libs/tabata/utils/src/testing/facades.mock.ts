@@ -25,6 +25,7 @@ export const mockWorkoutEditorFacade = {
     workout: () => null,
     isEditMode: () => false,
     isSaving: () => false,
+    hasUnsavedChanges: () => false,
     loadWorkout: mockFn(),
     updateDraft: mockFn(),
     clearDraft: mockFn(),

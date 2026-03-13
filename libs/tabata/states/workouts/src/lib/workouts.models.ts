@@ -29,7 +29,7 @@ export interface TabataWorkout {
     cooldown: Phase;
     script?: string;
     createdAt: string;
-    updatedAt?: string;
+    updatedAt: string;
     updatedByUserId: string;
     createdByUserId: string;
     generatedByAi: boolean;

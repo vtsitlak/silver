@@ -30,7 +30,6 @@
                 [value]="selectedMuscles()"
                 (ionChange)="onMuscleChange($event)"
                 interface="popover"
-                multiple="true"
                 class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
             >
                 @for (muscle of musclesList(); track muscle) {
@@ -43,7 +42,6 @@
                 [value]="selectedEquipment()"
                 (ionChange)="onEquipmentChange($event)"
                 interface="popover"
-                multiple="true"
                 class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
             >
                 @for (equipment of equipmentList(); track equipment) {
@@ -92,8 +90,6 @@
             <div class="flex justify-center items-center py-8">
                 <ion-spinner name="crescent"></ion-spinner>
             </div>
-        } @else if (error()) {
-            <p class="text-center text-red-500 p-4">{{ error() }}</p>
         } @else {
             <ion-list>
                 @for (exercise of filteredExercises(); track exercise.exerciseId) {

@@ -8,11 +8,16 @@ import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { createMockActivatedRoute, mockAuthFacade, mockModalController, mockWorkoutEditorFacade } from '@silver/tabata/testing';
 import { WorkoutPhaseComponent } from './workout-phase.component';
 import { WorkoutSubmitService } from '../../services/workout-submit.service';
+import { WorkoutEditorCancelService } from '../../services/workout-editor-cancel.service';
 import type { TabataWorkout } from '@silver/tabata/states/workouts';
+
+const mockCancelService = {
+    confirmCancel: jest.fn().mockResolvedValue(false)
+};
 
 const mockExercisesFacade = {
     exercisesMap: () => ({}),
-    loadExercisesMap: () => {}
+    loadExercisesMap: jest.fn()
 };
 
 const mockWorkoutSubmitService = {
@@ -30,6 +35,7 @@ describe('WorkoutPhaseComponent', () => {
             providers: [
                 provideRouter([]),
                 { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade },
+                { provide: WorkoutEditorCancelService, useValue: mockCancelService },
                 { provide: ExercisesFacade, useValue: mockExercisesFacade },
                 { provide: ActivatedRoute, useValue: createMockActivatedRoute() },
                 { provide: ModalController, useValue: mockModalController },
@@ -55,6 +61,7 @@ describe('WorkoutPhaseComponent', () => {
             providers: [
                 provideRouter([]),
                 { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade },
+                { provide: WorkoutEditorCancelService, useValue: mockCancelService },
                 { provide: ExercisesFacade, useValue: mockExercisesFacade },
                 { provide: ActivatedRoute, useValue: createMockActivatedRoute({ routeConfig: { path: 'warmup' } }) },
                 { provide: ModalController, useValue: mockModalController },
@@ -74,6 +81,7 @@ describe('WorkoutPhaseComponent', () => {
             providers: [
                 provideRouter([]),
                 { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade },
+                { provide: WorkoutEditorCancelService, useValue: mockCancelService },
                 { provide: ExercisesFacade, useValue: mockExercisesFacade },
                 { provide: ActivatedRoute, useValue: createMockActivatedRoute({ routeConfig: { path: 'cooldown' } }) },
                 { provide: ModalController, useValue: mockModalController },
@@ -86,9 +94,10 @@ describe('WorkoutPhaseComponent', () => {
         expect(f.componentInstance.phaseType()).toBe('cooldown');
     });
 
-    it('should navigate to workouts on cancel', () => {
+    it('should navigate to workouts on cancel when confirmCancel returns false', async () => {
         const navSpy = jest.spyOn(router, 'navigate');
-        component.onCancel();
+        mockCancelService.confirmCancel.mockResolvedValue(false);
+        await component.onCancel();
         expect(navSpy).toHaveBeenCalledWith(['/tabs/workouts']);
     });
 
@@ -99,6 +108,7 @@ describe('WorkoutPhaseComponent', () => {
             providers: [
                 provideRouter([]),
                 { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade },
+                { provide: WorkoutEditorCancelService, useValue: mockCancelService },
                 { provide: ExercisesFacade, useValue: mockExercisesFacade },
                 { provide: ActivatedRoute, useValue: createMockActivatedRoute({ routeConfig: { path: 'cooldown' } }) },
                 { provide: ModalController, useValue: mockModalController },
@@ -118,6 +128,7 @@ describe('WorkoutPhaseComponent', () => {
             providers: [
                 provideRouter([]),
                 { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade },
+                { provide: WorkoutEditorCancelService, useValue: mockCancelService },
                 { provide: ExercisesFacade, useValue: mockExercisesFacade },
                 { provide: ActivatedRoute, useValue: createMockActivatedRoute({ routeConfig: { path: 'cooldown' } }) },
                 { provide: ModalController, useValue: mockModalController },
@@ -171,7 +182,7 @@ describe('WorkoutPhaseComponent', () => {
         const completeSpy = jest.fn();
         component.handleReorderEnd({
             detail: { from: 2, to: 0, complete: completeSpy },
-            preventDefault: () => {}
+            preventDefault: jest.fn()
         } as unknown as CustomEvent<{ from: number; to: number; complete: (data?: boolean | unknown[]) => void }>);
         expect(component.phaseItems().map((p) => p.exercise.exerciseId)).toEqual(['c', 'a', 'b']);
         expect(completeSpy).toHaveBeenCalledWith(true);
