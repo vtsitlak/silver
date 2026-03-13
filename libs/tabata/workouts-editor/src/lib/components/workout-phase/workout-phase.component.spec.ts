@@ -12,7 +12,7 @@ import type { TabataWorkout } from '@silver/tabata/states/workouts';
 
 const mockExercisesFacade = {
     exercisesMap: () => ({}),
-    loadExercisesMap: () => {}
+    loadExercisesMap: jest.fn()
 };
 
 const mockWorkoutSubmitService = {
@@ -171,7 +171,7 @@ describe('WorkoutPhaseComponent', () => {
         const completeSpy = jest.fn();
         component.handleReorderEnd({
             detail: { from: 2, to: 0, complete: completeSpy },
-            preventDefault: () => {}
+            preventDefault: jest.fn()
         } as unknown as CustomEvent<{ from: number; to: number; complete: (data?: boolean | unknown[]) => void }>);
         expect(component.phaseItems().map((p) => p.exercise.exerciseId)).toEqual(['c', 'a', 'b']);
         expect(completeSpy).toHaveBeenCalledWith(true);
