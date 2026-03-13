@@ -1,4 +1,4 @@
-import type { BodyRegion, EquipmentCategory } from '@silver/shared/helpers';
+import type { BodyRegion, EquipmentCategory } from '@silver/tabata/helpers';
 
 // Workout and store state models for tabata-workouts.
 export interface WorkoutsState {

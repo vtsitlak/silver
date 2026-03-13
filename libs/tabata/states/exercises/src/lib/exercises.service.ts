@@ -30,10 +30,13 @@ export class ExercisesService {
         return p;
     }
 
-    /** Get all exercises with optional search and sort (GET /api/v1/exercises) */
+    /**
+     * Get all exercises with optional search and sort.
+     * For the local API, this is implemented via /exercises/filter without constraints.
+     */
     getAllExercises(limit = DEFAULT_LIMIT, offset = 0, search = '', sortBy: SortBy = 'targetMuscles', sortOrder: SortOrder = 'desc'): Observable<Exercise[]> {
         const params = this.params(offset, limit, { search, sortBy, sortOrder });
-        return this.http.get<ExerciseListResponse>(`${this.getBaseUrl()}/exercises`, { params }).pipe(map((res) => (res.success ? res.data : [])));
+        return this.http.get<ExerciseListResponse>(`${this.getBaseUrl()}/exercises/filter`, { params }).pipe(map((res) => (res.success ? res.data : [])));
     }
 
     /** Search exercises with fuzzy matching (GET /api/v1/exercises/search) */

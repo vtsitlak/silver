@@ -32,7 +32,7 @@
     "rewrites": [
         { "source": "/api/workouts/:id", "destination": "/api/workouts" },
         { "source": "/api/exercisedb/:path*", "destination": "/api/exercisedb" },
-        { "source": "/api/exercises-db/(.*)", "destination": "/api/exercises-db/$1" },
+        { "source": "/api/exercises-db/:path*", "destination": "/api/exercises-db" },
         { "source": "/((?!api/).*)", "destination": "/en/index.html" }
     ]
 }

@@ -119,8 +119,9 @@ export class WorkoutDetailsComponent implements OnInit {
         return this.exercisesFacade.exercisesMap()[exerciseId]?.name ?? exerciseId;
     }
 
-    /** Resolve exercise id to gif URL for thumbnail (empty string if none). */
+    /** Resolve exercise id to first image URL for thumbnail (empty string if none). */
     getExerciseImage(exerciseId: string): string {
-        return this.exercisesFacade.exercisesMap()[exerciseId]?.gifUrl ?? '';
+        const images = this.exercisesFacade.exercisesMap()[exerciseId]?.images;
+        return images?.length ? images[0] : '';
     }
 }

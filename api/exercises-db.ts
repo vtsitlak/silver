@@ -14,13 +14,6 @@ const CORS_HEADERS: Record<string, string> = {
     'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
-function jsonResponse(body: string, status: number): Response {
-    return new Response(body, {
-        status,
-        headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
-    });
-}
-
 interface FreeExerciseDbItem {
     id: string;
     name: string;
@@ -35,7 +28,7 @@ interface FreeExerciseDbItem {
 interface Exercise {
     exerciseId: string;
     name: string;
-    gifUrl: string;
+    images: string[];
     targetMuscles: string[];
     bodyParts: string[];
     equipments: string[];
@@ -44,12 +37,11 @@ interface Exercise {
 }
 
 function mapToExercise(raw: FreeExerciseDbItem): Exercise {
-    const firstImage = Array.isArray(raw.images) && raw.images.length > 0 ? raw.images[0] : '';
-    const gifUrl = firstImage ? `${IMAGE_BASE}${firstImage}` : '';
+    const images = Array.isArray(raw.images) ? raw.images.map((path) => (path ? `${IMAGE_BASE}${path}` : '')).filter(Boolean) : [];
     return {
         exerciseId: raw.id,
         name: raw.name,
-        gifUrl,
+        images,
         targetMuscles: Array.isArray(raw.primaryMuscles) ? [...raw.primaryMuscles] : [],
         bodyParts: raw.category ? [raw.category] : [],
         equipments: raw.equipment ? [raw.equipment] : [],
@@ -136,104 +128,109 @@ function sortExercises(exercises: Exercise[], sortBy: string, sortOrder: string)
     });
 }
 
-export default {
-    async fetch(request: Request): Promise<Response> {
-        if (request.method === 'OPTIONS') {
-            return new Response(null, { status: 204, headers: CORS_HEADERS });
-        }
-        if (request.method !== 'GET') {
-            return jsonResponse(JSON.stringify({ error: 'Method not allowed' }), 405);
-        }
+export default async function handler(req: any, res: any): Promise<void> {
+    Object.entries(CORS_HEADERS).forEach(([key, value]) => res.setHeader(key, value));
 
-        const url = new URL(request.url);
-        const pathParts = url.pathname.replace(/^\/+/, '').split('/');
-        const isExercisesDb = pathParts[0] === 'api' && pathParts[1] === 'exercises-db';
-        const subPath = isExercisesDb ? pathParts.slice(2).join('/') : '';
-
-        try {
-            const exercises = await getExercises();
-
-            if (subPath === 'muscles') {
-                const names = new Set<string>();
-                exercises.forEach((ex) => {
-                    ex.targetMuscles.forEach((m) => names.add(m));
-                    ex.secondaryMuscles.forEach((m) => names.add(m));
-                });
-                const data = Array.from(names)
-                    .sort()
-                    .map((name) => ({ name }));
-                return jsonResponse(JSON.stringify({ success: true, data }), 200);
-            }
-
-            if (subPath === 'equipments') {
-                const names = new Set<string>();
-                exercises.forEach((ex) => ex.equipments.forEach((e) => names.add(e)));
-                const data = Array.from(names)
-                    .sort()
-                    .map((name) => ({ name }));
-                return jsonResponse(JSON.stringify({ success: true, data }), 200);
-            }
-
-            if (subPath === 'bodyparts') {
-                const names = new Set<string>();
-                exercises.forEach((ex) => ex.bodyParts.forEach((b) => names.add(b)));
-                const data = Array.from(names)
-                    .sort()
-                    .map((name) => ({ name }));
-                return jsonResponse(JSON.stringify({ success: true, data }), 200);
-            }
-
-            if (subPath.startsWith('exercises/')) {
-                const afterExercises = subPath.slice('exercises/'.length);
-                const isFilter = afterExercises === 'filter';
-                const exerciseId = !isFilter && !afterExercises.includes('/') ? decodeURIComponent(afterExercises) : null;
-
-                if (exerciseId) {
-                    const ex = exercises.find((e) => e.exerciseId === exerciseId);
-                    if (!ex) return jsonResponse(JSON.stringify({ success: false, data: null }), 200);
-                    return jsonResponse(JSON.stringify({ success: true, data: ex }), 200);
-                }
-
-                if (isFilter) {
-                    const search = (url.searchParams.get('search') ?? '').trim().toLowerCase();
-                    const muscles = parseCommaList(url.searchParams.get('muscles'));
-                    const equipment = parseCommaList(url.searchParams.get('equipment'));
-                    const bodyParts = parseCommaList(url.searchParams.get('bodyParts'));
-                    const offset = Math.max(0, parseInt(url.searchParams.get('offset') ?? '0', 10) || 0);
-                    const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') ?? '20', 10) || 20));
-                    const sortBy = url.searchParams.get('sortBy') ?? 'name';
-                    const sortOrder = url.searchParams.get('sortOrder') ?? 'desc';
-
-                    let filtered = exercises.filter(
-                        (ex) => matchesSearch(ex, search) && matchesMuscles(ex, muscles) && matchesEquipment(ex, equipment) && matchesBodyParts(ex, bodyParts)
-                    );
-                    filtered = sortExercises(filtered, sortBy, sortOrder);
-                    const total = filtered.length;
-                    const page = Math.floor(offset / limit) + 1;
-                    const totalPages = Math.ceil(total / limit) || 1;
-                    const slice = filtered.slice(offset, offset + limit);
-                    const metadata = {
-                        totalExercises: total,
-                        totalPages,
-                        currentPage: page,
-                        previousPage: page > 1 ? String(page - 1) : null,
-                        nextPage: page < totalPages ? String(page + 1) : null
-                    };
-                    return jsonResponse(
-                        JSON.stringify({
-                            success: true,
-                            data: slice,
-                            metadata
-                        }),
-                        200
-                    );
-                }
-            }
-
-            return jsonResponse(JSON.stringify({ error: 'Not found' }), 404);
-        } catch (error) {
-            const message = error instanceof Error ? error.message : 'Internal Server Error';
-            return jsonResponse(JSON.stringify({ error: message }), 500);
-        }
+    if (req.method === 'OPTIONS') {
+        res.statusCode = 204;
+        res.end();
+        return;
     }
-};
+
+    if (req.method !== 'GET') {
+        res.status(405).json({ error: 'Method not allowed' });
+        return;
+    }
+
+    const url = new URL(req.url ?? '', `http://${req.headers?.host ?? 'localhost'}`);
+    const pathname = url.pathname ?? '';
+    const subPath = pathname.replace(/^\/api\/exercises-db\/?/, '');
+
+    try {
+        const exercises = await getExercises();
+
+        if (subPath === 'muscles') {
+            const names = new Set<string>();
+            exercises.forEach((ex) => {
+                ex.targetMuscles.forEach((m) => names.add(m));
+                ex.secondaryMuscles.forEach((m) => names.add(m));
+            });
+            const data = Array.from(names)
+                .sort()
+                .map((name) => ({ name }));
+            res.status(200).json({ success: true, data });
+            return;
+        }
+
+        if (subPath === 'equipments') {
+            const names = new Set<string>();
+            exercises.forEach((ex) => ex.equipments.forEach((e) => names.add(e)));
+            const data = Array.from(names)
+                .sort()
+                .map((name) => ({ name }));
+            res.status(200).json({ success: true, data });
+            return;
+        }
+
+        if (subPath === 'bodyparts') {
+            const names = new Set<string>();
+            exercises.forEach((ex) => ex.bodyParts.forEach((b) => names.add(b)));
+            const data = Array.from(names)
+                .sort()
+                .map((name) => ({ name }));
+            res.status(200).json({ success: true, data });
+            return;
+        }
+
+        if (subPath.startsWith('exercises/')) {
+            const afterExercises = subPath.slice('exercises/'.length);
+            const isFilter = afterExercises === 'filter';
+            const exerciseId = !isFilter && !afterExercises.includes('/') ? decodeURIComponent(afterExercises) : null;
+
+            if (exerciseId) {
+                const ex = exercises.find((e) => e.exerciseId === exerciseId);
+                if (!ex) {
+                    res.status(200).json({ success: false, data: null });
+                    return;
+                }
+                res.status(200).json({ success: true, data: ex });
+                return;
+            }
+
+            if (isFilter) {
+                const search = (url.searchParams.get('search') ?? '').trim().toLowerCase();
+                const muscles = parseCommaList(url.searchParams.get('muscles'));
+                const equipment = parseCommaList(url.searchParams.get('equipment'));
+                const bodyParts = parseCommaList(url.searchParams.get('bodyParts'));
+                const offset = Math.max(0, parseInt(url.searchParams.get('offset') ?? '0', 10) || 0);
+                const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') ?? '20', 10) || 20));
+                const sortBy = url.searchParams.get('sortBy') ?? 'name';
+                const sortOrder = url.searchParams.get('sortOrder') ?? 'desc';
+
+                let filtered = exercises.filter(
+                    (ex) => matchesSearch(ex, search) && matchesMuscles(ex, muscles) && matchesEquipment(ex, equipment) && matchesBodyParts(ex, bodyParts)
+                );
+                filtered = sortExercises(filtered, sortBy, sortOrder);
+                const total = filtered.length;
+                const page = Math.floor(offset / limit) + 1;
+                const totalPages = Math.ceil(total / limit) || 1;
+                const slice = filtered.slice(offset, offset + limit);
+                const metadata = {
+                    totalExercises: total,
+                    totalPages,
+                    currentPage: page,
+                    previousPage: page > 1 ? String(page - 1) : null,
+                    nextPage: page < totalPages ? String(page + 1) : null
+                };
+
+                res.status(200).json({ success: true, data: slice, metadata });
+                return;
+            }
+        }
+
+        res.status(404).json({ error: 'Not found' });
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Internal Server Error';
+        res.status(500).json({ error: message });
+    }
+}

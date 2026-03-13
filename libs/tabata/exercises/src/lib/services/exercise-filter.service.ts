@@ -70,13 +70,12 @@ export class ExerciseFilterService {
                 if (!hasOtherFilters && term.length > 0 && term.length < 3) {
                     return;
                 }
-                // API behavior:
-                // - bodyParts supports comma-separated OR: "chest,back"
-                // - equipment/muscles do NOT – "dumbbell,barbell" or "hands,wrists" return 0 results.
-                // To avoid surprising narrower results, only send the FIRST selection
-                // for equipment/muscles, and keep OR for bodyParts.
-                const musclesParam = muscles.length > 0 ? muscles[0] : undefined;
-                const equipmentParam = equipment.length > 0 ? equipment[0] : undefined;
+                // Local API behavior:
+                // - muscles, equipment, bodyParts all support comma-separated OR:
+                //   e.g. "chest,back" or "dumbbell,barbell".
+                //   Muscles are matched against both primary and secondary muscles.
+                const musclesParam = muscles.length > 0 ? muscles.join(',') : undefined;
+                const equipmentParam = equipment.length > 0 ? equipment.join(',') : undefined;
                 const bodyPartsParam = bodyParts.length > 0 ? bodyParts.join(',') : undefined;
 
                 if (this.filterTimeoutId !== null) {
@@ -121,8 +120,8 @@ export class ExerciseFilterService {
 
         const { term, muscles, equipment, bodyParts } = this.filterState();
 
-        const musclesParam = muscles.length > 0 ? muscles[0] : undefined;
-        const equipmentParam = equipment.length > 0 ? equipment[0] : undefined;
+        const musclesParam = muscles.length > 0 ? muscles.join(',') : undefined;
+        const equipmentParam = equipment.length > 0 ? equipment.join(',') : undefined;
         const bodyPartsParam = bodyParts.length > 0 ? bodyParts.join(',') : undefined;
 
         this.facade.filterExercises({

@@ -73,7 +73,7 @@ describe('MainWorkoutComponent', () => {
                 exercise: {
                     exerciseId: 'e1',
                     name: 'Push',
-                    gifUrl: '',
+                    images: [],
                     targetMuscles: [],
                     bodyParts: [],
                     equipments: [],
