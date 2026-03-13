@@ -3,12 +3,13 @@ import { signal } from '@angular/core';
 import { ExerciseSelectorModalComponent } from './exercise-selector-modal.component';
 import { ExercisesFacade, Exercise } from '@silver/tabata/states/exercises';
 import { ModalController } from '@ionic/angular/standalone';
+import { ExerciseFilterService } from '../../services/exercise-filter.service';
 
 const mockExercises: Exercise[] = [
     {
         exerciseId: '1',
         name: 'Push Up',
-        gifUrl: '',
+        images: [],
         targetMuscles: ['chest'],
         bodyParts: ['upper body'],
         equipments: ['body weight'],
@@ -38,6 +39,7 @@ const mockModalCtrl = {
 describe('ExerciseSelectorModalComponent', () => {
     let component: ExerciseSelectorModalComponent;
     let fixture: ComponentFixture<ExerciseSelectorModalComponent>;
+    let filterService: ExerciseFilterService;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -50,6 +52,7 @@ describe('ExerciseSelectorModalComponent', () => {
 
         fixture = TestBed.createComponent(ExerciseSelectorModalComponent);
         component = fixture.componentInstance;
+        filterService = TestBed.inject(ExerciseFilterService);
         fixture.detectChanges();
     });
 
@@ -128,5 +131,25 @@ describe('ExerciseSelectorModalComponent', () => {
         expect(component.selectedCount()).toBe(1);
         expect(component.isSelected(mockExercises[0])).toBe(true);
         expect(component.isSelected(ex2)).toBe(false);
+    });
+
+    it('should support multiple muscle selection', () => {
+        const spy = jest.spyOn(filterService, 'updateFilters');
+        const event = { detail: { value: ['chest', 'back'] } } as unknown as CustomEvent<{ value: string | string[] }>;
+
+        component.onMuscleChange(event);
+
+        expect(component.selectedMuscles()).toEqual(['chest', 'back']);
+        expect(spy).toHaveBeenCalledWith(expect.objectContaining({ muscles: ['chest', 'back'] }));
+    });
+
+    it('should support multiple equipment selection', () => {
+        const spy = jest.spyOn(filterService, 'updateFilters');
+        const event = { detail: { value: ['barbell', 'dumbbell'] } } as unknown as CustomEvent<{ value: string | string[] }>;
+
+        component.onEquipmentChange(event);
+
+        expect(component.selectedEquipment()).toEqual(['barbell', 'dumbbell']);
+        expect(spy).toHaveBeenCalledWith(expect.objectContaining({ equipment: ['barbell', 'dumbbell'] }));
     });
 });

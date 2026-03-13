@@ -30,6 +30,7 @@
                 [value]="selectedMuscles()"
                 (ionChange)="onMuscleChange($event)"
                 interface="popover"
+                multiple="true"
                 class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
             >
                 @for (muscle of musclesList(); track muscle) {
@@ -42,6 +43,7 @@
                 [value]="selectedEquipment()"
                 (ionChange)="onEquipmentChange($event)"
                 interface="popover"
+                multiple="true"
                 class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
             >
                 @for (equipment of equipmentList(); track equipment) {
@@ -99,8 +101,8 @@
                         [class.selected]="isSelected(exercise)"
                         [disabled]="isPreselected(exercise) || (!isSelected(exercise) && !canSelectMore())"
                     >
-                        @if (exercise.gifUrl) {
-                            <img [src]="exercise.gifUrl" [alt]="exercise.name" class="w-12 h-12 object-cover rounded-lg bg-gray-100 mr-3" slot="start" />
+                        @if (exercise.images && exercise.images.length > 0) {
+                            <img [src]="exercise.images[0]" [alt]="exercise.name" class="w-12 h-12 object-cover rounded-lg bg-gray-100 mr-3" slot="start" />
                         }
                         <ion-label>
                             <h2 class="font-medium">{{ exercise.name }}</h2>

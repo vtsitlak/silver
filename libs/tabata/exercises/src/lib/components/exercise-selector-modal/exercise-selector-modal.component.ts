@@ -104,6 +104,13 @@ export class ExerciseSelectorModalComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        // Ensure we have an initial page of exercises when the modal opens.
+        this.facade.filterExercises({
+            limit: this.pageSize,
+            offset: 0,
+            sortBy: 'name',
+            sortOrder: 'desc'
+        });
         this.loadFilterOptions();
         this.initializePreselected();
     }

@@ -127,7 +127,7 @@ export class MainWorkoutComponent implements OnInit {
                                     ? ({
                                           exerciseId: id,
                                           name: this.formatIdAsDisplayName(id),
-                                          gifUrl: '',
+                                          images: [],
                                           targetMuscles: [],
                                           bodyParts: [],
                                           equipments: [],

@@ -83,7 +83,7 @@ export function createMockWorkoutsFacade(): {
 export const mockExercise = {
     exerciseId: 'Burpees',
     name: 'Burpees',
-    gifUrl: 'https://example.com/burpee.gif',
+    images: ['https://example.com/burpee.gif'] as string[],
     targetMuscles: [] as string[],
     bodyParts: [] as string[],
     equipments: [] as string[],

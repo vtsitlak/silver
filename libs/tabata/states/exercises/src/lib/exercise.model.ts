@@ -1,10 +1,10 @@
 /**
- * Exercise model matching ExerciseDB API v1 (https://www.exercisedb.dev/docs)
+ * Exercise model; images array matches free-exercise-db (list shows first, details show all).
  */
 export interface Exercise {
     exerciseId: string;
     name: string;
-    gifUrl: string;
+    images: string[];
     targetMuscles: string[];
     bodyParts: string[];
     equipments: string[];

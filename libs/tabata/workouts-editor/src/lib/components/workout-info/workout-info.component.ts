@@ -20,7 +20,7 @@ import {
 import { ToolbarComponent } from '@silver/tabata/ui';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { WorkoutEditorCancelService } from '../../services/workout-editor-cancel.service';
-import { EQUIPMENT_CATEGORY_OPTIONS, BODY_REGION_OPTIONS, type EquipmentCategory, type BodyRegion } from '@silver/shared/helpers';
+import { EQUIPMENT_CATEGORY_OPTIONS, BODY_REGION_OPTIONS, type EquipmentCategory, type BodyRegion } from '@silver/tabata/helpers';
 import { addIcons } from 'ionicons';
 import { arrowBackOutline, arrowForwardOutline } from 'ionicons/icons';
 
