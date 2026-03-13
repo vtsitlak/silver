@@ -19,11 +19,20 @@
                 { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
                 { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
             ]
+        },
+        {
+            "source": "/api/exercises-db/:path*",
+            "headers": [
+                { "key": "Access-Control-Allow-Origin", "value": "*" },
+                { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
+                { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
+            ]
         }
     ],
     "rewrites": [
         { "source": "/api/workouts/:id", "destination": "/api/workouts" },
         { "source": "/api/exercisedb/:path*", "destination": "/api/exercisedb" },
+        { "source": "/api/exercises-db/:path*", "destination": "/api/exercises-db" },
         { "source": "/((?!api/).*)", "destination": "/en/index.html" }
     ]
 }

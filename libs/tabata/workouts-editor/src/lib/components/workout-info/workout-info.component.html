@@ -58,13 +58,14 @@
 </ion-content>
 
 <ion-footer class="ion-no-border">
-    <div class="flex justify-between items-center ion-padding">
-        <ion-button fill="clear" type="button" (click)="onCancel()" class="ion-no-padding">
+    <div class="flex justify-between items-center ion-padding gap-2">
+        <ion-button fill="clear" type="button" (click)="onCancel()" class="ion-no-padding flex-1 min-w-0">
             <ion-icon name="arrow-back-outline"></ion-icon>
-            <span class="ion-padding-start">Workouts</span>
+            <span class="ion-padding-start">Back</span>
         </ion-button>
-        <ion-button fill="clear" type="button" (click)="onSubmit()" [disabled]="!isFormValid()" class="ion-no-padding">
-            <span class="ion-padding-end">Warmup</span>
+        <ion-button fill="clear" type="button" (click)="onCancel()" class="ion-no-padding flex-1 min-w-0">Cancel</ion-button>
+        <ion-button fill="clear" type="button" (click)="onSubmit()" [disabled]="!isFormValid()" class="ion-no-padding flex-1 min-w-0">
+            <span class="ion-padding-end">Next</span>
             <ion-icon name="arrow-forward-outline"></ion-icon>
         </ion-button>
     </div>

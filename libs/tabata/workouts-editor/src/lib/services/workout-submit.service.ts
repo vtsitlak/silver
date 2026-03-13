@@ -7,16 +7,6 @@ import { ToastService } from '@silver/tabata/helpers';
 import { WorkoutEditorFacade, WorkoutEditorService, type CreateWorkoutPayload, type UpdateWorkoutPayload } from '@silver/tabata/states/workout-editor';
 import type { TabataWorkout } from '@silver/tabata/states/workouts';
 
-const DATE_FORMAT = (d: Date): string => {
-    const y = d.getFullYear();
-    const M = String(d.getMonth() + 1).padStart(2, '0');
-    const D = String(d.getDate()).padStart(2, '0');
-    const h = String(d.getHours()).padStart(2, '0');
-    const m = String(d.getMinutes()).padStart(2, '0');
-    const s = String(d.getSeconds()).padStart(2, '0');
-    return `${y}-${M}-${D}-${h}:${m}:${s}`;
-};
-
 function totalDurationMinutesFromDraft(draft: Partial<TabataWorkout>): number {
     const warmupSeconds = draft.warmup?.totalDurationSeconds ?? 0;
     const cooldownSeconds = draft.cooldown?.totalDurationSeconds ?? 0;
@@ -27,13 +17,6 @@ function totalDurationMinutesFromDraft(draft: Partial<TabataWorkout>): number {
     }, 0);
     const totalSeconds = warmupSeconds + blocksSeconds + cooldownSeconds;
     return Math.round(totalSeconds / 60);
-}
-
-const ALPHANUMERIC = 'abcdefghijklmnopqrstuvwxyz0123456789';
-/** Generate workout id on the frontend; backend is not a full REST API and does not assign ids. */
-function generateWorkoutId(): string {
-    const randomPart = Array.from({ length: 6 }, () => ALPHANUMERIC[Math.floor(Math.random() * ALPHANUMERIC.length)]).join('');
-    return `${Date.now()}${randomPart}`;
 }
 
 /** Returns human-readable labels for missing required fields (script excluded). */
@@ -95,13 +78,11 @@ export class WorkoutSubmitService {
     private readonly toast = inject(ToastService);
 
     /**
-     * Builds payload from current draft with userId and timestamps, then creates or updates the workout
-     * via the existing workout editor HTTP service and syncs the store. Returns an observable that
-     * emits the saved workout on success.
+     * Builds payload from current draft and creates or updates the workout via the API.
+     * API assigns id, createdAt, and updatedAt. Returns an observable that emits the saved workout on success.
      */
     submitWorkout(): Observable<TabataWorkout> {
         const userId = this.authFacade.user()?.uid ?? '';
-        const now = DATE_FORMAT(new Date());
         const draft = this.workoutEditorFacade.workoutDraft();
         const isEditMode = this.workoutEditorFacade.isEditMode();
         const existingWorkout = this.workoutEditorFacade.workout();
@@ -115,11 +96,12 @@ export class WorkoutSubmitService {
         this.workoutEditorFacade.startSave();
 
         if (isEditMode && existingWorkout?.id) {
+            const draftObj = draft as Record<string, unknown>;
+            const rest = Object.fromEntries(Object.entries(draftObj).filter(([k]) => k !== 'updatedAt'));
             const payload: UpdateWorkoutPayload = {
-                ...draft,
+                ...rest,
                 totalDurationMinutes: totalDurationMinutesFromDraft(draft),
-                updatedByUserId: userId,
-                updatedAt: now
+                updatedByUserId: userId
             };
             return this.workoutEditorService.updateWorkout(existingWorkout.id, payload).pipe(
                 tap((workout) => this.workoutEditorFacade.setWorkoutFromResponse(workout)),
@@ -131,15 +113,13 @@ export class WorkoutSubmitService {
         }
 
         const merged = this.workoutEditorFacade.mergedWorkout() as Record<string, unknown>;
-        const rest = Object.fromEntries(Object.entries(merged).filter(([key]) => key !== 'id'));
-        const payload: CreateWorkoutPayload & { id: string; createdAt: string } = {
+        const rest = Object.fromEntries(Object.entries(merged).filter(([k]) => k !== 'id' && k !== 'createdAt' && k !== 'updatedAt'));
+        const payload: CreateWorkoutPayload = {
             ...rest,
-            id: generateWorkoutId(),
             totalDurationMinutes: totalDurationMinutesFromDraft(this.workoutEditorFacade.workoutDraft()),
             createdByUserId: userId,
-            updatedByUserId: userId,
-            createdAt: now
-        } as CreateWorkoutPayload & { id: string; createdAt: string };
+            updatedByUserId: userId
+        } as CreateWorkoutPayload;
         return this.workoutEditorService.createWorkout(payload).pipe(
             tap((workout) => this.workoutEditorFacade.setWorkoutFromResponse(workout)),
             catchError((err: Error) => {

@@ -26,6 +26,17 @@ function jsonResponse(body: string, status: number): Response {
     });
 }
 
+function timestamp(): string {
+    const d = new Date();
+    const y = d.getFullYear();
+    const M = String(d.getMonth() + 1).padStart(2, '0');
+    const D = String(d.getDate()).padStart(2, '0');
+    const h = String(d.getHours()).padStart(2, '0');
+    const m = String(d.getMinutes()).padStart(2, '0');
+    const s = String(d.getSeconds()).padStart(2, '0');
+    return `${y}-${M}-${D}-${h}:${m}:${s}`;
+}
+
 export default {
     async fetch(request: Request): Promise<Response> {
         if (request.method === 'OPTIONS') {
@@ -87,7 +98,9 @@ export default {
                 if (index === -1) {
                     return jsonResponse(JSON.stringify({ error: 'Workout not found' }), 404);
                 }
-                const updated = { ...body, id };
+                const existing = list[index] as Record<string, unknown>;
+                const omit = (o: Record<string, unknown>, keys: string[]) => Object.fromEntries(Object.entries(o).filter(([k]) => !keys.includes(k)));
+                const updated = { ...existing, ...omit(body as Record<string, unknown>, ['updatedAt']), id, updatedAt: timestamp() };
                 const newList = [...list];
                 newList[index] = updated;
                 const setRes = await fetch(UPSTASH_URL, {

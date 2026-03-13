@@ -15,6 +15,7 @@ export class WorkoutEditorFacade {
     readonly isEditMode = this.store.isEditMode;
     readonly isBusy = this.store.isBusy;
     readonly hasDraftChanges = this.store.hasDraftChanges;
+    readonly hasUnsavedChanges = this.store.hasUnsavedChanges;
     readonly mergedWorkout = this.store.mergedWorkout;
 
     loadWorkout(id: string): void {

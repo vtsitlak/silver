@@ -23,6 +23,7 @@ import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { checkmark } from 'ionicons/icons';
 import { ExercisesFacade, Exercise } from '@silver/tabata/states/exercises';
+import { ExerciseFilterService } from '../../services/exercise-filter.service';
 
 @Component({
     selector: 'tbt-exercise-selector-modal',
@@ -54,6 +55,7 @@ import { ExercisesFacade, Exercise } from '@silver/tabata/states/exercises';
 export class ExerciseSelectorModalComponent implements OnInit {
     private readonly facade = inject(ExercisesFacade);
     private readonly modalCtrl = inject(ModalController);
+    private readonly filterService = inject(ExerciseFilterService);
 
     readonly multiple = input<boolean>(true);
     readonly preselectedIds = input<string[]>([]);
@@ -95,42 +97,13 @@ export class ExerciseSelectorModalComponent implements OnInit {
         return this.selectedCount() < max;
     });
 
-    readonly filteredExercises = computed(() => {
-        const term = this.searchTerm().toLowerCase().trim();
-        const muscles = this.selectedMuscles();
-        const equipment = this.selectedEquipment();
-        const bodyParts = this.selectedBodyParts();
-
-        let result = this.exercises();
-
-        if (term) {
-            result = result.filter((ex) => ex.name.toLowerCase().includes(term));
-        }
-
-        if (muscles.length > 0) {
-            const lower = muscles.map((m) => m.toLowerCase());
-            result = result.filter((ex) => ex.targetMuscles.some((m) => lower.includes(m.toLowerCase())));
-        }
-
-        if (equipment.length > 0) {
-            const lower = equipment.map((e) => e.toLowerCase());
-            result = result.filter((ex) => ex.equipments.some((e) => lower.includes(e.toLowerCase())));
-        }
-
-        if (bodyParts.length > 0) {
-            const lower = bodyParts.map((bp) => bp.toLowerCase());
-            result = result.filter((ex) => ex.bodyParts.some((bp) => lower.includes(bp.toLowerCase())));
-        }
-
-        return result;
-    });
+    readonly filteredExercises = computed(() => this.exercises());
 
     constructor() {
         addIcons({ checkmark });
     }
 
     ngOnInit(): void {
-        this.loadExercises();
         this.loadFilterOptions();
         this.initializePreselected();
     }
@@ -167,25 +140,33 @@ export class ExerciseSelectorModalComponent implements OnInit {
 
     onSearchInput(ev: Event): void {
         const customEv = ev as CustomEvent<{ value: string }>;
-        this.searchTerm.set(customEv.detail?.value ?? '');
+        const value = (customEv.detail?.value ?? '') as string;
+        this.searchTerm.set(value);
+        this.filterService.updateFilters({ term: value.toLowerCase().trim() });
     }
 
     onMuscleChange(ev: Event): void {
         const customEv = ev as CustomEvent<{ value: string | string[] }>;
-        const v = customEv.detail?.value;
-        this.selectedMuscles.set(Array.isArray(v) ? v : v ? [v] : []);
+        const v = customEv.detail?.value as string | string[] | undefined;
+        const next = Array.isArray(v) ? v : v ? [v] : [];
+        this.selectedMuscles.set(next);
+        this.filterService.updateFilters({ muscles: next });
     }
 
     onEquipmentChange(ev: Event): void {
         const customEv = ev as CustomEvent<{ value: string | string[] }>;
-        const v = customEv.detail?.value;
-        this.selectedEquipment.set(Array.isArray(v) ? v : v ? [v] : []);
+        const v = customEv.detail?.value as string | string[] | undefined;
+        const next = Array.isArray(v) ? v : v ? [v] : [];
+        this.selectedEquipment.set(next);
+        this.filterService.updateFilters({ equipment: next });
     }
 
     onBodyPartChange(ev: Event): void {
         const customEv = ev as CustomEvent<{ value: string | string[] }>;
-        const v = customEv.detail?.value;
-        this.selectedBodyParts.set(Array.isArray(v) ? v : v ? [v] : []);
+        const v = customEv.detail?.value as string | string[] | undefined;
+        const next = Array.isArray(v) ? v : v ? [v] : [];
+        this.selectedBodyParts.set(next);
+        this.filterService.updateFilters({ bodyParts: next });
     }
 
     clearFilters(): void {
@@ -193,6 +174,12 @@ export class ExerciseSelectorModalComponent implements OnInit {
         this.selectedEquipment.set([]);
         this.selectedBodyParts.set([]);
         this.searchTerm.set('');
+        this.filterService.updateFilters({
+            term: '',
+            muscles: [],
+            equipment: [],
+            bodyParts: []
+        });
     }
 
     resetSelections(): void {
@@ -251,8 +238,7 @@ export class ExerciseSelectorModalComponent implements OnInit {
         }
 
         this.lastLoadMoreTime = Date.now();
-        this.facade.getAllExercises({ limit: this.pageSize, offset: this.currentOffset });
-        this.currentOffset += this.pageSize;
+        this.filterService.loadMore();
 
         setTimeout(() => {
             infiniteScroll.complete();

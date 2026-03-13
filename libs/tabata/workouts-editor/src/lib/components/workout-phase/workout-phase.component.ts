@@ -15,13 +15,14 @@ import {
 } from '@ionic/angular/standalone';
 import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { createOutline, trashOutline, arrowBackOutline, arrowForwardOutline, flagOutline } from 'ionicons/icons';
+import { createOutline, trashOutline, arrowBackOutline, arrowForwardOutline, saveOutline } from 'ionicons/icons';
 import { ToolbarComponent, DurationInputModalComponent } from '@silver/tabata/ui';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { Exercise, ExerciseSelectorModalComponent, ExerciseDetailsModalComponent } from '@silver/tabata/exercises';
 import type { Phase } from '@silver/tabata/states/workouts';
 import { WorkoutSubmitService } from '../../services/workout-submit.service';
+import { WorkoutEditorCancelService } from '../../services/workout-editor-cancel.service';
 
 export type WorkoutPhaseType = 'warmup' | 'cooldown';
 
@@ -58,11 +59,12 @@ export class WorkoutPhaseComponent implements OnInit {
     private readonly exercisesFacade = inject(ExercisesFacade);
     private readonly modalCtrl = inject(ModalController);
     private readonly workoutSubmitService = inject(WorkoutSubmitService);
+    private readonly cancelService = inject(WorkoutEditorCancelService);
 
     private readonly hasSyncedPhaseFromDraft = signal<WorkoutPhaseType | null>(null);
 
     constructor() {
-        addIcons({ createOutline, trashOutline, arrowBackOutline, arrowForwardOutline, flagOutline });
+        addIcons({ createOutline, trashOutline, arrowBackOutline, arrowForwardOutline, saveOutline });
         const path = this.route.snapshot.routeConfig?.path ?? '';
         const phase = path.endsWith('cooldown') ? 'cooldown' : 'warmup';
         this.phaseType.set(phase);
@@ -99,6 +101,22 @@ export class WorkoutPhaseComponent implements OnInit {
             const ids = [...new Set(items.map((p) => p.exercise.exerciseId).filter(Boolean))];
             if (ids.length > 0) {
                 this.exercisesFacade.loadExercisesMap(ids);
+            }
+        });
+        effect(() => {
+            const items = this.phaseItems();
+            const phase = this.phaseType();
+            const canPushToDraft = this.facade.workout() === null || this.hasSyncedPhaseFromDraft() === phase;
+            if (canPushToDraft) {
+                const movements = items.map((p) => ({
+                    exerciseId: p.exercise.exerciseId,
+                    durationSeconds: p.durationSeconds ?? 0
+                }));
+                const totalDurationSeconds = items.reduce((sum, p) => sum + (p.durationSeconds ?? 0), 0);
+                const phaseData: Phase = { totalDurationSeconds, movements };
+                untracked(() => {
+                    this.facade.updateDraft(phase === 'warmup' ? { warmup: phaseData } : { cooldown: phaseData });
+                });
             }
         });
     }
@@ -165,8 +183,11 @@ export class WorkoutPhaseComponent implements OnInit {
         }
     }
 
-    onCancel(): void {
-        this.router.navigate(['/tabs/workouts']);
+    async onCancel(): Promise<void> {
+        const stay = await this.cancelService.confirmCancel();
+        if (!stay) {
+            this.router.navigate(['/tabs/workouts']);
+        }
     }
 
     navigateBack(): void {
@@ -176,18 +197,6 @@ export class WorkoutPhaseComponent implements OnInit {
     onNext(): void {
         if (!this.allHaveDuration()) return;
         const phase = this.phaseType();
-        const items = this.phaseItems();
-        const movements = items.map((p) => ({
-            exerciseId: p.exercise.exerciseId,
-            durationSeconds: p.durationSeconds ?? 0
-        }));
-        const totalDurationSeconds = this.totalDurationSeconds();
-        const phaseData: Phase = { totalDurationSeconds, movements };
-        if (phase === 'warmup') {
-            this.facade.updateDraft({ warmup: phaseData });
-        } else {
-            this.facade.updateDraft({ cooldown: phaseData });
-        }
         if (phase === 'warmup') {
             const id = this.workoutId();
             if (this.isEditMode() && id) {

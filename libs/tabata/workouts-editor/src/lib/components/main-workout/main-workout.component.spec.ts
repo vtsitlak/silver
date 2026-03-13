@@ -8,6 +8,11 @@ import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { AuthFacade } from '@silver/tabata/auth';
 import { ModalController } from '@ionic/angular/standalone';
 import { createMockActivatedRoute, mockAuthFacade } from '@silver/tabata/testing';
+import { WorkoutEditorCancelService } from '../../services/workout-editor-cancel.service';
+
+const mockCancelService = {
+    confirmCancel: jest.fn().mockResolvedValue(true)
+};
 
 const mockExercisesFacade = {
     exercisesMap: () => ({}),
@@ -36,6 +41,7 @@ describe('MainWorkoutComponent', () => {
             providers: [
                 provideRouter([]),
                 { provide: WorkoutEditorFacade, useValue: mockFacade },
+                { provide: WorkoutEditorCancelService, useValue: mockCancelService },
                 { provide: ExercisesFacade, useValue: mockExercisesFacade },
                 { provide: ModalController, useValue: mockModalCtrl },
                 { provide: AuthFacade, useValue: mockAuthFacade },
