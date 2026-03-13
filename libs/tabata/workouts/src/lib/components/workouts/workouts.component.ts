@@ -71,8 +71,7 @@ export class WorkoutsComponent {
     }
 
     onPlayClick(workout: TabataWorkout): void {
-        void workout;
-        // TODO: Implement workout player navigation
+        this.router.navigate(['/workouts', workout.id, 'play']);
     }
 
     onRemoveClick(workout: TabataWorkout): void {

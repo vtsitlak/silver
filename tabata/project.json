@@ -1,0 +1,21 @@
+{
+    "name": "workout-player",
+    "$schema": "../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "tabata/src",
+    "prefix": "lib",
+    "projectType": "library",
+    "tags": [],
+    "targets": {
+        "test": {
+            "executor": "@nx/jest:jest",
+            "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+            "options": {
+                "jestConfig": "tabata/jest.config.cts",
+                "tsConfig": "tabata/tsconfig.spec.json"
+            }
+        },
+        "lint": {
+            "executor": "@nx/eslint:lint"
+        }
+    }
+}

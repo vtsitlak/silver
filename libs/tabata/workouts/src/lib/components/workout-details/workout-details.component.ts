@@ -19,7 +19,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { playCircle, createOutline, timeOutline, fitnessOutline, flashOutline, pauseOutline } from 'ionicons/icons';
-import { WorkoutsFacade, TabataWorkout } from '@silver/tabata/states/workouts';
+import { WorkoutsFacade } from '@silver/tabata/states/workouts';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { formatDurationMinutes, getBlockDurationMinutes, formatSecondsToMinutes } from '@silver/tabata/helpers';
@@ -105,8 +105,10 @@ export class WorkoutDetailsComponent implements OnInit {
     }
 
     startWorkout(): void {
-        // TODO: Implement workout player navigation
-        console.log('Starting workout:', this.workoutId());
+        const id = this.workoutId();
+        if (id) {
+            this.router.navigate(['/workouts', id, 'play']);
+        }
     }
 
     /** Expose helpers for template (duration/block formatting). */

@@ -1,0 +1,8 @@
+.workout-player {
+    display: flex;
+    flex-direction: column;
+}
+
+.workout-player-footer {
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.06);
+}
