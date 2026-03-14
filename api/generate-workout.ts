@@ -151,8 +151,18 @@ export default {
 
             return jsonResponse(JSON.stringify(output), 200);
         } catch (err) {
-            const message = err instanceof Error ? err.message : 'Generation failed';
-            return jsonResponse(JSON.stringify({ error: message }), 500);
+            const raw = err instanceof Error ? err.message : String(err);
+            const isQuota = raw.includes('429') || raw.includes('quota') || raw.includes('Quota exceeded');
+            if (isQuota) {
+                return jsonResponse(
+                    JSON.stringify({
+                        error:
+                            'AI quota limit reached. Please try again in a minute or check your Google AI Studio quota and billing at https://ai.google.dev/gemini-api/docs/rate-limits'
+                    }),
+                    429
+                );
+            }
+            return jsonResponse(JSON.stringify({ error: raw.length > 200 ? 'Generation failed' : raw }), 500);
         }
     }
 };

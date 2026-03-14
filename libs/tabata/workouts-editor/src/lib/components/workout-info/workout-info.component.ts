@@ -220,8 +220,9 @@ export class WorkoutInfoComponent implements OnInit {
                                 this.infoModel.set({ ...model, generatedByAi: true });
                                 this.isGenerating.set(false);
                             },
-                            error: (err) => {
-                                this.generateError.set(err?.message ?? 'AI generation failed');
+                            error: (err: { error?: { error?: string }; message?: string }) => {
+                                const msg = err?.error?.error ?? err?.message ?? 'AI generation failed';
+                                this.generateError.set(msg);
                                 this.isGenerating.set(false);
                             }
                         });
