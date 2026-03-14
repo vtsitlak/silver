@@ -9,7 +9,6 @@ import { formatDurationMinutes } from '@silver/tabata/helpers';
     selector: 'tbt-workout-item',
     templateUrl: 'workout-item.component.html',
     styleUrls: ['workout-item.component.scss'],
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [IonItem, IonLabel, IonIcon, IonButton, IonButtons]
 })

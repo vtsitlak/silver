@@ -54,22 +54,11 @@
                 <ion-card-content>
                     <p class="text-sm text-gray-500 mb-2"> Duration: {{ formatSecondsToMinutes(w.warmup.totalDurationSeconds) }} min </p>
                     @if (w.warmup.movements.length > 0) {
-                        <ion-list lines="none" class="exercises-list">
-                            @for (movement of w.warmup.movements; track $index) {
-                                <ion-item class="exercise-item">
-                                    @if (getExerciseImage(movement.exerciseId)) {
-                                        <img
-                                            [src]="getExerciseImage(movement.exerciseId)"
-                                            [alt]="getExerciseName(movement.exerciseId)"
-                                            class="w-12 h-12 object-cover rounded-lg bg-gray-100 mr-3"
-                                            slot="start"
-                                        />
-                                    }
-                                    <ion-label class="text-sm">{{ getExerciseName(movement.exerciseId) }}</ion-label>
-                                    <ion-note slot="end" class="text-sm text-gray-500">{{ movement.durationSeconds }}s</ion-note>
-                                </ion-item>
-                            }
-                        </ion-list>
+                        <tbt-phase-movements-list
+                            [movements]="w.warmup.movements"
+                            [getExerciseName]="getExerciseNameFn"
+                            [getExerciseImage]="getExerciseImageFn"
+                        />
                     }
                 </ion-card-content>
             </ion-card>
@@ -109,7 +98,7 @@
                     </ion-list>
 
                     @if (block.interBlockRestSeconds > 0) {
-                        <p class="text-sm text-gray-400 mt-2 flex items-center gap-1">
+                        <p class="text-sm text-gray-400 rest-after-block flex items-center gap-1">
                             <ion-icon name="pause-outline"></ion-icon>
                             {{ block.interBlockRestSeconds }}s rest after block
                         </p>
@@ -126,22 +115,11 @@
                 <ion-card-content>
                     <p class="text-sm text-gray-500 mb-2"> Duration: {{ formatSecondsToMinutes(w.cooldown.totalDurationSeconds) }} min </p>
                     @if (w.cooldown.movements.length > 0) {
-                        <ion-list lines="none" class="exercises-list">
-                            @for (movement of w.cooldown.movements; track $index) {
-                                <ion-item class="exercise-item">
-                                    @if (getExerciseImage(movement.exerciseId)) {
-                                        <img
-                                            [src]="getExerciseImage(movement.exerciseId)"
-                                            [alt]="getExerciseName(movement.exerciseId)"
-                                            class="w-12 h-12 object-cover rounded-lg bg-gray-100 mr-3"
-                                            slot="start"
-                                        />
-                                    }
-                                    <ion-label class="text-sm">{{ getExerciseName(movement.exerciseId) }}</ion-label>
-                                    <ion-note slot="end" class="text-sm text-gray-500">{{ movement.durationSeconds }}s</ion-note>
-                                </ion-item>
-                            }
-                        </ion-list>
+                        <tbt-phase-movements-list
+                            [movements]="w.cooldown.movements"
+                            [getExerciseName]="getExerciseNameFn"
+                            [getExerciseImage]="getExerciseImageFn"
+                        />
                     }
                 </ion-card-content>
             </ion-card>

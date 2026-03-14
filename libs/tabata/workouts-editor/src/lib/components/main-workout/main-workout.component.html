@@ -19,6 +19,14 @@
             @for (block of blocks(); track $index; let i = $index) {
                 <ion-item class="block-item">
                     <ion-reorder slot="start"></ion-reorder>
+                    @if (block.exercise && getExerciseImage(block.exercise.exerciseId)) {
+                        <img
+                            [src]="getExerciseImage(block.exercise.exerciseId)"
+                            [alt]="getExerciseName(block.exercise.exerciseId)"
+                            class="block-exercise-thumb"
+                            slot="start"
+                        />
+                    }
                     <ion-label class="block-label">
                         <h2 class="font-medium">Block {{ i + 1 }}</h2>
                         @if (block.exercise) {

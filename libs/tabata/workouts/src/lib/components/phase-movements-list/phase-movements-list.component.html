@@ -1,0 +1,13 @@
+<ion-list lines="none" class="phase-movements-list">
+    @for (movement of movements(); track $index) {
+        <ion-item class="phase-movement-item">
+            @if (getExerciseImage()(movement.exerciseId)) {
+                <img [src]="getExerciseImage()(movement.exerciseId)" [alt]="getExerciseName()(movement.exerciseId)" class="phase-movement-thumb" slot="start" />
+            }
+            <ion-label class="ion-text-wrap">
+                <span class="phase-movement-name">{{ getExerciseName()(movement.exerciseId) }}</span>
+                <span class="phase-movement-duration">{{ movement.durationSeconds }}s</span>
+            </ion-label>
+        </ion-item>
+    }
+</ion-list>

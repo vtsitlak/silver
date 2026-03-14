@@ -37,7 +37,6 @@ interface WorkoutInfoFormModel {
     selector: 'tbt-workout-info',
     templateUrl: 'workout-info.component.html',
     styleUrls: ['workout-info.component.scss'],
-    standalone: true,
     imports: [
         IonHeader,
         IonContent,

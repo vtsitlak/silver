@@ -1,5 +1,9 @@
 .exercises-list {
-    .exercise-item::part(native) {
-        border-bottom: 1px solid var(--ion-color-light);
+    .exercise-item {
+        margin-bottom: 4px;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
     }
 }

@@ -16,8 +16,7 @@ interface ProfileFormModel {
     selector: 'tbt-profile',
     imports: [IonToggle, IonHeader, IonContent, ToolbarComponent, FormField, IonButton, IonSpinner],
     templateUrl: './profile.component.html',
-    styleUrl: './profile.component.scss',
-    standalone: true
+    styleUrl: './profile.component.scss'
 })
 export class ProfileComponent implements OnInit {
     private readonly authFacade = inject(AuthFacade);

@@ -41,7 +41,6 @@ export interface MainWorkoutBlockItem {
     selector: 'tbt-main-workout',
     templateUrl: 'main-workout.component.html',
     styleUrls: ['main-workout.component.scss'],
-    standalone: true,
     imports: [
         IonHeader,
         IonContent,
@@ -296,6 +295,11 @@ export class MainWorkoutComponent implements OnInit {
 
     getExerciseName(exerciseId: string): string {
         return this.exercisesFacade.exercisesMap()[exerciseId]?.name ?? this.formatIdAsDisplayName(exerciseId);
+    }
+
+    getExerciseImage(exerciseId: string): string {
+        const images = this.exercisesFacade.exercisesMap()[exerciseId]?.images;
+        return images?.length ? images[0] : '';
     }
 
     clearExerciseFromBlock(blockIndex: number): void {

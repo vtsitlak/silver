@@ -72,10 +72,11 @@ describe('WorkoutDetailsComponent', () => {
         expect(duration).toBe(5);
     });
 
-    it('should load workouts on init if empty', () => {
+    it('should not load workouts list on init (details page only loads single workout by id)', () => {
         mockWorkoutsFacade.workouts.set([]);
-        component.ngOnInit();
-        expect(mockWorkoutsFacade.loadWorkouts).toHaveBeenCalled();
+        fixture.detectChanges();
+        expect(mockWorkoutsFacade.loadWorkoutById).toHaveBeenCalledWith('1');
+        expect(mockWorkoutsFacade.loadWorkouts).not.toHaveBeenCalled();
     });
 
     it('should return exercise image URL when available', () => {

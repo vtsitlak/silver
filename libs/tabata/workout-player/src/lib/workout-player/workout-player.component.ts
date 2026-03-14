@@ -20,7 +20,6 @@ interface WorkoutSegment {
 
 @Component({
     selector: 'tbt-workout-player',
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon, IonContent, IonFooter],
     templateUrl: './workout-player.component.html',

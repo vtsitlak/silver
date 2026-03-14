@@ -6,7 +6,6 @@ import { ToolbarComponent } from '@silver/tabata/ui';
     selector: 'tbt-home',
     templateUrl: 'home.component.html',
     styleUrls: ['home.component.scss'],
-    standalone: true,
     imports: [IonHeader, IonContent, ToolbarComponent]
 })
 export class HomeComponent {}

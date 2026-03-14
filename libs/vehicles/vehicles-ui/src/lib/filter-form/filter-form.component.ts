@@ -6,7 +6,6 @@ import { Filter } from '@silver/vehicles-store';
 
 @Component({
     selector: 'app-filter-form',
-    standalone: true,
     templateUrl: './filter-form.component.html',
     styleUrls: ['./filter-form.component.scss'],
     imports: [MatFormFieldModule, MatSelectModule, FormField]
