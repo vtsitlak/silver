@@ -28,7 +28,8 @@
         "cap:run:android:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync android && npx cap run android",
         "cap:run:ios:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync ios && npx cap run ios",
         "cap:live:android:tabata-ai": "cd apps/tabata-ai && npx cap run android --livereload --external",
-        "cap:live:ios:tabata-ai": "cd apps/tabata-ai && npx cap run ios --livereload --external"
+        "cap:live:ios:tabata-ai": "cd apps/tabata-ai && npx cap run ios --livereload --external",
+        "postinstall": "patch-package"
     },
     "private": true,
     "overrides": {
@@ -38,8 +39,8 @@
         "@angular/animations": "^21.1.6",
         "@angular/cdk": "^21.0.6",
         "@angular/common": "^21.1.6",
-        "@angular/compiler": "^21.2.4",
-        "@angular/core": "21.2.4",
+        "@angular/compiler": "^21.1.6",
+        "@angular/core": "^21.1.6",
         "@angular/fire": "21.0.0-rc.0",
         "@angular/forms": "^21.1.6",
         "@angular/material": "^21.0.6",
@@ -111,6 +112,7 @@
         "jest-util": "30.2.0",
         "json-server": "^0.17.4",
         "nx": "22.3.3",
+        "patch-package": "^8.0.1",
         "postcss": "^8.4.5",
         "prettier": "~3.6.2",
         "rollup": "^4.59.0",
