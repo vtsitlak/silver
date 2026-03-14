@@ -1,9 +1,9 @@
 export default {
-    displayName: 'home',
+    displayName: 'dashboard',
     preset: '../../../jest.preset.js',
     setupFiles: ['<rootDir>/src/jest-global-setup.ts'],
     setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-    coverageDirectory: '../../../coverage/libs/tabata/home',
+    coverageDirectory: '../../../coverage/libs/tabata/dashboard',
     moduleNameMapper: {
         '^@silver/shared/helpers$': '<rootDir>/../utils/src/testing/shared-helpers.mock.ts'
     },

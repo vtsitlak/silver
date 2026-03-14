@@ -18,7 +18,18 @@
         <p class="text-center text-red-500">{{ error() }}</p>
     } @else if (workout(); as w) {
         <div class="workout-header mb-6">
-            <h1 class="text-2xl font-bold mb-2">{{ w.name }}</h1>
+            <div class="flex items-center gap-2 mb-2">
+                <h1 class="text-2xl font-bold flex-1">{{ w.name }}</h1>
+                <ion-button
+                    fill="clear"
+                    size="small"
+                    (click)="toggleFavorite()"
+                    [attr.aria-label]="isFavorite() ? 'Remove from favorites' : 'Add to favorites'"
+                    class="ion-no-padding"
+                >
+                    <ion-icon [name]="isFavorite() ? 'heart' : 'heart-outline'" [color]="isFavorite() ? 'danger' : 'medium'"></ion-icon>
+                </ion-button>
+            </div>
             @if (w.description) {
                 <p class="text-gray-500 mb-4">{{ w.description }}</p>
             }

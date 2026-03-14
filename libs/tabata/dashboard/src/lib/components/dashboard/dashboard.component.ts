@@ -1,43 +1,44 @@
 import { Component, ChangeDetectionStrategy, computed, effect, inject } from '@angular/core';
-import { IonHeader, IonContent, IonSegment, IonSegmentButton, IonLabel, IonList, IonItem, IonBadge, IonSpinner } from '@ionic/angular/standalone';
+import { Router } from '@angular/router';
+import { IonHeader, IonContent, IonList, IonItem, IonLabel, IonButton, IonIcon, IonSpinner } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { playCircle } from 'ionicons/icons';
 import { ToolbarComponent } from '@silver/tabata/ui';
 import { AuthFacade } from '@silver/tabata/auth';
 import { UserWorkoutsFacade } from '@silver/tabata/states/user-workouts';
 import { WorkoutsFacade } from '@silver/tabata/states/workouts';
 
-type TabValue = 'history' | 'most-used' | 'favorites';
-
 @Component({
-    selector: 'tbt-history',
-    templateUrl: 'history.component.html',
-    styleUrls: ['history.component.scss'],
+    selector: 'tbt-dashboard',
+    templateUrl: 'dashboard.component.html',
+    styleUrls: ['dashboard.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [IonHeader, IonContent, IonSegment, IonSegmentButton, IonLabel, IonList, IonItem, IonBadge, IonSpinner, ToolbarComponent]
+    imports: [IonHeader, IonContent, IonList, IonItem, IonLabel, IonButton, IonIcon, IonSpinner, ToolbarComponent]
 })
-export class HistoryComponent {
+export class DashboardComponent {
     private readonly authFacade = inject(AuthFacade);
     private readonly userWorkoutsFacade = inject(UserWorkoutsFacade);
     private readonly workoutsFacade = inject(WorkoutsFacade);
+    private readonly router = inject(Router);
 
     readonly user = this.authFacade.user;
     readonly userWorkout = this.userWorkoutsFacade.userWorkout;
     readonly isLoading = this.userWorkoutsFacade.isLoading;
-    readonly error = this.userWorkoutsFacade.error;
 
-    selectedTab = 'history' as TabValue;
-
-    readonly hasNoData = computed(() => {
-        const uw = this.userWorkout();
-        if (!uw) return true;
-        return uw.workoutItems.length === 0 && uw.favoriteWorkouts.length === 0;
+    readonly greeting = computed(() => {
+        const u = this.user();
+        if (!u) return '';
+        const name = (u as { displayName?: string }).displayName?.trim();
+        const email = (u as { email?: string }).email?.trim();
+        return name || email || 'there';
     });
 
-    readonly sortedWorkoutItems = computed(() => {
+    readonly lastWorkoutItem = computed(() => {
         const items = this.userWorkout()?.workoutItems ?? [];
-        return [...items].sort((a, b) => (b.startedAt || '').localeCompare(a.startedAt || ''));
+        return [...items].sort((a, b) => (b.startedAt || '').localeCompare(a.startedAt || ''))[0] ?? null;
     });
 
-    readonly mostUsedWorkouts = computed(() => {
+    readonly mostPopularWorkout = computed(() => {
         const items = this.userWorkout()?.workoutItems ?? [];
         const byId = new Map<string, { count: number; lastStartedAt: string }>();
         for (const item of items) {
@@ -45,10 +46,10 @@ export class HistoryComponent {
             const lastStarted = !cur || (item.startedAt || '') > (cur.lastStartedAt || '') ? item.startedAt : cur.lastStartedAt;
             byId.set(item.workoutId, { count: (cur?.count ?? 0) + 1, lastStartedAt: lastStarted });
         }
-        return Array.from(byId.entries())
+        const sorted = Array.from(byId.entries())
             .map(([workoutId, data]) => ({ workoutId, ...data }))
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 5);
+            .sort((a, b) => b.count - a.count);
+        return sorted[0] ?? null;
     });
 
     readonly favoriteIds = computed(() => this.userWorkout()?.favoriteWorkouts ?? []);
@@ -59,16 +60,13 @@ export class HistoryComponent {
     });
 
     constructor() {
+        addIcons({ playCircle });
         effect(() => {
             const uid = this.user()?.uid;
-            if (uid) {
-                this.userWorkoutsFacade.getOrCreateUserWorkout(uid);
-            }
+            if (uid) this.userWorkoutsFacade.getOrCreateUserWorkout(uid);
         });
         effect(() => {
-            if (this.userWorkout()) {
-                this.workoutsFacade.loadWorkouts();
-            }
+            if (this.userWorkout()) this.workoutsFacade.loadWorkouts();
         });
     }
 
@@ -80,5 +78,9 @@ export class HistoryComponent {
         if (!dateStr) return '';
         const d = new Date(dateStr);
         return isNaN(d.getTime()) ? dateStr : d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+    }
+
+    playWorkout(workoutId: string): void {
+        this.router.navigate(['/workouts', workoutId, 'play']);
     }
 }

@@ -1,0 +1,60 @@
+<ion-header [translucent]="true">
+    <tbt-toolbar i18n-title="@@dashboard" title="Dashboard"></tbt-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+    <div class="p-4 space-y-6">
+        @if (isLoading() && !userWorkout()) {
+            <div class="flex justify-center items-center py-12">
+                <ion-spinner name="crescent"></ion-spinner>
+            </div>
+        } @else {
+            <section>
+                <h2 class="text-xl font-semibold text-gray-800" i18n="@@dashboardGreeting">Hello, {{ greeting() }}!</h2>
+            </section>
+
+            @if (lastWorkoutItem(); as item) {
+                <section class="rounded-lg border border-gray-200 p-4 bg-gray-50">
+                    <h3 class="text-sm font-medium text-gray-500 mb-1" i18n="@@dashboardLastWorkout">Last workout started</h3>
+                    <p class="font-medium text-gray-900">{{ getWorkoutName(item.workoutId) }}</p>
+                    <p class="text-sm text-gray-500 mt-0.5">{{ formatDateTime(item.startedAt) }}</p>
+                    <ion-button size="small" fill="solid" (click)="playWorkout(item.workoutId)" class="mt-2">
+                        <ion-icon name="play-circle"></ion-icon>
+                        <span i18n="@@dashboardPlay">Play</span>
+                    </ion-button>
+                </section>
+            }
+
+            @if (mostPopularWorkout(); as entry) {
+                <section class="rounded-lg border border-gray-200 p-4 bg-gray-50">
+                    <h3 class="text-sm font-medium text-gray-500 mb-1" i18n="@@dashboardMostPopular">Most popular workout</h3>
+                    <p class="font-medium text-gray-900">{{ getWorkoutName(entry.workoutId) }}</p>
+                    <p class="text-sm text-gray-500 mt-0.5">{{ formatDateTime(entry.lastStartedAt) }}</p>
+                    <ion-button size="small" fill="solid" (click)="playWorkout(entry.workoutId)" class="mt-2">
+                        <ion-icon name="play-circle"></ion-icon>
+                        <span i18n="@@dashboardPlay">Play</span>
+                    </ion-button>
+                </section>
+            }
+
+            @if (favoriteIds().length > 0) {
+                <section>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" i18n="@@dashboardFavorites">Favorite workouts</h3>
+                    <ion-list lines="none" class="space-y-2">
+                        @for (favId of favoriteIds(); track favId) {
+                            <ion-item class="rounded-lg border border-gray-200">
+                                <ion-label>
+                                    <p class="font-medium">{{ getWorkoutName(favId) }}</p>
+                                </ion-label>
+                                <ion-button slot="end" size="small" fill="clear" (click)="playWorkout(favId)">
+                                    <ion-icon name="play-circle"></ion-icon>
+                                    <span i18n="@@dashboardPlay">Play</span>
+                                </ion-button>
+                            </ion-item>
+                        }
+                    </ion-list>
+                </section>
+            }
+        }
+    </div>
+</ion-content>

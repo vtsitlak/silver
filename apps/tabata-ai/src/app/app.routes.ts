@@ -2,10 +2,10 @@ import { Routes } from '@angular/router';
 import { AuthGuard, redirectLoggedInTo, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
 
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['auth/login']);
-const redirectLoggedInToHome = () => redirectLoggedInTo(['tabs/home']);
+const redirectLoggedInToDashboard = () => redirectLoggedInTo(['tabs/dashboard']);
 
 export const routes: Routes = [
-    { path: '', redirectTo: '/tabs/home', pathMatch: 'full' },
+    { path: '', redirectTo: '/tabs/dashboard', pathMatch: 'full' },
     {
         path: 'workouts/:workoutId/play',
         canActivate: [AuthGuard],
@@ -15,7 +15,7 @@ export const routes: Routes = [
     {
         path: 'auth',
         loadChildren: () => import('@silver/tabata/auth').then((m) => m.authRoutes),
-        data: { authGuardPipe: redirectLoggedInToHome }
+        data: { authGuardPipe: redirectLoggedInToDashboard }
     },
     {
         path: 'tabs',

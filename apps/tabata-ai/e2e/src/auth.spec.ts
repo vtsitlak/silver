@@ -36,14 +36,14 @@ test.describe('Authentication', () => {
             .first()
             .fill(TEST_USER_PASSWORD ?? '');
 
-        await Promise.all([page.waitForURL(/\/tabs\/home/, { timeout: 15000 }), page.getByRole('button', { name: 'Login' }).click()]);
+        await Promise.all([page.waitForURL(/\/tabs\/dashboard/, { timeout: 15000 }), page.getByRole('button', { name: 'Login' }).click()]);
 
-        await expect(page).toHaveURL(/\/tabs\/home/, { timeout: 10000 });
+        await expect(page).toHaveURL(/\/tabs\/dashboard/, { timeout: 10000 });
 
-        await expect(page.getByRole('tab', { name: 'Home' })).toBeVisible({ timeout: 5000 });
+        await expect(page.getByRole('tab', { name: 'Dashboard' })).toBeVisible({ timeout: 5000 });
         await expect(page.getByRole('tab', { name: 'Workouts' })).toBeVisible();
         await expect(page.getByRole('tab', { name: 'History' })).toBeVisible();
 
-        await expect(page.getByRole('tab', { name: 'Home' })).toHaveAttribute('aria-selected', 'true');
+        await expect(page.getByRole('tab', { name: 'Dashboard' })).toHaveAttribute('aria-selected', 'true');
     });
 });
