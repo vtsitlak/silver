@@ -1,31 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { WorkoutItemComponent } from './workout-item.component';
 import { TabataWorkout } from '@silver/tabata/states/workouts';
+import { mockTabataWorkout } from '@silver/tabata/testing';
+import { WorkoutItemComponent } from './workout-item.component';
 
-const mockWorkout: TabataWorkout = {
-    id: '1',
-    name: 'Test Workout',
-    description: 'A test workout description',
-    totalDurationMinutes: 30,
-    warmup: { totalDurationSeconds: 300, movements: [] },
-    blocks: [
-        {
-            rounds: 8,
-            workDurationSeconds: 20,
-            restDurationSeconds: 10,
-            exerciseId: 'burpees',
-            interBlockRestSeconds: 60
-        }
-    ],
-    cooldown: { totalDurationSeconds: 120, movements: [] },
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedByUserId: 'user1',
-    createdByUserId: 'user1',
-    generatedByAi: false,
-    mainTargetBodypart: 'back',
-    secondaryTargetBodyparts: [],
-    availableEquipments: []
-};
+const mockWorkout: TabataWorkout = { ...mockTabataWorkout } as TabataWorkout;
 
 describe('WorkoutItemComponent', () => {
     let component: WorkoutItemComponent;

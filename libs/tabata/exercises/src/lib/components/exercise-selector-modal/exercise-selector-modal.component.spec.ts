@@ -1,40 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
 import { ExerciseSelectorModalComponent } from './exercise-selector-modal.component';
 import { ExercisesFacade, Exercise } from '@silver/tabata/states/exercises';
 import { ModalController } from '@ionic/angular/standalone';
+import {
+    mockExercisesArray,
+    createMockExercisesFacadeForSelector,
+    mockModalController
+} from '@silver/tabata/testing';
 import { ExerciseFilterService } from '../../services/exercise-filter.service';
 
-const mockExercises: Exercise[] = [
-    {
-        exerciseId: '1',
-        name: 'Push Up',
-        images: [],
-        targetMuscles: ['chest'],
-        category: ['upper body'],
-        equipments: ['body weight'],
-        secondaryMuscles: [],
-        instructions: []
-    }
-];
-
-const mockFacade = {
-    exercises: signal(mockExercises),
-    isLoading: signal(false),
-    error: signal<string | null>(null),
-    musclesList: signal([]),
-    equipmentList: signal([]),
-    categoryList: signal([]),
-    getAllExercises: jest.fn(),
-    filterExercises: jest.fn(),
-    getMusclesList: jest.fn(),
-    getEquipmentList: jest.fn(),
-    getCategoryList: jest.fn()
-};
-
-const mockModalCtrl = {
-    dismiss: jest.fn()
-};
+const mockFacade = createMockExercisesFacadeForSelector(mockExercisesArray as Exercise[]);
 
 describe('ExerciseSelectorModalComponent', () => {
     let component: ExerciseSelectorModalComponent;
@@ -46,7 +21,7 @@ describe('ExerciseSelectorModalComponent', () => {
             imports: [ExerciseSelectorModalComponent],
             providers: [
                 { provide: ExercisesFacade, useValue: mockFacade },
-                { provide: ModalController, useValue: mockModalCtrl }
+                { provide: ModalController, useValue: mockModalController }
             ]
         }).compileComponents();
 
@@ -66,9 +41,12 @@ describe('ExerciseSelectorModalComponent', () => {
     });
 
     it('should dismiss with selected exercises and confirm role on confirm', () => {
-        component.toggleSelection(mockExercises[0]);
+        component.toggleSelection(mockExercisesArray[0] as Exercise);
         component.confirm();
-        expect(mockModalCtrl.dismiss).toHaveBeenCalledWith({ selected: [mockExercises[0]] }, 'confirm');
+        expect(mockModalController.dismiss).toHaveBeenCalledWith(
+            { selected: [mockExercisesArray[0]] },
+            'confirm'
+        );
     });
 
     it('should call dismiss when onDidDismiss is called (no-op, no error)', () => {
@@ -88,9 +66,9 @@ describe('ExerciseSelectorModalComponent', () => {
         component['initializePreselected']();
         expect(component.selectedCount()).toBe(1);
         expect(component.newlySelectedCount()).toBe(0);
-        expect(component.isPreselected(mockExercises[0])).toBe(true);
+        expect(component.isPreselected(mockExercisesArray[0] as Exercise)).toBe(true);
         component.confirm();
-        expect(mockModalCtrl.dismiss).toHaveBeenCalledWith({ selected: [] }, 'confirm');
+        expect(mockModalController.dismiss).toHaveBeenCalledWith({ selected: [] }, 'confirm');
     });
 
     it('should only return newly selected on confirm when preselected exist', () => {
@@ -106,7 +84,7 @@ describe('ExerciseSelectorModalComponent', () => {
         component.toggleSelection(ex2);
         expect(component.newlySelectedCount()).toBe(1);
         component.confirm();
-        expect(mockModalCtrl.dismiss).toHaveBeenCalledWith({ selected: [ex2] }, 'confirm');
+        expect(mockModalController.dismiss).toHaveBeenCalledWith({ selected: [ex2] }, 'confirm');
     });
 
     it('should not toggle preselected exercise', () => {
@@ -120,8 +98,8 @@ describe('ExerciseSelectorModalComponent', () => {
     });
 
     it('resetSelections with preselected should keep only preselected', () => {
-        const ex2: Exercise = { ...mockExercises[0], exerciseId: '2', name: 'Squat' };
-        mockFacade.exercises.set([mockExercises[0], ex2]);
+        const ex2: Exercise = { ...(mockExercisesArray[0] as Exercise), exerciseId: '2', name: 'Squat' };
+        mockFacade.exercises.set([mockExercisesArray[0] as Exercise, ex2]);
         fixture.componentRef.setInput('preselectedIds', ['1']);
         fixture.detectChanges();
         component['initializePreselected']();
@@ -129,7 +107,7 @@ describe('ExerciseSelectorModalComponent', () => {
         expect(component.selectedCount()).toBe(2);
         component.resetSelections();
         expect(component.selectedCount()).toBe(1);
-        expect(component.isSelected(mockExercises[0])).toBe(true);
+        expect(component.isSelected(mockExercisesArray[0] as Exercise)).toBe(true);
         expect(component.isSelected(ex2)).toBe(false);
     });
 

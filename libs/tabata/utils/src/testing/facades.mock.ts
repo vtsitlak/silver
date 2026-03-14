@@ -5,6 +5,8 @@
  */
 /// <reference types="jest" />
 
+import { signal } from '@angular/core';
+
 function mockFn(): jest.Mock {
     return typeof jest !== 'undefined'
         ? jest.fn()
@@ -13,9 +15,45 @@ function mockFn(): jest.Mock {
           }) as unknown as jest.Mock);
 }
 
-/** Mock for AuthFacade (e.g. when testing components that use ToolbarComponent). */
+/** Mock for AuthFacade. user is a signal so authFacade.user() works. Use in any spec that provides AuthFacade. */
 export const mockAuthFacade = {
-    logout: mockFn()
+    user: signal<unknown>(null),
+    error: () => null,
+    isLoading: () => false,
+    isAuthenticated: () => false,
+    usePassword: () => true,
+    useGoogle: () => false,
+    hasError: () => false,
+    sign: mockFn(),
+    register: mockFn(),
+    sendPasswordResetEmail: mockFn(),
+    updateDisplayName: mockFn(),
+    updatePassword: mockFn(),
+    logout: mockFn(),
+    getUser: mockFn()
+};
+
+/** Mock for UserWorkoutsFacade. Use in dashboard, history, workout-details, workout-player specs. */
+export const mockUserWorkoutsFacade = {
+    userWorkout: () => null,
+    isLoading: () => false,
+    error: () => null,
+    hasUserWorkout: () => false,
+    loadUserWorkout: mockFn(),
+    saveUserWorkout: mockFn(),
+    getOrCreateUserWorkout: mockFn()
+};
+
+/** Simple mock for WorkoutsFacade (read-only style). For writable signals use createMockWorkoutsFacade from workouts.mock. */
+export const mockWorkoutsFacade = {
+    workouts: () => [],
+    loadedWorkout: () => null,
+    isLoading: () => false,
+    error: () => null,
+    hasWorkouts: () => false,
+    loadWorkouts: mockFn(),
+    loadWorkoutById: mockFn(),
+    removeWorkout: mockFn()
 };
 
 /** Mock for WorkoutEditorFacade. */
