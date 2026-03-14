@@ -6,8 +6,8 @@
         "node": ">=22.0.0"
     },
     "scripts": {
-        "serve:exercises-db": "node scripts/serve-exercises-db.mjs",
-        "start:tabata-ai": "concurrently \"node scripts/serve-exercises-db.mjs\" \"nx serve tabata-ai\" --names \"exercises-db,tabata-ai\"",
+        "serve:exercises-db": "node apps/tabata-ai/scripts/serve-exercises-db.mjs",
+        "start:tabata-ai": "concurrently \"node apps/tabata-ai/scripts/serve-exercises-db.mjs\" \"nx serve tabata-ai\" --names \"exercises-db,tabata-ai\"",
         "build-localize:tabata-ai": "nx build tabata-ai  --localize",
         "build-run:tabata-ai": "npx http-server dist/apps/tabata-ai",
         "start:vehicles-app": "nx serve vehicles-app",
@@ -23,7 +23,7 @@
         "test:shared": "nx run-many -t test --projects=tag:scope:shared",
         "e2e:tabata-ai": "nx e2e tabata-ai-e2e",
         "cap:sync:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync",
-        "cap:android:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync android && powershell -ExecutionPolicy Bypass -File ../../scripts/open-android-studio.ps1",
+        "cap:android:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync android && powershell -ExecutionPolicy Bypass -File scripts/open-android-studio.ps1",
         "cap:ios:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync ios && npx cap open ios",
         "cap:run:android:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync android && npx cap run android",
         "cap:run:ios:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync ios && npx cap run ios",

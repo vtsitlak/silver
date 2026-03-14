@@ -12,7 +12,7 @@ export class ExercisesFacade {
     readonly error = this.store.error;
     readonly musclesList = this.store.musclesList;
     readonly equipmentList = this.store.equipmentList;
-    readonly bodyPartList = this.store.bodyPartList;
+    readonly categoryList = this.store.categoryList;
     readonly exercisesMap = this.store.exercisesMap;
 
     readonly hasExercises = this.store.hasExercises;
@@ -37,15 +37,15 @@ export class ExercisesFacade {
         search?: string;
         muscles?: string;
         equipment?: string;
-        bodyParts?: string;
+        category?: string;
         sortBy?: SortBy;
         sortOrder?: SortOrder;
     }): void {
         this.store['filterExercises'](options);
     }
 
-    getExercisesByBodyPart(bodyPartName: string, limit?: number, offset?: number): void {
-        this.store['getExercisesByBodyPart']({ bodyPartName, limit, offset });
+    getExercisesByCategory(categoryName: string, limit?: number, offset?: number): void {
+        this.store['getExercisesByCategory']({ categoryName, limit, offset });
     }
 
     getExercisesByEquipment(equipmentName: string, limit?: number, offset?: number): void {
@@ -64,8 +64,8 @@ export class ExercisesFacade {
         this.store['getEquipmentList']();
     }
 
-    getBodyPartList(): void {
-        this.store['getBodyPartList']();
+    getCategoryList(): void {
+        this.store['getCategoryList']();
     }
 
     /** Load a map of exercises by IDs (e.g. for workout details). Sets exercisesMap signal. */

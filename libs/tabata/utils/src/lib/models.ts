@@ -1,8 +1,8 @@
-export type BodyRegion = 'Upper Body' | 'Lower Body' | 'Full Body' | 'Core' | 'Cardio';
+export type BodyRegion = 'Upper Body' | 'Lower Body' | 'Full Body' | 'Core';
 
 export interface TargetBodyRegions {
     bodyRegion: BodyRegion;
-    bodyparts: string[];
+    muscles: string[];
 }
 
 export type EquipmentCategory = 'Machine' | 'Free Weight' | 'Functional Tool' | 'Accessory' | 'Bodyweight' | 'Other';
@@ -18,10 +18,10 @@ export interface MuscleMapping {
 }
 
 /** All body regions for main/secondary target selects. */
-export const BODY_REGION_OPTIONS: BodyRegion[] = ['Upper Body', 'Lower Body', 'Core', 'Cardio', 'Full Body'];
+export const BODY_REGION_OPTIONS: BodyRegion[] = ['Upper Body', 'Lower Body', 'Core', 'Full Body'];
 
 /** Equipment categories for workout editor (excludes Bodyweight and Other). */
-export const EQUIPMENT_CATEGORY_OPTIONS: EquipmentCategory[] = ['Machine', 'Free Weight', 'Functional Tool', 'Accessory'];
+export const EQUIPMENT_CATEGORY_OPTIONS: EquipmentCategory[] = ['Machine', 'Free Weight', 'Functional Tool', 'Accessory', 'Other'];
 
 /**
  * Equipment options grouped by category, using values from free-exercise-db
@@ -66,15 +66,11 @@ export const muscleOptions: MuscleMapping[] = [
     },
     {
         region: 'Lower Body',
-        muscles: ['quadriceps', 'hamstrings', 'glutes', 'calves']
+        muscles: ['quadriceps', 'hamstrings', 'glutes', 'calves', 'abductors', 'adductors']
     },
     {
         region: 'Core',
         muscles: ['abdominals', 'lower back']
-    },
-    {
-        region: 'Cardio',
-        muscles: []
     },
     {
         region: 'Full Body',
@@ -83,28 +79,24 @@ export const muscleOptions: MuscleMapping[] = [
 ];
 
 /**
- * Target body-part groupings using muscle names from the new DB.
+ * Target muscle groupings by body region, using muscle names from the API.
  * This is used by the workout editor for selecting main/secondary targets.
  */
 export const targetBodypartsOptions: TargetBodyRegions[] = [
     {
         bodyRegion: 'Upper Body',
-        bodyparts: ['neck', 'shoulders', 'chest', 'biceps', 'triceps', 'forearms', 'traps', 'lats', 'middle back']
+        muscles: ['neck', 'shoulders', 'chest', 'biceps', 'triceps', 'forearms', 'traps', 'lats', 'middle back']
     },
     {
         bodyRegion: 'Lower Body',
-        bodyparts: ['quadriceps', 'hamstrings', 'glutes', 'calves']
+        muscles: ['quadriceps', 'hamstrings', 'glutes', 'calves', 'abductors', 'adductors']
     },
     {
         bodyRegion: 'Full Body',
-        bodyparts: []
+        muscles: []
     },
     {
         bodyRegion: 'Core',
-        bodyparts: ['abdominals', 'lower back']
-    },
-    {
-        bodyRegion: 'Cardio',
-        bodyparts: []
+        muscles: ['abdominals', 'lower back']
     }
 ];

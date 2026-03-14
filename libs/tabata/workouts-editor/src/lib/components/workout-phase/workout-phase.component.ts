@@ -84,7 +84,7 @@ export class WorkoutPhaseComponent implements OnInit {
                                 name: this.formatIdAsDisplayName(m.exerciseId),
                                 images: [],
                                 targetMuscles: [],
-                                bodyParts: [],
+                                category: [],
                                 equipments: [],
                                 secondaryMuscles: [],
                                 instructions: []

@@ -32,7 +32,7 @@
 
             <ion-item>
                 <ion-label position="stacked">Main target <span>*</span></ion-label>
-                <ion-select placeholder="Select main target" [formField]="infoForm['mainTargetBodypart']" interface="action-sheet">
+                <ion-select placeholder="Select main target" [formField]="infoForm['mainTargetBodypart']" interface="alert">
                     @for (region of bodyRegionOptions; track region) {
                         <ion-select-option [value]="region" [disabled]="mainTargetDisabled()(region)">
                             {{ region }}

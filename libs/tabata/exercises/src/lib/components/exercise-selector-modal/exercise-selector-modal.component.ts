@@ -65,12 +65,12 @@ export class ExerciseSelectorModalComponent implements OnInit {
     readonly error = this.facade.error;
     readonly musclesList = this.facade.musclesList;
     readonly equipmentList = this.facade.equipmentList;
-    readonly bodyPartList = this.facade.bodyPartList;
+    readonly categoryList = this.facade.categoryList;
 
     readonly searchTerm = signal('');
     readonly selectedMuscles = signal<string[]>([]);
     readonly selectedEquipment = signal<string[]>([]);
-    readonly selectedBodyParts = signal<string[]>([]);
+    readonly selectedCategory = signal<string[]>([]);
     readonly selectedExercises = signal<Map<string, Exercise>>(new Map());
 
     private currentOffset = 0;
@@ -122,7 +122,7 @@ export class ExerciseSelectorModalComponent implements OnInit {
     private loadFilterOptions(): void {
         this.facade.getMusclesList();
         this.facade.getEquipmentList();
-        this.facade.getBodyPartList();
+        this.facade.getCategoryList();
     }
 
     private initializePreselected(): void {
@@ -167,24 +167,24 @@ export class ExerciseSelectorModalComponent implements OnInit {
         this.filterService.updateFilters({ equipment: next });
     }
 
-    onBodyPartChange(ev: Event): void {
+    onCategoryChange(ev: Event): void {
         const customEv = ev as CustomEvent<{ value: string | string[] }>;
         const v = customEv.detail?.value as string | string[] | undefined;
         const next = Array.isArray(v) ? v : v ? [v] : [];
-        this.selectedBodyParts.set(next);
-        this.filterService.updateFilters({ bodyParts: next });
+        this.selectedCategory.set(next);
+        this.filterService.updateFilters({ category: next });
     }
 
     clearFilters(): void {
         this.selectedMuscles.set([]);
         this.selectedEquipment.set([]);
-        this.selectedBodyParts.set([]);
+        this.selectedCategory.set([]);
         this.searchTerm.set('');
         this.filterService.updateFilters({
             term: '',
             muscles: [],
             equipment: [],
-            bodyParts: []
+            category: []
         });
     }
 

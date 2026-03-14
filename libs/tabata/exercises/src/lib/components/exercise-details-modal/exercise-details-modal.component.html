@@ -69,17 +69,17 @@
             <ion-card-header>
                 <ion-card-title class="flex items-center gap-2 text-lg">
                     <ion-icon name="body-outline"></ion-icon>
-                    Body Parts
+                    Category
                 </ion-card-title>
             </ion-card-header>
             <ion-card-content>
                 <div class="flex flex-wrap gap-2">
-                    @for (part of ex.bodyParts; track part) {
+                    @for (part of ex.category; track part) {
                         <ion-chip color="tertiary">
                             <ion-label>{{ formatMuscle(part) }}</ion-label>
                         </ion-chip>
                     } @empty {
-                        <p class="text-gray-500">No body parts specified</p>
+                        <p class="text-gray-500">No category specified</p>
                     }
                 </div>
             </ion-card-content>

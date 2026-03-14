@@ -75,7 +75,7 @@ describe('MainWorkoutComponent', () => {
                     name: 'Push',
                     images: [],
                     targetMuscles: [],
-                    bodyParts: [],
+                    category: [],
                     equipments: [],
                     secondaryMuscles: [],
                     instructions: []

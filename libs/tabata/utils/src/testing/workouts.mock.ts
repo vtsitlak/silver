@@ -85,7 +85,7 @@ export const mockExercise = {
     name: 'Burpees',
     images: ['https://example.com/burpee.gif'] as string[],
     targetMuscles: [] as string[],
-    bodyParts: [] as string[],
+    category: [] as string[],
     equipments: [] as string[],
     secondaryMuscles: [] as string[],
     instructions: [] as string[]

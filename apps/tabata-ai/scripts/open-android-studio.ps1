@@ -1,8 +1,9 @@
 # Open Android Studio with the Tabata AI Android project
 # This script clears conflicting Java environment variables
+# Run from repo root or from apps/tabata-ai (script lives in apps/tabata-ai/scripts).
 
 param(
-    [string]$ProjectPath = "apps\tabata-ai\android"
+    [string]$ProjectPath = "android"
 )
 
 # Use Android Studio2 - the only complete installation with idea.properties
@@ -25,7 +26,7 @@ if (-not (Test-Path $StudioPath)) {
     exit 1
 }
 
-# Get the full project path
+# Script is in apps/tabata-ai/scripts; project is apps/tabata-ai/android
 $FullProjectPath = Join-Path $PSScriptRoot "..\$ProjectPath" | Resolve-Path -ErrorAction SilentlyContinue
 
 if (-not $FullProjectPath) {
