@@ -15,12 +15,16 @@ import {
     IonSelectOption,
     IonLabel,
     IonFooter,
-    IonIcon
+    IonIcon,
+    IonSpinner
 } from '@ionic/angular/standalone';
 import { ToolbarComponent } from '@silver/tabata/ui';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { WorkoutEditorCancelService } from '../../services/workout-editor-cancel.service';
 import { EQUIPMENT_CATEGORY_OPTIONS, BODY_REGION_OPTIONS, type EquipmentCategory, type BodyRegion } from '@silver/tabata/helpers';
+import { AiWorkoutGeneratorService } from '@silver/tabata/ai-workout-generator';
+import type { ExerciseSummary } from '@silver/tabata/ai-workout-generator';
+import { ExercisesService } from '@silver/tabata/states/exercises';
 import { addIcons } from 'ionicons';
 import { arrowBackOutline, arrowForwardOutline } from 'ionicons/icons';
 
@@ -52,6 +56,7 @@ interface WorkoutInfoFormModel {
         IonLabel,
         IonFooter,
         IonIcon,
+        IonSpinner,
         FormField,
         ToolbarComponent
     ]
@@ -61,6 +66,8 @@ export class WorkoutInfoComponent implements OnInit {
     private readonly router = inject(Router);
     private readonly facade = inject(WorkoutEditorFacade);
     private readonly cancelService = inject(WorkoutEditorCancelService);
+    private readonly aiGenerator = inject(AiWorkoutGeneratorService);
+    private readonly exercisesService = inject(ExercisesService);
 
     readonly workoutId = signal<string | null>(null);
     readonly isEditMode = signal(false);
@@ -90,6 +97,9 @@ export class WorkoutInfoComponent implements OnInit {
     });
 
     readonly isFormValid = computed(() => this.infoForm().valid());
+
+    readonly isGenerating = signal(false);
+    readonly generateError = signal<string | null>(null);
 
     private readonly hasSyncedDraftToForm = signal(false);
 
@@ -146,8 +156,70 @@ export class WorkoutInfoComponent implements OnInit {
 
     onGenerateWithAi(): void {
         if (this.infoForm().invalid()) return;
-        this.infoModel.set({ ...this.infoModel(), generatedByAi: true });
-        // TODO: wire to AI generation (draft is synced via effect)
+        const model = this.infoModel();
+        const mainTarget = model.mainTargetBodypart;
+        if (!mainTarget) return;
+
+        this.generateError.set(null);
+        this.isGenerating.set(true);
+
+        const equipmentParam = model.availableEquipments?.[0] ?? '';
+        this.exercisesService
+            .filterExercises({
+                limit: 40,
+                muscles: mainTarget,
+                equipment: equipmentParam,
+                sortBy: 'name',
+                sortOrder: 'asc'
+            })
+            .subscribe({
+                next: (exercises) => {
+                    const summaries: ExerciseSummary[] = exercises.map((e) => ({
+                        exerciseId: e.exerciseId,
+                        name: e.name,
+                        targetMuscles: e.targetMuscles ?? [],
+                        category: e.category ?? [],
+                        equipments: e.equipments ?? []
+                    }));
+
+                    if (summaries.length === 0) {
+                        this.generateError.set('No exercises found for the selected target and equipment. Add more or change filters.');
+                        this.isGenerating.set(false);
+                        return;
+                    }
+
+                    this.aiGenerator
+                        .generateWorkout({
+                            name: model.name,
+                            description: model.description,
+                            mainTargetBodypart: mainTarget,
+                            availableEquipments: model.availableEquipments,
+                            secondaryTargetBodyparts: model.secondaryTargetBodyparts,
+                            exercises: summaries
+                        })
+                        .subscribe({
+                            next: (output) => {
+                                this.facade.updateDraft({
+                                    totalDurationMinutes: output.totalDurationMinutes,
+                                    warmup: output.warmup,
+                                    blocks: output.blocks,
+                                    cooldown: output.cooldown,
+                                    generatedByAi: true
+                                });
+                                this.infoModel.set({ ...model, generatedByAi: true });
+                                this.isGenerating.set(false);
+                            },
+                            error: (err) => {
+                                this.generateError.set(err?.message ?? 'AI generation failed');
+                                this.isGenerating.set(false);
+                            }
+                        });
+                },
+                error: () => {
+                    this.generateError.set('Failed to load exercises');
+                    this.isGenerating.set(false);
+                }
+            });
     }
 
     async onCancel(): Promise<void> {

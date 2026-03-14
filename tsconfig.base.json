@@ -37,7 +37,9 @@
             "@silver/tabata/states/workouts": ["libs/tabata/states/workouts/src/index.ts"],
             "@silver/tabata/states/user-workouts": ["libs/tabata/states/user-workouts/src/index.ts"],
             "@silver/tabata/states/workout-editor": ["libs/tabata/states/workout-editor/src/index.ts"],
-            "@silver/tabata/workout-player": ["libs/tabata/workout-player/src/index.ts"]
+            "@silver/tabata/workout-player": ["libs/tabata/workout-player/src/index.ts"],
+            "@silver/tabata/ai-workout-generator": ["libs/tabata/ai-workout-generator/src/index.ts"],
+            "@silver/ai-workout-generator": ["libs/tabata/ai-workout-generator/src/index.ts"]
         }
     },
     "exclude": ["node_modules", "tmp"]

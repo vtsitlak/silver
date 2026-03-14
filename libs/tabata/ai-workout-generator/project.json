@@ -1,0 +1,21 @@
+{
+    "name": "ai-workout-generator",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/tabata/ai-workout-generator/src",
+    "prefix": "tbt",
+    "projectType": "library",
+    "tags": ["scope:tabata"],
+    "targets": {
+        "test": {
+            "executor": "@nx/jest:jest",
+            "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+            "options": {
+                "jestConfig": "libs/tabata/ai-workout-generator/jest.config.cts",
+                "tsConfig": "libs/tabata/ai-workout-generator/tsconfig.spec.json"
+            }
+        },
+        "lint": {
+            "executor": "@nx/eslint:lint"
+        }
+    }
+}

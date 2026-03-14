@@ -53,7 +53,15 @@
             </ion-item>
         </ion-list>
 
-        <ion-button expand="block" type="button" (click)="onGenerateWithAi()" [disabled]="!isFormValid()" class="ion-margin-top"> Generate with AI </ion-button>
+        <ion-button expand="block" type="button" (click)="onGenerateWithAi()" [disabled]="!isFormValid() || isGenerating()" class="ion-margin-top">
+            @if (isGenerating()) {
+                <ion-spinner name="crescent" class="ion-margin-end"></ion-spinner>
+            }
+            Generate with AI
+        </ion-button>
+        @if (generateError()) {
+            <p class="text-red-600 text-sm ion-margin-top">{{ generateError() }}</p>
+        }
     </form>
 </ion-content>
 
