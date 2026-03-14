@@ -22,7 +22,7 @@
             "@silver/tabata/helpers": ["libs/tabata/utils/src/index.ts"],
             "@silver/tabata/testing": ["libs/tabata/utils/src/testing/index.ts"],
             "@silver/tabata/history": ["libs/tabata/history/src/index.ts"],
-            "@silver/tabata/home": ["libs/tabata/home/src/index.ts"],
+            "@silver/tabata/dashboard": ["libs/tabata/dashboard/src/index.ts"],
             "@silver/tabata/profile": ["libs/tabata/profile/src/index.ts"],
             "@silver/tabata/ui": ["libs/tabata/ui/src/index.ts"],
             "@silver/tabata/workouts-editor": ["libs/tabata/workouts-editor/src/index.ts"],
@@ -37,7 +37,9 @@
             "@silver/tabata/states/workouts": ["libs/tabata/states/workouts/src/index.ts"],
             "@silver/tabata/states/user-workouts": ["libs/tabata/states/user-workouts/src/index.ts"],
             "@silver/tabata/states/workout-editor": ["libs/tabata/states/workout-editor/src/index.ts"],
-            "@silver/tabata/workout-player": ["libs/tabata/workout-player/src/index.ts"]
+            "@silver/tabata/workout-player": ["libs/tabata/workout-player/src/index.ts"],
+            "@silver/tabata/ai-workout-generator": ["libs/tabata/ai-workout-generator/src/index.ts"],
+            "@silver/ai-workout-generator": ["libs/tabata/ai-workout-generator/src/index.ts"]
         }
     },
     "exclude": ["node_modules", "tmp"]

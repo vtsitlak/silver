@@ -7,8 +7,8 @@ export const routes: Routes = [
         component: TabsComponent,
         children: [
             {
-                path: 'home',
-                loadComponent: () => import('@silver/tabata/home').then((m) => m.HomeComponent)
+                path: 'dashboard',
+                loadComponent: () => import('@silver/tabata/dashboard').then((m) => m.DashboardComponent)
             },
             {
                 path: 'workouts',
@@ -70,7 +70,7 @@ export const routes: Routes = [
             },
             {
                 path: '',
-                redirectTo: 'home',
+                redirectTo: 'dashboard',
                 pathMatch: 'full'
             }
         ]

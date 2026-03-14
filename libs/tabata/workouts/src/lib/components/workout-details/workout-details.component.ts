@@ -17,10 +17,14 @@ import {
     IonButtons
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { playCircle, createOutline, timeOutline, fitnessOutline, flashOutline, pauseOutline } from 'ionicons/icons';
+import { playCircle, createOutline, timeOutline, fitnessOutline, flashOutline, pauseOutline, heart, heartOutline } from 'ionicons/icons';
 import { WorkoutsFacade } from '@silver/tabata/states/workouts';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
+import { AuthFacade } from '@silver/tabata/auth';
+import { UserWorkoutsFacade } from '@silver/tabata/states/user-workouts';
+import type { UserWorkoutItem } from '@silver/tabata/states/user-workouts';
+import { computed } from '@angular/core';
 import { formatDurationMinutes, getBlockDurationMinutes, formatSecondsToMinutes } from '@silver/tabata/helpers';
 import { ToolbarComponent } from '@silver/tabata/ui';
 import { PhaseMovementsListComponent } from '../phase-movements-list/phase-movements-list.component';
@@ -54,6 +58,8 @@ export class WorkoutDetailsComponent {
     private readonly router = inject(Router);
     private readonly workoutEditorFacade = inject(WorkoutEditorFacade);
     private readonly exercisesFacade = inject(ExercisesFacade);
+    private readonly authFacade = inject(AuthFacade);
+    private readonly userWorkoutsFacade = inject(UserWorkoutsFacade);
 
     readonly workoutId = input.required<string>();
 
@@ -63,13 +69,26 @@ export class WorkoutDetailsComponent {
     readonly isLoading = this.facade.isLoading;
     readonly error = this.facade.error;
 
+    readonly isFavorite = computed(() => {
+        const id = this.workoutId();
+        const favs = this.userWorkoutsFacade.userWorkout()?.favoriteWorkouts ?? [];
+        return id ? favs.includes(id) : false;
+    });
+
     constructor() {
-        addIcons({ playCircle, createOutline, timeOutline, fitnessOutline, flashOutline, pauseOutline });
+        addIcons({ playCircle, createOutline, timeOutline, fitnessOutline, flashOutline, pauseOutline, heart, heartOutline });
 
         effect(() => {
             const id = this.workoutId();
             if (id) {
                 this.facade.loadWorkoutById(id);
+            }
+        });
+
+        effect(() => {
+            const uid = this.authFacade.user()?.uid;
+            if (uid) {
+                this.userWorkoutsFacade.getOrCreateUserWorkout(uid);
             }
         });
 
@@ -102,6 +121,19 @@ export class WorkoutDetailsComponent {
         if (id) {
             this.router.navigate(['/workouts', id, 'play']);
         }
+    }
+
+    toggleFavorite(): void {
+        const id = this.workoutId();
+        const userId = this.authFacade.user()?.uid;
+        if (!id || !userId) return;
+
+        const current = this.userWorkoutsFacade.userWorkout();
+        const base = current?.userId === userId ? current : { userId, favoriteWorkouts: [] as string[], workoutItems: [] as UserWorkoutItem[] };
+        const favs = base.favoriteWorkouts ?? [];
+        const isFav = favs.includes(id);
+        const newFavs = isFav ? favs.filter((f) => f !== id) : [...favs, id];
+        this.userWorkoutsFacade.saveUserWorkout({ ...base, favoriteWorkouts: newFavs });
     }
 
     /** Expose helpers for template (duration/block formatting). */

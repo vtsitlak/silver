@@ -13,7 +13,7 @@
 ## Status: In progress
 
 - **Authentication** — Login, register, forgot password, and profile updates are implemented (Firebase).
-- **Shell** — Tab navigation (Home, Workouts, History, Profile) and a simple home screen exist.
+- **Shell** — Tab navigation (Dashboard, Workouts, History, Profile) and a dashboard screen exist.
 - **Exercises** — Backend integration with [ExerciseDB API](https://www.exercisedb.dev/docs) is in place (service, store, facade); UI to browse or use exercises is **not** fully built yet.
 - **Workouts** — Workout storage via Upstash Redis (through Vercel serverless proxy) is implemented. Workout creation UI and timers are **not** implemented.
 - **History** — Placeholder only; no real history or statistics.
@@ -71,7 +71,7 @@ Default dev URL: http://localhost:4200 (or as shown in the terminal).
 - **`apps/tabata-ai/`** — App entry, routes, styles, and i18n config.
 - **`api/`** — Vercel serverless functions (workouts proxy to Upstash, health check).
 - **`libs/tabata/auth`** — Login, register, forgot password, profile; AuthStore; AuthFacade.
-- **`libs/tabata/home`** — Home tab content.
+- **`libs/tabata/dashboard`** — Dashboard tab content.
 - **`libs/tabata/workouts`** — Workouts tab (placeholder).
 - **`libs/tabata/tabata-workouts`** — WorkoutsStore, WorkoutsService, WorkoutsFacade (Upstash backend).
 - **`libs/tabata/history`** — History tab (placeholder).
@@ -80,7 +80,7 @@ Default dev URL: http://localhost:4200 (or as shown in the terminal).
 - **`libs/tabata/exercises`** — ExerciseDB client, ExercisesStore, ExercisesFacade.
 - **`libs/tabata/utils`** — Helpers and centralized test mocks (`@silver/tabata/testing`).
 
-Routes: `/auth/login`, `/auth/register`, `/auth/forgot-password`, `/tabs/home`, `/tabs/workouts`, `/tabs/history`, `/tabs/profile`. Unauthenticated users are redirected to login.
+Routes: `/auth/login`, `/auth/register`, `/auth/forgot-password`, `/tabs/dashboard`, `/tabs/workouts`, `/tabs/history`, `/tabs/profile`. Unauthenticated users are redirected to login.
 
 ## Deployment (Vercel)
 

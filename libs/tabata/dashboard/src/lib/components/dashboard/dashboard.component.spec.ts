@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { AuthFacade } from '@silver/tabata/auth';
-import { HistoryComponent } from './history.component';
 import { UserWorkoutsFacade } from '@silver/tabata/states/user-workouts';
 import { WorkoutsFacade } from '@silver/tabata/states/workouts';
+import { DashboardComponent } from './dashboard.component';
 
 const mockAuthFacade = {
     user: () => null,
@@ -26,30 +26,23 @@ const mockUserWorkoutsFacade = {
     userWorkout: () => null,
     isLoading: () => false,
     error: () => null,
-    hasUserWorkout: () => false,
-    loadUserWorkout: () => {},
-    saveUserWorkout: () => {},
-    getOrCreateUserWorkout: () => {}
+    getOrCreateUserWorkout: () => {},
+    saveUserWorkout: () => {}
 };
 
 const mockWorkoutsFacade = {
     workouts: () => [],
     loadWorkouts: () => {},
-    loadedWorkout: () => null,
-    isLoading: () => false,
-    error: () => null,
-    hasWorkouts: () => false,
-    loadWorkoutById: () => {},
-    removeWorkout: () => ({ subscribe: () => {} })
+    loadWorkoutById: () => {}
 };
 
-describe('HistoryComponent', () => {
-    let component: HistoryComponent;
-    let fixture: ComponentFixture<HistoryComponent>;
+describe('DashboardComponent', () => {
+    let component: DashboardComponent;
+    let fixture: ComponentFixture<DashboardComponent>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [HistoryComponent],
+            imports: [DashboardComponent],
             providers: [
                 provideRouter([]),
                 { provide: AuthFacade, useValue: mockAuthFacade },
@@ -58,12 +51,23 @@ describe('HistoryComponent', () => {
             ]
         }).compileComponents();
 
-        fixture = TestBed.createComponent(HistoryComponent);
+        fixture = TestBed.createComponent(DashboardComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should return greeting from user displayName or email', () => {
+        expect(component.greeting()).toBe('there');
+    });
+
+    it('should navigate to play route when playWorkout is called', () => {
+        const router = TestBed.inject(Router);
+        const navSpy = jest.spyOn(router, 'navigate');
+        component.playWorkout('w1');
+        expect(navSpy).toHaveBeenCalledWith(['/workouts', 'w1', 'play']);
     });
 });
