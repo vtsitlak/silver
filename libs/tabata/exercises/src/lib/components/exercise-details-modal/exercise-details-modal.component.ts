@@ -26,7 +26,6 @@ import { ExercisesFacade } from '@silver/tabata/states/exercises';
     selector: 'tbt-exercise-details-modal',
     templateUrl: './exercise-details-modal.component.html',
     styleUrl: './exercise-details-modal.component.scss',
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         IonHeader,

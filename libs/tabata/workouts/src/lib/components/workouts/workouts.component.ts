@@ -17,7 +17,6 @@ import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
     selector: 'tbt-workouts',
     templateUrl: 'workouts.component.html',
     styleUrls: ['workouts.component.scss'],
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [IonHeader, ToolbarComponent, IonContent, IonSearchbar, IonButton, IonList, IonItem, IonIcon, WorkoutItemComponent]
 })
@@ -71,8 +70,7 @@ export class WorkoutsComponent {
     }
 
     onPlayClick(workout: TabataWorkout): void {
-        void workout;
-        // TODO: Implement workout player navigation
+        this.router.navigate(['/workouts', workout.id, 'play']);
     }
 
     onRemoveClick(workout: TabataWorkout): void {

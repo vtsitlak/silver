@@ -6,7 +6,6 @@ import { ToolbarComponent } from '@silver/tabata/ui';
     selector: 'tbt-history',
     templateUrl: 'history.component.html',
     styleUrls: ['history.component.scss'],
-    standalone: true,
     imports: [IonHeader, IonContent, ToolbarComponent]
 })
 export class HistoryComponent {}

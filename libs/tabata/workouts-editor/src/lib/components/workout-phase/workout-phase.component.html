@@ -20,7 +20,7 @@
                 <span class="text-gray-600">{{ phaseItems().length }} {{ phaseItems().length === 1 ? 'exercise' : 'exercises' }}</span>
                 <span class="font-medium">Total: {{ formatDuration(totalDurationSeconds()) }}</span>
             </div>
-            <ion-list lines="full" class="exercises-list">
+            <ion-list lines="none" class="exercises-list">
                 <ion-reorder-group [disabled]="false" (ionReorderEnd)="handleReorderEnd($event)">
                     @for (item of phaseItems(); track item.exercise.exerciseId; let i = $index) {
                         <ion-item class="exercise-item">

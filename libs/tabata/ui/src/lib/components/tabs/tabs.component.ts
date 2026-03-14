@@ -8,7 +8,6 @@ import { home, barbell, calendar } from 'ionicons/icons';
     selector: 'tbt-tabs',
     templateUrl: 'tabs.component.html',
     styleUrls: ['tabs.component.scss'],
-    standalone: true,
     imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, RouterLink]
 })
 export class TabsComponent {

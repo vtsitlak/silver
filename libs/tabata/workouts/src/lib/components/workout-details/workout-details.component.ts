@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, input, OnInit, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, effect } from '@angular/core';
 import { Router } from '@angular/router';
 import {
     IonContent,
@@ -14,25 +14,25 @@ import {
     IonLabel,
     IonChip,
     IonBackButton,
-    IonButtons,
-    IonNote
+    IonButtons
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { playCircle, createOutline, timeOutline, fitnessOutline, flashOutline, pauseOutline } from 'ionicons/icons';
-import { WorkoutsFacade, TabataWorkout } from '@silver/tabata/states/workouts';
+import { WorkoutsFacade } from '@silver/tabata/states/workouts';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { formatDurationMinutes, getBlockDurationMinutes, formatSecondsToMinutes } from '@silver/tabata/helpers';
 import { ToolbarComponent } from '@silver/tabata/ui';
+import { PhaseMovementsListComponent } from '../phase-movements-list/phase-movements-list.component';
 
 @Component({
     selector: 'tbt-workout-details',
     templateUrl: 'workout-details.component.html',
     styleUrls: ['workout-details.component.scss'],
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         ToolbarComponent,
+        PhaseMovementsListComponent,
         IonHeader,
         IonBackButton,
         IonButtons,
@@ -46,11 +46,10 @@ import { ToolbarComponent } from '@silver/tabata/ui';
         IonList,
         IonItem,
         IonLabel,
-        IonChip,
-        IonNote
+        IonChip
     ]
 })
-export class WorkoutDetailsComponent implements OnInit {
+export class WorkoutDetailsComponent {
     private readonly facade = inject(WorkoutsFacade);
     private readonly router = inject(Router);
     private readonly workoutEditorFacade = inject(WorkoutEditorFacade);
@@ -90,12 +89,6 @@ export class WorkoutDetailsComponent implements OnInit {
         });
     }
 
-    ngOnInit(): void {
-        if (this.facade.workouts().length === 0) {
-            this.facade.loadWorkouts();
-        }
-    }
-
     editWorkout(): void {
         const w = this.workout();
         if (w) {
@@ -105,8 +98,10 @@ export class WorkoutDetailsComponent implements OnInit {
     }
 
     startWorkout(): void {
-        // TODO: Implement workout player navigation
-        console.log('Starting workout:', this.workoutId());
+        const id = this.workoutId();
+        if (id) {
+            this.router.navigate(['/workouts', id, 'play']);
+        }
     }
 
     /** Expose helpers for template (duration/block formatting). */
@@ -124,4 +119,9 @@ export class WorkoutDetailsComponent implements OnInit {
         const images = this.exercisesFacade.exercisesMap()[exerciseId]?.images;
         return images?.length ? images[0] : '';
     }
+
+    /** Bound for passing to tbt-phase-movements-list. */
+    readonly getExerciseNameFn = (exerciseId: string): string => this.getExerciseName(exerciseId);
+    /** Bound for passing to tbt-phase-movements-list. */
+    readonly getExerciseImageFn = (exerciseId: string): string => this.getExerciseImage(exerciseId);
 }

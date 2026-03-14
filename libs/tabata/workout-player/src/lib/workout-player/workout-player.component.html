@@ -1,0 +1,101 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-title>Workout Player</ion-title>
+        <ion-buttons slot="end">
+            <ion-button (click)="cancel()">
+                <ion-icon name="close"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding workout-player">
+    @if (isLoading()) {
+        <div class="flex justify-center items-center min-h-[200px]">
+            <ion-icon name="time-outline" class="text-4xl"></ion-icon>
+        </div>
+    } @else if (error()) {
+        <div class="text-center text-red-500">
+            {{ error() }}
+        </div>
+    } @else if (finished()) {
+        <div class="flex flex-col items-center justify-center min-h-[300px] gap-4">
+            <ion-icon name="checkmark-circle" class="text-6xl text-green-500"></ion-icon>
+            <h2 class="text-2xl font-bold">Great job!</h2>
+            <p class="text-gray-500 text-center max-w-md"> You have completed this workout. Remember to hydrate and cool down properly. </p>
+            <ion-button expand="block" (click)="restart()">Play Again</ion-button>
+            <ion-button expand="block" fill="clear" (click)="cancel()">Back to Workouts</ion-button>
+        </div>
+    } @else {
+        <div class="flex flex-col gap-4">
+            @if (currentSegment(); as seg) {
+                <div class="text-center">
+                    <p class="uppercase text-xs tracking-wide text-gray-500">{{ phaseLabel(seg) }}</p>
+                    <h1 class="text-xl font-bold mt-1">
+                        @if (currentExercise(); as ex) {
+                            {{ ex.name }}
+                        } @else if (seg.isRest) {
+                            Rest
+                        } @else {
+                            Next segment
+                        }
+                    </h1>
+                    <p class="text-sm text-gray-500 mt-1">{{ seg.label }}</p>
+                </div>
+
+                <div class="flex flex-wrap justify-center gap-3 mt-4">
+                    @if (currentExercise(); as ex) {
+                        @if (ex.images && ex.images.length > 0) {
+                            @for (img of ex.images; track img) {
+                                <img [src]="img" [alt]="ex.name" class="w-32 h-32 object-cover rounded-xl bg-gray-100" />
+                            }
+                        }
+                    }
+                </div>
+
+                <div class="timers mt-6 flex flex-col gap-3 items-center">
+                    <div class="text-4xl font-mono"> {{ remainingInSegment() }}s </div>
+                    <div class="text-xs uppercase tracking-wide text-gray-500 flex items-center gap-1">
+                        <ion-icon name="time-outline"></ion-icon>
+                        <span>Total remaining: {{ remainingTotalSeconds() }}s</span>
+                    </div>
+                </div>
+
+                @if (currentExercise(); as ex) {
+                    @if (ex.instructions && ex.instructions.length > 0) {
+                        <div class="mt-6">
+                            <h2 class="text-base font-semibold mb-2">Instructions</h2>
+                            <ul class="list-disc list-inside space-y-1 text-sm text-gray-700">
+                                @for (step of ex.instructions; track $index) {
+                                    <li>{{ step }}</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                }
+            }
+        </div>
+    }
+</ion-content>
+
+<ion-footer class="ion-no-border workout-player-footer">
+    <div class="flex items-center justify-between ion-padding gap-3">
+        <ion-button fill="clear" (click)="cancel()">
+            <ion-icon name="close"></ion-icon>
+            <span class="ion-padding-start">Cancel</span>
+        </ion-button>
+
+        <ion-button fill="clear" (click)="skip()" [disabled]="!hasStarted()">
+            <span class="ion-padding-end">Skip</span>
+            <ion-icon name="play-skip-forward"></ion-icon>
+        </ion-button>
+
+        <ion-button shape="round" size="large" (click)="togglePlay()">
+            @if (isPlaying()) {
+                <ion-icon name="pause"></ion-icon>
+            } @else {
+                <ion-icon name="play"></ion-icon>
+            }
+        </ion-button>
+    </div>
+</ion-footer>

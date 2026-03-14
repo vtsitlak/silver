@@ -24,6 +24,15 @@ ion-footer {
     --min-height: 56px;
 }
 
+.block-exercise-thumb {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: var(--ion-color-light);
+    margin-right: 12px;
+}
+
 .blocks-list {
     .block-item::part(native) {
         border-bottom: 1px solid var(--ion-color-light);

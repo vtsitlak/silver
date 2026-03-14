@@ -7,6 +7,12 @@ const redirectLoggedInToHome = () => redirectLoggedInTo(['tabs/home']);
 export const routes: Routes = [
     { path: '', redirectTo: '/tabs/home', pathMatch: 'full' },
     {
+        path: 'workouts/:workoutId/play',
+        canActivate: [AuthGuard],
+        data: { authGuardPipe: redirectUnauthorizedToLogin },
+        loadComponent: () => import('@silver/tabata/workout-player').then((m) => m.WorkoutPlayerComponent)
+    },
+    {
         path: 'auth',
         loadChildren: () => import('@silver/tabata/auth').then((m) => m.authRoutes),
         data: { authGuardPipe: redirectLoggedInToHome }

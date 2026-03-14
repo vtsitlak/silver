@@ -35,7 +35,6 @@ export interface PhaseExerciseItem {
     selector: 'tbt-workout-phase',
     templateUrl: 'workout-phase.component.html',
     styleUrls: ['workout-phase.component.scss'],
-    standalone: true,
     imports: [
         IonHeader,
         IonContent,

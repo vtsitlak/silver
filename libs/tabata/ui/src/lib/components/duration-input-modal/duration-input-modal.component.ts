@@ -5,7 +5,6 @@ import { IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonCo
     selector: 'tbt-duration-input-modal',
     templateUrl: './duration-input-modal.component.html',
     styleUrl: './duration-input-modal.component.scss',
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent, IonItem, IonLabel, IonInput]
 })

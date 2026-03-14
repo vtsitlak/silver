@@ -8,7 +8,6 @@ import { VehicleItemComponent } from '../vehicle-item/vehicle-item.component';
 
 @Component({
     selector: 'app-vehicles',
-    standalone: true,
     templateUrl: './vehicles.component.html',
     styleUrls: ['./vehicles.component.scss'],
     imports: [MatProgressSpinnerModule, MatSnackBarModule, FilterFormComponent, VehicleItemComponent]

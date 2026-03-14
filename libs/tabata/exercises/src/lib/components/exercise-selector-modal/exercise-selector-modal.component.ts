@@ -29,7 +29,6 @@ import { ExerciseFilterService } from '../../services/exercise-filter.service';
     selector: 'tbt-exercise-selector-modal',
     templateUrl: 'exercise-selector-modal.component.html',
     styleUrls: ['exercise-selector-modal.component.scss'],
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         IonHeader,

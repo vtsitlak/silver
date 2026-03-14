@@ -20,7 +20,7 @@ export const WorkoutsStore = signalStore(
 
         rxMethod<string | void>((trigger$) =>
             trigger$.pipe(
-                tap(() => patchState(store, { isLoading: true, error: null, loadedWorkout: null })),
+                tap(() => patchState(store, { isLoading: true, error: null })),
                 switchMap((search) =>
                     workoutsService.getWorkouts(search === undefined || search === null ? undefined : search).pipe(
                         tapResponse({

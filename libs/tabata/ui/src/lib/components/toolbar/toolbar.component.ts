@@ -10,7 +10,6 @@ import { Router, RouterLink } from '@angular/router';
     imports: [IonButtons, IonContent, IonPopover, IonTitle, IonToolbar, IonIcon, IonLabel, IonItem, IonList, IonButton, IonHeader, RouterLink],
     templateUrl: './toolbar.component.html',
     styleUrl: './toolbar.component.scss',
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ToolbarComponent {
