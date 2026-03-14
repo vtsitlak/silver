@@ -5,6 +5,9 @@ module.exports = {
     content: [join(__dirname, 'src/**/!(*.stories|*.spec).{ts,html}'), ...createGlobPatternsForDependencies(__dirname)],
     theme: {
         extend: {
+            spacing: {
+                32: '8rem'
+            },
             fontFamily: {
                 sans: ['Figtree', 'Roboto', 'sans-serif']
             },

@@ -43,10 +43,12 @@
                     <p class="text-sm text-gray-500 mt-1">{{ seg.label }}</p>
                 </div>
 
-                <div class="flex justify-center mt-4">
+                <div class="flex flex-wrap justify-center gap-3 mt-4">
                     @if (currentExercise(); as ex) {
                         @if (ex.images && ex.images.length > 0) {
-                            <img [src]="ex.images[0]" [alt]="ex.name" class="w-40 h-40 object-cover rounded-xl bg-gray-100" />
+                            @for (img of ex.images; track img) {
+                                <img [src]="img" [alt]="ex.name" class="w-32 h-32 object-cover rounded-xl bg-gray-100" />
+                            }
                         }
                     }
                 </div>
@@ -83,7 +85,7 @@
             <span class="ion-padding-start">Cancel</span>
         </ion-button>
 
-        <ion-button fill="clear" (click)="skip()">
+        <ion-button fill="clear" (click)="skip()" [disabled]="!hasStarted()">
             <span class="ion-padding-end">Skip</span>
             <ion-icon name="play-skip-forward"></ion-icon>
         </ion-button>

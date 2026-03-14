@@ -1,17 +1,17 @@
 {
     "name": "workout-player",
-    "$schema": "../node_modules/nx/schemas/project-schema.json",
-    "sourceRoot": "tabata/src",
-    "prefix": "lib",
+    "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "libs/tabata/workout-player/src",
+    "prefix": "tbt",
     "projectType": "library",
-    "tags": [],
+    "tags": ["scope:tabata"],
     "targets": {
         "test": {
             "executor": "@nx/jest:jest",
             "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
             "options": {
-                "jestConfig": "tabata/jest.config.cts",
-                "tsConfig": "tabata/tsconfig.spec.json"
+                "jestConfig": "libs/tabata/workout-player/jest.config.cts",
+                "tsConfig": "libs/tabata/workout-player/tsconfig.spec.json"
             }
         },
         "lint": {

@@ -46,6 +46,8 @@ export class WorkoutPlayerComponent implements OnDestroy {
     readonly remainingInSegment = signal(0);
     readonly isPlaying = signal(false);
     readonly finished = signal(false);
+    /** True once the user has pressed Play at least once; Skip is disabled until then. */
+    readonly hasStarted = signal(false);
 
     readonly currentSegment = computed(() => this.segments()[this.currentIndex()] ?? null);
 
@@ -199,7 +201,11 @@ export class WorkoutPlayerComponent implements OnDestroy {
             this.restart();
             return;
         }
-        this.isPlaying.set(!this.isPlaying());
+        const next = !this.isPlaying();
+        if (next) {
+            this.hasStarted.set(true);
+        }
+        this.isPlaying.set(next);
     }
 
     private advanceSegment(): void {
@@ -220,6 +226,11 @@ export class WorkoutPlayerComponent implements OnDestroy {
     }
 
     async cancel(): Promise<void> {
+        const isPlaying = this.isPlaying();
+        if (isPlaying) {
+            this.isPlaying.set(false);
+        }
+
         const actionSheet = await this.actionSheetCtrl.create({
             header: 'Cancel workout?',
             buttons: [
@@ -233,7 +244,10 @@ export class WorkoutPlayerComponent implements OnDestroy {
                 },
                 {
                     text: 'Continue workout',
-                    role: 'cancel'
+                    role: 'cancel',
+                    handler: () => {
+                        this.isPlaying.set(isPlaying);
+                    }
                 }
             ]
         });

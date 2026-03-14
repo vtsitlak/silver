@@ -1,8 +1,8 @@
 module.exports = {
     displayName: 'workout-player',
-    preset: '../jest.preset.js',
+    preset: '../../../jest.preset.js',
     setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-    coverageDirectory: '../coverage/tabata',
+    coverageDirectory: '../../../coverage/libs/tabata/workout-player',
     transform: {
         '^.+\\.(ts|mjs|js|html)$': [
             'jest-preset-angular',
@@ -12,7 +12,7 @@ module.exports = {
             }
         ]
     },
-    transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
+    transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$|@ionic|@stencil|ionicons)'],
     snapshotSerializers: [
         'jest-preset-angular/build/serializers/no-ng-attributes',
         'jest-preset-angular/build/serializers/ng-snapshot',

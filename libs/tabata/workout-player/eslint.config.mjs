@@ -1,5 +1,5 @@
 import nx from '@nx/eslint-plugin';
-import baseConfig from '../eslint.config.mjs';
+import baseConfig from '../../../eslint.config.mjs';
 
 export default [
     ...baseConfig,
@@ -12,7 +12,7 @@ export default [
                 'error',
                 {
                     type: 'attribute',
-                    prefix: 'lib',
+                    prefix: 'tbt',
                     style: 'camelCase'
                 }
             ],
@@ -20,7 +20,7 @@ export default [
                 'error',
                 {
                     type: 'element',
-                    prefix: 'lib',
+                    prefix: 'tbt',
                     style: 'kebab-case'
                 }
             ]
@@ -28,7 +28,6 @@ export default [
     },
     {
         files: ['**/*.html'],
-        // Override or add rules here
         rules: {}
     }
 ];

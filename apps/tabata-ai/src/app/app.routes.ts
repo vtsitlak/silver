@@ -10,7 +10,7 @@ export const routes: Routes = [
         path: 'workouts/:workoutId/play',
         canActivate: [AuthGuard],
         data: { authGuardPipe: redirectUnauthorizedToLogin },
-        loadComponent: () => import('@silver/workout-player').then((m) => m.WorkoutPlayerComponent)
+        loadComponent: () => import('@silver/tabata/workout-player').then((m) => m.WorkoutPlayerComponent)
     },
     {
         path: 'auth',

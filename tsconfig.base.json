@@ -36,7 +36,7 @@
             "@silver/tabata/states/exercises": ["libs/tabata/states/exercises/src/index.ts"],
             "@silver/tabata/states/workouts": ["libs/tabata/states/workouts/src/index.ts"],
             "@silver/tabata/states/workout-editor": ["libs/tabata/states/workout-editor/src/index.ts"],
-            "@silver/workout-player": ["tabata/src/index.ts"]
+            "@silver/tabata/workout-player": ["libs/tabata/workout-player/src/index.ts"]
         }
     },
     "exclude": ["node_modules", "tmp"]
