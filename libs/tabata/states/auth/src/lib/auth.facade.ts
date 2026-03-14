@@ -52,17 +52,17 @@ export class AuthFacade {
     }
 
     sign(credentials: LoginUser): void {
-        this.pendingNavigation.set('/tabs/home');
+        this.pendingNavigation.set('/tabs/dashboard');
         this.store.sign(credentials);
     }
 
     signWithGoogle(): void {
-        this.pendingNavigation.set('/tabs/home');
+        this.pendingNavigation.set('/tabs/dashboard');
         this.store.signWithGoogle();
     }
 
     register(newUser: NewUser): void {
-        this.pendingNavigation.set('/tabs/home');
+        this.pendingNavigation.set('/tabs/dashboard');
         this.store.register(newUser);
     }
 

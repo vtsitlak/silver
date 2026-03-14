@@ -3,44 +3,15 @@ import { provideRouter, Router } from '@angular/router';
 import { AuthFacade } from '@silver/tabata/auth';
 import { UserWorkoutsFacade } from '@silver/tabata/states/user-workouts';
 import { WorkoutsFacade } from '@silver/tabata/states/workouts';
+import { mockAuthFacade, mockUserWorkoutsFacade, mockWorkoutsFacade } from '@silver/tabata/testing';
 import { DashboardComponent } from './dashboard.component';
-
-const mockAuthFacade = {
-    user: () => null,
-    error: () => null,
-    isLoading: () => false,
-    isAuthenticated: () => false,
-    usePassword: () => true,
-    useGoogle: () => false,
-    hasError: () => false,
-    sign: () => {},
-    register: () => {},
-    sendPasswordResetEmail: () => {},
-    updateDisplayName: () => {},
-    updatePassword: () => {},
-    logout: () => {},
-    getUser: () => {}
-};
-
-const mockUserWorkoutsFacade = {
-    userWorkout: () => null,
-    isLoading: () => false,
-    error: () => null,
-    getOrCreateUserWorkout: () => {},
-    saveUserWorkout: () => {}
-};
-
-const mockWorkoutsFacade = {
-    workouts: () => [],
-    loadWorkouts: () => {},
-    loadWorkoutById: () => {}
-};
 
 describe('DashboardComponent', () => {
     let component: DashboardComponent;
     let fixture: ComponentFixture<DashboardComponent>;
 
     beforeEach(async () => {
+        mockAuthFacade.user.set(null);
         await TestBed.configureTestingModule({
             imports: [DashboardComponent],
             providers: [
@@ -60,7 +31,12 @@ describe('DashboardComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should return greeting from user displayName or email', () => {
+    it('should return empty string when user is null', () => {
+        expect(component.greeting()).toBe('');
+    });
+    it('should return "there" when user has no displayName or email', () => {
+        mockAuthFacade.user.set({});
+        fixture.detectChanges();
         expect(component.greeting()).toBe('there');
     });
 

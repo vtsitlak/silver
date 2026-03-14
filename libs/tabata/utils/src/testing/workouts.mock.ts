@@ -30,6 +30,7 @@ export const mockTabataWorkout = {
         }
     ],
     createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
     updatedByUserId: 'user1',
     createdByUserId: 'user1',
     generatedByAi: false,
@@ -99,5 +100,48 @@ export function createMockExercisesFacade(): {
     return {
         exercisesMap: signal<Record<string, typeof mockExercise>>({ Burpees: mockExercise }),
         loadExercisesMap: mockFn()
+    };
+}
+
+/** Default mock exercises array for selector modal / list tests. */
+export const mockExercisesArray = [
+    {
+        exerciseId: '1',
+        name: 'Push Up',
+        images: [] as string[],
+        targetMuscles: ['chest'],
+        category: ['upper body'],
+        equipments: ['body weight'],
+        secondaryMuscles: [] as string[],
+        instructions: [] as string[]
+    }
+];
+
+/** Creates a mock ExercisesFacade for exercise-selector modal (exercises as signal of array). */
+export function createMockExercisesFacadeForSelector(initialExercises = mockExercisesArray): {
+    exercises: ReturnType<typeof signal>;
+    isLoading: ReturnType<typeof signal>;
+    error: ReturnType<typeof signal>;
+    musclesList: ReturnType<typeof signal>;
+    equipmentList: ReturnType<typeof signal>;
+    categoryList: ReturnType<typeof signal>;
+    getAllExercises: jest.Mock;
+    filterExercises: jest.Mock;
+    getMusclesList: jest.Mock;
+    getEquipmentList: jest.Mock;
+    getCategoryList: jest.Mock;
+} {
+    return {
+        exercises: signal([...initialExercises]),
+        isLoading: signal(false),
+        error: signal<string | null>(null),
+        musclesList: signal([]),
+        equipmentList: signal([]),
+        categoryList: signal([]),
+        getAllExercises: mockFn(),
+        filterExercises: mockFn(),
+        getMusclesList: mockFn(),
+        getEquipmentList: mockFn(),
+        getCategoryList: mockFn()
     };
 }

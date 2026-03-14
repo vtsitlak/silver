@@ -1,12 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
 import { Auth } from '@angular/fire/auth';
+import { mockAuth } from '@silver/tabata/testing';
 import { AuthService } from './auth.service';
-
-const mockAuth = {
-    currentUser: null,
-    authState: () => of(null)
-};
 
 describe('AuthService', () => {
     let service: AuthService;

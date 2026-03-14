@@ -1,28 +1,25 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, ActivatedRoute, Router } from '@angular/router';
-import { of } from 'rxjs';
 import { ModalController } from '@ionic/angular/standalone';
 import { AuthFacade } from '@silver/tabata/auth';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
-import { createMockActivatedRoute, mockAuthFacade, mockModalController, mockWorkoutEditorFacade } from '@silver/tabata/testing';
+import {
+    createMockActivatedRoute,
+    mockAuthFacade,
+    mockModalController,
+    mockWorkoutEditorFacade,
+    createMockWorkoutEditorCancelService,
+    createMockExercisesFacade,
+    createMockWorkoutSubmitService
+} from '@silver/tabata/testing';
 import { WorkoutPhaseComponent } from './workout-phase.component';
 import { WorkoutSubmitService } from '../../services/workout-submit.service';
 import { WorkoutEditorCancelService } from '../../services/workout-editor-cancel.service';
-import type { TabataWorkout } from '@silver/tabata/states/workouts';
 
-const mockCancelService = {
-    confirmCancel: jest.fn().mockResolvedValue(false)
-};
-
-const mockExercisesFacade = {
-    exercisesMap: () => ({}),
-    loadExercisesMap: jest.fn()
-};
-
-const mockWorkoutSubmitService = {
-    submitWorkout: () => of({} as TabataWorkout)
-};
+const mockCancelService = createMockWorkoutEditorCancelService(false);
+const mockExercisesFacade = createMockExercisesFacade();
+const mockWorkoutSubmitService = createMockWorkoutSubmitService();
 
 describe('WorkoutPhaseComponent', () => {
     let component: WorkoutPhaseComponent;

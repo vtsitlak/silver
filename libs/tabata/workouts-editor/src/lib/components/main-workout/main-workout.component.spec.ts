@@ -1,34 +1,23 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { provideRouter } from '@angular/router';
-import { signal } from '@angular/core';
 import { MainWorkoutComponent } from './main-workout.component';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { AuthFacade } from '@silver/tabata/auth';
 import { ModalController } from '@ionic/angular/standalone';
-import { createMockActivatedRoute, mockAuthFacade } from '@silver/tabata/testing';
+import {
+    createMockActivatedRoute,
+    mockAuthFacade,
+    mockWorkoutEditorFacade,
+    createMockWorkoutEditorCancelService,
+    createMockExercisesFacade,
+    mockModalController
+} from '@silver/tabata/testing';
 import { WorkoutEditorCancelService } from '../../services/workout-editor-cancel.service';
 
-const mockCancelService = {
-    confirmCancel: jest.fn().mockResolvedValue(true)
-};
-
-const mockExercisesFacade = {
-    exercisesMap: () => ({}),
-    loadExercisesMap: jest.fn()
-};
-
-const mockFacade = {
-    workoutDraft: signal({}),
-    workout: () => null,
-    loadWorkout: jest.fn(),
-    updateDraft: jest.fn()
-};
-
-const mockModalCtrl = {
-    create: jest.fn().mockResolvedValue({ present: () => Promise.resolve(), onDidDismiss: () => Promise.resolve({ data: null, role: null }) })
-};
+const mockCancelService = createMockWorkoutEditorCancelService(true);
+const mockExercisesFacade = createMockExercisesFacade();
 
 describe('MainWorkoutComponent', () => {
     let component: MainWorkoutComponent;
@@ -40,10 +29,10 @@ describe('MainWorkoutComponent', () => {
             imports: [MainWorkoutComponent],
             providers: [
                 provideRouter([]),
-                { provide: WorkoutEditorFacade, useValue: mockFacade },
+                { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade },
                 { provide: WorkoutEditorCancelService, useValue: mockCancelService },
                 { provide: ExercisesFacade, useValue: mockExercisesFacade },
-                { provide: ModalController, useValue: mockModalCtrl },
+                { provide: ModalController, useValue: mockModalController },
                 { provide: AuthFacade, useValue: mockAuthFacade },
                 { provide: ActivatedRoute, useValue: createMockActivatedRoute({ paramMap: { get: (k: string) => (k === 'workoutId' ? 'w1' : null) } }) }
             ]
@@ -84,7 +73,7 @@ describe('MainWorkoutComponent', () => {
             }
         ]);
         component.onNext();
-        expect(mockFacade.updateDraft).toHaveBeenCalledWith(expect.objectContaining({ blocks: expect.any(Array) }));
+        expect(mockWorkoutEditorFacade.updateDraft).toHaveBeenCalledWith(expect.objectContaining({ blocks: expect.any(Array) }));
         expect(router.navigate).toHaveBeenCalledWith(['/tabs/workouts/edit', 'w1', 'cooldown']);
     });
 

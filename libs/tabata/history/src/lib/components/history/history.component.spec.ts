@@ -4,44 +4,7 @@ import { AuthFacade } from '@silver/tabata/auth';
 import { HistoryComponent } from './history.component';
 import { UserWorkoutsFacade } from '@silver/tabata/states/user-workouts';
 import { WorkoutsFacade } from '@silver/tabata/states/workouts';
-
-const mockAuthFacade = {
-    user: () => null,
-    error: () => null,
-    isLoading: () => false,
-    isAuthenticated: () => false,
-    usePassword: () => true,
-    useGoogle: () => false,
-    hasError: () => false,
-    sign: () => {},
-    register: () => {},
-    sendPasswordResetEmail: () => {},
-    updateDisplayName: () => {},
-    updatePassword: () => {},
-    logout: () => {},
-    getUser: () => {}
-};
-
-const mockUserWorkoutsFacade = {
-    userWorkout: () => null,
-    isLoading: () => false,
-    error: () => null,
-    hasUserWorkout: () => false,
-    loadUserWorkout: () => {},
-    saveUserWorkout: () => {},
-    getOrCreateUserWorkout: () => {}
-};
-
-const mockWorkoutsFacade = {
-    workouts: () => [],
-    loadWorkouts: () => {},
-    loadedWorkout: () => null,
-    isLoading: () => false,
-    error: () => null,
-    hasWorkouts: () => false,
-    loadWorkoutById: () => {},
-    removeWorkout: () => ({ subscribe: () => {} })
-};
+import { mockAuthFacade, mockUserWorkoutsFacade, mockWorkoutsFacade } from '@silver/tabata/testing';
 
 describe('HistoryComponent', () => {
     let component: HistoryComponent;

@@ -5,19 +5,17 @@ import { WorkoutDetailsComponent } from './workout-details.component';
 import { WorkoutsFacade, TabataBlock } from '@silver/tabata/states/workouts';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { UserWorkoutsFacade } from '@silver/tabata/states/user-workouts';
-import { mockAuthFacade, createMockWorkoutsFacade, createMockExercisesFacade, mockTabataWorkout } from '@silver/tabata/testing';
+import {
+    mockAuthFacade,
+    mockUserWorkoutsFacade,
+    createMockWorkoutsFacade,
+    createMockExercisesFacade,
+    mockTabataWorkout
+} from '@silver/tabata/testing';
 import { AuthFacade } from '@silver/tabata/auth';
 
 let mockWorkoutsFacade: ReturnType<typeof createMockWorkoutsFacade>;
 let mockExercisesFacade: ReturnType<typeof createMockExercisesFacade>;
-
-const mockUserWorkoutsFacade = {
-    userWorkout: () => null,
-    isLoading: () => false,
-    error: () => null,
-    getOrCreateUserWorkout: jest.fn(),
-    saveUserWorkout: jest.fn()
-};
 
 describe('WorkoutDetailsComponent', () => {
     let component: WorkoutDetailsComponent;

@@ -8,26 +8,21 @@ import { AuthFacade } from '@silver/tabata/auth';
 import { UserWorkoutsFacade } from '@silver/tabata/states/user-workouts';
 import { ToastService } from '@silver/tabata/helpers';
 import { ActionSheetController } from '@ionic/angular/standalone';
-import { createMockActivatedRoute, createMockWorkoutsFacade, createMockExercisesFacade } from '@silver/tabata/testing';
+import {
+    createMockActivatedRoute,
+    createMockWorkoutsFacade,
+    createMockExercisesFacade,
+    mockAuthFacade,
+    mockUserWorkoutsFacade,
+    mockToastService,
+    mockActionSheetController
+} from '@silver/tabata/testing';
 
 describe('WorkoutPlayerComponent', () => {
     let component: WorkoutPlayerComponent;
     let fixture: ComponentFixture<WorkoutPlayerComponent>;
     const mockWorkoutsFacade = createMockWorkoutsFacade();
     const mockExercisesFacade = createMockExercisesFacade();
-    const mockToastService = { showError: jest.fn() };
-    const mockActionSheetController = {
-        create: jest.fn().mockResolvedValue({
-            present: jest.fn(),
-            onDidDismiss: jest.fn().mockResolvedValue({ data: undefined })
-        })
-    };
-    const mockAuthFacade = { user: () => ({ uid: 'user1' }) };
-    const mockUserWorkoutsFacade = {
-        userWorkout: () => null,
-        getOrCreateUserWorkout: jest.fn(),
-        saveUserWorkout: jest.fn()
-    };
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -37,7 +32,7 @@ describe('WorkoutPlayerComponent', () => {
                 { provide: ActivatedRoute, useValue: createMockActivatedRoute({ paramMap: { get: (k: string) => (k === 'workoutId' ? 'w1' : null) } }) },
                 { provide: WorkoutsFacade, useValue: mockWorkoutsFacade },
                 { provide: ExercisesFacade, useValue: mockExercisesFacade },
-                { provide: AuthFacade, useValue: mockAuthFacade },
+                { provide: AuthFacade, useValue: { ...mockAuthFacade, user: () => ({ uid: 'user1' }) } },
                 { provide: UserWorkoutsFacade, useValue: mockUserWorkoutsFacade },
                 { provide: ToastService, useValue: mockToastService },
                 { provide: ActionSheetController, useValue: mockActionSheetController }

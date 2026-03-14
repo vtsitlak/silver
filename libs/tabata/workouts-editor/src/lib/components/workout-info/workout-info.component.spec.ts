@@ -2,13 +2,16 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, ActivatedRoute, Router } from '@angular/router';
 import { AuthFacade } from '@silver/tabata/auth';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
-import { createMockActivatedRoute, mockAuthFacade, mockWorkoutEditorFacade } from '@silver/tabata/testing';
+import {
+    createMockActivatedRoute,
+    mockAuthFacade,
+    mockWorkoutEditorFacade,
+    createMockWorkoutEditorCancelService
+} from '@silver/tabata/testing';
 import { WorkoutInfoComponent } from './workout-info.component';
 import { WorkoutEditorCancelService } from '../../services/workout-editor-cancel.service';
 
-const mockCancelService = {
-    confirmCancel: jest.fn().mockResolvedValue(false)
-};
+const mockCancelService = createMockWorkoutEditorCancelService(false);
 
 describe('WorkoutInfoComponent', () => {
     let component: WorkoutInfoComponent;

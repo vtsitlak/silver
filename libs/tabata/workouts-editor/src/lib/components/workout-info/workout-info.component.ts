@@ -21,7 +21,14 @@ import {
 import { ToolbarComponent } from '@silver/tabata/ui';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { WorkoutEditorCancelService } from '../../services/workout-editor-cancel.service';
-import { EQUIPMENT_CATEGORY_OPTIONS, BODY_REGION_OPTIONS, type EquipmentCategory, type BodyRegion } from '@silver/tabata/helpers';
+import {
+    EQUIPMENT_CATEGORY_OPTIONS,
+    BODY_REGION_OPTIONS,
+    equipmentOptions,
+    muscleOptions,
+    type EquipmentCategory,
+    type BodyRegion
+} from '@silver/tabata/helpers';
 import { AiWorkoutGeneratorService } from '@silver/tabata/ai-workout-generator';
 import type { ExerciseSummary } from '@silver/tabata/ai-workout-generator';
 import { ExercisesService } from '@silver/tabata/states/exercises';
@@ -163,12 +170,14 @@ export class WorkoutInfoComponent implements OnInit {
         this.generateError.set(null);
         this.isGenerating.set(true);
 
-        const equipmentParam = model.availableEquipments?.[0] ?? '';
+        const musclesParam = this.getMusclesParamForRegion(mainTarget);
+        const equipmentParam = this.getEquipmentParamForCategories(model.availableEquipments ?? []);
+
         this.exercisesService
             .filterExercises({
                 limit: 40,
-                muscles: mainTarget,
-                equipment: equipmentParam,
+                muscles: musclesParam || undefined,
+                equipment: equipmentParam || undefined,
                 sortBy: 'name',
                 sortOrder: 'asc'
             })
@@ -183,7 +192,9 @@ export class WorkoutInfoComponent implements OnInit {
                     }));
 
                     if (summaries.length === 0) {
-                        this.generateError.set('No exercises found for the selected target and equipment. Add more or change filters.');
+                        this.generateError.set(
+                            'No exercises found for the selected target and equipment. Try different equipment or a broader target (e.g. Full Body).'
+                        );
                         this.isGenerating.set(false);
                         return;
                     }
@@ -209,8 +220,9 @@ export class WorkoutInfoComponent implements OnInit {
                                 this.infoModel.set({ ...model, generatedByAi: true });
                                 this.isGenerating.set(false);
                             },
-                            error: (err) => {
-                                this.generateError.set(err?.message ?? 'AI generation failed');
+                            error: (err: { error?: { error?: string }; message?: string }) => {
+                                const msg = err?.error?.error ?? err?.message ?? 'AI generation failed';
+                                this.generateError.set(msg);
                                 this.isGenerating.set(false);
                             }
                         });
@@ -220,6 +232,26 @@ export class WorkoutInfoComponent implements OnInit {
                     this.isGenerating.set(false);
                 }
             });
+    }
+
+    /** Maps BodyRegion to comma-separated muscle names from muscleOptions. Full Body = no filter (empty string). */
+    private getMusclesParamForRegion(region: BodyRegion): string {
+        if (region === 'Full Body') return '';
+        const mapping = muscleOptions.find((m) => m.region === region);
+        if (!mapping?.muscles?.length) return '';
+        return mapping.muscles.join(',');
+    }
+
+    /** Maps selected equipment categories to comma-separated equipment strings. Bodyweight is always included. */
+    private getEquipmentParamForCategories(categories: EquipmentCategory[]): string {
+        const equipmentStrings = new Set<string>();
+        const bodyweightItem = equipmentOptions.find((e) => e.equipmentCategory === 'Bodyweight');
+        bodyweightItem?.equipmentOptions?.forEach((eq) => equipmentStrings.add(eq));
+        for (const cat of categories) {
+            const item = equipmentOptions.find((e) => e.equipmentCategory === cat);
+            item?.equipmentOptions?.forEach((eq) => equipmentStrings.add(eq));
+        }
+        return Array.from(equipmentStrings).join(',');
     }
 
     async onCancel(): Promise<void> {
