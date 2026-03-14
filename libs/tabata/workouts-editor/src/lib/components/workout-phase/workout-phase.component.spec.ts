@@ -148,7 +148,7 @@ describe('WorkoutPhaseComponent', () => {
                     name: 'Stretch',
                     images: [],
                     targetMuscles: [],
-                    bodyParts: [],
+                    category: [],
                     equipments: [],
                     secondaryMuscles: [],
                     instructions: []
@@ -165,15 +165,15 @@ describe('WorkoutPhaseComponent', () => {
     it('should reorder phase items on ionReorderEnd and update duration modal index', () => {
         const items = [
             {
-                exercise: { exerciseId: 'a', name: 'A', images: [], targetMuscles: [], bodyParts: [], equipments: [], secondaryMuscles: [], instructions: [] },
+                exercise: { exerciseId: 'a', name: 'A', images: [], targetMuscles: [], category: [], equipments: [], secondaryMuscles: [], instructions: [] },
                 durationSeconds: 30
             },
             {
-                exercise: { exerciseId: 'b', name: 'B', images: [], targetMuscles: [], bodyParts: [], equipments: [], secondaryMuscles: [], instructions: [] },
+                exercise: { exerciseId: 'b', name: 'B', images: [], targetMuscles: [], category: [], equipments: [], secondaryMuscles: [], instructions: [] },
                 durationSeconds: 45
             },
             {
-                exercise: { exerciseId: 'c', name: 'C', images: [], targetMuscles: [], bodyParts: [], equipments: [], secondaryMuscles: [], instructions: [] },
+                exercise: { exerciseId: 'c', name: 'C', images: [], targetMuscles: [], category: [], equipments: [], secondaryMuscles: [], instructions: [] },
                 durationSeconds: 60
             }
         ];

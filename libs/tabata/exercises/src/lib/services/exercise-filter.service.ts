@@ -6,7 +6,7 @@ interface ExerciseFilterState {
     term: string;
     muscles: string[];
     equipment: string[];
-    bodyParts: string[];
+    category: string[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -18,7 +18,7 @@ export class ExerciseFilterService {
         term: '',
         muscles: [],
         equipment: [],
-        bodyParts: []
+        category: []
     });
 
     private readonly pageSize = 20;
@@ -64,19 +64,19 @@ export class ExerciseFilterService {
                     return;
                 }
 
-                const { term, muscles, equipment, bodyParts } = this.filterState();
+                const { term, muscles, equipment, category } = this.filterState();
 
-                const hasOtherFilters = muscles.length > 0 || equipment.length > 0 || bodyParts.length > 0;
+                const hasOtherFilters = muscles.length > 0 || equipment.length > 0 || category.length > 0;
                 if (!hasOtherFilters && term.length > 0 && term.length < 3) {
                     return;
                 }
                 // Local API behavior:
-                // - muscles, equipment, bodyParts all support comma-separated OR:
+                // - muscles, equipment, category all support comma-separated OR:
                 //   e.g. "chest,back" or "dumbbell,barbell".
                 //   Muscles are matched against both primary and secondary muscles.
                 const musclesParam = muscles.length > 0 ? muscles.join(',') : undefined;
                 const equipmentParam = equipment.length > 0 ? equipment.join(',') : undefined;
-                const bodyPartsParam = bodyParts.length > 0 ? bodyParts.join(',') : undefined;
+                const categoryParam = category.length > 0 ? category.join(',') : undefined;
 
                 if (this.filterTimeoutId !== null) {
                     clearTimeout(this.filterTimeoutId);
@@ -95,7 +95,7 @@ export class ExerciseFilterService {
                         search: term || undefined,
                         muscles: musclesParam,
                         equipment: equipmentParam,
-                        bodyParts: bodyPartsParam,
+                        category: categoryParam,
                         sortBy: 'name',
                         sortOrder: 'desc'
                     });
@@ -118,11 +118,11 @@ export class ExerciseFilterService {
             return;
         }
 
-        const { term, muscles, equipment, bodyParts } = this.filterState();
+        const { term, muscles, equipment, category } = this.filterState();
 
         const musclesParam = muscles.length > 0 ? muscles.join(',') : undefined;
         const equipmentParam = equipment.length > 0 ? equipment.join(',') : undefined;
-        const bodyPartsParam = bodyParts.length > 0 ? bodyParts.join(',') : undefined;
+        const categoryParam = category.length > 0 ? category.join(',') : undefined;
 
         this.facade.filterExercises({
             limit: this.pageSize,
@@ -130,7 +130,7 @@ export class ExerciseFilterService {
             search: term || undefined,
             muscles: musclesParam,
             equipment: equipmentParam,
-            bodyParts: bodyPartsParam,
+            category: categoryParam,
             sortBy: 'name',
             sortOrder: 'desc'
         });

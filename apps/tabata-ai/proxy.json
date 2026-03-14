@@ -1,7 +1,13 @@
 {
     "/api/workouts": {
         "target": "https://silver-tabata-ai.vercel.app",
-        "secure": true
+        "secure": false,
+        "changeOrigin": true
+    },
+    "/api/user-workouts": {
+        "target": "https://silver-tabata-ai.vercel.app",
+        "secure": false,
+        "changeOrigin": true
     },
     "/api/exercises-db": {
         "target": "http://localhost:3456",

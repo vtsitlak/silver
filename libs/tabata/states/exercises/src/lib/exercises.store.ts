@@ -16,7 +16,7 @@ export interface ExerciseState {
     error: string | null;
     musclesList: string[];
     equipmentList: string[];
-    bodyPartList: string[];
+    categoryList: string[];
     /** Map of exerciseId -> Exercise for the current context (e.g. workout details). */
     exercisesMap: Record<string, Exercise>;
 }
@@ -28,7 +28,7 @@ export const exerciseInitialState: ExerciseState = {
     error: null,
     musclesList: [],
     equipmentList: [],
-    bodyPartList: [],
+    categoryList: [],
     exercisesMap: {}
 };
 
@@ -46,7 +46,7 @@ export const ExercisesStore = signalStore(
         const getAllTrigger = new Subject<{ limit?: number; offset?: number } | void>();
         const getMusclesListTrigger = new Subject<void>();
         const getEquipmentListTrigger = new Subject<void>();
-        const getBodyPartListTrigger = new Subject<void>();
+        const getCategoryListTrigger = new Subject<void>();
 
         rxMethod<{ limit?: number; offset?: number } | void>(
             pipe(
@@ -111,9 +111,9 @@ export const ExercisesStore = signalStore(
             pipe(
                 tap(() => patchState(store, { isLoading: true, error: null })),
                 switchMap(() =>
-                    exercisesService.getBodyPartList().pipe(
+                    exercisesService.getCategoryList().pipe(
                         tapResponse({
-                            next: (bodyPartList) => patchState(store, { bodyPartList, isLoading: false }),
+                            next: (categoryList) => patchState(store, { categoryList, isLoading: false }),
                             error: (err: Error) => patchState(store, { error: err.message, isLoading: false })
                         }),
                         catchError((err: unknown) => {
@@ -123,7 +123,7 @@ export const ExercisesStore = signalStore(
                     )
                 )
             )
-        )(getBodyPartListTrigger);
+        )(getCategoryListTrigger);
 
         return {
             getAllExercises: (params?: { limit?: number; offset?: number }) => {
@@ -139,9 +139,9 @@ export const ExercisesStore = signalStore(
                 if (store.equipmentList().length > 0) return;
                 getEquipmentListTrigger.next();
             },
-            getBodyPartList: () => {
-                if (store.bodyPartList().length > 0) return;
-                getBodyPartListTrigger.next();
+            getCategoryList: () => {
+                if (store.categoryList().length > 0) return;
+                getCategoryListTrigger.next();
             },
 
             getExerciseById: rxMethod<string>(
@@ -186,7 +186,7 @@ export const ExercisesStore = signalStore(
                 search?: string;
                 muscles?: string;
                 equipment?: string;
-                bodyParts?: string;
+                category?: string;
                 sortBy?: SortBy;
                 sortOrder?: SortOrder;
             }>(
@@ -212,11 +212,11 @@ export const ExercisesStore = signalStore(
                 )
             ),
 
-            getExercisesByBodyPart: rxMethod<{ bodyPartName: string; limit?: number; offset?: number }>(
+            getExercisesByCategory: rxMethod<{ categoryName: string; limit?: number; offset?: number }>(
                 pipe(
                     tap(() => patchState(store, { isLoading: true, error: null })),
-                    switchMap(({ bodyPartName, limit = 10, offset = 0 }) =>
-                        exercisesService.getExercisesByBodyPart(bodyPartName, limit, offset).pipe(
+                    switchMap(({ categoryName, limit = 10, offset = 0 }) =>
+                        exercisesService.getExercisesByCategory(categoryName, limit, offset).pipe(
                             tapResponse({
                                 next: (exercises) => patchState(store, { exercises, isLoading: false }),
                                 error: (err: Error) => patchState(store, { error: err.message, isLoading: false })

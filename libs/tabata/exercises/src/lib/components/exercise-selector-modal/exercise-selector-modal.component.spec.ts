@@ -11,7 +11,7 @@ const mockExercises: Exercise[] = [
         name: 'Push Up',
         images: [],
         targetMuscles: ['chest'],
-        bodyParts: ['upper body'],
+        category: ['upper body'],
         equipments: ['body weight'],
         secondaryMuscles: [],
         instructions: []
@@ -24,12 +24,12 @@ const mockFacade = {
     error: signal<string | null>(null),
     musclesList: signal([]),
     equipmentList: signal([]),
-    bodyPartList: signal([]),
+    categoryList: signal([]),
     getAllExercises: jest.fn(),
     filterExercises: jest.fn(),
     getMusclesList: jest.fn(),
     getEquipmentList: jest.fn(),
-    getBodyPartList: jest.fn()
+    getCategoryList: jest.fn()
 };
 
 const mockModalCtrl = {

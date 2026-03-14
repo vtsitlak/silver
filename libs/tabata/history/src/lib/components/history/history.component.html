@@ -3,7 +3,82 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-    <div>
-        <p i18n="@@historyRandomContent">Some random content</p>
-    </div>
+    @if (isLoading() && !userWorkout()) {
+        <div class="flex justify-center items-center py-12">
+            <ion-spinner name="crescent"></ion-spinner>
+        </div>
+    } @else if (hasNoData()) {
+        <div class="p-6 text-center text-gray-500">
+            <p i18n="@@historyNoData">There are no data available yet.</p>
+        </div>
+    } @else {
+        <ion-segment [value]="selectedTab" (ionChange)="selectedTab = $any($event).detail.value" class="mb-4">
+            <ion-segment-button value="history">
+                <ion-label i18n="@@historyTabHistory">History</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="most-used">
+                <ion-label i18n="@@historyTabMostUsed">Most Used</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="favorites">
+                <ion-label i18n="@@historyTabFavorites">Favorites</ion-label>
+            </ion-segment-button>
+        </ion-segment>
+
+        <div class="px-4 pb-6">
+            @if (selectedTab === 'history') {
+                <ion-list lines="none" class="space-y-2">
+                    @for (item of sortedWorkoutItems(); track item.startedAt + item.workoutId) {
+                        <ion-item class="rounded-lg border border-gray-200">
+                            <span
+                                class="w-3 h-3 rounded-full shrink-0 mr-3"
+                                [class.bg-green-500]="item.completed"
+                                [class.bg-red-500]="!item.completed"
+                                [attr.aria-label]="item.completed ? 'Completed' : 'Not completed'"
+                            ></span>
+                            <ion-label>
+                                <h2 class="font-medium">{{ item.workoutId }}</h2>
+                                <p class="text-sm text-gray-500">
+                                    {{ formatDate(item.startedAt) }}
+                                    @if (item.completed) {
+                                        <span i18n="@@historyCompleted"> · Completed</span>
+                                    }
+                                </p>
+                            </ion-label>
+                        </ion-item>
+                    } @empty {
+                        <p class="text-gray-500 text-sm py-4" i18n="@@historyNoItems">No workout history yet.</p>
+                    }
+                </ion-list>
+            } @else if (selectedTab === 'most-used') {
+                <ion-list lines="none" class="space-y-2">
+                    @for (entry of mostUsedWorkouts(); track entry.workoutId) {
+                        <ion-item class="rounded-lg border border-gray-200">
+                            <ion-label>
+                                <h2 class="font-medium">{{ entry.workoutId }}</h2>
+                                <p class="text-sm text-gray-500">
+                                    <span i18n="@@historyLastStarted">Last started</span>: {{ formatDate(entry.lastStartedAt) }} ·
+                                    <span i18n="@@historyTimesStarted">Started {{ entry.count }} time(s)</span>
+                                </p>
+                            </ion-label>
+                            <ion-badge slot="end" color="primary">{{ entry.count }}</ion-badge>
+                        </ion-item>
+                    } @empty {
+                        <p class="text-gray-500 text-sm py-4" i18n="@@historyNoMostUsed">No data yet.</p>
+                    }
+                </ion-list>
+            } @else {
+                <ion-list lines="none" class="space-y-2">
+                    @for (favId of favoriteIds(); track favId) {
+                        <ion-item class="rounded-lg border border-gray-200">
+                            <ion-label>
+                                <h2 class="font-medium">{{ favId }}</h2>
+                            </ion-label>
+                        </ion-item>
+                    } @empty {
+                        <p class="text-gray-500 text-sm py-4" i18n="@@historyNoFavorites">No favorite workouts yet.</p>
+                    }
+                </ion-list>
+            }
+        </div>
+    }
 </ion-content>

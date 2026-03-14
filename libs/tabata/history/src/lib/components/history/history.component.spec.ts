@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { AuthFacade } from '@silver/tabata/auth';
 import { HistoryComponent } from './history.component';
+import { UserWorkoutsFacade } from '@silver/tabata/states/user-workouts';
 
 const mockAuthFacade = {
     user: () => null,
@@ -11,27 +12,23 @@ const mockAuthFacade = {
     usePassword: () => true,
     useGoogle: () => false,
     hasError: () => false,
-    sign: () => {
-        return;
-    },
-    register: () => {
-        return;
-    },
-    sendPasswordResetEmail: () => {
-        return;
-    },
-    updateDisplayName: () => {
-        return;
-    },
-    updatePassword: () => {
-        return;
-    },
-    logout: () => {
-        return;
-    },
-    getUser: () => {
-        return;
-    }
+    sign: () => {},
+    register: () => {},
+    sendPasswordResetEmail: () => {},
+    updateDisplayName: () => {},
+    updatePassword: () => {},
+    logout: () => {},
+    getUser: () => {}
+};
+
+const mockUserWorkoutsFacade = {
+    userWorkout: () => null,
+    isLoading: () => false,
+    error: () => null,
+    hasUserWorkout: () => false,
+    loadUserWorkout: () => {},
+    saveUserWorkout: () => {},
+    getOrCreateUserWorkout: () => {}
 };
 
 describe('HistoryComponent', () => {
@@ -41,7 +38,7 @@ describe('HistoryComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [HistoryComponent],
-            providers: [provideRouter([]), { provide: AuthFacade, useValue: mockAuthFacade }]
+            providers: [provideRouter([]), { provide: AuthFacade, useValue: mockAuthFacade }, { provide: UserWorkoutsFacade, useValue: mockUserWorkoutsFacade }]
         }).compileComponents();
 
         fixture = TestBed.createComponent(HistoryComponent);

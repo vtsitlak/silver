@@ -5,6 +5,9 @@ import { addIcons } from 'ionicons';
 import { play, pause, close, playSkipForward, timeOutline, checkmarkCircle } from 'ionicons/icons';
 import { WorkoutsFacade, TabataWorkout } from '@silver/tabata/states/workouts';
 import { ExercisesFacade, Exercise } from '@silver/tabata/states/exercises';
+import { AuthFacade } from '@silver/tabata/auth';
+import { UserWorkoutsFacade } from '@silver/tabata/states/user-workouts';
+import type { UserWorkoutItem } from '@silver/tabata/states/user-workouts';
 import { ToastService } from '@silver/tabata/helpers';
 import { ActionSheetController } from '@ionic/angular/standalone';
 
@@ -30,6 +33,8 @@ export class WorkoutPlayerComponent implements OnDestroy {
     private readonly router = inject(Router);
     private readonly workoutsFacade = inject(WorkoutsFacade);
     private readonly exercisesFacade = inject(ExercisesFacade);
+    private readonly authFacade = inject(AuthFacade);
+    private readonly userWorkoutsFacade = inject(UserWorkoutsFacade);
     private readonly toast = inject(ToastService);
     private readonly actionSheetCtrl = inject(ActionSheetController);
 
@@ -47,6 +52,8 @@ export class WorkoutPlayerComponent implements OnDestroy {
     readonly finished = signal(false);
     /** True once the user has pressed Play at least once; Skip is disabled until then. */
     readonly hasStarted = signal(false);
+    /** Current workout session to record (startedAt set on first play; finishedAt/completed on finish or cancel). */
+    readonly currentSession = signal<UserWorkoutItem | null>(null);
 
     readonly currentSegment = computed(() => this.segments()[this.currentIndex()] ?? null);
 
@@ -201,8 +208,17 @@ export class WorkoutPlayerComponent implements OnDestroy {
             return;
         }
         const next = !this.isPlaying();
-        if (next) {
+        if (next && !this.hasStarted()) {
             this.hasStarted.set(true);
+            const id = this.workoutId();
+            if (id) {
+                this.currentSession.set({
+                    workoutId: id,
+                    startedAt: new Date().toISOString(),
+                    finishedAt: '',
+                    completed: false
+                });
+            }
         }
         this.isPlaying.set(next);
     }
@@ -211,6 +227,7 @@ export class WorkoutPlayerComponent implements OnDestroy {
         const nextIndex = this.currentIndex() + 1;
         const segs = this.segments();
         if (nextIndex >= segs.length) {
+            this.finishSession(true);
             this.finished.set(true);
             this.clearTimer();
             this.isPlaying.set(false);
@@ -225,6 +242,11 @@ export class WorkoutPlayerComponent implements OnDestroy {
     }
 
     async cancel(): Promise<void> {
+        if (this.finished()) {
+            this.router.navigate(['/tabs/workouts']);
+            return;
+        }
+
         const isPlaying = this.isPlaying();
         if (isPlaying) {
             this.isPlaying.set(false);
@@ -237,6 +259,9 @@ export class WorkoutPlayerComponent implements OnDestroy {
                     text: 'Yes, cancel',
                     role: 'destructive',
                     handler: () => {
+                        if (this.hasStarted()) {
+                            this.finishSession(false);
+                        }
                         this.clearTimer();
                         this.router.navigate(['/tabs/workouts']);
                     }
@@ -251,6 +276,28 @@ export class WorkoutPlayerComponent implements OnDestroy {
             ]
         });
         await actionSheet.present();
+    }
+
+    private finishSession(completed: boolean): void {
+        const session = this.currentSession();
+        if (!session) return;
+        const userId = this.authFacade.user()?.uid;
+        if (!userId) return;
+
+        const item: UserWorkoutItem = {
+            ...session,
+            finishedAt: new Date().toISOString(),
+            completed
+        };
+
+        const current = this.userWorkoutsFacade.userWorkout();
+        const base = current?.userId === userId ? current : { userId, favoriteWorkouts: [] as string[], workoutItems: [] as UserWorkoutItem[] };
+        const updated = {
+            ...base,
+            workoutItems: [...(base.workoutItems ?? []), item]
+        };
+        this.userWorkoutsFacade.saveUserWorkout(updated);
+        this.currentSession.set(null);
     }
 
     restart(): void {

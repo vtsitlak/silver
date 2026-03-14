@@ -80,7 +80,7 @@
 
 <ion-footer class="ion-no-border workout-player-footer">
     <div class="flex items-center justify-between ion-padding gap-3">
-        <ion-button fill="clear" (click)="cancel()">
+        <ion-button fill="clear" (click)="cancel()" [disabled]="finished()">
             <ion-icon name="close"></ion-icon>
             <span class="ion-padding-start">Cancel</span>
         </ion-button>

@@ -1,6 +1,6 @@
 /**
  * Local dev server for exercises-db API (same logic as api/exercises-db.ts).
- * Run with: node scripts/serve-exercises-db.mjs
+ * Run with: node apps/tabata-ai/scripts/serve-exercises-db.mjs
  * Proxy in apps/tabata-ai/proxy.json points /api/exercises-db to this server.
  */
 
@@ -23,7 +23,7 @@ async function getExercises() {
             name: r.name,
             images,
             targetMuscles: Array.isArray(r.primaryMuscles) ? [...r.primaryMuscles] : [],
-            bodyParts: r.category ? [r.category] : [],
+            category: r.category ? [r.category] : [],
             equipments: r.equipment ? [r.equipment] : [],
             secondaryMuscles: Array.isArray(r.secondaryMuscles) ? [...r.secondaryMuscles] : [],
             instructions: Array.isArray(r.instructions) ? [...r.instructions] : []
@@ -61,10 +61,10 @@ function matchesEquipment(ex, equipment) {
     return equipment.some((e) => exEq.includes(e));
 }
 
-function matchesBodyParts(ex, bodyParts) {
-    if (bodyParts.length === 0) return true;
-    const exBp = ex.bodyParts.map((b) => b.toLowerCase());
-    return bodyParts.some((b) => exBp.includes(b));
+function matchesCategory(ex, category) {
+    if (category.length === 0) return true;
+    const exCat = ex.category.map((c) => c.toLowerCase());
+    return category.some((c) => exCat.includes(c));
 }
 
 function sortExercises(exercises, sortBy, sortOrder) {
@@ -80,9 +80,9 @@ function sortExercises(exercises, sortBy, sortOrder) {
                 aVal = (a.targetMuscles[0] ?? '').toLowerCase();
                 bVal = (b.targetMuscles[0] ?? '').toLowerCase();
                 break;
-            case 'bodyParts':
-                aVal = (a.bodyParts[0] ?? '').toLowerCase();
-                bVal = (b.bodyParts[0] ?? '').toLowerCase();
+            case 'category':
+                aVal = (a.category[0] ?? '').toLowerCase();
+                bVal = (b.category[0] ?? '').toLowerCase();
                 break;
             case 'equipments':
                 aVal = (a.equipments[0] ?? '').toLowerCase();
@@ -143,15 +143,42 @@ export default async function createApp() {
         }
     });
 
-    app.get('/api/exercises-db/bodyparts', async (req, res) => {
+    app.get('/api/exercises-db/category', async (req, res) => {
         try {
             const exercises = await getExercises();
             const names = new Set();
-            exercises.forEach((ex) => ex.bodyParts.forEach((b) => names.add(b)));
+            exercises.forEach((ex) => ex.category.forEach((c) => names.add(c)));
             const data = Array.from(names)
                 .sort()
                 .map((name) => ({ name }));
             res.json({ success: true, data });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+    app.get('/api/exercises-db/category/:categoryName/exercises', async (req, res) => {
+        try {
+            const exercises = await getExercises();
+            const categoryName = decodeURIComponent(req.params.categoryName || '');
+            const limit = Math.min(100, Math.max(1, parseInt(req.query.limit ?? '20', 10) || 20));
+            const offset = Math.max(0, parseInt(req.query.offset ?? '0', 10) || 0);
+            const filtered = exercises.filter((ex) => ex.category.some((c) => c.toLowerCase() === categoryName.toLowerCase()));
+            const slice = filtered.slice(offset, offset + limit);
+            const total = filtered.length;
+            const totalPages = Math.ceil(total / limit) || 1;
+            const page = Math.floor(offset / limit) + 1;
+            res.json({
+                success: true,
+                data: slice,
+                metadata: {
+                    totalExercises: total,
+                    totalPages,
+                    currentPage: page,
+                    previousPage: page > 1 ? String(page - 1) : null,
+                    nextPage: page < totalPages ? String(page + 1) : null
+                }
+            });
         } catch (err) {
             res.status(500).json({ error: err.message });
         }
@@ -163,14 +190,14 @@ export default async function createApp() {
             const search = (req.query.search ?? '').trim().toLowerCase();
             const muscles = parseCommaList(req.query.muscles ?? null);
             const equipment = parseCommaList(req.query.equipment ?? null);
-            const bodyParts = parseCommaList(req.query.bodyParts ?? null);
+            const category = parseCommaList(req.query.category ?? null);
             const offset = Math.max(0, parseInt(req.query.offset ?? '0', 10) || 0);
             const limit = Math.min(100, Math.max(1, parseInt(req.query.limit ?? '20', 10) || 20));
             const sortBy = req.query.sortBy ?? 'name';
             const sortOrder = req.query.sortOrder ?? 'desc';
 
             let filtered = exercises.filter(
-                (ex) => matchesSearch(ex, search) && matchesMuscles(ex, muscles) && matchesEquipment(ex, equipment) && matchesBodyParts(ex, bodyParts)
+                (ex) => matchesSearch(ex, search) && matchesMuscles(ex, muscles) && matchesEquipment(ex, equipment) && matchesCategory(ex, category)
             );
             filtered = sortExercises(filtered, sortBy, sortOrder);
             const total = filtered.length;

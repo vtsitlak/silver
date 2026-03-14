@@ -52,20 +52,20 @@
             </ion-select>
 
             <ion-select
-                placeholder="Body Part"
-                [value]="selectedBodyParts()"
-                (ionChange)="onBodyPartChange($event)"
+                placeholder="Category"
+                [value]="selectedCategory()"
+                (ionChange)="onCategoryChange($event)"
                 interface="popover"
                 multiple="true"
                 class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
             >
-                @for (bodyPart of bodyPartList(); track bodyPart) {
-                    <ion-select-option [value]="bodyPart">{{ formatName(bodyPart) }}</ion-select-option>
+                @for (cat of categoryList(); track cat) {
+                    <ion-select-option [value]="cat">{{ formatName(cat) }}</ion-select-option>
                 }
             </ion-select>
         </div>
 
-        @if (selectedMuscles().length > 0 || selectedEquipment().length > 0 || selectedBodyParts().length > 0) {
+        @if (selectedMuscles().length > 0 || selectedEquipment().length > 0 || selectedCategory().length > 0) {
             <ion-button fill="clear" size="small" (click)="clearFilters()" class="mt-2">Clear Filters</ion-button>
         }
     </div>
@@ -98,7 +98,7 @@
                     <ion-item
                         button
                         (click)="toggleSelection(exercise)"
-                        [class.selected]="isSelected(exercise)"
+                        [class.selected]="isSelected(exercise) || isPreselected(exercise)"
                         [disabled]="isPreselected(exercise) || (!isSelected(exercise) && !canSelectMore())"
                     >
                         @if (exercise.images && exercise.images.length > 0) {
@@ -115,11 +115,11 @@
                         @if (multiple()) {
                             <ion-checkbox
                                 slot="end"
-                                [checked]="isSelected(exercise)"
+                                [checked]="isSelected(exercise) || isPreselected(exercise)"
                                 [disabled]="isPreselected(exercise) || (!isSelected(exercise) && !canSelectMore())"
                             ></ion-checkbox>
                         } @else {
-                            @if (isSelected(exercise)) {
+                            @if (isSelected(exercise) || isPreselected(exercise)) {
                                 <ion-icon name="checkmark" slot="end" color="primary"></ion-icon>
                             }
                         }

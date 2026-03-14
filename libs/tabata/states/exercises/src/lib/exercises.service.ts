@@ -45,19 +45,19 @@ export class ExercisesService {
         return this.http.get<ExerciseListResponse>(`${this.getBaseUrl()}/exercises/search`, { params }).pipe(map((res) => (res.success ? res.data : [])));
     }
 
-    /** Filter exercises by muscles, equipment, bodyParts (GET /api/v1/exercises/filter) */
+    /** Filter exercises by muscles, equipment, category (GET /api/v1/exercises/filter) */
     filterExercises(options: {
         offset?: number;
         limit?: number;
         search?: string;
         muscles?: string;
         equipment?: string;
-        bodyParts?: string;
+        category?: string;
         sortBy?: SortBy;
         sortOrder?: SortOrder;
     }): Observable<Exercise[]> {
-        const { offset = 0, limit = DEFAULT_LIMIT, search, muscles, equipment, bodyParts, sortBy = 'name', sortOrder = 'desc' } = options;
-        const params = this.params(offset, limit, { search, muscles, equipment, bodyParts, sortBy, sortOrder });
+        const { offset = 0, limit = DEFAULT_LIMIT, search, muscles, equipment, category, sortBy = 'name', sortOrder = 'desc' } = options;
+        const params = this.params(offset, limit, { search, muscles, equipment, category, sortBy, sortOrder });
         return this.http.get<ExerciseListResponse>(`${this.getBaseUrl()}/exercises/filter`, { params }).pipe(map((res) => (res.success ? res.data : [])));
     }
 
@@ -86,11 +86,11 @@ export class ExercisesService {
         );
     }
 
-    /** Get exercises by body part (GET /api/v1/bodyparts/{bodyPartName}/exercises) */
-    getExercisesByBodyPart(bodyPartName: string, limit = DEFAULT_LIMIT, offset = 0): Observable<Exercise[]> {
+    /** Get exercises by category (GET /api/v1/category/{categoryName}/exercises) */
+    getExercisesByCategory(categoryName: string, limit = DEFAULT_LIMIT, offset = 0): Observable<Exercise[]> {
         const params = this.params(offset, limit);
         return this.http
-            .get<ExerciseListResponse>(`${this.getBaseUrl()}/bodyparts/${encodeURIComponent(bodyPartName)}/exercises`, { params })
+            .get<ExerciseListResponse>(`${this.getBaseUrl()}/category/${encodeURIComponent(categoryName)}/exercises`, { params })
             .pipe(map((res) => (res.success ? res.data : [])));
     }
 
@@ -121,8 +121,8 @@ export class ExercisesService {
         return this.http.get<NameListResponse>(`${this.getBaseUrl()}/equipments`).pipe(map((res) => (res.success ? res.data.map((x) => x.name) : [])));
     }
 
-    /** Get all body parts (GET /api/v1/bodyparts) */
-    getBodyPartList(): Observable<string[]> {
-        return this.http.get<NameListResponse>(`${this.getBaseUrl()}/bodyparts`).pipe(map((res) => (res.success ? res.data.map((x) => x.name) : [])));
+    /** Get all categories (GET /api/v1/category) */
+    getCategoryList(): Observable<string[]> {
+        return this.http.get<NameListResponse>(`${this.getBaseUrl()}/category`).pipe(map((res) => (res.success ? res.data.map((x) => x.name) : [])));
     }
 }

@@ -6,7 +6,7 @@ export interface Exercise {
     name: string;
     images: string[];
     targetMuscles: string[];
-    bodyParts: string[];
+    category: string[];
     equipments: string[];
     secondaryMuscles: string[];
     instructions: string[];
@@ -36,5 +36,5 @@ export interface NameListResponse {
     data: { name: string }[];
 }
 
-export type SortBy = 'name' | 'exerciseId' | 'targetMuscles' | 'bodyParts' | 'equipments';
+export type SortBy = 'name' | 'exerciseId' | 'targetMuscles' | 'category' | 'equipments';
 export type SortOrder = 'asc' | 'desc';
