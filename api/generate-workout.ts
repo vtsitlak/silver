@@ -1,6 +1,12 @@
 /**
  * Vercel serverless handler for AI workout generation.
- * Uses Genkit with Google AI (Gemini). Set GEMINI_API_KEY in Vercel env.
+ * Uses Genkit with Google AI (Gemini).
+ *
+ * Env:
+ * - GEMINI_API_KEY or GOOGLE_GENAI_API_KEY: API key from https://aistudio.google.com/apikey
+ * - GEMINI_MODEL (optional): Model id, e.g. gemini-2.5-flash-lite, gemini-2.5-flash, gemini-2.5-pro.
+ *   Default: gemini-2.5-flash-lite (good free-tier quota). Avoid gemini-2.0-flash (deprecated, quota often 0).
+ *
  * Request body: GenerateWorkoutInput (name, description, mainTargetBodypart, availableEquipments, secondaryTargetBodyparts, exercises[]).
  * Response: GenerateWorkoutOutput (totalDurationMinutes, warmup, blocks, cooldown).
  */
@@ -81,6 +87,7 @@ export default {
         if (!apiKey) {
             return jsonResponse(JSON.stringify({ error: 'GEMINI_API_KEY (or GOOGLE_GENAI_API_KEY) must be set' }), 503);
         }
+        const modelId = (process.env['GEMINI_MODEL'] ?? 'gemini-2.5-flash-lite').trim() || 'gemini-2.5-flash-lite';
 
         let body: unknown;
         try {
@@ -113,7 +120,7 @@ export default {
 
             const ai = genkit({
                 plugins: [googleAI({ apiKey })],
-                model: gemini('gemini-2.0-flash')
+                model: gemini(modelId)
             });
 
             const prompt = buildPrompt({
@@ -157,7 +164,7 @@ export default {
                 return jsonResponse(
                     JSON.stringify({
                         error:
-                            'AI quota limit reached. Please try again in a minute or check your Google AI Studio quota and billing at https://ai.google.dev/gemini-api/docs/rate-limits'
+                            'AI quota limit reached. Try: (1) Set GEMINI_MODEL=gemini-2.5-flash-lite or gemini-2.5-flash (gemini-2.0-flash is deprecated and often has no free quota). (2) Check API key at https://aistudio.google.com/apikey and quota at https://ai.google.dev/gemini-api/docs/rate-limits'
                     }),
                     429
                 );
