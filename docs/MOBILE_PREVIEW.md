@@ -36,8 +36,12 @@ npm run cap:android:tabata-ai
 # Open in Xcode (build + sync + open IDE)
 npm run cap:ios:tabata-ai
 
-# Run directly on Android device/emulator
+# Run directly on Android device/emulator (uses JDK 17 automatically)
 npm run cap:run:android:tabata-ai
+
+# List connected devices and emulators, then run on a specific one
+cd apps/tabata-ai && npx cap run android --list
+npm run cap:run:android:tabata-ai -- --target <device-id>
 
 # Run directly on iOS simulator
 npm run cap:run:ios:tabata-ai
@@ -182,24 +186,23 @@ To produce an APK using Gradle directly (ensure `JAVA_HOME` points to JDK 17+ fi
 
 1. **On Windows** (from repo root or from `apps/tabata-ai/android`):
 
-   ```bash
-   cd apps/tabata-ai/android
-   .\gradlew.bat assembleDebug
-   ```
+    ```bash
+    cd apps/tabata-ai/android
+    .\gradlew.bat assembleDebug
+    ```
 
 2. **On macOS/Linux:**
 
-   ```bash
-   cd apps/tabata-ai/android
-   ./gradlew assembleDebug
-   ```
+    ```bash
+    cd apps/tabata-ai/android
+    ./gradlew assembleDebug
+    ```
 
 3. Wait until the end of the run. You must see **`BUILD SUCCESSFUL`**. The first run can take several minutes (Gradle download, daemon, dependencies). If the build fails, fix the reported errors before looking for the APK.
 
 4. **Where the APK is saved:**
-
-   - Full path: `apps/tabata-ai/android/app/build/outputs/apk/debug/app-debug.apk`
-   - The `app/build` folder is gitignored, but the file is on disk after a successful build.
+    - Full path: `apps/tabata-ai/android/app/build/outputs/apk/debug/app-debug.apk`
+    - The `app/build` folder is gitignored, but the file is on disk after a successful build.
 
 If you only see a `logs` folder under `android/build/outputs`, that is from the root project; the APK is under **`android/app/build/outputs/apk/debug/`**. If that folder or `app-debug.apk` is missing, the build did not finish successfully—re-run `.\gradlew.bat assembleDebug` and wait for `BUILD SUCCESSFUL`.
 
@@ -221,9 +224,9 @@ Ensure the project is deployed to Vercel and that the serverless functions (incl
 The in-app **toolbar** uses `assets/icon-128.png`. To use the same graphic as the **Android launcher icon** (home screen):
 
 1. From the repo root run:
-   ```bash
-   npm run cap:icons:tabata-ai
-   ```
+    ```bash
+    npm run cap:icons:tabata-ai
+    ```
 2. This copies `apps/tabata-ai/src/assets/icon-256.png` to `apps/tabata-ai/assets/icon.png` and runs `@capacitor/assets` to generate Android adaptive icon resources (foreground from the icon, background from the app primary color).
 3. Rebuild the app (e.g. `npm run build-apk:tabata-ai` or build from Android Studio).
 
@@ -261,12 +264,12 @@ The Android Gradle Plugin and Google Services require **Java 11+**. Gradle is us
 
 1. Install [JDK 17 or 21 LTS](https://adoptium.net/) if needed. **Java 25 is not supported** by Gradle 8.7 ("Unsupported class file major version 69"); use Temurin 17 or 21.
 2. Point `JAVA_HOME` at JDK 17 **before** running Gradle. In PowerShell (one-time for that terminal):
-   ```powershell
-   $env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-17.0.x.x-hotspot"   # or your JDK 17 path
-   cd apps\tabata-ai\android
-   .\gradlew.bat assembleDebug
-   ```
-   Or set `JAVA_HOME` in System Environment Variables to the JDK 17 folder, then reopen the terminal.
+    ```powershell
+    $env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-17.0.x.x-hotspot"   # or your JDK 17 path
+    cd apps\tabata-ai\android
+    .\gradlew.bat assembleDebug
+    ```
+    Or set `JAVA_HOME` in System Environment Variables to the JDK 17 folder, then reopen the terminal.
 3. Stop any old Gradle daemons that might be using Java 8: `.\gradlew.bat --stop`, then run `.\gradlew.bat assembleDebug` again.
 
 **"Unsupported class file major version 69" or Java 25**

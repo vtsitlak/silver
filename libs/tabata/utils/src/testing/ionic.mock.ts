@@ -15,14 +15,28 @@ export const mockModalController = {
             ? jest.fn().mockResolvedValue({
                   present: jest.fn(),
                   onDidDismiss: jest.fn().mockResolvedValue({}),
-                  dismiss: typeof jest !== 'undefined' ? jest.fn() : (() => { return; })
+                  dismiss:
+                      typeof jest !== 'undefined'
+                          ? jest.fn()
+                          : () => {
+                                return;
+                            }
               })
             : ((() => {
                   return Promise.resolve({
-                      present: () => { return; },
+                      present: () => {
+                          return;
+                      },
                       onDidDismiss: Promise.resolve({}),
-                      dismiss: () => { return; }
+                      dismiss: () => {
+                          return;
+                      }
                   });
               }) as unknown as jest.Mock),
-    dismiss: typeof jest !== 'undefined' ? jest.fn() : (() => { return; })
+    dismiss:
+        typeof jest !== 'undefined'
+            ? jest.fn()
+            : () => {
+                  return;
+              }
 };

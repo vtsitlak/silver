@@ -36,10 +36,12 @@ export const mockActionSheetController = {
                   onDidDismiss: jest.fn().mockResolvedValue({ data: undefined })
               })
             : ((() =>
-                Promise.resolve({
-                    present: () => { return; },
-                    onDidDismiss: Promise.resolve({ data: undefined })
-                })) as unknown as jest.Mock)
+                  Promise.resolve({
+                      present: () => {
+                          return;
+                      },
+                      onDidDismiss: Promise.resolve({ data: undefined })
+                  })) as unknown as jest.Mock)
 };
 
 /** Mock for WorkoutSubmitService (submitWorkout returns an observable). */

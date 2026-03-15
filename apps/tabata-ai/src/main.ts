@@ -29,7 +29,22 @@ function isNativePlatform(): boolean {
     }
     if (typeof document !== 'undefined' && document.URL) {
         const u = document.URL;
-        if (u.startsWith('capacitor://') || u.startsWith('http://localhost') || u.startsWith('https://localhost')) {
+        if (
+            u.startsWith('capacitor://') ||
+            u.startsWith('http://localhost') ||
+            u.startsWith('https://localhost') ||
+            u.startsWith('file://') ||
+            u === '' ||
+            u === 'about:blank'
+        ) {
+            return true;
+        }
+        try {
+            const loc = document.location;
+            if (loc.hostname === 'localhost' || loc.hostname === '127.0.0.1' || loc.hostname === '') {
+                return true;
+            }
+        } catch {
             return true;
         }
     }

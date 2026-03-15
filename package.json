@@ -25,7 +25,7 @@
         "cap:sync:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync",
         "cap:android:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync android && powershell -ExecutionPolicy Bypass -File scripts/open-android-studio.ps1",
         "cap:ios:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync ios && npx cap open ios",
-        "cap:run:android:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync android && npx cap run android",
+        "cap:run:android:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync android && powershell -ExecutionPolicy Bypass -File scripts/run-android.ps1",
         "cap:run:ios:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync ios && npx cap run ios",
         "build-apk:tabata-ai": "cd apps/tabata-ai && powershell -ExecutionPolicy Bypass -File scripts/build-apk.ps1",
         "cap:icons:tabata-ai": "cd apps/tabata-ai && node scripts/generate-app-icon.mjs",
