@@ -2,6 +2,8 @@
 
 This guide explains how to preview the Tabata AI app on Android and iOS devices/emulators from Cursor.
 
+**Testing disclaimer:** This app has been tested only on **web** and **Android (OnePlus 10 Pro)**. iOS and other devices have not been tested.
+
 **Web browser:** When viewing the app in a desktop browser, switch to **mobile view** (Chrome DevTools device toolbar or responsive mode) for the best experience. The UI is designed for mobile-first layout.
 
 ## Prerequisites
@@ -160,6 +162,77 @@ npx cap run android --list
 npx cap run ios --list
 ```
 
+## Building an APK (Android)
+
+`npm run cap:android:tabata-ai` only builds the web app, syncs to Android, and opens Android Studio. It does **not** build an APK.
+
+### Build APK (one command)
+
+From the **repo root**, you can build the debug APK without setting `JAVA_HOME` manually. The script finds JDK 17 (or 21), stops old Gradle daemons, and runs the build:
+
+```bash
+npm run build-apk:tabata-ai
+```
+
+The APK is written to `apps/tabata-ai/android/app/build/outputs/apk/debug/app-debug.apk`. If no JDK 17/21 is found, the script prints where to install it (e.g. [Adoptium](https://adoptium.net/)).
+
+### Build APK (manual Gradle)
+
+To produce an APK using Gradle directly (ensure `JAVA_HOME` points to JDK 17+ first):
+
+1. **On Windows** (from repo root or from `apps/tabata-ai/android`):
+
+   ```bash
+   cd apps/tabata-ai/android
+   .\gradlew.bat assembleDebug
+   ```
+
+2. **On macOS/Linux:**
+
+   ```bash
+   cd apps/tabata-ai/android
+   ./gradlew assembleDebug
+   ```
+
+3. Wait until the end of the run. You must see **`BUILD SUCCESSFUL`**. The first run can take several minutes (Gradle download, daemon, dependencies). If the build fails, fix the reported errors before looking for the APK.
+
+4. **Where the APK is saved:**
+
+   - Full path: `apps/tabata-ai/android/app/build/outputs/apk/debug/app-debug.apk`
+   - The `app/build` folder is gitignored, but the file is on disk after a successful build.
+
+If you only see a `logs` folder under `android/build/outputs`, that is from the root project; the APK is under **`android/app/build/outputs/apk/debug/`**. If that folder or `app-debug.apk` is missing, the build did not finish successfully—re-run `.\gradlew.bat assembleDebug` and wait for `BUILD SUCCESSFUL`.
+
+From Android Studio: **Build → Build Bundle(s) / APK(s) → Build APK(s)** creates the same debug APK in the path above.
+
+## APIs when running on device
+
+When the app runs on a physical Android or iOS device (or emulator), it cannot use relative URLs like `/api/exercises-db` because there is no same-origin server. The app detects native platform via Capacitor and uses the **Vercel deployment** base URL (`https://silver-tabata-ai.vercel.app`) for:
+
+- **Exercises API** (`/api/exercises-db`)
+- **Workouts API** (`/api/workouts`)
+- **User workouts API** (`/api/user-workouts`)
+- **Generate workout (Gemini) API** (`/api/generate-workout`)
+
+Ensure the project is deployed to Vercel and that the serverless functions (including `api/exercises-db` and `api/generate-workout`) are available at that origin. No extra configuration is required on the device.
+
+## App icon (launcher icon)
+
+The in-app **toolbar** uses `assets/icon-128.png`. To use the same graphic as the **Android launcher icon** (home screen):
+
+1. From the repo root run:
+   ```bash
+   npm run cap:icons:tabata-ai
+   ```
+2. This copies `apps/tabata-ai/src/assets/icon-256.png` to `apps/tabata-ai/assets/icon.png` and runs `@capacitor/assets` to generate Android adaptive icon resources (foreground from the icon, background from the app primary color).
+3. Rebuild the app (e.g. `npm run build-apk:tabata-ai` or build from Android Studio).
+
+If you change the toolbar icon (`icon-256.png` / `icon-128.png`), run `npm run cap:icons:tabata-ai` again so the launcher icon stays in sync.
+
+## Dark mode
+
+The app respects the system **dark mode** (Settings → Display → Dark theme on Android). Backgrounds, text, inputs, tab bar, action sheets, and modals use high-contrast colors in dark mode. Styling is defined in `apps/tabata-ai/src/styles.scss` and follows Ionic’s dark system palette where applicable.
+
 ## Troubleshooting
 
 ### Android Issues
@@ -181,6 +254,24 @@ npx cap run ios --list
 
 - Ensure Java JDK 17+ is installed
 - Run `cd apps/tabata-ai/android && ./gradlew clean`
+
+**"No matching variant... compatible with Java 8" / "Java 11" when running `gradlew assembleDebug`**
+
+The Android Gradle Plugin and Google Services require **Java 11+**. Gradle is using Java 8 (often from an old `JAVA_HOME`). Fix:
+
+1. Install [JDK 17 or 21 LTS](https://adoptium.net/) if needed. **Java 25 is not supported** by Gradle 8.7 ("Unsupported class file major version 69"); use Temurin 17 or 21.
+2. Point `JAVA_HOME` at JDK 17 **before** running Gradle. In PowerShell (one-time for that terminal):
+   ```powershell
+   $env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-17.0.x.x-hotspot"   # or your JDK 17 path
+   cd apps\tabata-ai\android
+   .\gradlew.bat assembleDebug
+   ```
+   Or set `JAVA_HOME` in System Environment Variables to the JDK 17 folder, then reopen the terminal.
+3. Stop any old Gradle daemons that might be using Java 8: `.\gradlew.bat --stop`, then run `.\gradlew.bat assembleDebug` again.
+
+**"Unsupported class file major version 69" or Java 25**
+
+Gradle 8.7 does not support Java 25. Use **JDK 17 or 21 LTS** for the Android build. Install [Temurin 17 or 21](https://adoptium.net/) (default path is fine); the `build-apk:tabata-ai` script will pick it up and ignore Java 25.
 
 **"Could not find installation home path" or Java-related errors**
 This happens when an old `JAVA_HOME` environment variable conflicts with Android Studio's bundled JDK.

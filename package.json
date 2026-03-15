@@ -27,6 +27,8 @@
         "cap:ios:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync ios && npx cap open ios",
         "cap:run:android:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync android && npx cap run android",
         "cap:run:ios:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync ios && npx cap run ios",
+        "build-apk:tabata-ai": "cd apps/tabata-ai && powershell -ExecutionPolicy Bypass -File scripts/build-apk.ps1",
+        "cap:icons:tabata-ai": "cd apps/tabata-ai && node scripts/generate-app-icon.mjs",
         "cap:live:android:tabata-ai": "cd apps/tabata-ai && npx cap run android --livereload --external",
         "cap:live:ios:tabata-ai": "cd apps/tabata-ai && npx cap run ios --livereload --external",
         "postinstall": "patch-package"
@@ -79,6 +81,7 @@
         "@angular/compiler-cli": "21.0.8",
         "@angular/language-service": "21.0.8",
         "@angular/localize": "21.0.8",
+        "@capacitor/assets": "^3.0.5",
         "@capacitor/cli": "^8.2.0",
         "@eslint/js": "^9.8.0",
         "@nx/angular": "22.3.3",

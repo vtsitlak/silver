@@ -15,8 +15,20 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { AuthFacade } from '@silver/tabata/auth';
 import { WORKOUTS_API_BASE_URL } from '@silver/tabata/workouts';
 import { EXERCISES_API_BASE_URL } from '@silver/tabata/states/exercises';
+import { USER_WORKOUTS_API_BASE_URL } from '@silver/tabata/states/user-workouts';
+import { GENERATE_WORKOUT_API_BASE_URL } from '@silver/tabata/ai-workout-generator';
 import { rateLimitInterceptor } from './app/interceptors/rate-limit.interceptor';
 import { of } from 'rxjs';
+import { Capacitor } from '@capacitor/core';
+
+const API_ORIGIN_VERCEL = 'https://silver-tabata-ai.vercel.app';
+
+function getApiBaseUrl(): string {
+    if (typeof Capacitor !== 'undefined' && Capacitor.getPlatform() !== 'web') {
+        return API_ORIGIN_VERCEL;
+    }
+    return environment.production ? '' : (environment.workoutsApiBaseUrl ?? '');
+}
 
 export function initAuthStore() {
     const authFacade = inject(AuthFacade);
@@ -34,8 +46,16 @@ export const appConfig = {
         provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
         provideFirestore(() => getFirestore()),
         provideAuth(() => getAuth()),
-        { provide: WORKOUTS_API_BASE_URL, useValue: environment.production ? '' : (environment.workoutsApiBaseUrl ?? '') },
-        { provide: EXERCISES_API_BASE_URL, useValue: '/api/exercises-db' }
+        { provide: WORKOUTS_API_BASE_URL, useFactory: () => getApiBaseUrl() },
+        {
+            provide: EXERCISES_API_BASE_URL,
+            useFactory: () => {
+                const base = getApiBaseUrl();
+                return base ? `${base.replace(/\/$/, '')}/api/exercises-db` : '/api/exercises-db';
+            }
+        },
+        { provide: USER_WORKOUTS_API_BASE_URL, useFactory: () => getApiBaseUrl() },
+        { provide: GENERATE_WORKOUT_API_BASE_URL, useFactory: () => getApiBaseUrl() }
     ]
 };
 

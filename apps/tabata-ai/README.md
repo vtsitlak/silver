@@ -1,6 +1,6 @@
 # Tabata AI
 
-> **Demo app** — for learning and example code only. Not for commercial use. When viewed from web, switch to **mobile view** (browser DevTools or responsive mode) for the best experience.
+> **Demo app** — for learning and example code only. Not for commercial use. **Tested only on web and Android (OnePlus 10 Pro).** When viewed from web, switch to **mobile view** (browser DevTools or responsive mode) for the best experience.
 
 ---
 
@@ -19,6 +19,7 @@
 - **History** — History, Most Used, Favorites segments.
 - **Profile** — Display name, email, password update; logout with confirm.
 - **i18n** — English (en), Dutch (nl), Greek (el) configured.
+- **Testing** — Tested only on web and Android (OnePlus 10 Pro); iOS and other devices have not been tested.
 
 ---
 
