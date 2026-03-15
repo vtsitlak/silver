@@ -7,51 +7,75 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
-    <form (ngSubmit)="onSubmit()" class="workout-info-form" novalidate>
-        <ion-list>
-            <ion-item>
-                <ion-input [required]="true" id="workout-name" type="text" placeholder="Enter workout name" [formField]="infoForm['name']">
-                    <ion-label position="stacked">Workout Name <span>*</span></ion-label>
-                </ion-input>
-            </ion-item>
-
-            <ion-item>
-                <ion-textarea [required]="true" id="workout-description" placeholder="Enter workout description" [formField]="infoForm['description']" rows="3">
-                    <ion-label position="stacked">Description <span>*</span></ion-label>
-                </ion-textarea>
-            </ion-item>
-
-            <ion-item>
-                <ion-label position="stacked">Available equipment</ion-label>
-                <ion-select placeholder="Select equipment" [formField]="infoForm['availableEquipments']" multiple="true" interface="alert">
-                    @for (eq of equipmentOptions; track eq) {
-                        <ion-select-option [value]="eq">{{ eq }}</ion-select-option>
+    <form (ngSubmit)="onSubmit()" class="workout-info-form bg-white w-full flex flex-col px-4 py-4" novalidate>
+        <div class="flex flex-col mb-2">
+            <label for="workout-name" class="mb-2 font-medium">Workout Name <span>*</span></label>
+            <input id="workout-name" type="text" placeholder="Enter workout name" [formField]="infoForm['name']" />
+            <div class="h-5">
+                @if (infoForm['name']().touched() && infoForm['name']().invalid()) {
+                    @for (err of infoForm['name']().errors(); track err.kind) {
+                        <p class="text-error text-sm mt-1">{{ err.message }}</p>
                     }
-                </ion-select>
-            </ion-item>
+                }
+            </div>
+        </div>
 
-            <ion-item>
-                <ion-label position="stacked">Main target <span>*</span></ion-label>
-                <ion-select placeholder="Select main target" [formField]="infoForm['mainTargetBodypart']" interface="alert">
-                    @for (region of bodyRegionOptions; track region) {
-                        <ion-select-option [value]="region" [disabled]="mainTargetDisabled()(region)">
-                            {{ region }}
-                        </ion-select-option>
+        <div class="flex flex-col mb-2">
+            <label for="workout-description" class="mb-2 font-medium">Description <span>*</span></label>
+            <textarea id="workout-description" placeholder="Enter workout description" [formField]="infoForm['description']" rows="3"></textarea>
+            <div class="h-5">
+                @if (infoForm['description']().touched() && infoForm['description']().invalid()) {
+                    @for (err of infoForm['description']().errors(); track err.kind) {
+                        <p class="text-error text-sm mt-1">{{ err.message }}</p>
                     }
-                </ion-select>
-            </ion-item>
+                }
+            </div>
+        </div>
 
-            <ion-item>
-                <ion-label position="stacked">Secondary targets</ion-label>
-                <ion-select placeholder="Select secondary targets" [formField]="infoForm['secondaryTargetBodyparts']" multiple="true" interface="alert">
-                    @for (region of bodyRegionOptions; track region) {
-                        <ion-select-option [value]="region" [disabled]="secondaryTargetDisabled()(region)">
-                            {{ region }}
-                        </ion-select-option>
-                    }
-                </ion-select>
-            </ion-item>
-        </ion-list>
+        <div class="flex flex-col mb-2">
+            <label for="workout-equipment" class="mb-2 font-medium">Available equipment</label>
+            <ion-select
+                id="workout-equipment"
+                placeholder="Select equipment"
+                [formField]="infoForm['availableEquipments']"
+                multiple="true"
+                interface="alert"
+                class="w-full"
+            >
+                @for (eq of equipmentOptions; track eq) {
+                    <ion-select-option [value]="eq">{{ eq }}</ion-select-option>
+                }
+            </ion-select>
+        </div>
+
+        <div class="flex flex-col mb-2">
+            <label for="workout-main-target" class="mb-2 font-medium">Main target <span>*</span></label>
+            <ion-select id="workout-main-target" placeholder="Select main target" [formField]="infoForm['mainTargetBodypart']" interface="alert" class="w-full">
+                @for (region of bodyRegionOptions; track region) {
+                    <ion-select-option [value]="region" [disabled]="mainTargetDisabled()(region)">
+                        {{ region }}
+                    </ion-select-option>
+                }
+            </ion-select>
+        </div>
+
+        <div class="flex flex-col mb-2">
+            <label for="workout-secondary-targets" class="mb-2 font-medium">Secondary targets</label>
+            <ion-select
+                id="workout-secondary-targets"
+                placeholder="Select secondary targets"
+                [formField]="infoForm['secondaryTargetBodyparts']"
+                multiple="true"
+                interface="alert"
+                class="w-full"
+            >
+                @for (region of bodyRegionOptions; track region) {
+                    <ion-select-option [value]="region" [disabled]="secondaryTargetDisabled()(region)">
+                        {{ region }}
+                    </ion-select-option>
+                }
+            </ion-select>
+        </div>
 
         <ion-button expand="block" type="button" (click)="onGenerateWithAi()" [disabled]="!isFormValid() || isGenerating()" class="ion-margin-top">
             @if (isGenerating()) {
