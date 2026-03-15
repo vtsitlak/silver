@@ -27,6 +27,7 @@
         "cap:ios:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync ios && npx cap open ios",
         "cap:run:android:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync android && npx cap run android",
         "cap:run:ios:tabata-ai": "nx build tabata-ai --configuration=development && cd apps/tabata-ai && npx cap sync ios && npx cap run ios",
+        "build-apk:tabata-ai": "cd apps/tabata-ai && powershell -ExecutionPolicy Bypass -File scripts/build-apk.ps1",
         "cap:live:android:tabata-ai": "cd apps/tabata-ai && npx cap run android --livereload --external",
         "cap:live:ios:tabata-ai": "cd apps/tabata-ai && npx cap run ios --livereload --external",
         "postinstall": "patch-package"
