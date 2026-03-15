@@ -1,42 +1,52 @@
 # Tabata AI
 
-> **This project is still in progress.** Many features are missing or incomplete. The app provides a basic shell (auth, tabs, placeholder screens) and is under active development.
+> **Demo app** — for learning and example code only. Not for commercial use. When viewed from web, switch to **mobile view** (browser DevTools or responsive mode) for the best experience.
 
 ---
 
 ## What it is
 
-**Tabata AI** is a Tabata-style workout application built with Angular and Ionic inside the Silver Nx monorepo. It targets web and mobile (iOS/Android) via Capacitor and uses Firebase for authentication.
+**Tabata AI** is a Tabata-style workout application built with Angular and Ionic inside the Silver Nx monorepo. It targets web and mobile (iOS/Android) via Capacitor and uses Firebase for authentication. Use it to explore Tabata workout flows, AI-generated workouts, and modern Angular patterns.
 
 ---
 
-## Status: In progress
+## Status
 
-- **Authentication** — Login, register, forgot password, and profile updates are implemented (Firebase).
-- **Shell** — Tab navigation (Dashboard, Workouts, History, Profile) and a dashboard screen exist.
-- **Exercises** — Backend integration with [ExerciseDB API](https://www.exercisedb.dev/docs) is in place (service, store, facade); UI to browse or use exercises is **not** fully built yet.
-- **Workouts** — Workout storage via Upstash Redis (through Vercel serverless proxy) is implemented. Workout creation UI and timers are **not** implemented.
-- **History** — Placeholder only; no real history or statistics.
-- **Profile** — Display name and password update work; other profile features are missing.
-- **i18n** — English (en), Dutch (nl), and Greek (el) are configured; coverage may be partial.
-
-Expect breaking changes and incomplete flows until the project reaches a stable release.
+- **Authentication** — Login, register, forgot password, profile updates (Firebase).
+- **Shell** — Tab navigation (Dashboard, Workouts, History, Profile), toolbar with About modal.
+- **Exercises** — [ExerciseDB API](https://www.exercisedb.dev/docs) integration (service, store, facade); exercise selector and details modals.
+- **Workouts** — Create/edit workouts; “Generate with AI” (Google Gemini); workout storage via Upstash Redis through Vercel serverless proxy.
+- **History** — History, Most Used, Favorites segments.
+- **Profile** — Display name, email, password update; logout with confirm.
+- **i18n** — English (en), Dutch (nl), Greek (el) configured.
 
 ---
 
 ## Tech stack
 
-| Layer         | Technology                                                                           |
-| ------------- | ------------------------------------------------------------------------------------ |
-| Framework     | Angular 21, Ionic 8 (standalone components)                                          |
-| Auth          | Firebase (Angular Fire), AuthGuard                                                   |
-| State         | NgRx Signals (AuthStore, AuthFacade; ExercisesStore, ExercisesFacade; WorkoutsStore) |
-| Exercises API | [ExerciseDB](https://www.exercisedb.dev) (public API)                                |
-| Workouts API  | Upstash Redis via Vercel serverless proxy (`/api/workouts`)                          |
-| Mobile        | Capacitor 6                                                                          |
-| i18n          | Angular localize (en, nl, el)                                                        |
-| Tests         | Jest (unit), Playwright (e2e)                                                        |
-| Deployment    | Vercel (static + serverless functions)                                               |
+| Layer            | Technology                                                                            |
+| ---------------- | ------------------------------------------------------------------------------------- |
+| Framework        | Angular 21, Ionic 8 (standalone components, Signals, control flow)                    |
+| Auth             | Firebase (Angular Fire), AuthGuard                                                    |
+| State            | NgRx-style facades and stores; Angular Signals for reactive UI and computed values    |
+| Exercises API    | [ExerciseDB](https://www.exercisedb.dev) (public API)                                 |
+| Workouts / AI    | REST API generate-workout serverless function (Google Gemini); secret API keys in env |
+| Workouts storage | Upstash Redis via Vercel serverless proxy (`/api/workouts`)                           |
+| Deployment       | Vercel (static + serverless functions)                                                |
+| Environment      | Secret API keys via env vars (e.g. `GEMINI_API_KEY`)                                  |
+| Mobile           | Capacitor 6 (iOS / Android)                                                           |
+| i18n             | Angular localize (en, nl, el)                                                         |
+| Tests            | Jest (unit), Playwright (e2e)                                                         |
+
+---
+
+## How to use
+
+- **Dashboard** — Last and popular workouts, quick play.
+- **Workouts** — Browse, create, or edit. Use “Generate with AI” on the create flow for an AI-generated structure.
+- **History** — Workout history, Most Used, and Favorites.
+- **Profile** — Display name, email, password. Log out from here.
+- **Toolbar (ℹ)** — About modal with demo disclaimer, technologies, and state management overview.
 
 ---
 
@@ -45,6 +55,8 @@ Expect breaking changes and incomplete flows until the project reaches a stable 
 - Node.js v20+
 - Firebase project (for auth); configure environment as needed for the app.
 - For e2e: `npx playwright install` (once).
+
+**Web preview:** When running in the browser, use Chrome DevTools device toolbar (or responsive mode) and select a mobile device for the intended layout.
 
 ---
 
@@ -72,9 +84,10 @@ Default dev URL: http://localhost:4200 (or as shown in the terminal).
 - **`api/`** — Vercel serverless functions (workouts proxy to Upstash, health check).
 - **`libs/tabata/auth`** — Login, register, forgot password, profile; AuthStore; AuthFacade.
 - **`libs/tabata/dashboard`** — Dashboard tab content.
-- **`libs/tabata/workouts`** — Workouts tab (placeholder).
+- **`libs/tabata/workouts`** — Workouts tab (list, create, details).
+- **`libs/tabata/workouts-editor`** — Workout create/edit flow, AI preview modal.
 - **`libs/tabata/tabata-workouts`** — WorkoutsStore, WorkoutsService, WorkoutsFacade (Upstash backend).
-- **`libs/tabata/history`** — History tab (placeholder).
+- **`libs/tabata/history`** — History tab (History, Most Used, Favorites).
 - **`libs/tabata/profile`** — Profile tab and form.
 - **`libs/tabata/ui`** — Tabs and toolbar components.
 - **`libs/tabata/exercises`** — ExerciseDB client, ExercisesStore, ExercisesFacade.

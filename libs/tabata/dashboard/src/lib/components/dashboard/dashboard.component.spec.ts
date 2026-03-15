@@ -1,9 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
+import { ModalController } from '@ionic/angular/standalone';
 import { AuthFacade } from '@silver/tabata/auth';
 import { UserWorkoutsFacade } from '@silver/tabata/states/user-workouts';
 import { WorkoutsFacade } from '@silver/tabata/states/workouts';
-import { mockAuthFacade, mockUserWorkoutsFacade, mockWorkoutsFacade } from '@silver/tabata/testing';
+import { mockAuthFacade, mockModalController, mockUserWorkoutsFacade, mockWorkoutsFacade } from '@silver/tabata/testing';
 import { DashboardComponent } from './dashboard.component';
 
 describe('DashboardComponent', () => {
@@ -18,7 +19,8 @@ describe('DashboardComponent', () => {
                 provideRouter([]),
                 { provide: AuthFacade, useValue: mockAuthFacade },
                 { provide: UserWorkoutsFacade, useValue: mockUserWorkoutsFacade },
-                { provide: WorkoutsFacade, useValue: mockWorkoutsFacade }
+                { provide: WorkoutsFacade, useValue: mockWorkoutsFacade },
+                { provide: ModalController, useValue: mockModalController }
             ]
         }).compileComponents();
 

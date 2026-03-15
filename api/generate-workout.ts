@@ -36,23 +36,48 @@ function buildPrompt(input: {
         .map((e) => `- ${e.exerciseId}: ${e.name} (targets: ${(e.targetMuscles || []).join(', ')}, equipment: ${(e.equipments || []).join(', ')})`)
         .join('\n');
 
-    return `You are a Tabata workout designer. Generate a single JSON object for a Tabata workout. Use ONLY the exercise IDs listed below; do not invent IDs.
+    const equipmentList = ['body only', ...(input.availableEquipments || []).filter((e: string) => e !== 'Bodyweight')].join(', ');
 
-Workout brief:
+    return `You are an expert Tabata workout designer. Design a workout that strictly follows the user's brief and uses ONLY the exercise IDs from the list below. Do not invent any exercise IDs.
+
+WORKOUT BRIEF (honor these in every phase):
 - Name: ${input.name}
 - Description: ${input.description}
 - Main target body part: ${input.mainTargetBodypart}
-- Secondary targets: ${(input.secondaryTargetBodyparts || []).join(', ') || 'none'}
-- Available equipment: ${(input.availableEquipments || []).join(', ')}
+- Secondary target body parts: ${(input.secondaryTargetBodyparts || []).join(', ') || 'none'}
+- Available equipment: ${equipmentList}
+Note: body only is always available; choose exercises that match the target body parts and the listed equipment.
 
-Available exercises (use only these exerciseId values):
+AVAILABLE EXERCISES (use only these exerciseId values):
 ${exerciseList}
 
-Return a JSON object with this exact structure (no markdown, no code fence):
+---
+
+WARMUP (5–10 minutes):
+Purpose: Prepare muscles for high-intensity intervals. Total warmup duration must be 300–600 seconds (5–10 min).
+- Prefer dynamic movements: e.g. jumping jacks, mountain climbers, high knees, butt kicks when bodyweight is available.
+- If equipment is available: light cardio on bike/rower or myofascial release–style movements are also suitable.
+- Pick 2–4 movements from the list that fit the main/secondary targets and equipment. Each movement can be 60–120 seconds.
+
+MAIN PHASE – TABATA BLOCKS:
+- Each block = one exercise only, 8 rounds of 20 seconds work + 10 seconds rest (4 minutes per block).
+- Use 4–5 blocks for a full workout (~20 min of work); 1 minute rest between blocks (interBlockRestSeconds: 60).
+- Choose different exercises per block that align with the main and secondary target body parts and available equipment.
+- Rounds: 8, workDurationSeconds: 20, restDurationSeconds: 10, interBlockRestSeconds: 60 for every block.
+
+COOLDOWN (5–10 minutes):
+Purpose: Gradually lower heart rate. Total cooldown duration must be 300–600 seconds (5–10 min).
+- Prefer low-intensity movements and stretching for the muscle groups worked: e.g. walking-in-place style moves, then static stretches.
+- If equipment allows: light pedaling or resistance-band assisted stretching from the list.
+- Pick 2–4 movements from the list; each can be 60–120 seconds.
+
+---
+
+Return a single JSON object with this exact structure (no markdown, no code fence):
 {
-  "totalDurationMinutes": <number>,
+  "totalDurationMinutes": <number, total of warmup + all blocks + cooldown in minutes>,
   "warmup": {
-    "totalDurationSeconds": <number>,
+    "totalDurationSeconds": <number, between 300 and 600>,
     "movements": [{"exerciseId": "<id from list>", "durationSeconds": <number>}, ...]
   },
   "blocks": [
@@ -65,12 +90,12 @@ Return a JSON object with this exact structure (no markdown, no code fence):
     }
   ],
   "cooldown": {
-    "totalDurationSeconds": <number>,
+    "totalDurationSeconds": <number, between 300 and 600>,
     "movements": [{"exerciseId": "<id from list>", "durationSeconds": <number>}, ...]
   }
 }
 
-Rules: warmup 3-5 min, 2-4 Tabata blocks, cooldown 2-4 min. Only use exerciseIds from the list. Output valid JSON only.`;
+Rules: Use only exerciseIds from the list. Warmup and cooldown each 5–10 min (300–600 s). Main phase: 4–5 blocks, one exercise per block. Output valid JSON only.`;
 }
 
 export default {

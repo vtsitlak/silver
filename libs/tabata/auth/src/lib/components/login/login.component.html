@@ -2,7 +2,12 @@
     <div class="min-h-screen flex flex-col bg-logo bg-cover bg-center">
         <div class="form-container flex flex-col w-full mt-auto mb-0 justify-end">
             <form (ngSubmit)="onSubmit()" class="rounded-t-2xl bg-white w-full flex flex-col px-4 pb-4">
-                <h2 class="text-xl font-semibold mb-4" i18n="@@authLoginTitle">Login</h2>
+                <div class="flex items-center gap-2 mb-4">
+                    <h2 class="text-xl font-semibold" i18n="@@authLoginTitle">Login</h2>
+                    <ion-button fill="clear" size="small" (click)="openInfoSheet()" aria-label="About this app" class="ion-no-padding min-w-0">
+                        <ion-icon name="information-circle-outline"></ion-icon>
+                    </ion-button>
+                </div>
                 <div class="flex flex-col mb-2">
                     <label for="email" i18n="@@authEmailLabel" class="mb-2">Email</label>
                     <input

@@ -41,9 +41,9 @@
                 </ion-card-header>
                 <ion-card-content>
                     <p class="text-sm text-gray-500 mb-2">
-                        {{ formatSecondsToMinutes(d.warmup.totalDurationSeconds ?? 0) }} min · {{ d.warmup.movements?.length ?? 0 }} movements
+                        {{ formatSecondsToMinutes(d.warmup.totalDurationSeconds) }} min · {{ d.warmup.movements.length }} movements
                     </p>
-                    @if (d.warmup.movements?.length) {
+                    @if (d.warmup.movements.length) {
                         <ion-list lines="none" class="minimal-list">
                             @for (m of d.warmup.movements; track $index) {
                                 <ion-item class="py-1">
@@ -102,9 +102,9 @@
                 </ion-card-header>
                 <ion-card-content>
                     <p class="text-sm text-gray-500 mb-2">
-                        {{ formatSecondsToMinutes(d.cooldown.totalDurationSeconds ?? 0) }} min · {{ d.cooldown.movements?.length ?? 0 }} movements
+                        {{ formatSecondsToMinutes(d.cooldown.totalDurationSeconds) }} min · {{ d.cooldown.movements.length }} movements
                     </p>
-                    @if (d.cooldown.movements?.length) {
+                    @if (d.cooldown.movements.length) {
                         <ion-list lines="none" class="minimal-list">
                             @for (m of d.cooldown.movements; track $index) {
                                 <ion-item class="py-1">

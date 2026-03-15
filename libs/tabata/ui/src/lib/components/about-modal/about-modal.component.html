@@ -1,0 +1,54 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-title>About Tabata AI</ion-title>
+        <ion-buttons slot="end">
+            <ion-button (click)="onClose()">Close</ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding">
+    <div class="about-modal-content">
+        <section class="about-section">
+            <h3 class="about-heading">Demo app</h3>
+            <p class="about-body"> When viewed from web, switch to mobile view (browser DevTools or responsive mode) for the best experience. </p>
+            <p class="about-body">
+                This is a demonstration application for learning and example code only. It is not intended for commercial use. Use it to explore Tabata workout
+                flows, AI-generated workouts, and modern Angular patterns.
+            </p>
+        </section>
+
+        <section class="about-section">
+            <h3 class="about-heading">Technologies</h3>
+            <ul class="about-list">
+                <li><strong>Angular</strong> — Signals, standalone components, control flow (<code>&#64;if</code>, <code>&#64;for</code>)</li>
+                <li><strong>Ionic</strong> — UI components, tabs, modals, action sheets</li>
+                <li><strong>Firebase</strong> — Authentication and optional backend</li>
+                <li><strong>Nx</strong> — Monorepo, libs, build pipeline</li>
+                <li><strong>Google Gemini</strong> — AI workout generation via API</li>
+                <li><strong>REST API</strong> — Generate-workout endpoint (serverless function)</li>
+                <li><strong>Environment</strong> — Secret API keys via env vars (e.g. GEMINI_API_KEY)</li>
+                <li><strong>Vercel</strong> — Deployment and serverless functions</li>
+                <li><strong>Upstash</strong> — Serverless data / Redis when used</li>
+                <li><strong>Capacitor</strong> — Native mobile builds (iOS / Android)</li>
+            </ul>
+        </section>
+
+        <section class="about-section">
+            <h3 class="about-heading">State management</h3>
+            <p class="about-body">
+                NgRx-style facades and stores (e.g. AuthFacade, workout state). Angular Signals for reactive UI and computed values. Data persisted via
+                Firebase.
+            </p>
+        </section>
+
+        <section class="about-section">
+            <h3 class="about-heading">How to use</h3>
+            <ul class="about-list">
+                <li><strong>Dashboard</strong> — Last and popular workouts, quick play.</li>
+                <li><strong>Workouts</strong> — Browse, create, or edit. Use “Generate with AI” on the create flow for an AI-generated structure.</li>
+                <li><strong>History</strong> — Workout history, most used, and favorites.</li>
+                <li><strong>Profile</strong> — Display name, email, password. Log out from here.</li>
+            </ul>
+        </section>
+    </div>
+</ion-content>

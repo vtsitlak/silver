@@ -1,13 +1,13 @@
-import { Component, inject, input, ChangeDetectionStrategy } from '@angular/core';
-
-import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonPopover, IonTitle, IonToolbar } from '@ionic/angular/standalone';
-import { AuthFacade } from '@silver/tabata/auth';
+import { Component, input, ChangeDetectionStrategy, inject } from '@angular/core';
+import { IonButton, IonButtons, IonHeader, IonIcon, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { logOut, home, person, menu } from 'ionicons/icons';
-import { Router, RouterLink } from '@angular/router';
+import { informationCircleOutline } from 'ionicons/icons';
+import { AboutModalComponent } from '../about-modal/about-modal.component';
+
 @Component({
     selector: 'tbt-toolbar',
-    imports: [IonButtons, IonContent, IonPopover, IonTitle, IonToolbar, IonIcon, IonLabel, IonItem, IonList, IonButton, IonHeader, RouterLink],
+    imports: [IonButtons, IonTitle, IonToolbar, IonIcon, IonButton, IonHeader],
     templateUrl: './toolbar.component.html',
     styleUrl: './toolbar.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -18,31 +18,18 @@ export class ToolbarComponent {
     showStartContent = input<boolean>(false);
     /** When true, show projected content for end (e.g. edit button) instead of the default menu. */
     showEndContent = input<boolean>(false);
-    router = inject(Router);
-    private readonly authFacade = inject(AuthFacade);
 
-    showPopover = false;
-    popoverEvent: unknown;
+    private readonly modalCtrl = inject(ModalController);
 
     constructor() {
-        addIcons({ home, menu, person, logOut });
+        addIcons({ informationCircleOutline });
     }
 
-    togglePopover(event: Event) {
-        this.popoverEvent = event;
-        this.showPopover = !this.showPopover;
-    }
-
-    closePopover() {
-        this.showPopover = false;
-    }
-
-    onMenuItemClick() {
-        this.closePopover();
-    }
-
-    logout() {
-        this.closePopover();
-        this.authFacade.logout();
+    async openAbout(): Promise<void> {
+        const modal = await this.modalCtrl.create({
+            component: AboutModalComponent,
+            cssClass: 'about-modal-sheet'
+        });
+        await modal.present();
     }
 }

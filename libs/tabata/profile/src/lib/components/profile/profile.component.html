@@ -109,6 +109,11 @@
                     <span i18n="@@profileUpdateButton">Update Profile</span>
                 }
             </ion-button>
+
+            <ion-button expand="block" fill="outline" color="danger" (click)="onLogoutClick()" class="ion-margin-top">
+                <ion-icon name="log-out-outline" slot="start"></ion-icon>
+                <span i18n="@@logout">Logout</span>
+            </ion-button>
         </form>
     </div>
 </ion-content>
