@@ -1,9 +1,9 @@
 <ion-content fullscreen="true">
     <div class="min-h-screen flex flex-col bg-logo bg-cover bg-center">
         <div class="form-container flex flex-col w-full mt-auto mb-0 justify-end">
-            <form (ngSubmit)="onSubmit()" class="rounded-t-2xl bg-white w-full flex flex-col px-4 pb-4">
+            <form (ngSubmit)="onSubmit()" class="login-form rounded-t-2xl bg-white w-full flex flex-col px-4 pb-4 text-gray-900">
                 <div class="flex items-center gap-2 mb-4">
-                    <h2 class="text-xl font-semibold" i18n="@@authLoginTitle">Login</h2>
+                    <h2 class="text-xl font-semibold text-gray-900" i18n="@@authLoginTitle">Login</h2>
                     <ion-button fill="clear" size="small" (click)="openInfoSheet()" aria-label="About this app" class="ion-no-padding min-w-0">
                         <ion-icon name="information-circle-outline"></ion-icon>
                     </ion-button>
@@ -27,7 +27,7 @@
                     </div>
                 </div>
                 <div class="flex flex-col mb-2">
-                    <label for="password" i18n="@@authPasswordLabel" class="mb-2">Password</label>
+                    <label for="password" i18n="@@authPasswordLabel" class="mb-2 text-gray-900 font-medium">Password</label>
                     <input
                         id="password"
                         type="password"

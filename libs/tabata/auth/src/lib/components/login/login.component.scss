@@ -1,0 +1,17 @@
+/* Ensure text and icon are visible on the white form (e.g. when app is in dark mode). */
+.login-form {
+    --ion-icon-color: #1f2937;
+    color: #1f2937;
+
+    ion-button[aria-label='About this app'] ion-icon {
+        color: #1f2937;
+    }
+
+    input {
+        color: #1f2937;
+        background-color: #ffffff;
+        &::placeholder {
+            color: #6b7280;
+        }
+    }
+}

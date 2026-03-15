@@ -31,6 +31,8 @@
 
 body {
     font-family: 'Figtree', 'Roboto', sans-serif;
+    background-color: var(--color-surface);
+    color: var(--color-text);
 }
 
 :root {
@@ -40,6 +42,10 @@ body {
     --color-secondary-rgb: 198, 108, 214;
     --color-secondary-dark: #9b4ea7;
     --color-error: #b00020;
+    --color-surface: #ffffff;
+    --color-surface-rgb: 255, 255, 255;
+    --color-text: #1f2937;
+    --color-text-muted: #4b5563;
     --ion-color-secondary: var(--color-secondary);
     --ion-color-secondary-rgb: var(--color-secondary-rgb);
     --ion-color-secondary-contrast: #ffffff;
@@ -52,6 +58,24 @@ body {
     --ion-color-danger-contrast-rgb: 255, 255, 255;
     --ion-color-danger-shade: #96001a;
     --ion-color-danger-tint: #b83342;
+}
+
+/* Dark mode: system preference or .ion-palette-dark / .dark on html */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-surface: #1a1a1e;
+        --color-surface-rgb: 26, 26, 30;
+        --color-text: #e5e7eb;
+        --color-text-muted: #9ca3af;
+    }
+}
+.ion-palette-dark,
+.dark,
+[data-theme='dark'] {
+    --color-surface: #1a1a1e;
+    --color-surface-rgb: 26, 26, 30;
+    --color-text: #e5e7eb;
+    --color-text-muted: #9ca3af;
 }
 
 ion-title,
@@ -223,7 +247,7 @@ ion-item {
     }
 
     &.selected {
-        --background: rgb(243 244 246); /* gray-100, lighter background */
+        --background: var(--ion-item-background, rgb(243 244 246));
     }
 
     &[disabled] {
@@ -247,6 +271,8 @@ textarea {
     border-radius: 4px;
     padding: 8px;
     width: 100%;
+    background-color: var(--color-surface);
+    color: var(--color-text);
     transition: border-color 0.2s ease-in-out;
 
     &:focus {
@@ -259,6 +285,44 @@ textarea {
         border-color: var(--color-error);
         border-width: 2px;
     }
+}
+
+/* Dark mode: ion-content and cards use surface color for contrast */
+@media (prefers-color-scheme: dark) {
+    ion-content {
+        --background: var(--color-surface);
+        --color: var(--color-text);
+    }
+    ion-item {
+        --background: var(--color-surface);
+        --color: var(--color-text);
+    }
+    ion-input,
+    ion-textarea {
+        --background: var(--color-surface);
+        --color: var(--color-text);
+    }
+}
+.ion-palette-dark ion-content,
+.dark ion-content,
+[data-theme='dark'] ion-content {
+    --background: var(--color-surface);
+    --color: var(--color-text);
+}
+.ion-palette-dark ion-item,
+.dark ion-item,
+[data-theme='dark'] ion-item {
+    --background: var(--color-surface);
+    --color: var(--color-text);
+}
+.ion-palette-dark ion-input,
+.ion-palette-dark ion-textarea,
+.dark ion-input,
+.dark ion-textarea,
+[data-theme='dark'] ion-input,
+[data-theme='dark'] ion-textarea {
+    --background: var(--color-surface);
+    --color: var(--color-text);
 }
 
 /* Exercise selector modal sheet (presented via ModalController) */
@@ -323,13 +387,31 @@ ion-tab-bar ion-tab-button[aria-selected='true'] ion-label {
     color: var(--color-primary-dark) !important;
 }
 
-/* Toolbar: ensure info icon is visible (contrast on toolbar) */
+/* Toolbar: ensure info icon is visible (contrast on toolbar); dark mode keeps light icon on primary bar */
 ion-toolbar ion-button[aria-label='About this app'] ion-icon {
     color: #ffffff;
 }
 ion-toolbar:not(.ion-color) ion-button[aria-label='About this app'] ion-icon {
     --ion-icon-color: #ffffff;
     color: #ffffff;
+}
+
+/* Ion labels and list text in dark mode */
+@media (prefers-color-scheme: dark) {
+    ion-label,
+    ion-list ion-item {
+        color: var(--color-text);
+    }
+}
+.ion-palette-dark ion-label,
+.dark ion-label,
+[data-theme='dark'] ion-label {
+    color: var(--color-text);
+}
+.ion-palette-dark ion-item.selected,
+.dark ion-item.selected,
+[data-theme='dark'] ion-item.selected {
+    --background: rgba(255, 255, 255, 0.08);
 }
 
 /* Custom Input Container */

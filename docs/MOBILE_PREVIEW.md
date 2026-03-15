@@ -2,6 +2,8 @@
 
 This guide explains how to preview the Tabata AI app on Android and iOS devices/emulators from Cursor.
 
+**Testing disclaimer:** This app has been tested only on **web** and **Android (OnePlus 10 Pro)**. iOS and other devices have not been tested.
+
 **Web browser:** When viewing the app in a desktop browser, switch to **mobile view** (Chrome DevTools device toolbar or responsive mode) for the best experience. The UI is designed for mobile-first layout.
 
 ## Prerequisites
@@ -202,6 +204,34 @@ To produce an APK using Gradle directly (ensure `JAVA_HOME` points to JDK 17+ fi
 If you only see a `logs` folder under `android/build/outputs`, that is from the root project; the APK is under **`android/app/build/outputs/apk/debug/`**. If that folder or `app-debug.apk` is missing, the build did not finish successfully—re-run `.\gradlew.bat assembleDebug` and wait for `BUILD SUCCESSFUL`.
 
 From Android Studio: **Build → Build Bundle(s) / APK(s) → Build APK(s)** creates the same debug APK in the path above.
+
+## APIs when running on device
+
+When the app runs on a physical Android or iOS device (or emulator), it cannot use relative URLs like `/api/exercises-db` because there is no same-origin server. The app detects native platform via Capacitor and uses the **Vercel deployment** base URL (`https://silver-tabata-ai.vercel.app`) for:
+
+- **Exercises API** (`/api/exercises-db`)
+- **Workouts API** (`/api/workouts`)
+- **User workouts API** (`/api/user-workouts`)
+- **Generate workout (Gemini) API** (`/api/generate-workout`)
+
+Ensure the project is deployed to Vercel and that the serverless functions (including `api/exercises-db` and `api/generate-workout`) are available at that origin. No extra configuration is required on the device.
+
+## App icon (launcher icon)
+
+The in-app **toolbar** uses `assets/icon-128.png`. To use the same graphic as the **Android launcher icon** (home screen):
+
+1. From the repo root run:
+   ```bash
+   npm run cap:icons:tabata-ai
+   ```
+2. This copies `apps/tabata-ai/src/assets/icon-256.png` to `apps/tabata-ai/assets/icon.png` and runs `@capacitor/assets` to generate Android adaptive icon resources (foreground from the icon, background from the app primary color).
+3. Rebuild the app (e.g. `npm run build-apk:tabata-ai` or build from Android Studio).
+
+If you change the toolbar icon (`icon-256.png` / `icon-128.png`), run `npm run cap:icons:tabata-ai` again so the launcher icon stays in sync.
+
+## Dark mode
+
+The app respects the system **dark mode** (Settings → Display → Dark theme on Android). Backgrounds, text, inputs, tab bar, action sheets, and modals use high-contrast colors in dark mode. Styling is defined in `apps/tabata-ai/src/styles.scss` and follows Ionic’s dark system palette where applicable.
 
 ## Troubleshooting
 
