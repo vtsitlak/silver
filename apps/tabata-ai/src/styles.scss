@@ -277,6 +277,14 @@ textarea {
     --border-radius: 12px 12px 0 0;
 }
 
+/* AI workout preview modal (presented via ModalController) */
+.ai-workout-preview-modal-sheet {
+    --height: 90%;
+    --min-height: 70vh;
+    --max-height: 95vh;
+    --border-radius: 12px 12px 0 0;
+}
+
 /* Custom Input Container */
 .input-wrapper {
     position: relative;
