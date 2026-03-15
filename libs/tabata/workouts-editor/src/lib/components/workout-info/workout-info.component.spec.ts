@@ -6,12 +6,28 @@ import {
     createMockActivatedRoute,
     mockAuthFacade,
     mockWorkoutEditorFacade,
-    createMockWorkoutEditorCancelService
+    createMockWorkoutEditorCancelService,
+    mockModalController
 } from '@silver/tabata/testing';
 import { WorkoutInfoComponent } from './workout-info.component';
 import { WorkoutEditorCancelService } from '../../services/workout-editor-cancel.service';
+import { ModalController } from '@ionic/angular/standalone';
+import { AiWorkoutGeneratorService } from '@silver/tabata/ai-workout-generator';
+import { ExercisesService } from '@silver/tabata/states/exercises';
+import { of } from 'rxjs';
 
 const mockCancelService = createMockWorkoutEditorCancelService(false);
+const mockAiGenerator = {
+    generateWorkout: jest.fn(() =>
+        of({
+            totalDurationMinutes: 20,
+            warmup: { totalDurationSeconds: 180, movements: [] },
+            blocks: [],
+            cooldown: { totalDurationSeconds: 120, movements: [] }
+        })
+    )
+};
+const mockExercisesService = { filterExercises: jest.fn(() => of([])) };
 
 describe('WorkoutInfoComponent', () => {
     let component: WorkoutInfoComponent;
@@ -26,6 +42,9 @@ describe('WorkoutInfoComponent', () => {
                 { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade },
                 { provide: WorkoutEditorCancelService, useValue: mockCancelService },
                 { provide: AuthFacade, useValue: mockAuthFacade },
+                { provide: ModalController, useValue: mockModalController },
+                { provide: AiWorkoutGeneratorService, useValue: mockAiGenerator },
+                { provide: ExercisesService, useValue: mockExercisesService },
                 {
                     provide: ActivatedRoute,
                     useValue: createMockActivatedRoute()

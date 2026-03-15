@@ -1,0 +1,121 @@
+import { Component, ChangeDetectionStrategy, inject, effect, signal, computed } from '@angular/core';
+import {
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonButtons,
+    IonButton,
+    IonContent,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardContent,
+    IonList,
+    IonItem,
+    IonLabel,
+    IonChip,
+    IonIcon,
+    IonSpinner,
+    ModalController
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { timeOutline, fitnessOutline, flashOutline, saveOutline, refreshOutline, closeOutline } from 'ionicons/icons';
+import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
+import { WorkoutSubmitService } from '../../services/workout-submit.service';
+import { ExercisesFacade } from '@silver/tabata/states/exercises';
+import { ToastService } from '@silver/tabata/helpers';
+import { formatDurationMinutes, getBlockDurationMinutes, formatSecondsToMinutes } from '@silver/tabata/helpers';
+@Component({
+    selector: 'tbt-ai-workout-preview-modal',
+    templateUrl: './ai-workout-preview-modal.component.html',
+    styleUrls: ['./ai-workout-preview-modal.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        IonHeader,
+        IonToolbar,
+        IonTitle,
+        IonButtons,
+        IonButton,
+        IonContent,
+        IonCard,
+        IonCardHeader,
+        IonCardTitle,
+        IonCardContent,
+        IonList,
+        IonItem,
+        IonLabel,
+        IonChip,
+        IonIcon,
+        IonSpinner
+    ]
+})
+export class AiWorkoutPreviewModalComponent {
+    private readonly facade = inject(WorkoutEditorFacade);
+    private readonly submitService = inject(WorkoutSubmitService);
+    private readonly exercisesFacade = inject(ExercisesFacade);
+    private readonly toast = inject(ToastService);
+    private readonly modalCtrl = inject(ModalController);
+
+    readonly draft = this.facade.workoutDraft;
+    readonly isSaving = this.facade.isSaving;
+    readonly exercisesMap = this.exercisesFacade.exercisesMap;
+
+    readonly formatDurationMinutes = formatDurationMinutes;
+    readonly getBlockDurationMinutes = getBlockDurationMinutes;
+    readonly formatSecondsToMinutes = formatSecondsToMinutes;
+
+    /** Collect exercise IDs from draft and load map when draft has structure. */
+    private readonly exerciseIds = computed(() => {
+        const d = this.draft();
+        const ids: string[] = [];
+        d.blocks?.forEach((b) => b.exerciseId && ids.push(b.exerciseId));
+        d.warmup?.movements?.forEach((m) => m.exerciseId && ids.push(m.exerciseId));
+        d.cooldown?.movements?.forEach((m) => m.exerciseId && ids.push(m.exerciseId));
+        return [...new Set(ids)];
+    });
+
+    constructor() {
+        addIcons({
+            timeOutline,
+            fitnessOutline,
+            flashOutline,
+            saveOutline,
+            refreshOutline,
+            closeOutline
+        });
+        effect(() => {
+            const ids = this.exerciseIds();
+            if (ids.length > 0) {
+                this.exercisesFacade.loadExercisesMap(ids);
+            }
+        });
+    }
+
+    getExerciseName(exerciseId: string): string {
+        return this.exercisesMap()[exerciseId]?.name ?? exerciseId;
+    }
+
+    getExerciseImage(exerciseId: string): string {
+        const images = this.exercisesMap()[exerciseId]?.images;
+        return images?.length ? images[0] : '';
+    }
+
+    onSave(): void {
+        this.submitService.submitWorkout().subscribe({
+            next: (workout) => {
+                this.modalCtrl.dismiss({ workout }, 'save');
+            },
+            error: (err: Error) => {
+                this.toast.showError(err.message ?? 'Failed to save workout');
+            }
+        });
+    }
+
+    onTryAgain(): void {
+        this.modalCtrl.dismiss(null, 'tryAgain');
+    }
+
+    onCancel(): void {
+        this.modalCtrl.dismiss(null, 'cancel');
+    }
+}

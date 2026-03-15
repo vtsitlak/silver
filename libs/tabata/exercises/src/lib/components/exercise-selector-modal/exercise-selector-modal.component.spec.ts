@@ -37,7 +37,7 @@ describe('ExerciseSelectorModalComponent', () => {
 
     it('should dismiss with cancel role when cancel is called', () => {
         component.cancel();
-        expect(mockModalCtrl.dismiss).toHaveBeenCalledWith(null, 'cancel');
+        expect(mockModalController.dismiss).toHaveBeenCalledWith(null, 'cancel');
     });
 
     it('should dismiss with selected exercises and confirm role on confirm', () => {
@@ -54,7 +54,7 @@ describe('ExerciseSelectorModalComponent', () => {
     });
 
     it('should clear selections when resetSelections is called (no preselected)', () => {
-        component.toggleSelection(mockExercises[0]);
+        component.toggleSelection(mockExercisesArray[0] as Exercise);
         expect(component.selectedCount()).toBe(1);
         component.resetSelections();
         expect(component.selectedCount()).toBe(0);
@@ -72,12 +72,13 @@ describe('ExerciseSelectorModalComponent', () => {
     });
 
     it('should only return newly selected on confirm when preselected exist', () => {
+        const ex1 = mockExercisesArray[0] as Exercise;
         const ex2: Exercise = {
-            ...mockExercises[0],
+            ...ex1,
             exerciseId: '2',
             name: 'Squat'
         };
-        mockFacade.exercises.set([mockExercises[0], ex2]);
+        mockFacade.exercises.set([ex1, ex2]);
         fixture.componentRef.setInput('preselectedIds', ['1']);
         fixture.detectChanges();
         component['initializePreselected']();
@@ -91,9 +92,10 @@ describe('ExerciseSelectorModalComponent', () => {
         fixture.componentRef.setInput('preselectedIds', ['1']);
         fixture.detectChanges();
         component['initializePreselected']();
-        component.toggleSelection(mockExercises[0]);
+        const ex = mockExercisesArray[0] as Exercise;
+        component.toggleSelection(ex);
         expect(component.selectedCount()).toBe(1);
-        component.toggleSelection(mockExercises[0]);
+        component.toggleSelection(ex);
         expect(component.selectedCount()).toBe(1);
     });
 

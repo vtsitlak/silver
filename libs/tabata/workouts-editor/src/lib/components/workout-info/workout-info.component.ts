@@ -32,6 +32,8 @@ import {
 import { AiWorkoutGeneratorService } from '@silver/tabata/ai-workout-generator';
 import type { ExerciseSummary } from '@silver/tabata/ai-workout-generator';
 import { ExercisesService } from '@silver/tabata/states/exercises';
+import { ModalController } from '@ionic/angular/standalone';
+import { AiWorkoutPreviewModalComponent } from '../ai-workout-preview-modal/ai-workout-preview-modal.component';
 import { addIcons } from 'ionicons';
 import { arrowBackOutline, arrowForwardOutline } from 'ionicons/icons';
 
@@ -75,6 +77,7 @@ export class WorkoutInfoComponent implements OnInit {
     private readonly cancelService = inject(WorkoutEditorCancelService);
     private readonly aiGenerator = inject(AiWorkoutGeneratorService);
     private readonly exercisesService = inject(ExercisesService);
+    private readonly modalCtrl = inject(ModalController);
 
     readonly workoutId = signal<string | null>(null);
     readonly isEditMode = signal(false);
@@ -219,6 +222,7 @@ export class WorkoutInfoComponent implements OnInit {
                                 });
                                 this.infoModel.set({ ...model, generatedByAi: true });
                                 this.isGenerating.set(false);
+                                this.openAiPreviewModal();
                             },
                             error: (err: { error?: { error?: string }; message?: string }) => {
                                 const msg = err?.error?.error ?? err?.message ?? 'AI generation failed';
@@ -269,5 +273,26 @@ export class WorkoutInfoComponent implements OnInit {
         } else {
             this.router.navigate(['/tabs/workouts/create/warmup']);
         }
+    }
+
+    private openAiPreviewModal(): void {
+        this.modalCtrl
+            .create({
+                component: AiWorkoutPreviewModalComponent,
+                cssClass: 'ai-workout-preview-modal-sheet'
+            })
+            .then((modal) => {
+                modal.onDidDismiss().then(({ role }) => {
+                    if (role === 'save') {
+                        this.router.navigate(['/tabs/workouts']);
+                    } else if (role === 'tryAgain') {
+                        this.onGenerateWithAi();
+                    } else if (role === 'cancel') {
+                        this.facade.clearDraft();
+                        this.router.navigate(['/tabs/workouts']);
+                    }
+                });
+                return modal.present();
+            });
     }
 }
