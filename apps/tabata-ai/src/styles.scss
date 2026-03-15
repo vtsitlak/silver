@@ -60,23 +60,63 @@ body {
     --ion-color-danger-tint: #b83342;
 }
 
-/* Dark mode: system preference or .ion-palette-dark / .dark on html */
+/* App forces light theme only (no dark mode). */
+html.force-light-theme {
+    --color-surface: #ffffff !important;
+    --color-surface-rgb: 255, 255, 255 !important;
+    --color-text: #1f2937 !important;
+    --color-text-muted: #4b5563 !important;
+}
+.force-light-theme,
+.force-light-theme ion-content,
+.force-light-theme ion-item,
+.force-light-theme ion-label,
+.force-light-theme .ion-palette-dark {
+    --color-surface: #ffffff !important;
+    --color-surface-rgb: 255, 255, 255 !important;
+    --color-text: #1f2937 !important;
+    --color-text-muted: #4b5563 !important;
+    --ion-background-color: #ffffff !important;
+    --ion-text-color: #1f2937 !important;
+    --ion-item-background: #ffffff !important;
+}
+.force-light-theme ion-content {
+    --background: #ffffff !important;
+    --color: #1f2937 !important;
+}
+.force-light-theme ion-item {
+    --background: #ffffff !important;
+    --color: #1f2937 !important;
+}
+.force-light-theme ion-input,
+.force-light-theme ion-textarea {
+    --background: #ffffff !important;
+    --color: #1f2937 !important;
+}
+/* Override when Ionic adds .ion-palette-dark to body (system dark mode) */
+body.force-light-theme.ion-palette-dark,
+body.force-light-theme.dark {
+    --color-surface: #ffffff !important;
+    --color-text: #1f2937 !important;
+    --ion-background-color: #ffffff !important;
+    --ion-text-color: #1f2937 !important;
+}
+body.force-light-theme.ion-palette-dark ion-content,
+body.force-light-theme.dark ion-content {
+    --background: #ffffff !important;
+    --color: #1f2937 !important;
+}
+
+/* Dark mode disabled - was: system preference or .ion-palette-dark */
+/* When not using .force-light-theme, uncomment below to re-enable dark mode.
 @media (prefers-color-scheme: dark) {
     :root {
         --color-surface: #1a1a1e;
-        --color-surface-rgb: 26, 26, 30;
         --color-text: #e5e7eb;
         --color-text-muted: #9ca3af;
     }
 }
-.ion-palette-dark,
-.dark,
-[data-theme='dark'] {
-    --color-surface: #1a1a1e;
-    --color-surface-rgb: 26, 26, 30;
-    --color-text: #e5e7eb;
-    --color-text-muted: #9ca3af;
-}
+*/
 
 ion-title,
 ion-label,

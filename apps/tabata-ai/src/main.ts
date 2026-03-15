@@ -23,8 +23,21 @@ import { Capacitor } from '@capacitor/core';
 
 const API_ORIGIN_VERCEL = 'https://silver-tabata-ai.vercel.app';
 
-function getApiBaseUrl(): string {
+function isNativePlatform(): boolean {
     if (typeof Capacitor !== 'undefined' && Capacitor.getPlatform() !== 'web') {
+        return true;
+    }
+    if (typeof document !== 'undefined' && document.URL) {
+        const u = document.URL;
+        if (u.startsWith('capacitor://') || u.startsWith('http://localhost') || u.startsWith('https://localhost')) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function getApiBaseUrl(): string {
+    if (isNativePlatform()) {
         return API_ORIGIN_VERCEL;
     }
     return environment.production ? '' : (environment.workoutsApiBaseUrl ?? '');
