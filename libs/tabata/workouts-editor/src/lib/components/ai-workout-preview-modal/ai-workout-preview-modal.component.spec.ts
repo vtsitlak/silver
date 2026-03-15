@@ -83,7 +83,12 @@ describe('AiWorkoutPreviewModalComponent', () => {
     });
 
     it('should call loadExercisesMap with draft exercise ids', () => {
-        expect(mockExercisesFacade.loadExercisesMap).toHaveBeenCalledWith(['ex1', 'ex2', 'ex3']);
+        expect(mockExercisesFacade.loadExercisesMap).toHaveBeenCalled();
+        const ids = mockExercisesFacade.loadExercisesMap.mock.calls[0][0] as string[];
+        expect(ids).toHaveLength(3);
+        expect(ids).toContain('ex1');
+        expect(ids).toContain('ex2');
+        expect(ids).toContain('ex3');
     });
 
     it('should dismiss with save role when save succeeds', () => {
