@@ -2,6 +2,8 @@
 
 This guide explains how to preview the Tabata AI app on Android and iOS devices/emulators from Cursor.
 
+**Web browser:** When viewing the app in a desktop browser, switch to **mobile view** (Chrome DevTools device toolbar or responsive mode) for the best experience. The UI is designed for mobile-first layout.
+
 ## Prerequisites
 
 ### For Android Development

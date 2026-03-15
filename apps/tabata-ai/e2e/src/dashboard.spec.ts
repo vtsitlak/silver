@@ -13,6 +13,7 @@ test.describe('Dashboard', () => {
         await expect(page.getByRole('tab', { name: 'Dashboard' })).toBeVisible({ timeout: 5000 });
         await expect(page.getByRole('tab', { name: 'Workouts' })).toBeVisible();
         await expect(page.getByRole('tab', { name: 'History' })).toBeVisible();
+        await expect(page.getByRole('tab', { name: 'Profile' })).toBeVisible();
         await expect(page.getByRole('tab', { name: 'Dashboard' })).toHaveAttribute('aria-selected', 'true');
         await expect(page.getByRole('heading', { name: /Hello,/ })).toBeVisible({ timeout: 5000 });
     });

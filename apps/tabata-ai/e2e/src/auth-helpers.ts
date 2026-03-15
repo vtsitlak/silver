@@ -23,11 +23,16 @@ export function requireAuthEnv(): void {
 export async function loginAndWaitForDashboard(page: Page): Promise<void> {
     await page.goto('/auth/login');
     await page.getByLabel('Email').or(page.locator('#email')).first().waitFor({ state: 'visible', timeout: 10000 });
-    await page.getByLabel('Email').or(page.locator('#email')).first().fill(TEST_USER_EMAIL ?? '');
-    await page.getByLabel('Password').or(page.locator('#password')).first().fill(TEST_USER_PASSWORD ?? '');
-    await Promise.all([
-        page.waitForURL(/\/tabs\/dashboard/, { timeout: 15000 }),
-        page.getByRole('button', { name: 'Login' }).click()
-    ]);
+    await page
+        .getByLabel('Email')
+        .or(page.locator('#email'))
+        .first()
+        .fill(TEST_USER_EMAIL ?? '');
+    await page
+        .getByLabel('Password')
+        .or(page.locator('#password'))
+        .first()
+        .fill(TEST_USER_PASSWORD ?? '');
+    await Promise.all([page.waitForURL(/\/tabs\/dashboard/, { timeout: 15000 }), page.getByRole('button', { name: 'Login' }).click()]);
     await page.waitForURL(/\/tabs\/dashboard/, { timeout: 10000 });
 }

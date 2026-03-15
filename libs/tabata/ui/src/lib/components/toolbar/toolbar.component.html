@@ -18,27 +18,10 @@
             @if (showEndContent()) {
                 <ng-content select="[slot=end]"></ng-content>
             } @else {
-                <ion-button (click)="togglePopover($event)">
-                    <ion-icon class="text-white" name="menu"></ion-icon>
+                <ion-button (click)="openAbout()" aria-label="About this app" class="ion-no-padding">
+                    <ion-icon class="text-white" name="information-circle-outline"></ion-icon>
                 </ion-button>
             }
         </ion-buttons>
     </ion-toolbar>
 </ion-header>
-
-<ion-popover [isOpen]="showPopover" (didDismiss)="closePopover()" [event]="popoverEvent" reference="event" size="auto" alignment="center">
-    <ng-template>
-        <ion-content>
-            <ion-list>
-                <ion-item class="p-0 mb-0" button [routerLink]="['/tabs/profile']" (click)="onMenuItemClick()">
-                    <ion-icon slot="start" name="person"></ion-icon>
-                    <ion-label i18n="@@profile">Profile</ion-label>
-                </ion-item>
-                <ion-item class="p-0 mb-0" button (click)="logout()">
-                    <ion-icon slot="start" name="log-out"></ion-icon>
-                    <ion-label i18n="@@logout">Logout</ion-label>
-                </ion-item>
-            </ion-list>
-        </ion-content>
-    </ng-template>
-</ion-popover>

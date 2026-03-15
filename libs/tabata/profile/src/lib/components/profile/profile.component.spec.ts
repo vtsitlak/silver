@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { ModalController } from '@ionic/angular/standalone';
 import { AuthFacade } from '@silver/tabata/auth';
-import { mockAuthFacade } from '@silver/tabata/testing';
+import { mockAuthFacade, mockModalController } from '@silver/tabata/testing';
 import { ProfileComponent } from './profile.component';
 
 describe('ProfileComponent', () => {
@@ -11,7 +12,7 @@ describe('ProfileComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [ProfileComponent],
-            providers: [provideRouter([]), { provide: AuthFacade, useValue: mockAuthFacade }]
+            providers: [provideRouter([]), { provide: AuthFacade, useValue: mockAuthFacade }, { provide: ModalController, useValue: mockModalController }]
         }).compileComponents();
 
         fixture = TestBed.createComponent(ProfileComponent);

@@ -285,6 +285,53 @@ textarea {
     --border-radius: 12px 12px 0 0;
 }
 
+/* About modal (presented via ModalController from toolbar) */
+.about-modal-sheet {
+    --height: 85%;
+    --min-height: 70vh;
+    --max-height: 90vh;
+    --border-radius: 12px 12px 0 0;
+}
+
+.about-modal-sheet ion-content {
+    --background: #ffffff;
+}
+
+/* Action sheet: ensure header/subHeader text and background are visible (About, login info) */
+ion-action-sheet.tbt-action-sheet-visible {
+    --background: #ffffff;
+    --color: #1f2937;
+}
+.tbt-action-sheet-visible .action-sheet-title,
+.tbt-action-sheet-visible .action-sheet-sub-title {
+    color: #1f2937 !important;
+}
+
+/* Tab bar: ensure unselected icons and labels are visible */
+ion-tab-bar {
+    --color: #4b5563;
+    --color-selected: var(--color-primary-dark);
+}
+ion-tab-bar ion-tab-button ion-icon,
+ion-tab-bar ion-tab-button ion-label {
+    color: #4b5563;
+}
+ion-tab-bar ion-tab-button.tab-selected ion-icon,
+ion-tab-bar ion-tab-button.tab-selected ion-label,
+ion-tab-bar ion-tab-button[aria-selected='true'] ion-icon,
+ion-tab-bar ion-tab-button[aria-selected='true'] ion-label {
+    color: var(--color-primary-dark) !important;
+}
+
+/* Toolbar: ensure info icon is visible (contrast on toolbar) */
+ion-toolbar ion-button[aria-label='About this app'] ion-icon {
+    color: #ffffff;
+}
+ion-toolbar:not(.ion-color) ion-button[aria-label='About this app'] ion-icon {
+    --ion-icon-color: #ffffff;
+    color: #ffffff;
+}
+
 /* Custom Input Container */
 .input-wrapper {
     position: relative;

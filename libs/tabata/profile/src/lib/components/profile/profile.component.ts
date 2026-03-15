@@ -1,6 +1,8 @@
 import { Component, inject, linkedSignal, OnInit, signal } from '@angular/core';
 import { disabled, email, form, FormField, required, validate } from '@angular/forms/signals';
-import { IonHeader, IonContent, IonButton, IonToggle, IonSpinner } from '@ionic/angular/standalone';
+import { IonHeader, IonContent, IonButton, IonToggle, IonSpinner, IonIcon, ActionSheetController } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { logOutOutline } from 'ionicons/icons';
 import { ToolbarComponent } from '@silver/tabata/ui';
 import { AuthFacade } from '@silver/tabata/auth';
 
@@ -14,12 +16,13 @@ interface ProfileFormModel {
 
 @Component({
     selector: 'tbt-profile',
-    imports: [IonToggle, IonHeader, IonContent, ToolbarComponent, FormField, IonButton, IonSpinner],
+    imports: [IonToggle, IonHeader, IonContent, ToolbarComponent, FormField, IonButton, IonSpinner, IonIcon],
     templateUrl: './profile.component.html',
     styleUrl: './profile.component.scss'
 })
 export class ProfileComponent implements OnInit {
     private readonly authFacade = inject(AuthFacade);
+    private readonly actionSheetCtrl = inject(ActionSheetController);
     usePassword = linkedSignal(() => this.authFacade.usePassword());
     isLoading = linkedSignal(() => this.authFacade.isLoading());
     showPasswordField = false;
@@ -55,6 +58,10 @@ export class ProfileComponent implements OnInit {
             return newPwd === v ? null : { kind: 'passwordMismatch', message: 'Passwords do not match' };
         });
     });
+
+    constructor() {
+        addIcons({ logOutOutline });
+    }
 
     ngOnInit(): void {
         const user = this.authFacade.user();
@@ -101,5 +108,17 @@ export class ProfileComponent implements OnInit {
             });
             this.togglePasswordField();
         }
+    }
+
+    async onLogoutClick(): Promise<void> {
+        const sheet = await this.actionSheetCtrl.create({
+            header: 'Log out?',
+            subHeader: 'You will need to sign in again to use the app.',
+            buttons: [
+                { text: 'Cancel', role: 'cancel' },
+                { text: 'Log out', role: 'destructive', handler: () => this.authFacade.logout() }
+            ]
+        });
+        await sheet.present();
     }
 }

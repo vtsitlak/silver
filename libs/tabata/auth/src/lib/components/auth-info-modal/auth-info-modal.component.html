@@ -1,0 +1,27 @@
+<ion-modal [isOpen]="isOpen()" (didDismiss)="onDidDismiss()" [initialBreakpoint]="0.6" [breakpoints]="[0, 0.6, 1]" class="auth-info-modal">
+    <ion-header>
+        <ion-toolbar>
+            <ion-title i18n="@@authDemoInfoTitle">About this app</ion-title>
+            <ion-buttons slot="end">
+                <ion-button (click)="onClose()" i18n="@@authClose">Close</ion-button>
+            </ion-buttons>
+        </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+        <div class="auth-info-modal-body" style="background-color: #ffffff; color: #1f2937; padding: 16px; min-height: 200px">
+            <p style="font-weight: 600; margin-bottom: 8px; color: #1f2937" i18n="@@authDemoInfoSubtitle">Demo app — for practice and example code only</p>
+            <ul style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6; color: #374151">
+                <li style="margin-bottom: 8px; color: #374151" i18n="@@authDemoInfo1"
+                    >This is a demonstration application for learning and practicing. It is not intended for commercial use.</li
+                >
+                <li style="margin-bottom: 8px; color: #374151" i18n="@@authDemoInfo2"
+                    >Login and authentication are powered by Firebase (Firebase Auth). Your credentials are handled by Firebase services.</li
+                >
+                <li style="margin-bottom: 8px; color: #374151" i18n="@@authDemoInfo3"
+                    >Workout data and AI-generated content are for illustration purposes only.</li
+                >
+                <li style="margin-bottom: 0; color: #374151" i18n="@@authDemoInfo4">Use this app as reference code or for personal practice only.</li>
+            </ul>
+        </div>
+    </ion-content>
+</ion-modal>

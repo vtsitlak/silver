@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { fakeAsync, tick } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { ModalController } from '@ionic/angular/standalone';
 import { WorkoutDetailsComponent } from './workout-details.component';
 import { WorkoutsFacade, TabataBlock } from '@silver/tabata/states/workouts';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
@@ -8,6 +9,7 @@ import { UserWorkoutsFacade } from '@silver/tabata/states/user-workouts';
 import {
     mockAuthFacade,
     mockUserWorkoutsFacade,
+    mockModalController,
     createMockWorkoutsFacade,
     createMockExercisesFacade,
     mockTabataWorkout
@@ -31,7 +33,8 @@ describe('WorkoutDetailsComponent', () => {
                 { provide: AuthFacade, useValue: mockAuthFacade },
                 { provide: UserWorkoutsFacade, useValue: mockUserWorkoutsFacade },
                 { provide: WorkoutsFacade, useValue: mockWorkoutsFacade },
-                { provide: ExercisesFacade, useValue: mockExercisesFacade }
+                { provide: ExercisesFacade, useValue: mockExercisesFacade },
+                { provide: ModalController, useValue: mockModalController }
             ]
         }).compileComponents();
 
