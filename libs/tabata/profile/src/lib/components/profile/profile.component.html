@@ -4,7 +4,11 @@
 
 <ion-content [fullscreen]="true">
     <div class="flex flex-col">
-        <form (ngSubmit)="onSubmit()" class="bg-white w-full flex flex-col px-4 py-4">
+        <form
+            (submit)="$event.preventDefault(); onSubmit()"
+            method="post"
+            class="bg-white w-full flex flex-col px-4 py-4"
+        >
             <h2 class="text-xl font-semibold mb-4" i18n="@@profileTitle">Profile Settings</h2>
 
             <div class="flex flex-col mb-2">
