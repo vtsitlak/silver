@@ -104,7 +104,10 @@ export class WorkoutSubmitService {
                 updatedByUserId: userId
             };
             return this.workoutEditorService.updateWorkout(existingWorkout.id, payload).pipe(
-                tap((workout) => this.workoutEditorFacade.setWorkoutFromResponse(workout)),
+                tap((workout) => {
+                    this.workoutEditorFacade.setWorkoutFromResponse(workout);
+                    this.toast.showSuccess('Workout updated');
+                }),
                 catchError((err: Error) => {
                     this.workoutEditorFacade.setSaveError(err.message);
                     return EMPTY;
@@ -121,7 +124,10 @@ export class WorkoutSubmitService {
             updatedByUserId: userId
         } as CreateWorkoutPayload;
         return this.workoutEditorService.createWorkout(payload).pipe(
-            tap((workout) => this.workoutEditorFacade.setWorkoutFromResponse(workout)),
+            tap((workout) => {
+                this.workoutEditorFacade.setWorkoutFromResponse(workout);
+                this.toast.showSuccess('Workout created');
+            }),
             catchError((err: Error) => {
                 this.workoutEditorFacade.setSaveError(err.message);
                 return EMPTY;
