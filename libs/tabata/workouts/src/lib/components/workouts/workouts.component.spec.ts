@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
 import { AuthFacade } from '@silver/tabata/auth';
-import { WorkoutsFacade } from '@silver/tabata/states/workouts';
+import { WorkoutsFacade, TabataWorkout } from '@silver/tabata/states/workouts';
 import { ToastService } from '@silver/tabata/helpers';
-import { mockAuthFacade, mockWorkoutsFacade, mockModalController, mockToastService } from '@silver/tabata/testing';
+import { mockAuthFacade, mockModalController, mockToastService, createMockWorkoutsFacade } from '@silver/tabata/testing';
 import { WorkoutsComponent } from './workouts.component';
 import { ModalController } from '@ionic/angular/standalone';
 
 describe('WorkoutsComponent', () => {
     let component: WorkoutsComponent;
     let fixture: ComponentFixture<WorkoutsComponent>;
+    const mockWorkoutsFacade = createMockWorkoutsFacade();
 
     beforeEach(async () => {
-        mockWorkoutsFacade.removeWorkout.mockReturnValue(of({ success: true }));
+        mockAuthFacade.user.set(null);
         await TestBed.configureTestingModule({
             imports: [WorkoutsComponent],
             providers: [
@@ -32,5 +32,23 @@ describe('WorkoutsComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should expose only workouts created by current user in userWorkouts', () => {
+        mockAuthFacade.user.set({ uid: 'user-1' });
+        const workoutsSignal = mockWorkoutsFacade.workouts as unknown as {
+            (): TabataWorkout[];
+            set(value: TabataWorkout[]): void;
+        };
+        const base = workoutsSignal()[0];
+        workoutsSignal.set([
+            { ...base, id: 'w1', createdByUserId: 'user-1' },
+            { ...base, id: 'w2', createdByUserId: 'user-2' }
+        ]);
+
+        fixture.detectChanges();
+
+        const result = component['userWorkouts']();
+        expect(result.map((w: { id: string }) => w.id)).toEqual(['w1']);
     });
 });

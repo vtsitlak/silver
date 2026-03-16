@@ -24,7 +24,7 @@
     }
     @if (!isLoading() && !error()) {
         <ion-list>
-            @for (workout of workouts(); track workout.id) {
+            @for (workout of userWorkouts(); track workout.id) {
                 <tbt-workout-item
                     [workout]="workout"
                     (detailsClick)="onDetailsClick($event)"
@@ -34,7 +34,7 @@
                 ></tbt-workout-item>
             } @empty {
                 <ion-item lines="none">
-                    <p i18n>No workouts yet.</p>
+                    <p i18n>Start creating your workouts to see them here.</p>
                 </ion-item>
             }
         </ion-list>

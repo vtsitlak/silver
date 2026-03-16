@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, inject, signal } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -9,6 +9,7 @@ import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
 import { ToolbarComponent } from '@silver/tabata/ui';
 import { WorkoutsFacade, TabataWorkout } from '@silver/tabata/states/workouts';
+import { AuthFacade } from '@silver/tabata/auth';
 import { ToastService } from '@silver/tabata/helpers';
 import { WorkoutItemComponent } from '../workout-item/workout-item.component';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
@@ -22,6 +23,7 @@ import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 })
 export class WorkoutsComponent {
     private readonly facade = inject(WorkoutsFacade);
+    private readonly authFacade = inject(AuthFacade);
     private readonly router = inject(Router);
     private readonly toast = inject(ToastService);
     private readonly workoutEditorFacade = inject(WorkoutEditorFacade);
@@ -49,6 +51,16 @@ export class WorkoutsComponent {
     readonly workouts = this.facade.workouts;
     readonly isLoading = this.facade.isLoading;
     readonly error = this.facade.error;
+
+    /** Workouts created by the currently logged-in user. */
+    readonly userWorkouts = computed(() => {
+        const userId = (this.authFacade.user() as { uid?: string } | null)?.uid;
+        const all = this.workouts();
+        if (!userId) {
+            return all;
+        }
+        return all.filter((w) => w.createdByUserId === userId);
+    });
 
     onSearchInput(ev: Event): void {
         const customEv = ev as CustomEvent<{ value: string }>;
