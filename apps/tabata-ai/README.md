@@ -10,6 +10,12 @@
 
 ---
 
+## Live demo
+
+- **Deployed app**: [https://silver-tabata-ai.vercel.app/](https://silver-tabata-ai.vercel.app/)
+
+---
+
 ## Status
 
 - **Authentication** — Login, register, forgot password, profile updates (Firebase).
@@ -76,6 +82,21 @@ From the **monorepo root** (`silver/`):
 | Lint                         | `npx nx lint tabata-ai`                               |
 
 Default dev URL: http://localhost:4200 (or as shown in the terminal).
+
+---
+
+## Screenshots
+
+> Note: Layout is optimized for mobile view. Screenshots are indicative; use DevTools responsive mode to match the intended size.
+
+- **Login**  
+  ![Tabata AI Login](./docs/screenshots/login.png)
+
+- **Dashboard**  
+  ![Tabata AI Dashboard](./docs/screenshots/dashboard.png)
+
+- **Workouts**  
+  ![Tabata AI Workouts](./docs/screenshots/workouts.png)
 
 ---
 

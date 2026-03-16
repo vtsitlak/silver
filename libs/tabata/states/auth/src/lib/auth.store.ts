@@ -6,6 +6,7 @@ import { catchError, exhaustMap, finalize, map, of, pipe, switchMap, tap } from 
 import { Subject } from 'rxjs';
 import { tapResponse } from '@ngrx/operators';
 import { AuthService } from './auth.service';
+import { ToastService } from '@silver/tabata/helpers';
 import { authInitialState, AuthState, LoginUser, NewUser, ProfileUser, toProfileUser, UpdatePasswordDetails, userToState } from './auth.models';
 
 export const AuthStore = signalStore(
@@ -19,7 +20,7 @@ export const AuthStore = signalStore(
         isAuthenticated: computed(() => !!profileUser())
     })),
     // --- METHODS ---
-    withMethods((store, authService = inject(AuthService)) => ({
+    withMethods((store, authService = inject(AuthService), toast = inject(ToastService)) => ({
         clearError(): void {
             patchState(store, { error: null });
         },
@@ -51,6 +52,7 @@ export const AuthStore = signalStore(
                         tapResponse({
                             next: () => {
                                 patchState(store, { isLoading: false, error: null });
+                                toast.showSuccess('Password reset email sent. Check your inbox and spam folder, then follow the instructions.');
                             },
                             error: (error: Error) => {
                                 console.error('Auth error:', error);

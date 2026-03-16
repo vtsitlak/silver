@@ -13,6 +13,14 @@
                 <h2 class="text-xl font-semibold text-gray-800" i18n="@@dashboardGreeting">Hello, {{ greeting() }}!</h2>
             </section>
 
+            @if (!lastWorkoutItem() && !mostPopularWorkout() && favoriteIds().length === 0) {
+                <section class="rounded-lg border border-dashed border-gray-300 p-4 bg-white text-center">
+                    <p class="text-sm text-gray-600" i18n="@@dashboardEmptyMessage">
+                        Start logging workouts and marking them as favorites to see your recent and favorite workouts here.
+                    </p>
+                </section>
+            }
+
             @if (lastWorkoutItem(); as item) {
                 <section class="rounded-lg border border-gray-200 p-4 bg-gray-50">
                     <h3 class="text-sm font-medium text-gray-500 mb-1" i18n="@@dashboardLastWorkout">Last workout started</h3>
