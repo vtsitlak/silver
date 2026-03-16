@@ -1,7 +1,11 @@
 <ion-content fullscreen="true">
     <div class="min-h-screen flex flex-col bg-logo bg-cover bg-center">
         <div class="form-container flex flex-col w-full mt-auto mb-0 justify-end">
-            <form (ngSubmit)="onSubmit()" class="rounded-t-2xl bg-white w-full flex flex-col px-4 pb-4">
+            <form
+                (submit)="$event.preventDefault(); onSubmit()"
+                method="post"
+                class="rounded-t-2xl bg-white w-full flex flex-col px-4 pb-4"
+            >
                 <h2 class="text-xl font-semibold mb-4" i18n="@@authRegisterTitle">Register</h2>
                 <div class="flex flex-col mb-2">
                     <label for="displayName" i18n="@@authDisplayNameLabel" class="mb-2">Display name</label>
