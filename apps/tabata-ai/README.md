@@ -87,16 +87,16 @@ Default dev URL: http://localhost:4200 (or as shown in the terminal).
 
 ## Screenshots
 
-> Note: Layout is optimized for mobile view. Screenshots are indicative; use DevTools responsive mode to match the intended size.
+> Note: Layout is optimized for mobile view. Screenshots are in `docs/screenshots/` (login.png, dashboard.png, workouts.png).
 
 - **Login**  
-  ![Tabata AI Login](./docs/screenshots/login.png)
+  ![Tabata AI Login](../../docs/screenshots/login.png)
 
 - **Dashboard**  
-  ![Tabata AI Dashboard](./docs/screenshots/dashboard.png)
+  ![Tabata AI Dashboard](../../docs/screenshots/dashboard.png)
 
 - **Workouts**  
-  ![Tabata AI Workouts](./docs/screenshots/workouts.png)
+  ![Tabata AI Workouts](../../docs/screenshots/workouts.png)
 
 ---
 

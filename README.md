@@ -95,6 +95,17 @@ silver/
 
 ---
 
+## Tabata AI — live demo and screenshots
+
+- **Live demo:** [https://silver-tabata-ai.vercel.app/](https://silver-tabata-ai.vercel.app/)
+- **Screenshots** (see [apps/tabata-ai/README.md](apps/tabata-ai/README.md) for more):
+
+  | Login | Dashboard | Workouts |
+  | ----- | --------- | -------- |
+  | ![Login](docs/screenshots/login.png) | ![Dashboard](docs/screenshots/dashboard.png) | ![Workouts](docs/screenshots/workouts.png) |
+
+---
+
 ## Getting started
 
 ### Prerequisites
