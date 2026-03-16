@@ -18,6 +18,10 @@ export class ForgotPasswordComponent {
     isLoading = computed(() => this.authFacade.isLoading());
     error = computed(() => this.authFacade.hasError());
 
+    constructor() {
+        this.authFacade.clearError();
+    }
+
     forgotModel = signal<ForgotPasswordForm>({
         email: ''
     });

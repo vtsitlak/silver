@@ -24,6 +24,7 @@ export const mockAuthFacade = {
     usePassword: () => true,
     useGoogle: () => false,
     hasError: () => false,
+    clearError: mockFn(),
     sign: mockFn(),
     register: mockFn(),
     sendPasswordResetEmail: mockFn(),

@@ -25,6 +25,7 @@ export class LoginComponent {
     error = computed(() => this.authFacade.hasError());
 
     constructor() {
+        this.authFacade.clearError();
         addIcons({ informationCircleOutline });
     }
 
