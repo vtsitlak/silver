@@ -47,6 +47,10 @@ export class AuthFacade {
     readonly hasError = computed(() => isNonNullish(this.store.error()));
 
     // Methods
+    clearError(): void {
+        this.pendingNavigation.set(null);
+        this.store.clearError();
+    }
     getUser(): void {
         this.store.getUser();
     }

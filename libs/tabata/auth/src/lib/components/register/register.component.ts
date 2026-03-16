@@ -22,6 +22,10 @@ export class RegisterComponent {
     isLoading = computed(() => this.authFacade.isLoading());
     error = computed(() => this.authFacade.hasError());
 
+    constructor() {
+        this.authFacade.clearError();
+    }
+
     registerModel = signal<RegisterFormModel>({
         email: '',
         password: '',
