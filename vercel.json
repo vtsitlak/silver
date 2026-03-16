@@ -46,6 +46,7 @@
         }
     ],
     "rewrites": [
+        { "source": "/preview.png", "destination": "/en/preview.png" },
         { "source": "/api/workouts/:id", "destination": "/api/workouts" },
         { "source": "/api/exercisedb/:path*", "destination": "/api/exercisedb" },
         { "source": "/api/exercises-db/:path*", "destination": "/api/exercises-db" },
