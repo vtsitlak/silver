@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { AuthFacade } from '@silver/tabata/auth';
+import { AuthFacade } from '@silver/tabata/states/auth';
 import { WorkoutsFacade, TabataWorkout } from '@silver/tabata/states/workouts';
 import { ToastService } from '@silver/tabata/helpers';
 import { mockAuthFacade, mockModalController, mockToastService, createMockWorkoutsFacade } from '@silver/tabata/testing';
