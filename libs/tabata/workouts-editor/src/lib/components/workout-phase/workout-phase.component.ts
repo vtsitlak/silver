@@ -117,6 +117,12 @@ export class WorkoutPhaseComponent implements OnInit {
                     this.facade.updateDraft(phase === 'warmup' ? { warmup: phaseData } : { cooldown: phaseData });
                 });
             }
+            return this.workoutSubmitService.scheduleAutosaveWhen(
+                this.facade.hasUnsavedChanges(),
+                this.isEditMode(),
+                !this.facade.isBusy(),
+                this.workoutSubmitService.canSubmitWorkout()
+            );
         });
     }
 

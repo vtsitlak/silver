@@ -4,7 +4,7 @@ import { filter } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, skip } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { IonContent, IonHeader, IonSearchbar, IonButton, IonList, IonItem, IonIcon } from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonSearchbar, IonButton, IonList, IonItem, IonIcon, ActionSheetController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
 import { ToolbarComponent } from '@silver/tabata/ui';
@@ -27,6 +27,7 @@ export class WorkoutsComponent {
     private readonly router = inject(Router);
     private readonly toast = inject(ToastService);
     private readonly workoutEditorFacade = inject(WorkoutEditorFacade);
+    private readonly actionSheetCtrl = inject(ActionSheetController);
 
     constructor() {
         addIcons({ add });
@@ -85,17 +86,29 @@ export class WorkoutsComponent {
         this.router.navigate(['/workouts', workout.id, 'play']);
     }
 
-    onRemoveClick(workout: TabataWorkout): void {
+    async onRemoveClick(workout: TabataWorkout): Promise<void> {
+        const sheet = await this.actionSheetCtrl.create({
+            header: 'Delete workout?',
+            subHeader: `This will permanently delete "${workout.name}".`,
+            buttons: [
+                { text: 'Cancel', role: 'cancel' },
+                { text: 'Delete', role: 'destructive' }
+            ]
+        });
+        await sheet.present();
+        const { role } = await sheet.onDidDismiss();
+        if (role !== 'destructive') return;
+
         this.facade.removeWorkout(workout.id).subscribe({
             next: (res) => {
                 if (res?.success) {
-                    this.toast.showSuccess('Workout removed');
+                    this.toast.showSuccess('Workout deleted');
                 } else {
-                    this.toast.showError(this.facade.error() ?? 'Failed to remove workout');
+                    this.toast.showError(this.facade.error() ?? 'Failed to delete workout');
                 }
             },
             error: () => {
-                this.toast.showError(this.facade.error() ?? 'Failed to remove workout');
+                this.toast.showError(this.facade.error() ?? 'Failed to delete workout');
             }
         });
     }
