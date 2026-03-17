@@ -23,6 +23,7 @@ import { WorkoutEditorCancelService } from '../../services/workout-editor-cancel
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { Exercise, ExerciseSelectorModalComponent, ExerciseDetailsModalComponent } from '@silver/tabata/exercises';
 import type { TabataBlock } from '@silver/tabata/states/workouts';
+import { WorkoutSubmitService } from '../../services/workout-submit.service';
 
 const WORK_SECONDS = 20;
 const REST_SECONDS = 10;
@@ -64,6 +65,7 @@ export class MainWorkoutComponent implements OnInit {
     private readonly exercisesFacade = inject(ExercisesFacade);
     private readonly modalCtrl = inject(ModalController);
     private readonly cancelService = inject(WorkoutEditorCancelService);
+    private readonly workoutSubmitService = inject(WorkoutSubmitService);
 
     readonly workoutId = signal<string | null>(null);
     readonly isEditMode = signal(false);
@@ -163,6 +165,12 @@ export class MainWorkoutComponent implements OnInit {
                     this.facade.updateDraft({ blocks: tabataBlocks });
                 });
             }
+            return this.workoutSubmitService.scheduleAutosaveWhen(
+                this.facade.hasUnsavedChanges(),
+                this.isEditMode(),
+                !this.facade.isBusy(),
+                this.workoutSubmitService.canSubmitWorkout()
+            );
         });
     }
 

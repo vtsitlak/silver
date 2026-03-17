@@ -125,7 +125,13 @@ export const WorkoutEditorStore = signalStore(
         };
 
         const setWorkoutFromResponse = (workout: TabataWorkout): void => {
-            patchState(store, { workout, isSaving: false });
+            patchState(store, {
+                workout,
+                workoutDraft: { ...workout },
+                initialDraftSnapshot: cloneDeep(workout),
+                isSaving: false,
+                error: null
+            });
         };
 
         /** Set current workout from list/cache (no API call). Use when opening edit from workouts list. */

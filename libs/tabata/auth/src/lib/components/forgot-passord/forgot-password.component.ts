@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { email, form, FormField, required } from '@angular/forms/signals';
+import { Router } from '@angular/router';
 import { IonContent, IonButton, IonSpinner } from '@ionic/angular/standalone';
 import { AuthFacade } from '@silver/tabata/states/auth';
 
@@ -15,11 +16,16 @@ interface ForgotPasswordForm {
 })
 export class ForgotPasswordComponent {
     private readonly authFacade = inject(AuthFacade);
+    private readonly router = inject(Router);
     isLoading = computed(() => this.authFacade.isLoading());
-    error = computed(() => this.authFacade.hasError());
+    error = computed(() => !!this.authFacade.sendPasswordError());
 
     constructor() {
-        this.authFacade.clearError();
+        this.authFacade.clearSendPasswordError();
+    }
+
+    backToLogin(): void {
+        this.router.navigateByUrl('/auth/login');
     }
 
     forgotModel = signal<ForgotPasswordForm>({

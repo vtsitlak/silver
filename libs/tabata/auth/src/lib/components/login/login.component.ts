@@ -22,11 +22,14 @@ export class LoginComponent {
     private readonly router = inject(Router);
     private readonly actionSheetCtrl = inject(ActionSheetController);
     isLoading = computed(() => this.authFacade.isLoading());
-    error = computed(() => this.authFacade.hasError());
+    error = computed(() => !!this.authFacade.loginError());
 
     constructor() {
-        this.authFacade.clearError();
         addIcons({ informationCircleOutline });
+    }
+
+    ionViewWillEnter(): void {
+        this.authFacade.clearLoginError();
     }
 
     loginModel = signal<LoginFormModel>({

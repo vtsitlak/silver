@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { AuthFacade } from '@silver/tabata/states/auth';
 import { mockAuthFacade } from '@silver/tabata/testing';
 import { ForgotPasswordComponent } from './forgot-password.component';
@@ -10,7 +11,7 @@ describe('ForgotPasswordComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [ForgotPasswordComponent],
-            providers: [{ provide: AuthFacade, useValue: mockAuthFacade }]
+            providers: [provideRouter([]), { provide: AuthFacade, useValue: mockAuthFacade }]
         }).compileComponents();
 
         fixture = TestBed.createComponent(ForgotPasswordComponent);

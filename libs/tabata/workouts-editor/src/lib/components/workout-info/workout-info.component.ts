@@ -31,6 +31,7 @@ import { ModalController } from '@ionic/angular/standalone';
 import { AiWorkoutPreviewModalComponent } from '../ai-workout-preview-modal/ai-workout-preview-modal.component';
 import { addIcons } from 'ionicons';
 import { arrowBackOutline, arrowForwardOutline } from 'ionicons/icons';
+import { WorkoutSubmitService } from '../../services/workout-submit.service';
 
 interface WorkoutInfoFormModel {
     name: string;
@@ -68,6 +69,7 @@ export class WorkoutInfoComponent implements OnInit {
     private readonly aiGenerator = inject(AiWorkoutGeneratorService);
     private readonly exercisesService = inject(ExercisesService);
     private readonly modalCtrl = inject(ModalController);
+    private readonly workoutSubmitService = inject(WorkoutSubmitService);
 
     readonly workoutId = signal<string | null>(null);
     readonly isEditMode = signal(false);
@@ -138,6 +140,12 @@ export class WorkoutInfoComponent implements OnInit {
                     });
                 });
             }
+            return this.workoutSubmitService.scheduleAutosaveWhen(
+                this.facade.hasUnsavedChanges(),
+                this.isEditMode(),
+                !this.facade.isBusy(),
+                this.workoutSubmitService.canSubmitWorkout()
+            );
         });
     }
 

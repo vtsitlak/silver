@@ -20,7 +20,7 @@ function totalDurationMinutesFromDraft(draft: Partial<TabataWorkout>): number {
 }
 
 /** Returns human-readable labels for missing required fields (script excluded). */
-function getMissingFieldLabels(draft: Partial<TabataWorkout>): string[] {
+export function getMissingFieldLabels(draft: Partial<TabataWorkout>): string[] {
     const missing: string[] = [];
     if (draft.name == null || String(draft.name).trim() === '') missing.push('Name');
     if (draft.description == null || String(draft.description).trim() === '') missing.push('Description');
@@ -110,6 +110,7 @@ export class WorkoutSubmitService {
                 }),
                 catchError((err: Error) => {
                     this.workoutEditorFacade.setSaveError(err.message);
+                    this.toast.showError(err.message || 'Failed to update workout');
                     return EMPTY;
                 })
             );
@@ -130,8 +131,33 @@ export class WorkoutSubmitService {
             }),
             catchError((err: Error) => {
                 this.workoutEditorFacade.setSaveError(err.message);
+                this.toast.showError(err.message || 'Failed to create workout');
                 return EMPTY;
             })
         );
+    }
+
+    /**
+     * Returns true when the current draft is complete enough to be saved.
+     * Useful for autosave in edit mode.
+     */
+    canSubmitWorkout(): boolean {
+        const draft = this.workoutEditorFacade.workoutDraft();
+        return getMissingFieldLabels(draft).length === 0;
+    }
+
+    /**
+     * Schedules a single autosave after a short delay when conditions are met.
+     * Call from an effect; return the result as the effect cleanup.
+     * @param hasUnsaved Whether the draft has unsaved changes
+     * @param isEditMode Whether we are editing an existing workout
+     * @param notBusy Whether the editor is not loading/saving
+     * @param canSubmit Whether the draft is complete enough to submit
+     * @returns Cleanup function to clear the timer, or undefined
+     */
+    scheduleAutosaveWhen(hasUnsaved: boolean, isEditMode: boolean, notBusy: boolean, canSubmit: boolean): (() => void) | undefined {
+        if (!hasUnsaved || !isEditMode || !notBusy || !canSubmit) return undefined;
+        const id = setTimeout(() => this.submitWorkout().subscribe(), 800);
+        return () => clearTimeout(id);
     }
 }

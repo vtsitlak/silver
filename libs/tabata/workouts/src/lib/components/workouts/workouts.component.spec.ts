@@ -3,9 +3,9 @@ import { provideRouter } from '@angular/router';
 import { AuthFacade } from '@silver/tabata/states/auth';
 import { WorkoutsFacade, TabataWorkout } from '@silver/tabata/states/workouts';
 import { ToastService } from '@silver/tabata/helpers';
-import { mockAuthFacade, mockModalController, mockToastService, createMockWorkoutsFacade } from '@silver/tabata/testing';
+import { mockAuthFacade, mockModalController, mockToastService, createMockWorkoutsFacade, mockActionSheetController } from '@silver/tabata/testing';
 import { WorkoutsComponent } from './workouts.component';
-import { ModalController } from '@ionic/angular/standalone';
+import { ActionSheetController, ModalController } from '@ionic/angular/standalone';
 
 describe('WorkoutsComponent', () => {
     let component: WorkoutsComponent;
@@ -21,7 +21,8 @@ describe('WorkoutsComponent', () => {
                 { provide: AuthFacade, useValue: mockAuthFacade },
                 { provide: WorkoutsFacade, useValue: mockWorkoutsFacade },
                 { provide: ModalController, useValue: mockModalController },
-                { provide: ToastService, useValue: mockToastService }
+                { provide: ToastService, useValue: mockToastService },
+                { provide: ActionSheetController, useValue: mockActionSheetController }
             ]
         }).compileComponents();
 

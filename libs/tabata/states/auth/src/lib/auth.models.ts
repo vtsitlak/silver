@@ -34,7 +34,13 @@ export interface AuthState {
     isLoading: boolean;
     usePassword: boolean;
     useGoogle: boolean;
-    error: string | null;
+    loginError: string | null;
+    getUserError: string | null;
+    sendPasswordError: string | null;
+    registerError: string | null;
+    updateDisplayNameError: string | null;
+    updatePasswordError: string | null;
+    logoutError: string | null;
 }
 
 export const authInitialState: AuthState = {
@@ -42,7 +48,13 @@ export const authInitialState: AuthState = {
     isLoading: false,
     usePassword: false,
     useGoogle: false,
-    error: null
+    loginError: null,
+    getUserError: null,
+    sendPasswordError: null,
+    registerError: null,
+    updateDisplayNameError: null,
+    updatePasswordError: null,
+    logoutError: null
 };
 
 export function toProfileUser(user: User | null): ProfileUser | null {
@@ -56,11 +68,11 @@ export function toProfileUser(user: User | null): ProfileUser | null {
 export function userToState(user: User | null, isLoading = false): AuthState | null {
     if (user) {
         return {
+            ...authInitialState,
             user: toProfileUser(user),
             isLoading,
             usePassword: user.providerData.map((data) => data.providerId).indexOf(PROVIDER_ID.PASSWORD) > -1,
-            useGoogle: user.providerData.map((data) => data.providerId).indexOf(PROVIDER_ID.GOOGLE) > -1,
-            error: null
+            useGoogle: user.providerData.map((data) => data.providerId).indexOf(PROVIDER_ID.GOOGLE) > -1
         };
     }
     return null;
