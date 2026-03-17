@@ -14,21 +14,35 @@ export class AuthFacade {
     private readonly pendingNavigation = signal<string | null>(null);
 
     constructor() {
-        // Show toast when error occurs
+        // Show toast when any auth error occurs
         effect(() => {
-            const error = this.store.error();
-            if (isNonNullish(error)) {
-                this.toast.showError(error);
+            const msg =
+                this.store.loginError() ??
+                this.store.getUserError() ??
+                this.store.sendPasswordError() ??
+                this.store.registerError() ??
+                this.store.updateDisplayNameError() ??
+                this.store.updatePasswordError() ??
+                this.store.logoutError();
+            if (isNonNullish(msg)) {
+                this.toast.showError(msg);
             }
         });
 
-        // Navigate when loading completes successfully
+        // Navigate when loading completes successfully (no error for the current operation)
         effect(() => {
             const isLoading = this.store.isLoading();
-            const error = this.store.error();
+            const hasAnyError =
+                isNonNullish(this.store.loginError()) ||
+                isNonNullish(this.store.getUserError()) ||
+                isNonNullish(this.store.sendPasswordError()) ||
+                isNonNullish(this.store.registerError()) ||
+                isNonNullish(this.store.updateDisplayNameError()) ||
+                isNonNullish(this.store.updatePasswordError()) ||
+                isNonNullish(this.store.logoutError());
             const path = this.pendingNavigation();
 
-            if (isNonNullish(path) && !isLoading && isNullish(error)) {
+            if (isNonNullish(path) && !isLoading && !hasAnyError) {
                 this.router.navigateByUrl(path);
                 this.pendingNavigation.set(null);
             }
@@ -37,19 +51,43 @@ export class AuthFacade {
 
     // State
     readonly user = this.store.user;
-    readonly error = this.store.error;
+    readonly loginError = this.store.loginError;
+    readonly getUserError = this.store.getUserError;
+    readonly sendPasswordError = this.store.sendPasswordError;
+    readonly registerError = this.store.registerError;
+    readonly updateDisplayNameError = this.store.updateDisplayNameError;
+    readonly updatePasswordError = this.store.updatePasswordError;
+    readonly logoutError = this.store.logoutError;
     readonly isLoading = this.store.isLoading;
     readonly isAuthenticated = this.store.isAuthenticated;
     readonly usePassword = this.store.usePassword;
     readonly useGoogle = this.store.useGoogle;
 
-    /** Computed: true when there is an error message (for UI). */
-    readonly hasError = computed(() => isNonNullish(this.store.error()));
+    /** Computed: true when there is any error message (for UI). */
+    readonly hasError = computed(
+        () =>
+            isNonNullish(this.store.loginError()) ||
+            isNonNullish(this.store.getUserError()) ||
+            isNonNullish(this.store.sendPasswordError()) ||
+            isNonNullish(this.store.registerError()) ||
+            isNonNullish(this.store.updateDisplayNameError()) ||
+            isNonNullish(this.store.updatePasswordError()) ||
+            isNonNullish(this.store.logoutError())
+    );
 
     // Methods
     clearError(): void {
         this.pendingNavigation.set(null);
         this.store.clearError();
+    }
+    clearLoginError(): void {
+        this.store.clearLoginError();
+    }
+    clearRegisterError(): void {
+        this.store.clearRegisterError();
+    }
+    clearSendPasswordError(): void {
+        this.store.clearSendPasswordError();
     }
     getUser(): void {
         this.store.getUser();

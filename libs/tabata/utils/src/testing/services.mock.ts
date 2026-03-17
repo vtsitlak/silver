@@ -45,8 +45,14 @@ export const mockActionSheetController = {
 };
 
 /** Mock for WorkoutSubmitService (submitWorkout returns an observable). */
-export function createMockWorkoutSubmitService(): { submitWorkout: jest.Mock } {
+export function createMockWorkoutSubmitService(): {
+    submitWorkout: jest.Mock;
+    canSubmitWorkout: jest.Mock;
+    scheduleAutosaveWhen: jest.Mock;
+} {
     return {
-        submitWorkout: mockFn().mockReturnValue(of({}))
+        submitWorkout: mockFn().mockReturnValue(of({})),
+        canSubmitWorkout: mockFn().mockReturnValue(true),
+        scheduleAutosaveWhen: mockFn().mockReturnValue(undefined)
     };
 }

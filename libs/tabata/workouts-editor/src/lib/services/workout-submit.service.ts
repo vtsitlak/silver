@@ -155,12 +155,7 @@ export class WorkoutSubmitService {
      * @param canSubmit Whether the draft is complete enough to submit
      * @returns Cleanup function to clear the timer, or undefined
      */
-    scheduleAutosaveWhen(
-        hasUnsaved: boolean,
-        isEditMode: boolean,
-        notBusy: boolean,
-        canSubmit: boolean
-    ): (() => void) | undefined {
+    scheduleAutosaveWhen(hasUnsaved: boolean, isEditMode: boolean, notBusy: boolean, canSubmit: boolean): (() => void) | undefined {
         if (!hasUnsaved || !isEditMode || !notBusy || !canSubmit) return undefined;
         const id = setTimeout(() => this.submitWorkout().subscribe(), 800);
         return () => clearTimeout(id);

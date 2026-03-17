@@ -77,7 +77,13 @@
             </ion-select>
         </div>
 
-        <ion-button expand="block" type="button" (click)="onGenerateWithAi()" [disabled]="!isFormValid() || isGenerating() || isEditMode()" class="ion-margin-top">
+        <ion-button
+            expand="block"
+            type="button"
+            (click)="onGenerateWithAi()"
+            [disabled]="!isFormValid() || isGenerating() || isEditMode()"
+            class="ion-margin-top"
+        >
             @if (isGenerating()) {
                 <ion-spinner name="crescent" class="ion-margin-end"></ion-spinner>
             }

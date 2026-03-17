@@ -20,10 +20,14 @@ export class RegisterComponent {
     private readonly authFacade = inject(AuthFacade);
     private readonly router = inject(Router);
     isLoading = computed(() => this.authFacade.isLoading());
-    error = computed(() => this.authFacade.hasError());
+    error = computed(() => !!this.authFacade.registerError());
 
     constructor() {
-        this.authFacade.clearError();
+        this.authFacade.clearRegisterError();
+    }
+
+    backToLogin(): void {
+        this.router.navigateByUrl('/auth/login');
     }
 
     registerModel = signal<RegisterFormModel>({

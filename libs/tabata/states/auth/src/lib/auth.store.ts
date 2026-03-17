@@ -22,14 +22,32 @@ export const AuthStore = signalStore(
     // --- METHODS ---
     withMethods((store, authService = inject(AuthService), toast = inject(ToastService)) => ({
         clearError(): void {
-            patchState(store, { error: null });
+            patchState(store, {
+                loginError: null,
+                getUserError: null,
+                sendPasswordError: null,
+                registerError: null,
+                updateDisplayNameError: null,
+                updatePasswordError: null,
+                logoutError: null
+            });
+        },
+
+        clearLoginError(): void {
+            patchState(store, { loginError: null });
+        },
+        clearRegisterError(): void {
+            patchState(store, { registerError: null });
+        },
+        clearSendPasswordError(): void {
+            patchState(store, { sendPasswordError: null });
         },
 
         getUser: (() => {
             const getUserTrigger = new Subject<void>();
             rxMethod<void>(
                 pipe(
-                    tap(() => patchState(store, { isLoading: true, error: null })),
+                    tap(() => patchState(store, { isLoading: true, getUserError: null })),
                     switchMap(() => authService.currentUser$),
                     map((user) => userToState(user)),
                     tap((state) => {
@@ -46,23 +64,23 @@ export const AuthStore = signalStore(
 
         sendPasswordResetEmail: rxMethod<string>(
             pipe(
-                tap(() => patchState(store, { isLoading: true, error: null })),
+                tap(() => patchState(store, { isLoading: true, sendPasswordError: null })),
                 exhaustMap((email) =>
                     authService.sendPasswordResetEmail(email).pipe(
                         tapResponse({
                             next: () => {
-                                patchState(store, { isLoading: false, error: null });
+                                patchState(store, { isLoading: false, sendPasswordError: null });
                                 toast.showSuccess('Password reset email sent. Check your inbox and spam folder, then follow the instructions.');
                             },
                             error: (error: Error) => {
                                 console.error('Auth error:', error);
-                                patchState(store, { isLoading: false, error: error.message });
+                                patchState(store, { isLoading: false, sendPasswordError: error.message });
                                 return of(undefined);
                             }
                         }),
                         catchError((error: unknown) => {
                             console.error('Auth error:', error);
-                            patchState(store, { isLoading: false, error: error instanceof Error ? error.message : String(error) });
+                            patchState(store, { isLoading: false, sendPasswordError: error instanceof Error ? error.message : String(error) });
                             return of(undefined);
                         }),
                         finalize(() => {
@@ -82,7 +100,7 @@ export const AuthStore = signalStore(
                     }),
                     tap(() => {
                         console.debug('[AuthStore.sign] Setting isLoading=true');
-                        patchState(store, { isLoading: true, error: null });
+                        patchState(store, { isLoading: true, loginError: null });
                     }),
                     exhaustMap(({ email, password }) => {
                         console.debug('[AuthStore.sign] Calling authService.sign', { email });
@@ -99,13 +117,13 @@ export const AuthStore = signalStore(
                                 },
                                 error: (error: Error) => {
                                     console.error('[AuthStore.sign] Error', error);
-                                    patchState(store, { isLoading: false, error: error.message });
+                                    patchState(store, { isLoading: false, loginError: error.message });
                                     return of(undefined);
                                 }
                             }),
                             catchError((error: unknown) => {
                                 console.error('[AuthStore.sign] CatchError', error);
-                                patchState(store, { isLoading: false, error: error instanceof Error ? error.message : String(error) });
+                                patchState(store, { isLoading: false, loginError: error instanceof Error ? error.message : String(error) });
                                 return of(undefined);
                             }),
                             finalize(() => {
@@ -125,7 +143,7 @@ export const AuthStore = signalStore(
             const signWithGoogleTrigger = new Subject<void>();
             rxMethod<void>(
                 pipe(
-                    tap(() => patchState(store, { isLoading: true, error: null })),
+                    tap(() => patchState(store, { isLoading: true, loginError: null })),
                     exhaustMap(() =>
                         authService.signInWithGoogle().pipe(
                             tapResponse({
@@ -139,7 +157,7 @@ export const AuthStore = signalStore(
                                 },
                                 error: (error: Error) => {
                                     console.error('Auth error:', error);
-                                    patchState(store, { isLoading: false, error: error.message });
+                                    patchState(store, { isLoading: false, loginError: error.message });
                                     return of(undefined);
                                 }
                             })
@@ -152,7 +170,7 @@ export const AuthStore = signalStore(
 
         register: rxMethod<NewUser>(
             pipe(
-                tap(() => patchState(store, { isLoading: true, error: null })),
+                tap(() => patchState(store, { isLoading: true, registerError: null })),
                 exhaustMap((newUser) =>
                     authService.signUp(newUser.email, newUser.password, newUser.displayName).pipe(
                         tapResponse({
@@ -166,7 +184,7 @@ export const AuthStore = signalStore(
                             },
                             error: (error: Error) => {
                                 console.error('Auth error:', error);
-                                patchState(store, { isLoading: false, error: error.message });
+                                patchState(store, { isLoading: false, registerError: error.message });
                                 return of(undefined);
                             }
                         })
@@ -177,7 +195,7 @@ export const AuthStore = signalStore(
 
         updateDisplayName: rxMethod<string>(
             pipe(
-                tap(() => patchState(store, { isLoading: true, error: null })),
+                tap(() => patchState(store, { isLoading: true, updateDisplayNameError: null })),
                 exhaustMap((displayName) =>
                     authService.updateDisplayName(displayName).pipe(
                         tapResponse({
@@ -187,7 +205,7 @@ export const AuthStore = signalStore(
                             },
                             error: (error: Error) => {
                                 console.error('Auth error:', error);
-                                patchState(store, { isLoading: false, error: error.message });
+                                patchState(store, { isLoading: false, updateDisplayNameError: error.message });
                                 return of(undefined);
                             }
                         })
@@ -198,7 +216,7 @@ export const AuthStore = signalStore(
 
         updatePassword: rxMethod<UpdatePasswordDetails>(
             pipe(
-                tap(() => patchState(store, { isLoading: true, error: null })),
+                tap(() => patchState(store, { isLoading: true, updatePasswordError: null })),
                 exhaustMap(({ email, currentPassword, newPassword }) =>
                     authService.updatePassword(email, currentPassword, newPassword).pipe(
                         tapResponse({
@@ -207,7 +225,7 @@ export const AuthStore = signalStore(
                             },
                             error: (error: Error) => {
                                 console.error('Auth error:', error);
-                                patchState(store, { isLoading: false, error: error.message });
+                                patchState(store, { isLoading: false, updatePasswordError: error.message });
                                 return of(undefined);
                             }
                         })
@@ -220,7 +238,7 @@ export const AuthStore = signalStore(
             const logoutTrigger = new Subject<void>();
             rxMethod<void>(
                 pipe(
-                    tap(() => patchState(store, { isLoading: true, error: null })),
+                    tap(() => patchState(store, { isLoading: true, logoutError: null })),
                     exhaustMap(() =>
                         authService.logout().pipe(
                             tapResponse({
@@ -229,7 +247,7 @@ export const AuthStore = signalStore(
                                 },
                                 error: (error: Error) => {
                                     console.error('Auth error:', error);
-                                    patchState(store, { isLoading: false, error: error.message });
+                                    patchState(store, { isLoading: false, logoutError: error.message });
                                     return of(undefined);
                                 }
                             })
