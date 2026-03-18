@@ -11,7 +11,8 @@ import {
     reauthenticateWithCredential,
     signInWithPopup,
     GoogleAuthProvider,
-    sendPasswordResetEmail
+    sendPasswordResetEmail,
+    deleteUser
 } from '@angular/fire/auth';
 import { catchError, from, Observable, of, switchMap, throwError } from 'rxjs';
 
@@ -108,5 +109,11 @@ export class AuthService {
 
     logout(): Observable<unknown> {
         return from(this.auth.signOut());
+    }
+
+    deleteCurrentUser(): Observable<void> {
+        const user = this.auth.currentUser;
+        if (!user) return of(undefined);
+        return from(deleteUser(user));
     }
 }

@@ -83,4 +83,8 @@ export class DashboardComponent {
     playWorkout(workoutId: string): void {
         this.router.navigate(['/workouts', workoutId, 'play']);
     }
+
+    openWorkoutDetails(workoutId: string): void {
+        this.router.navigate(['/tabs/workouts', workoutId]);
+    }
 }

@@ -48,4 +48,11 @@ describe('DashboardComponent', () => {
         component.playWorkout('w1');
         expect(navSpy).toHaveBeenCalledWith(['/workouts', 'w1', 'play']);
     });
+
+    it('should navigate to workout details when openWorkoutDetails is called', () => {
+        const router = TestBed.inject(Router);
+        const navSpy = jest.spyOn(router, 'navigate');
+        component.openWorkoutDetails('w1');
+        expect(navSpy).toHaveBeenCalledWith(['/tabs/workouts', 'w1']);
+    });
 });

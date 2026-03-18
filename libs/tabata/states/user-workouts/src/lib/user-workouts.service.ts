@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { switchMap } from 'rxjs/operators';
 import type { UserWorkout } from './user-workouts.model';
 import { USER_WORKOUTS_API_BASE_URL } from './user-workouts-api-base-url';
@@ -39,6 +40,14 @@ export class UserWorkoutsService {
     getOrCreateUserWorkout(userId: string): Observable<UserWorkout> {
         return this.getUserWorkout(userId).pipe(
             switchMap((uw) => (uw !== null ? of(uw) : this.saveUserWorkout({ userId, favoriteWorkouts: [], workoutItems: [] })))
+        );
+    }
+
+    /** DELETE user workout record by userId. */
+    deleteUserWorkout(userId: string): Observable<{ success: boolean }> {
+        return this.http.delete<{ success: boolean }>(this.apiUrl(`/api/user-workouts/${encodeURIComponent(userId)}`)).pipe(
+            // Some deployments may not have DELETE enabled yet; fall back to wiping the record via upsert.
+            catchError(() => this.saveUserWorkout({ userId, favoriteWorkouts: [], workoutItems: [] }).pipe(switchMap(() => of({ success: true }))))
         );
     }
 }

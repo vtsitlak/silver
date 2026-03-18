@@ -1,7 +1,9 @@
 <ion-header [translucent]="true">
     <tbt-toolbar title="Workout Details" [showStartContent]="true" [showEndContent]="true">
         <ion-buttons slot="start" class="toolbar-buttons-white">
-            <ion-back-button defaultHref="/tabs/workouts"></ion-back-button>
+            <ion-button fill="clear" (click)="goBack()" aria-label="Back" class="ion-no-padding">
+                <ion-icon name="chevron-back-outline"></ion-icon>
+            </ion-button>
         </ion-buttons>
         <ion-buttons slot="end" class="toolbar-buttons-white">
             <ion-button (click)="editWorkout()" aria-label="Edit workout">
@@ -27,12 +29,33 @@
                     [attr.aria-label]="isFavorite() ? 'Remove from favorites' : 'Add to favorites'"
                     class="ion-no-padding"
                 >
-                    <ion-icon [name]="isFavorite() ? 'heart' : 'heart-outline'" [color]="isFavorite() ? 'danger' : 'medium'"></ion-icon>
+                    <ion-icon class="text-2xl" [name]="isFavorite() ? 'heart' : 'heart-outline'" [color]="isFavorite() ? 'danger' : 'medium'"></ion-icon>
                 </ion-button>
             </div>
             @if (w.description) {
                 <p class="text-gray-500 mb-4">{{ w.description }}</p>
             }
+
+            <div class="space-y-1 mb-4 text-sm text-gray-700">
+                @if (w.mainTargetBodypart) {
+                    <p>
+                        <span class="font-medium text-gray-900" i18n="@@workoutDetailsMainTarget">Main target:</span>
+                        {{ w.mainTargetBodypart }}
+                    </p>
+                }
+                @if (w.secondaryTargetBodyparts.length) {
+                    <p>
+                        <span class="font-medium text-gray-900" i18n="@@workoutDetailsSecondaryTargets">Secondary targets:</span>
+                        {{ w.secondaryTargetBodyparts.join(', ') }}
+                    </p>
+                }
+                @if (w.availableEquipments.length) {
+                    <p>
+                        <span class="font-medium text-gray-900" i18n="@@workoutDetailsEquipment">Equipment:</span>
+                        {{ w.availableEquipments.join(', ') }}
+                    </p>
+                }
+            </div>
 
             <div class="flex items-center gap-4 mb-4">
                 <ion-chip color="primary">

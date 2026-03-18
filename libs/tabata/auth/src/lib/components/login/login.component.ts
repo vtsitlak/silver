@@ -3,7 +3,7 @@ import { email, form, FormField, minLength, required } from '@angular/forms/sign
 import { Router } from '@angular/router';
 import { IonContent, IonButton, IonSpinner, IonIcon, ActionSheetController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { informationCircleOutline } from 'ionicons/icons';
+import { eyeOffOutline, eyeOutline, informationCircleOutline } from 'ionicons/icons';
 import { AuthFacade } from '@silver/tabata/states/auth';
 
 interface LoginFormModel {
@@ -23,9 +23,10 @@ export class LoginComponent {
     private readonly actionSheetCtrl = inject(ActionSheetController);
     isLoading = computed(() => this.authFacade.isLoading());
     error = computed(() => !!this.authFacade.loginError());
+    readonly showPassword = signal(false);
 
     constructor() {
-        addIcons({ informationCircleOutline });
+        addIcons({ informationCircleOutline, eyeOutline, eyeOffOutline });
     }
 
     ionViewWillEnter(): void {

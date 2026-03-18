@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, input, effect } from '@angular/core';
+import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import {
     IonContent,
@@ -13,11 +14,10 @@ import {
     IonItem,
     IonLabel,
     IonChip,
-    IonBackButton,
     IonButtons
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { playCircle, createOutline, timeOutline, fitnessOutline, flashOutline, pauseOutline, heart, heartOutline } from 'ionicons/icons';
+import { playCircle, createOutline, timeOutline, fitnessOutline, flashOutline, pauseOutline, heart, heartOutline, chevronBackOutline } from 'ionicons/icons';
 import { WorkoutsFacade } from '@silver/tabata/states/workouts';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
@@ -38,7 +38,6 @@ import { PhaseMovementsListComponent } from '../phase-movements-list/phase-movem
         ToolbarComponent,
         PhaseMovementsListComponent,
         IonHeader,
-        IonBackButton,
         IonButtons,
         IonContent,
         IonButton,
@@ -56,6 +55,7 @@ import { PhaseMovementsListComponent } from '../phase-movements-list/phase-movem
 export class WorkoutDetailsComponent {
     private readonly facade = inject(WorkoutsFacade);
     private readonly router = inject(Router);
+    private readonly location = inject(Location);
     private readonly workoutEditorFacade = inject(WorkoutEditorFacade);
     private readonly exercisesFacade = inject(ExercisesFacade);
     private readonly authFacade = inject(AuthFacade);
@@ -76,7 +76,7 @@ export class WorkoutDetailsComponent {
     });
 
     constructor() {
-        addIcons({ playCircle, createOutline, timeOutline, fitnessOutline, flashOutline, pauseOutline, heart, heartOutline });
+        addIcons({ playCircle, createOutline, timeOutline, fitnessOutline, flashOutline, pauseOutline, heart, heartOutline, chevronBackOutline });
 
         effect(() => {
             const id = this.workoutId();
@@ -106,6 +106,10 @@ export class WorkoutDetailsComponent {
                 this.exercisesFacade.loadExercisesMap(ids);
             }
         });
+    }
+
+    goBack(): void {
+        this.location.back();
     }
 
     editWorkout(): void {

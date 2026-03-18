@@ -11,7 +11,10 @@ export function buildGenerateWorkoutPrompt(input: GenerateWorkoutInput): string 
 
     const equipmentList = ['body only', ...input.availableEquipments.filter((e) => e !== 'Bodyweight')].join(', ');
 
-    return `You are an expert Tabata workout designer. Design a workout that strictly follows the user's brief and uses ONLY the exercise IDs from the list below. Do not invent any exercise IDs.
+    return `You are an expert Tabata workout designer.
+Design a workout that STRICTLY follows the user's brief and uses ONLY the exercise IDs from the list below. Do not invent any exercise IDs.
+If the user explicitly specifies a constraint (e.g. number of blocks, warmup/cooldown duration, “no warmup”, total duration, or any specific structure), you MUST follow it even if it deviates from the “typical” guidelines below.
+Do NOT add extra blocks or extra phases beyond what the user asked for. When the brief conflicts with default recommendations, the brief wins.
 
 WORKOUT BRIEF (honor these in every phase):
 - Name: ${input.name}
@@ -34,7 +37,9 @@ Purpose: Prepare muscles for high-intensity intervals. Total warmup duration mus
 
 MAIN PHASE – TABATA BLOCKS:
 - Each block = one exercise only, 8 rounds of 20 seconds work + 10 seconds rest (4 minutes per block).
-- Use 4–5 blocks for a full workout (~20 min of work); 1 minute rest between blocks (interBlockRestSeconds: 60).
+- Default recommendation (ONLY if the user did not specify otherwise): Use 4–5 blocks for a full workout (~20 min of work).
+- If the user says “one block” (or any specific number), output EXACTLY that many blocks.
+- Rest between blocks: 1 minute (interBlockRestSeconds: 60) unless the user specifies a different rest.
 - Choose different exercises per block that align with the main and secondary target body parts and available equipment.
 - Rounds: 8, workDurationSeconds: 20, restDurationSeconds: 10, interBlockRestSeconds: 60 for every block.
 

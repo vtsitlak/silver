@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { ModalController } from '@ionic/angular/standalone';
 import { AuthFacade } from '@silver/tabata/auth';
 import { HistoryComponent } from './history.component';
@@ -30,5 +30,12 @@ describe('HistoryComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should navigate to workout details when openWorkoutDetails is called', () => {
+        const router = TestBed.inject(Router);
+        const navSpy = jest.spyOn(router, 'navigate');
+        component.openWorkoutDetails('w1');
+        expect(navSpy).toHaveBeenCalledWith(['/tabs/workouts', 'w1']);
     });
 });

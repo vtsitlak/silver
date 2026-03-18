@@ -24,7 +24,9 @@
             @if (lastWorkoutItem(); as item) {
                 <section class="rounded-lg border border-gray-200 p-4 bg-gray-50">
                     <h3 class="text-sm font-medium text-gray-500 mb-1" i18n="@@dashboardLastWorkout">Last workout started</h3>
-                    <p class="font-medium text-gray-900">{{ getWorkoutName(item.workoutId) }}</p>
+                    <button type="button" class="font-medium text-left text-primary hover:underline" (click)="openWorkoutDetails(item.workoutId)">
+                        {{ getWorkoutName(item.workoutId) }}
+                    </button>
                     <p class="text-sm text-gray-500 mt-0.5">{{ formatDateTime(item.startedAt) }}</p>
                     <ion-button size="small" fill="solid" (click)="playWorkout(item.workoutId)" class="mt-2">
                         <ion-icon name="play-circle"></ion-icon>
@@ -36,7 +38,9 @@
             @if (mostPopularWorkout(); as entry) {
                 <section class="rounded-lg border border-gray-200 p-4 bg-gray-50">
                     <h3 class="text-sm font-medium text-gray-500 mb-1" i18n="@@dashboardMostPopular">Most popular workout</h3>
-                    <p class="font-medium text-gray-900">{{ getWorkoutName(entry.workoutId) }}</p>
+                    <button type="button" class="font-medium text-left text-primary hover:underline" (click)="openWorkoutDetails(entry.workoutId)">
+                        {{ getWorkoutName(entry.workoutId) }}
+                    </button>
                     <p class="text-sm text-gray-500 mt-0.5">{{ formatDateTime(entry.lastStartedAt) }}</p>
                     <ion-button size="small" fill="solid" (click)="playWorkout(entry.workoutId)" class="mt-2">
                         <ion-icon name="play-circle"></ion-icon>
@@ -52,7 +56,9 @@
                         @for (favId of favoriteIds(); track favId) {
                             <ion-item class="rounded-lg border border-gray-200">
                                 <ion-label>
-                                    <p class="font-medium">{{ getWorkoutName(favId) }}</p>
+                                    <button type="button" class="font-medium text-primary hover:underline" (click)="openWorkoutDetails(favId)">
+                                        {{ getWorkoutName(favId) }}
+                                    </button>
                                 </ion-label>
                                 <ion-button slot="end" size="small" fill="clear" (click)="playWorkout(favId)">
                                     <ion-icon name="play-circle"></ion-icon>

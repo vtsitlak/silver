@@ -33,13 +33,24 @@
                 </div>
                 <div class="flex flex-col mb-2">
                     <label for="password" i18n="@@authPasswordLabel" class="mb-2">Password</label>
-                    <input
-                        id="password"
-                        type="password"
-                        [formField]="registerForm.password"
-                        placeholder="Enter your password"
-                        i18n-placeholder="@@authPasswordPlaceholder"
-                    />
+                    <div class="relative">
+                        <input
+                            id="password"
+                            [type]="showPassword() ? 'text' : 'password'"
+                            [formField]="registerForm.password"
+                            placeholder="Enter your password"
+                            i18n-placeholder="@@authPasswordPlaceholder"
+                            class="pr-10"
+                        />
+                        <button
+                            type="button"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            (click)="showPassword.set(!showPassword())"
+                            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+                        >
+                            <ion-icon [name]="showPassword() ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+                        </button>
+                    </div>
                     <div class="h-5">
                         @if (registerForm.password().touched() && registerForm.password().invalid()) {
                             @for (err of registerForm.password().errors(); track err.kind) {

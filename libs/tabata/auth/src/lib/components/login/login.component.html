@@ -2,11 +2,16 @@
     <div class="min-h-screen flex flex-col bg-logo bg-cover bg-center">
         <div class="form-container flex flex-col w-full mt-auto mb-0 justify-end">
             <form (ngSubmit)="onSubmit()" class="login-form rounded-t-2xl bg-white w-full flex flex-col px-4 pb-4 text-gray-900">
-                <div class="flex items-center gap-2 mb-4">
-                    <h2 class="text-xl font-semibold text-gray-900" i18n="@@authLoginTitle">Login</h2>
-                    <ion-button fill="clear" size="small" (click)="openInfoSheet()" aria-label="About this app" class="ion-no-padding min-w-0">
-                        <ion-icon name="information-circle-outline"></ion-icon>
-                    </ion-button>
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <h2 class="text-xl font-semibold text-gray-900" i18n="@@authLoginTitle">Login</h2>
+                        <ion-button fill="clear" size="small" (click)="openInfoSheet()" aria-label="About this app" class="ion-no-padding min-w-0">
+                            <ion-icon name="information-circle-outline"></ion-icon>
+                        </ion-button>
+                    </div>
+                    <p class="hidden lg:block text-xs text-gray-500 text-right whitespace-nowrap" i18n="@@authDesktopHint">
+                        Tip: switch to mobile view for the best experience
+                    </p>
                 </div>
                 <div class="flex flex-col mb-2">
                     <label for="email" i18n="@@authEmailLabel" class="mb-2 text-gray-900 font-medium">Email</label>
@@ -28,14 +33,25 @@
                 </div>
                 <div class="flex flex-col mb-2">
                     <label for="password" i18n="@@authPasswordLabel" class="mb-2 text-gray-900 font-medium">Password</label>
-                    <input
-                        id="password"
-                        type="password"
-                        [formField]="loginForm.password"
-                        placeholder="Enter your password"
-                        autocomplete="current-password"
-                        i18n-placeholder="@@authPasswordPlaceholder"
-                    />
+                    <div class="relative">
+                        <input
+                            id="password"
+                            [type]="showPassword() ? 'text' : 'password'"
+                            [formField]="loginForm.password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            i18n-placeholder="@@authPasswordPlaceholder"
+                            class="pr-10"
+                        />
+                        <button
+                            type="button"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            (click)="showPassword.set(!showPassword())"
+                            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+                        >
+                            <ion-icon [name]="showPassword() ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+                        </button>
+                    </div>
                     <div class="h-5">
                         @if (loginForm.password().touched() && loginForm.password().invalid()) {
                             @for (err of loginForm.password().errors(); track err.kind) {
