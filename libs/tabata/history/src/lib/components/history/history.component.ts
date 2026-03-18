@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy, computed, effect, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { IonHeader, IonContent, IonSegment, IonSegmentButton, IonLabel, IonList, IonItem, IonBadge, IonSpinner } from '@ionic/angular/standalone';
 import { ToolbarComponent } from '@silver/tabata/ui';
 import { AuthFacade } from '@silver/tabata/auth';
@@ -18,6 +19,7 @@ export class HistoryComponent {
     private readonly authFacade = inject(AuthFacade);
     private readonly userWorkoutsFacade = inject(UserWorkoutsFacade);
     private readonly workoutsFacade = inject(WorkoutsFacade);
+    private readonly router = inject(Router);
 
     readonly user = this.authFacade.user;
     readonly userWorkout = this.userWorkoutsFacade.userWorkout;
@@ -80,5 +82,9 @@ export class HistoryComponent {
         if (!dateStr) return '';
         const d = new Date(dateStr);
         return isNaN(d.getTime()) ? dateStr : d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+    }
+
+    openWorkoutDetails(workoutId: string): void {
+        this.router.navigate(['/tabs/workouts', workoutId]);
     }
 }

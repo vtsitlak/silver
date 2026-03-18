@@ -5,6 +5,7 @@ import { addIcons } from 'ionicons';
 import { logOutOutline } from 'ionicons/icons';
 import { ToolbarComponent } from '@silver/tabata/ui';
 import { AuthFacade } from '@silver/tabata/auth';
+import { DeleteAccountService } from '../../services/delete-account.service';
 
 interface ProfileFormModel {
     displayName: string;
@@ -23,6 +24,7 @@ interface ProfileFormModel {
 export class ProfileComponent implements OnInit {
     private readonly authFacade = inject(AuthFacade);
     private readonly actionSheetCtrl = inject(ActionSheetController);
+    private readonly deleteAccountService = inject(DeleteAccountService);
     usePassword = linkedSignal(() => this.authFacade.usePassword());
     isLoading = linkedSignal(() => this.authFacade.isLoading());
     showPasswordField = false;
@@ -117,6 +119,24 @@ export class ProfileComponent implements OnInit {
             buttons: [
                 { text: 'Cancel', role: 'cancel' },
                 { text: 'Log out', role: 'destructive', handler: () => this.authFacade.logout() }
+            ]
+        });
+        await sheet.present();
+    }
+
+    async onDeleteAccountClick(): Promise<void> {
+        const sheet = await this.actionSheetCtrl.create({
+            header: 'Delete account?',
+            subHeader: 'This will permanently delete your account and all your workout data. This cannot be undone.',
+            buttons: [
+                { text: 'Cancel', role: 'cancel' },
+                {
+                    text: 'Delete account',
+                    role: 'destructive',
+                    handler: () => {
+                        this.deleteAccountService.deleteAccount().subscribe();
+                    }
+                }
             ]
         });
         await sheet.present();

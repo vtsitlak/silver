@@ -36,7 +36,9 @@
                                 [attr.aria-label]="item.completed ? 'Completed' : 'Not completed'"
                             ></span>
                             <ion-label>
-                                <h2 class="font-medium">{{ getWorkoutName(item.workoutId) }}</h2>
+                                <button type="button" class="font-medium text-left text-primary hover:underline" (click)="openWorkoutDetails(item.workoutId)">
+                                    {{ getWorkoutName(item.workoutId) }}
+                                </button>
                                 <p class="text-sm text-gray-500">
                                     {{ formatDateTime(item.startedAt) }}
                                     @if (item.completed) {
@@ -54,7 +56,9 @@
                     @for (entry of mostUsedWorkouts(); track entry.workoutId) {
                         <ion-item class="rounded-lg border border-gray-200">
                             <ion-label>
-                                <h2 class="font-medium">{{ getWorkoutName(entry.workoutId) }}</h2>
+                                <button type="button" class="font-medium text-left text-primary hover:underline" (click)="openWorkoutDetails(entry.workoutId)">
+                                    {{ getWorkoutName(entry.workoutId) }}
+                                </button>
                                 <p class="text-sm text-gray-500">
                                     <span i18n="@@historyLastStarted">Last started</span>: {{ formatDateTime(entry.lastStartedAt) }} ·
                                     <span i18n="@@historyTimesStarted">Started {{ entry.count }} time(s)</span>
@@ -71,7 +75,9 @@
                     @for (favId of favoriteIds(); track favId) {
                         <ion-item class="rounded-lg border border-gray-200">
                             <ion-label>
-                                <h2 class="font-medium">{{ getWorkoutName(favId) }}</h2>
+                                <button type="button" class="font-medium text-left text-primary hover:underline" (click)="openWorkoutDetails(favId)">
+                                    {{ getWorkoutName(favId) }}
+                                </button>
                             </ion-label>
                         </ion-item>
                     } @empty {

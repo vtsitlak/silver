@@ -22,6 +22,26 @@
             @if (d.description) {
                 <p class="text-gray-500 text-sm mb-4">{{ d.description }}</p>
             }
+            <div class="space-y-1 mb-4 text-sm text-gray-700">
+                @if (d.mainTargetBodypart) {
+                    <p>
+                        <span class="font-medium text-gray-900" i18n="@@workoutDetailsMainTarget">Main target:</span>
+                        {{ d.mainTargetBodypart }}
+                    </p>
+                }
+                @if (d.secondaryTargetBodyparts && d.secondaryTargetBodyparts.length) {
+                    <p>
+                        <span class="font-medium text-gray-900" i18n="@@workoutDetailsSecondaryTargets">Secondary targets:</span>
+                        {{ d.secondaryTargetBodyparts.join(', ') }}
+                    </p>
+                }
+                @if (d.availableEquipments && d.availableEquipments.length) {
+                    <p>
+                        <span class="font-medium text-gray-900" i18n="@@workoutDetailsEquipment">Equipment:</span>
+                        {{ d.availableEquipments.join(', ') }}
+                    </p>
+                }
+            </div>
             <div class="flex flex-wrap gap-2 mb-4">
                 <ion-chip color="primary">
                     <ion-icon name="time-outline"></ion-icon>

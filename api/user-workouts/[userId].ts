@@ -8,7 +8,7 @@ const UPSTASH_TOKEN = process.env['UPSTASH_TOKEN'];
 
 const CORS_HEADERS: Record<string, string> = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, PUT, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
@@ -67,6 +67,20 @@ export default {
             if (method === 'GET') {
                 const record = index >= 0 ? list[index] : null;
                 return jsonResponse(JSON.stringify(record), 200);
+            }
+
+            if (method === 'DELETE') {
+                const newList = list.filter((u) => String(u?.userId) !== userId);
+                const setRes = await fetch(UPSTASH_URL, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(['JSON.SET', 'user_workouts', '$', JSON.stringify(newList)])
+                });
+                const setData = await setRes.json();
+                if (setData.error) {
+                    return jsonResponse(JSON.stringify({ error: setData.error }), 400);
+                }
+                return jsonResponse(JSON.stringify({ success: true }), 200);
             }
 
             if (method === 'PUT') {

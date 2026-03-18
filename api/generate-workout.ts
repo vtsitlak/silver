@@ -24,13 +24,149 @@ function jsonResponse(body: string, status: number): Response {
     });
 }
 
+function extractRequestedBlocks(description: string): number | null {
+    const d = (description || '').toLowerCase();
+    if (!d.trim()) return null;
+
+    const wordToNum: Record<string, number> = {
+        one: 1,
+        two: 2,
+        three: 3,
+        four: 4,
+        five: 5,
+        six: 6,
+        seven: 7,
+        eight: 8,
+        nine: 9,
+        ten: 10
+    };
+
+    if (/\b(single|one)\s+block\b/.test(d)) return 1;
+
+    const numMatch = d.match(/\b(\d+)\s+blocks?\b/);
+    if (numMatch?.[1]) {
+        const n = Number(numMatch[1]);
+        if (Number.isFinite(n) && n > 0 && n <= 20) return n;
+    }
+
+    const wordMatch = d.match(/\b(one|two|three|four|five|six|seven|eight|nine|ten)\s+blocks?\b/);
+    if (wordMatch?.[1]) return wordToNum[wordMatch[1]] ?? null;
+
+    return null;
+}
+
+function enforceBlockCount<T extends { exerciseId: string }>(blocks: T[], requested: number): T[] {
+    const safe = Array.isArray(blocks) ? blocks.filter((b) => b && typeof b.exerciseId === 'string') : [];
+    if (requested <= 0) return safe;
+    if (safe.length === requested) return safe;
+    if (safe.length > requested) return safe.slice(0, requested);
+    if (safe.length === 0) return [];
+    const out = [...safe];
+    while (out.length < requested) {
+        const pick = safe[out.length % safe.length];
+        if (!pick) break;
+        out.push({ ...pick });
+    }
+    return out;
+}
+
+type PhaseOut = { totalDurationSeconds: number; movements: { exerciseId: string; durationSeconds: number }[] };
+
+function extractRequestedPhaseSeconds(description: string, phase: 'warmup' | 'cooldown'): number | null {
+    const d = (description || '').toLowerCase();
+    if (!d.trim()) return null;
+
+    // "no warmup", "skip cooldown", etc.
+    const noRe = new RegExp(`\\b(no|skip|without)\\s+${phase}\\b`);
+    if (noRe.test(d)) return 0;
+
+    const phaseRe = phase === 'warmup' ? /warm\s*up/ : /cool\s*down/;
+
+    // e.g. "warmup 3 min", "cooldown: 120s"
+    const minsAfter = d.match(new RegExp(`${phaseRe.source}[^0-9]{0,12}(\\d{1,3})\\s*(min|mins|minutes|m)\\b`));
+    if (minsAfter?.[1]) {
+        const n = Number(minsAfter[1]);
+        if (Number.isFinite(n) && n >= 0 && n <= 60) return n * 60;
+    }
+    const secsAfter = d.match(new RegExp(`${phaseRe.source}[^0-9]{0,12}(\\d{1,4})\\s*(sec|secs|seconds|s)\\b`));
+    if (secsAfter?.[1]) {
+        const n = Number(secsAfter[1]);
+        if (Number.isFinite(n) && n >= 0 && n <= 3600) return n;
+    }
+
+    // e.g. "3 min warmup", "120s cooldown"
+    const minsBefore = d.match(new RegExp(`\\b(\\d{1,3})\\s*(min|mins|minutes|m)\\b[^.]{0,12}${phaseRe.source}`));
+    if (minsBefore?.[1]) {
+        const n = Number(minsBefore[1]);
+        if (Number.isFinite(n) && n >= 0 && n <= 60) return n * 60;
+    }
+    const secsBefore = d.match(new RegExp(`\\b(\\d{1,4})\\s*(sec|secs|seconds|s)\\b[^.]{0,12}${phaseRe.source}`));
+    if (secsBefore?.[1]) {
+        const n = Number(secsBefore[1]);
+        if (Number.isFinite(n) && n >= 0 && n <= 3600) return n;
+    }
+
+    return null;
+}
+
+function enforcePhaseDuration(phase: PhaseOut, requestedSeconds: number): PhaseOut {
+    if (requestedSeconds <= 0) {
+        return { totalDurationSeconds: 0, movements: [] };
+    }
+
+    const movements = Array.isArray(phase.movements) ? phase.movements.filter((m) => m?.exerciseId) : [];
+    if (movements.length === 0) {
+        return { totalDurationSeconds: requestedSeconds, movements: [] };
+    }
+
+    const currentTotal = movements.reduce((sum, m) => sum + (Number(m.durationSeconds) || 0), 0);
+    if (currentTotal <= 0) {
+        const per = Math.floor(requestedSeconds / movements.length);
+        const rem = requestedSeconds - per * movements.length;
+        return {
+            totalDurationSeconds: requestedSeconds,
+            movements: movements.map((m, idx) => ({ ...m, durationSeconds: per + (idx === movements.length - 1 ? rem : 0) }))
+        };
+    }
+
+    const scaled = movements.map((m) => ({ ...m, durationSeconds: Math.max(1, Math.round((m.durationSeconds / currentTotal) * requestedSeconds)) }));
+    const scaledTotal = scaled.reduce((sum, m) => sum + m.durationSeconds, 0);
+    const delta = requestedSeconds - scaledTotal;
+    if (delta !== 0) {
+        const last = scaled[scaled.length - 1];
+        if (last) last.durationSeconds = Math.max(1, last.durationSeconds + delta);
+    }
+
+    return { totalDurationSeconds: requestedSeconds, movements: scaled };
+}
+
+function computeTotalDurationMinutes(output: {
+    warmup: { totalDurationSeconds: number };
+    blocks: { rounds: number; workDurationSeconds: number; restDurationSeconds: number; interBlockRestSeconds: number }[];
+    cooldown: { totalDurationSeconds: number };
+}): number {
+    const warmupSeconds = output.warmup.totalDurationSeconds ?? 0;
+    const cooldownSeconds = output.cooldown.totalDurationSeconds ?? 0;
+    const blocksSeconds = (output.blocks ?? []).reduce((sum, b) => {
+        const rounds = b.rounds ?? 8;
+        const work = b.workDurationSeconds ?? 20;
+        const rest = b.restDurationSeconds ?? 10;
+        const between = b.interBlockRestSeconds ?? 60;
+        return sum + rounds * (work + rest) + between;
+    }, 0);
+    return Math.round((warmupSeconds + blocksSeconds + cooldownSeconds) / 60);
+}
+
 function buildPrompt(input: {
     name: string;
     description: string;
     mainTargetBodypart: string;
     availableEquipments: string[];
     secondaryTargetBodyparts: string[];
-    exercises: { exerciseId: string; name: string; targetMuscles: string[]; equipments: string[] }[];
+    exercises: { exerciseId: string; name: string; targetMuscles?: string[]; equipments?: string[] }[];
+    requestedBlocks: number | null;
+    requestedWarmupSeconds: number | null;
+    requestedCooldownSeconds: number | null;
 }): string {
     const exerciseList = input.exercises
         .map((e) => `- ${e.exerciseId}: ${e.name} (targets: ${(e.targetMuscles || []).join(', ')}, equipment: ${(e.equipments || []).join(', ')})`)
@@ -38,7 +174,16 @@ function buildPrompt(input: {
 
     const equipmentList = ['body only', ...(input.availableEquipments || []).filter((e: string) => e !== 'Bodyweight')].join(', ');
 
-    return `You are an expert Tabata workout designer. Design a workout that strictly follows the user's brief and uses ONLY the exercise IDs from the list below. Do not invent any exercise IDs.
+    const requestedBlocksLine = input.requestedBlocks != null ? `- Requested number of blocks: ${input.requestedBlocks} (MUST match exactly)` : '';
+    const requestedWarmupLine =
+        input.requestedWarmupSeconds != null ? `- Requested warmup duration: ${input.requestedWarmupSeconds}s (MUST match exactly)` : '';
+    const requestedCooldownLine =
+        input.requestedCooldownSeconds != null ? `- Requested cooldown duration: ${input.requestedCooldownSeconds}s (MUST match exactly)` : '';
+
+    return `You are an expert Tabata workout designer.
+Design a workout that STRICTLY follows the user's brief and uses ONLY the exercise IDs from the list below. Do not invent any exercise IDs.
+If the user explicitly specifies a constraint (e.g. number of blocks, total duration, specific structure), you MUST follow it even if it deviates from the “typical” guidelines below.
+Do NOT add extra blocks or extra phases beyond what the user asked for. When the brief conflicts with default recommendations, the brief wins.
 
 WORKOUT BRIEF (honor these in every phase):
 - Name: ${input.name}
@@ -46,6 +191,9 @@ WORKOUT BRIEF (honor these in every phase):
 - Main target body part: ${input.mainTargetBodypart}
 - Secondary target body parts: ${(input.secondaryTargetBodyparts || []).join(', ') || 'none'}
 - Available equipment: ${equipmentList}
+${requestedBlocksLine}
+${requestedWarmupLine}
+${requestedCooldownLine}
 Note: body only is always available; choose exercises that match the target body parts and the listed equipment.
 
 AVAILABLE EXERCISES (use only these exerciseId values):
@@ -61,7 +209,9 @@ Purpose: Prepare muscles for high-intensity intervals. Total warmup duration mus
 
 MAIN PHASE – TABATA BLOCKS:
 - Each block = one exercise only, 8 rounds of 20 seconds work + 10 seconds rest (4 minutes per block).
-- Use 4–5 blocks for a full workout (~20 min of work); 1 minute rest between blocks (interBlockRestSeconds: 60).
+- Default recommendation (ONLY if the user did not specify otherwise): Use 4–5 blocks for a full workout (~20 min of work).
+- If the user says “one block” (or any specific number), output EXACTLY that many blocks.
+- Rest between blocks: 1 minute (interBlockRestSeconds: 60) unless the user specifies a different rest.
 - Choose different exercises per block that align with the main and secondary target body parts and available equipment.
 - Rounds: 8, workDurationSeconds: 20, restDurationSeconds: 10, interBlockRestSeconds: 60 for every block.
 
@@ -148,13 +298,19 @@ export default {
                 model: gemini(modelId)
             });
 
+            const requestedBlocks = extractRequestedBlocks(input.description ?? '');
+            const requestedWarmupSeconds = extractRequestedPhaseSeconds(input.description ?? '', 'warmup');
+            const requestedCooldownSeconds = extractRequestedPhaseSeconds(input.description ?? '', 'cooldown');
             const prompt = buildPrompt({
                 name: input.name,
                 description: input.description ?? '',
                 mainTargetBodypart: input.mainTargetBodypart,
                 availableEquipments: input.availableEquipments ?? [],
                 secondaryTargetBodyparts: input.secondaryTargetBodyparts ?? [],
-                exercises: input.exercises
+                exercises: input.exercises,
+                requestedBlocks,
+                requestedWarmupSeconds,
+                requestedCooldownSeconds
             });
 
             const result = await ai.generate({ prompt });
@@ -168,7 +324,7 @@ export default {
                 cooldown?: { totalDurationSeconds?: number; movements?: { exerciseId: string; durationSeconds: number }[] };
             };
 
-            const output = {
+            const baseOutput = {
                 totalDurationMinutes: parsed.totalDurationMinutes ?? 30,
                 warmup: {
                     totalDurationSeconds: parsed.warmup?.totalDurationSeconds ?? 240,
@@ -179,6 +335,21 @@ export default {
                     totalDurationSeconds: parsed.cooldown?.totalDurationSeconds ?? 120,
                     movements: parsed.cooldown?.movements ?? []
                 }
+            };
+
+            const warmup = requestedWarmupSeconds != null ? enforcePhaseDuration(baseOutput.warmup, requestedWarmupSeconds) : baseOutput.warmup;
+            const cooldown = requestedCooldownSeconds != null ? enforcePhaseDuration(baseOutput.cooldown, requestedCooldownSeconds) : baseOutput.cooldown;
+            const blocks = requestedBlocks != null ? enforceBlockCount(baseOutput.blocks, requestedBlocks) : baseOutput.blocks;
+            const output = {
+                ...baseOutput,
+                warmup,
+                blocks,
+                cooldown,
+                totalDurationMinutes: computeTotalDurationMinutes({
+                    warmup,
+                    blocks,
+                    cooldown
+                })
             };
 
             return jsonResponse(JSON.stringify(output), 200);
