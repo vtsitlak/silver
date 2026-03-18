@@ -1,27 +1,27 @@
 <ion-header>
     <ion-toolbar>
-        <ion-buttons slot="start">
-            @if (showStartContent()) {
-                <ng-content select="[slot=start]"></ng-content>
-            } @else {
+        @if (showStartContent()) {
+            <ng-content select="[slot=start]"></ng-content>
+        } @else {
+            <ion-buttons slot="start">
                 <ion-button>
                     <img src="assets/icon-128.png" alt="Home" class="text-white w-12 h-12" />
                 </ion-button>
-            }
-        </ion-buttons>
+            </ion-buttons>
+        }
 
         @if (title()) {
             <ion-title class="text-white">{{ title() }}</ion-title>
         }
 
-        <ion-buttons slot="end">
-            @if (showEndContent()) {
-                <ng-content select="[slot=end]"></ng-content>
-            } @else {
+        @if (showEndContent()) {
+            <ng-content select="[slot=end]"></ng-content>
+        } @else {
+            <ion-buttons slot="end">
                 <ion-button (click)="openAbout()" aria-label="About this app" class="ion-no-padding">
                     <ion-icon class="text-white" name="information-circle-outline"></ion-icon>
                 </ion-button>
-            }
-        </ion-buttons>
+            </ion-buttons>
+        }
     </ion-toolbar>
 </ion-header>
