@@ -42,7 +42,12 @@ export class AppComponent implements OnInit, OnDestroy {
         this.darkObserver = new MutationObserver(() => {
             const doc = document.documentElement;
             const body = document.body;
-            if (doc.classList.contains('dark') || doc.classList.contains('ion-palette-dark') || body.classList.contains('dark') || body.classList.contains('ion-palette-dark')) {
+            if (
+                doc.classList.contains('dark') ||
+                doc.classList.contains('ion-palette-dark') ||
+                body.classList.contains('dark') ||
+                body.classList.contains('ion-palette-dark')
+            ) {
                 this.forceLightTheme();
             }
         });

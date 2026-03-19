@@ -16,6 +16,7 @@ export interface ExerciseSummary {
     exerciseId: string;
     name: string;
     targetMuscles: string[];
+    secondaryMuscles: string[];
     category: string[];
     equipments: string[];
 }

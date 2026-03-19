@@ -31,7 +31,16 @@ describe('AiWorkoutGeneratorService', () => {
             mainTargetBodypart: 'Upper Body',
             availableEquipments: ['Bodyweight'],
             secondaryTargetBodyparts: [],
-            exercises: [{ exerciseId: 'e1', name: 'Push-up', targetMuscles: [], category: [], equipments: [] }]
+            exercises: [
+                {
+                    exerciseId: 'e1',
+                    name: 'Push-up',
+                    targetMuscles: [],
+                    secondaryMuscles: [],
+                    category: [],
+                    equipments: []
+                }
+            ]
         };
         const mockOutput = {
             totalDurationMinutes: 30,

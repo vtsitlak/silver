@@ -188,6 +188,7 @@ export class WorkoutInfoComponent implements OnInit {
                         exerciseId: e.exerciseId,
                         name: e.name,
                         targetMuscles: e.targetMuscles ?? [],
+                        secondaryMuscles: e.secondaryMuscles ?? [],
                         category: e.category ?? [],
                         equipments: e.equipments ?? []
                     }));

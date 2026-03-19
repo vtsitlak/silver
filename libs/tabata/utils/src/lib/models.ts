@@ -100,3 +100,29 @@ export const targetBodypartsOptions: TargetBodyRegions[] = [
         muscles: ['abdominals', 'lower back']
     }
 ];
+
+/** All muscles across Upper Body, Lower Body, and Core (for Full Body target). */
+export const ALL_MUSCLES_FULL_BODY: string[] = muscleOptions.filter((m) => m.region !== 'Full Body' && m.muscles.length > 0).flatMap((m) => m.muscles);
+
+/**
+ * Returns the list of target muscle names for the given main and secondary body regions.
+ * Used by AI workout generation to match exercises whose main or secondary muscles align with the workout targets.
+ * For Full Body, returns all muscles; the caller should balance exercises across regions.
+ */
+export function getTargetMusclesForRegions(mainRegion: BodyRegion, secondaryRegions: BodyRegion[]): { muscles: string[]; isFullBody: boolean } {
+    if (mainRegion === 'Full Body') {
+        return { muscles: [...ALL_MUSCLES_FULL_BODY], isFullBody: true };
+    }
+    const musclesSet = new Set<string>();
+    const main = targetBodypartsOptions.find((t) => t.bodyRegion === mainRegion);
+    if (main?.muscles?.length) main.muscles.forEach((m) => musclesSet.add(m));
+    for (const r of secondaryRegions) {
+        if (r === 'Full Body') {
+            ALL_MUSCLES_FULL_BODY.forEach((m) => musclesSet.add(m));
+        } else {
+            const opt = targetBodypartsOptions.find((t) => t.bodyRegion === r);
+            if (opt?.muscles?.length) opt.muscles.forEach((m) => musclesSet.add(m));
+        }
+    }
+    return { muscles: [...musclesSet], isFullBody: false };
+}
