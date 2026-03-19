@@ -19,6 +19,8 @@ export function requireAuthEnv(): void {
 /**
  * Log in with test credentials and wait until the app has navigated to the dashboard.
  * Call requireAuthEnv() in beforeAll when using this.
+ * Waits for the Dashboard tab to be visible (SPA-friendly) and optionally the URL; uses
+ * waitUntil: 'commit' for URL wait so client-side navigation does not hang on missing 'load' event.
  */
 export async function loginAndWaitForDashboard(page: Page): Promise<void> {
     await page.goto('/auth/login');
@@ -34,5 +36,6 @@ export async function loginAndWaitForDashboard(page: Page): Promise<void> {
         .first()
         .fill(TEST_USER_PASSWORD ?? '');
     await page.getByRole('button', { name: 'Login' }).click();
-    await page.waitForURL(/\/tabs\/dashboard/, { timeout: 30000 });
+    await page.waitForURL(/\/tabs\/dashboard/, { timeout: 30000, waitUntil: 'commit' });
+    await page.getByRole('tab', { name: 'Dashboard' }).waitFor({ state: 'visible', timeout: 15000 });
 }

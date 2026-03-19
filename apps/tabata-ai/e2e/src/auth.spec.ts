@@ -36,9 +36,11 @@ test.describe('Authentication', () => {
             .first()
             .fill(TEST_USER_PASSWORD ?? '');
         await page.getByRole('button', { name: 'Login' }).click();
-        await expect(page).toHaveURL(/\/tabs\/dashboard/, { timeout: 30000 });
+        await page.waitForURL(/\/tabs\/dashboard/, { timeout: 30000, waitUntil: 'commit' });
+        await page.getByRole('tab', { name: 'Dashboard' }).waitFor({ state: 'visible', timeout: 15000 });
 
-        await expect(page.getByRole('tab', { name: 'Dashboard' })).toBeVisible({ timeout: 5000 });
+        await expect(page).toHaveURL(/\/tabs\/dashboard/);
+        await expect(page.getByRole('tab', { name: 'Dashboard' })).toBeVisible();
         await expect(page.getByRole('tab', { name: 'Workouts' })).toBeVisible();
         await expect(page.getByRole('tab', { name: 'History' })).toBeVisible();
 
