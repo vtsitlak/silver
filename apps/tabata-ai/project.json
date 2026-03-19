@@ -38,7 +38,6 @@
                     }
                 ],
                 "styles": [
-                    "apps/tabata-ai/src/styles.scss",
                     "apps/tabata-ai/src/theme/variables.scss",
                     "node_modules/@ionic/angular/css/core.css",
                     "node_modules/@ionic/angular/css/normalize.css",
@@ -49,7 +48,9 @@
                     "node_modules/@ionic/angular/css/float-elements.css",
                     "node_modules/@ionic/angular/css/text-alignment.css",
                     "node_modules/@ionic/angular/css/text-transformation.css",
-                    "node_modules/@ionic/angular/css/flex-utils.css"
+                    "node_modules/@ionic/angular/css/flex-utils.css",
+                    "apps/tabata-ai/src/styles.scss",
+                    "apps/tabata-ai/src/theme/force-light.scss"
                 ],
                 "scripts": []
             },

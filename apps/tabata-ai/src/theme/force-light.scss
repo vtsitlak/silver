@@ -1,0 +1,168 @@
+/*
+ * Force light theme – loaded LAST so it overrides Ionic and any browser dark mode.
+ * Required for consistent light appearance (e.g. DuckDuckGo, deployed).
+ */
+
+:root,
+html,
+html.dark,
+html.ion-palette-dark,
+html[data-theme='dark'] {
+    color-scheme: light !important;
+    --color-surface: #ffffff !important;
+    --color-surface-rgb: 255, 255, 255 !important;
+    --color-text: #1f2937 !important;
+    --color-text-muted: #4b5563 !important;
+    --ion-background-color: #ffffff !important;
+    --ion-text-color: #1f2937 !important;
+    --ion-item-background: #ffffff !important;
+}
+
+body,
+body.dark,
+body.ion-palette-dark,
+body[data-theme='dark'] {
+    --color-surface: #ffffff !important;
+    --color-text: #1f2937 !important;
+    --ion-background-color: #ffffff !important;
+    --ion-text-color: #1f2937 !important;
+    background-color: #ffffff !important;
+    color: #1f2937 !important;
+}
+
+ion-content,
+.ion-palette-dark ion-content,
+.dark ion-content,
+[data-theme='dark'] ion-content,
+body ion-content {
+    --background: #ffffff !important;
+    --color: #1f2937 !important;
+    background: #ffffff !important;
+    color: #1f2937 !important;
+}
+
+ion-item,
+.ion-palette-dark ion-item,
+.dark ion-item,
+[data-theme='dark'] ion-item,
+body ion-item {
+    --background: #ffffff !important;
+    --color: #1f2937 !important;
+    background: #ffffff !important;
+    color: #1f2937 !important;
+}
+
+ion-label,
+.ion-palette-dark ion-label,
+.dark ion-label,
+[data-theme='dark'] ion-label {
+    color: #1f2937 !important;
+}
+
+ion-input,
+ion-textarea,
+.ion-palette-dark ion-input,
+.ion-palette-dark ion-textarea,
+.dark ion-input,
+.dark ion-textarea,
+[data-theme='dark'] ion-input,
+[data-theme='dark'] ion-textarea {
+    --background: #ffffff !important;
+    --color: #1f2937 !important;
+    background: #ffffff !important;
+    color: #1f2937 !important;
+}
+
+ion-item.selected,
+.ion-palette-dark ion-item.selected,
+.dark ion-item.selected,
+[data-theme='dark'] ion-item.selected {
+    --background: rgba(0, 0, 0, 0.06) !important;
+}
+
+ion-action-sheet,
+ion-modal ion-content,
+.about-modal-sheet ion-content {
+    --background: #ffffff !important;
+    --color: #1f2937 !important;
+    background: #ffffff !important;
+    color: #1f2937 !important;
+}
+
+/* Tabs container and tab bar: force light background and gray unselected icons/labels. */
+ion-tabs,
+.ion-palette-dark ion-tabs,
+.dark ion-tabs,
+[data-theme='dark'] ion-tabs {
+    --background: #ffffff !important;
+    background: #ffffff !important;
+}
+
+ion-tab-bar,
+.ion-palette-dark ion-tab-bar,
+.dark ion-tab-bar,
+[data-theme='dark'] ion-tab-bar {
+    --background: #ffffff !important;
+    --color: #4b5563 !important;
+    --border-color: rgba(0, 0, 0, 0.08) !important;
+    background: #ffffff !important;
+    color: #4b5563 !important;
+}
+
+ion-tab-bar ion-tab-button,
+.ion-palette-dark ion-tab-bar ion-tab-button,
+.dark ion-tab-bar ion-tab-button,
+[data-theme='dark'] ion-tab-bar ion-tab-button {
+    --color: #4b5563 !important;
+    --color-selected: #24197d !important;
+    color: #4b5563 !important;
+}
+
+ion-tab-bar ion-tab-button ion-icon,
+ion-tab-bar ion-tab-button ion-label,
+.ion-palette-dark ion-tab-bar ion-tab-button ion-icon,
+.ion-palette-dark ion-tab-bar ion-tab-button ion-label,
+.dark ion-tab-bar ion-tab-button ion-icon,
+.dark ion-tab-bar ion-tab-button ion-label {
+    --color: #4b5563 !important;
+    --ion-icon-color: #4b5563 !important;
+    color: #4b5563 !important;
+}
+
+ion-tab-bar ion-tab-button.tab-selected,
+ion-tab-bar ion-tab-button[aria-selected='true'],
+.ion-palette-dark ion-tab-bar ion-tab-button.tab-selected,
+.dark ion-tab-bar ion-tab-button.tab-selected {
+    --color: #24197d !important;
+    --color-selected: #24197d !important;
+    color: #24197d !important;
+}
+
+ion-tab-bar ion-tab-button.tab-selected ion-icon,
+ion-tab-bar ion-tab-button.tab-selected ion-label,
+ion-tab-bar ion-tab-button[aria-selected='true'] ion-icon,
+ion-tab-bar ion-tab-button[aria-selected='true'] ion-label,
+.ion-palette-dark ion-tab-bar ion-tab-button.tab-selected ion-icon,
+.ion-palette-dark ion-tab-bar ion-tab-button.tab-selected ion-label,
+.dark ion-tab-bar ion-tab-button.tab-selected ion-icon,
+.dark ion-tab-bar ion-tab-button.tab-selected ion-label {
+    --color: #24197d !important;
+    --ion-icon-color: #24197d !important;
+    color: #24197d !important;
+}
+
+/* Shadow DOM: force tab button inner (native) to light background and text. */
+ion-tab-bar ion-tab-button::part(native),
+.ion-palette-dark ion-tab-bar ion-tab-button::part(native),
+.dark ion-tab-bar ion-tab-button::part(native),
+[data-theme='dark'] ion-tab-bar ion-tab-button::part(native) {
+    background: #ffffff !important;
+    color: #4b5563 !important;
+}
+
+ion-tab-bar ion-tab-button.tab-selected::part(native),
+ion-tab-bar ion-tab-button[aria-selected='true']::part(native),
+.ion-palette-dark ion-tab-bar ion-tab-button.tab-selected::part(native),
+.dark ion-tab-bar ion-tab-button.tab-selected::part(native) {
+    color: #24197d !important;
+}
