@@ -1,6 +1,18 @@
 import { buildGenerateWorkoutPrompt } from './prompts';
 import type { GenerateWorkoutInput } from './types';
 
+jest.mock('@silver/tabata/helpers', () => ({
+    getTargetMusclesForRegions: jest.fn((main: string, _secondary: string[]) => {
+        if (main === 'Full Body') {
+            return { muscles: ['quadriceps', 'chest', 'abdominals'], isFullBody: true };
+        }
+        return {
+            muscles: ['neck', 'shoulders', 'chest', 'biceps', 'triceps', 'forearms', 'traps', 'lats', 'middle back'],
+            isFullBody: false
+        };
+    })
+}));
+
 describe('buildGenerateWorkoutPrompt', () => {
     const baseInput: GenerateWorkoutInput = {
         name: 'Test Workout',
