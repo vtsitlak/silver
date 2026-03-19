@@ -8,7 +8,7 @@ html,
 html.dark,
 html.ion-palette-dark,
 html[data-theme='dark'] {
-    color-scheme: light !important;
+    color-scheme: only light !important;
     --color-surface: #ffffff !important;
     --color-surface-rgb: 255, 255, 255 !important;
     --color-text: #1f2937 !important;
