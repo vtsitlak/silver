@@ -64,12 +64,27 @@ export function initAuthStore() {
     return of(undefined);
 }
 
+function forceLightTheme(): void {
+    if (typeof document === 'undefined') return;
+    const doc = document.documentElement;
+    const body = document.body;
+    doc.setAttribute('data-theme', 'light');
+    doc.classList.add('force-light-theme');
+    doc.classList.remove('dark');
+    body.classList.add('force-light-theme');
+    body.classList.remove('dark', 'ion-palette-dark');
+}
+
 export const appConfig = {
     providers: [
         { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
         provideIonicAngular(),
         provideRouter(routes, withComponentInputBinding(), withPreloading(PreloadAllModules)),
         provideHttpClient(withInterceptors([rateLimitInterceptor])),
+        provideAppInitializer(() => {
+            forceLightTheme();
+            return of(undefined);
+        }),
         provideAppInitializer(initAuthStore),
         provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
         provideFirestore(() => getFirestore()),

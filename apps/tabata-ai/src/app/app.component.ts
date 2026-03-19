@@ -14,12 +14,24 @@ export class AppComponent implements OnInit, OnDestroy {
     private navSubscription: Subscription | null = null;
 
     ngOnInit(): void {
+        this.forceLightTheme();
+        setTimeout(() => this.forceLightTheme(), 0);
         this.navSubscription = this.router.events.pipe(filter((e): e is NavigationStart => e instanceof NavigationStart)).subscribe(() => {
             const el = document.activeElement as HTMLElement | null;
             if (el?.blur) {
                 el.blur();
             }
         });
+    }
+
+    private forceLightTheme(): void {
+        const doc = document.documentElement;
+        const body = document.body;
+        doc.setAttribute('data-theme', 'light');
+        doc.classList.add('force-light-theme');
+        doc.classList.remove('dark');
+        body.classList.add('force-light-theme');
+        body.classList.remove('dark', 'ion-palette-dark');
     }
 
     ngOnDestroy(): void {
