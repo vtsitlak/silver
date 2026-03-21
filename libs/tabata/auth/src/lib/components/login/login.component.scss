@@ -7,11 +7,9 @@
         color: #1f2937;
     }
 
-    input {
-        color: #1f2937;
-        background-color: #ffffff;
-        &::placeholder {
-            color: #6b7280;
-        }
+    ion-input {
+        --color: #1f2937;
+        --background: #ffffff;
+        --placeholder-color: #6b7280;
     }
 }

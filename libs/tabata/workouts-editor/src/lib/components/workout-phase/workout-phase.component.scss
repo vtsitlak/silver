@@ -5,5 +5,10 @@
         &:last-child {
             margin-bottom: 0;
         }
+
+        /** Ionic `ion-button` defaults to MD uppercase on label text; reset for exercise titles. */
+        ion-button.exercise-name-button::part(native) {
+            text-transform: none;
+        }
     }
 }

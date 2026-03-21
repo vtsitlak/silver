@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { email, form, FormField, minLength, required } from '@angular/forms/signals';
 import { Router } from '@angular/router';
-import { IonContent, IonButton, IonSpinner, IonIcon } from '@ionic/angular/standalone';
+import { IonContent, IonButton, IonSpinner, IonIcon, IonInput } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { eyeOffOutline, eyeOutline } from 'ionicons/icons';
 import { AuthFacade } from '@silver/tabata/states/auth';
@@ -14,7 +14,7 @@ interface RegisterFormModel {
 
 @Component({
     selector: 'tbt-register',
-    imports: [FormField, IonContent, IonButton, IonSpinner, IonIcon],
+    imports: [FormField, IonContent, IonButton, IonSpinner, IonIcon, IonInput],
     templateUrl: './register.component.html',
     styleUrl: './register.component.scss'
 })

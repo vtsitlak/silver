@@ -14,14 +14,18 @@
                     </p>
                 </div>
                 <div class="flex flex-col mb-2">
-                    <label for="email" i18n="@@authEmailLabel" class="mb-2 text-gray-900 font-medium">Email</label>
-                    <input
+                    <ion-input
                         id="email"
+                        fill="outline"
+                        class="w-full"
                         type="email"
                         [formField]="loginForm.email"
+                        label="Email"
+                        i18n-label="@@authEmailLabel"
                         placeholder="Enter your email"
                         autocomplete="email"
                         i18n-placeholder="@@authEmailPlaceholder"
+                        labelPlacement="floating"
                     />
                     <div class="h-5">
                         @if (loginForm.email().touched() && loginForm.email().invalid()) {
@@ -32,26 +36,30 @@
                     </div>
                 </div>
                 <div class="flex flex-col mb-2">
-                    <label for="password" i18n="@@authPasswordLabel" class="mb-2 text-gray-900 font-medium">Password</label>
-                    <div class="relative">
-                        <input
-                            id="password"
-                            [type]="showPassword() ? 'text' : 'password'"
-                            [formField]="loginForm.password"
-                            placeholder="Enter your password"
-                            autocomplete="current-password"
-                            i18n-placeholder="@@authPasswordPlaceholder"
-                            class="pr-10"
-                        />
-                        <button
+                    <ion-input
+                        id="password"
+                        fill="outline"
+                        class="w-full"
+                        [type]="showPassword() ? 'text' : 'password'"
+                        [formField]="loginForm.password"
+                        label="Password"
+                        i18n-label="@@authPasswordLabel"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        i18n-placeholder="@@authPasswordPlaceholder"
+                        labelPlacement="floating"
+                    >
+                        <ion-button
+                            slot="end"
+                            fill="clear"
                             type="button"
-                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            class="text-gray-500"
                             (click)="showPassword.set(!showPassword())"
                             [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
                         >
                             <ion-icon [name]="showPassword() ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
-                        </button>
-                    </div>
+                        </ion-button>
+                    </ion-input>
                     <div class="h-5">
                         @if (loginForm.password().touched() && loginForm.password().invalid()) {
                             @for (err of loginForm.password().errors(); track err.kind) {

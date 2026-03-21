@@ -26,11 +26,14 @@
 
         <div class="filters-row flex flex-wrap gap-2">
             <ion-select
-                placeholder="Muscle"
+                label="Muscle"
+                labelPlacement="floating"
+                placeholder="Any"
                 [value]="selectedMuscles()"
                 (ionChange)="onMuscleChange($event)"
                 interface="popover"
                 multiple="true"
+                fill="outline"
                 class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
             >
                 @for (muscle of musclesList(); track muscle) {
@@ -39,11 +42,14 @@
             </ion-select>
 
             <ion-select
-                placeholder="Equipment"
+                label="Equipment"
+                labelPlacement="floating"
+                placeholder="Any"
                 [value]="selectedEquipment()"
                 (ionChange)="onEquipmentChange($event)"
                 interface="popover"
                 multiple="true"
+                fill="outline"
                 class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
             >
                 @for (equipment of equipmentList(); track equipment) {
@@ -52,11 +58,14 @@
             </ion-select>
 
             <ion-select
-                placeholder="Category"
+                label="Category"
+                labelPlacement="floating"
+                placeholder="Any"
                 [value]="selectedCategory()"
                 (ionChange)="onCategoryChange($event)"
                 interface="popover"
                 multiple="true"
+                fill="outline"
                 class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
             >
                 @for (cat of categoryList(); track cat) {

@@ -397,6 +397,26 @@ ion-action-sheet.tbt-action-sheet-visible {
     color: #1f2937 !important;
 }
 
+/* Fixed footers: solid surface so scrolling content does not show through (Ionic can look transparent). */
+ion-footer {
+    --background: var(--color-surface);
+    --ion-toolbar-background: var(--color-surface);
+    background: var(--color-surface);
+}
+
+ion-footer ion-toolbar {
+    --background: var(--color-surface);
+    --ion-toolbar-background: var(--color-surface);
+    background: var(--color-surface);
+}
+
+ion-footer[translucent] {
+    --backdrop-filter: none;
+    backdrop-filter: none;
+    --background: var(--color-surface);
+    background: var(--color-surface);
+}
+
 /* Tab bar: ensure unselected icons and labels are visible */
 ion-tab-bar {
     --color: #4b5563;

@@ -1,9 +1,11 @@
 export * from './lib/components/ai-workout-preview-modal/ai-workout-preview-modal.component';
+export * from './lib/components/workout-editor/workout-editor.component';
 export * from './lib/components/workout-info/workout-info.component';
 export * from './lib/components/workout-phase/workout-phase.component';
 export * from './lib/components/main-workout/main-workout.component';
 export * from './lib/services/workout-submit.service';
 export * from './lib/services/workout-editor-cancel.service';
+export * from './lib/guards/workout-editor-can-deactivate.guard';
 
 // Re-export workout-editor state from centralized state library
 export * from '@silver/tabata/states/workout-editor';

@@ -2,10 +2,10 @@ import { computed, inject } from '@angular/core';
 import { signalStore, withState, withMethods, patchState, withComputed } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tap, switchMap, catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { Subject } from 'rxjs';
 import { tapResponse } from '@ngrx/operators';
-import { workoutsInitialState, type WorkoutsState } from './workouts.models';
+import { workoutsInitialState, type CreateWorkoutPayload, type TabataWorkout, type UpdateWorkoutPayload, type WorkoutsState } from './workouts.models';
 import { WorkoutsService } from './workouts.service';
 
 export const WorkoutsStore = signalStore(
@@ -83,6 +83,39 @@ export const WorkoutsStore = signalStore(
                         });
                         return of({ success: false });
                     })
+                );
+            },
+            createWorkout: (payload: CreateWorkoutPayload) => {
+                patchState(store, { isSaving: true, error: null });
+                return workoutsService.createWorkout(payload).pipe(
+                    tapResponse({
+                        next: (workout) => {
+                            const current = store.workouts();
+                            const exists = current.some((w) => w.id === workout.id);
+                            const next = exists ? current.map((w) => (w.id === workout.id ? workout : w)) : [workout, ...current];
+                            patchState(store, { workouts: next, loadedWorkout: workout, isSaving: false, error: null });
+                        },
+                        error: (err: Error) => {
+                            patchState(store, { error: err.message, isSaving: false });
+                        }
+                    }),
+                    catchError((err: unknown) => throwError(() => err))
+                );
+            },
+            updateWorkout: (id: string, payload: UpdateWorkoutPayload) => {
+                patchState(store, { isSaving: true, error: null });
+                return workoutsService.updateWorkout(id, payload).pipe(
+                    tapResponse({
+                        next: (workout) => {
+                            const current = store.workouts();
+                            const next = current.map((w) => (w.id === workout.id ? workout : w));
+                            patchState(store, { workouts: next, loadedWorkout: workout, isSaving: false, error: null });
+                        },
+                        error: (err: Error) => {
+                            patchState(store, { error: err.message, isSaving: false });
+                        }
+                    }),
+                    catchError((err: unknown) => throwError(() => err))
                 );
             }
         };

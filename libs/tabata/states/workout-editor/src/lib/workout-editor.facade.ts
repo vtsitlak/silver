@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { WorkoutEditorStore } from './workout-editor.store';
-import type { CreateWorkoutPayload, UpdateWorkoutPayload, WorkoutDraft } from './workout-editor.models';
+import type { WorkoutDraft } from './workout-editor.models';
 import type { TabataWorkout } from '@silver/tabata/states/workouts';
 
 @Injectable({ providedIn: 'root' })
@@ -10,10 +10,10 @@ export class WorkoutEditorFacade {
     readonly workout = this.store.workout;
     readonly workoutDraft = this.store.workoutDraft;
     readonly isLoading = this.store.isLoading;
-    readonly isSaving = this.store.isSaving;
     readonly error = this.store.error;
     readonly isEditMode = this.store.isEditMode;
     readonly isBusy = this.store.isBusy;
+    readonly canSubmitWorkout = this.store.canSubmitWorkout;
     readonly hasDraftChanges = this.store.hasDraftChanges;
     readonly hasUnsavedChanges = this.store.hasUnsavedChanges;
     readonly mergedWorkout = this.store.mergedWorkout;
@@ -22,36 +22,9 @@ export class WorkoutEditorFacade {
         this.store.loadWorkout(id);
     }
 
-    createWorkout(payload: CreateWorkoutPayload): void {
-        this.store.createWorkout(payload);
-    }
-
-    updateWorkout(id: string, payload: UpdateWorkoutPayload): void {
-        this.store.updateWorkout(id, payload);
-    }
-
-    /** Call before a save started outside the store (e.g. from WorkoutSubmitService). */
-    startSave(): void {
-        this.store.startSave();
-    }
-
-    /** Update store with the workout returned from create/update API. */
-    setWorkoutFromResponse(workout: TabataWorkout): void {
-        this.store.setWorkoutFromResponse(workout);
-    }
-
     /** Set current workout from list/cache (no API call). Use when opening edit from workouts list. */
     setWorkout(workout: TabataWorkout | null): void {
         this.store.setWorkout(workout);
-    }
-
-    /** Set save error when create/update fails outside the store. */
-    setSaveError(message: string): void {
-        this.store.setSaveError(message);
-    }
-
-    deleteWorkout(id: string): void {
-        this.store.deleteWorkout(id);
     }
 
     updateDraft(changes: WorkoutDraft): void {
@@ -72,5 +45,16 @@ export class WorkoutEditorFacade {
 
     reset(): void {
         this.store.reset();
+    }
+
+    /**
+     * Centralized save enable/disable logic.
+     * @param isSaving external saving state (e.g. workouts facade)
+     */
+    isSaveEnabled(isSaving: boolean): boolean {
+        if (isSaving) return false;
+        if (!this.canSubmitWorkout()) return false;
+        if (this.isEditMode()) return this.hasUnsavedChanges();
+        return true;
     }
 }

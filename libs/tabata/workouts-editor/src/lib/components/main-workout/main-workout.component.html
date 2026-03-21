@@ -1,12 +1,4 @@
-<ion-header [translucent]="true">
-    <tbt-toolbar [title]="pageTitle()">
-        <ion-buttons slot="start">
-            <ion-back-button [defaultHref]="backHref()"></ion-back-button>
-        </ion-buttons>
-    </tbt-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true" class="ion-padding">
+<div class="workout-tab-content">
     <div class="ion-text-center ion-padding-bottom space-y-1">
         <p> Add blocks of exercises. </p>
         <p class="text-sm text-gray-500"> Work {{ workSeconds }}s / Rest {{ restSeconds }}s · 8 rounds (fixed) per block. </p>
@@ -19,10 +11,10 @@
             @for (block of blocks(); track $index; let i = $index) {
                 <ion-item class="block-item">
                     <ion-reorder slot="start"></ion-reorder>
-                    @if (block.exercise && getExerciseImage(block.exercise.exerciseId)) {
+                    @if (block.exercise && getExerciseImage(block.exercise)) {
                         <img
-                            [src]="getExerciseImage(block.exercise.exerciseId)"
-                            [alt]="getExerciseName(block.exercise.exerciseId)"
+                            [src]="getExerciseImage(block.exercise)"
+                            [alt]="getExerciseName(block.exercise)"
                             class="block-exercise-thumb"
                             slot="start"
                         />
@@ -35,7 +27,7 @@
                                 class="cursor-pointer text-sm text-primary hover:underline text-left p-0 m-0"
                                 (click)="openExerciseDetailsModal(block.exercise.exerciseId)"
                             >
-                                {{ getExerciseName(block.exercise.exerciseId) }}
+                                {{ getExerciseName(block.exercise) }}
                             </button>
                         } @else {
                             <p class="text-sm text-gray-500">No exercise</p>
@@ -52,18 +44,4 @@
     </ion-list>
 
     <ion-button expand="block" fill="outline" class="ion-margin-top" (click)="openExerciseSelectorForNewBlock()"> Add block </ion-button>
-</ion-content>
-
-<ion-footer class="ion-no-border">
-    <div class="flex justify-between items-center ion-padding gap-2">
-        <ion-button fill="clear" type="button" (click)="navigateBack()" class="ion-no-padding flex-1 min-w-0">
-            <ion-icon name="arrow-back-outline"></ion-icon>
-            <span class="ion-padding-start">Back</span>
-        </ion-button>
-        <ion-button fill="clear" type="button" (click)="onCancel()" class="ion-no-padding flex-1 min-w-0">Cancel</ion-button>
-        <ion-button fill="clear" type="button" (click)="onNext()" [disabled]="!canGoNext()" class="ion-no-padding flex-1 min-w-0">
-            <span class="ion-padding-end">Next</span>
-            <ion-icon name="arrow-forward-outline"></ion-icon>
-        </ion-button>
-    </div>
-</ion-footer>
+</div>

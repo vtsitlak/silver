@@ -1,0 +1,43 @@
+.workout-editor-content {
+    min-height: 200px;
+}
+
+/**
+ * Reserve space for the fixed footer + safe area so the last form lines are not covered
+ * when scrolling (fixes overlap with Cancel / Save).
+ */
+:host .workout-editor-page {
+    --padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+}
+
+/**
+ * Scrollable segment: tabs keep natural width and scroll horizontally — no equal columns,
+ * so labels like "Cooldown" stay on one line without huge side padding per cell.
+ */
+:host .workout-editor-tabs {
+    max-width: 100%;
+}
+
+:host .workout-editor-tabs ion-segment-button {
+    flex: 0 0 auto;
+    --padding-start: 6px;
+    --padding-end: 6px;
+    --padding-top: 2px;
+    --padding-bottom: 2px;
+}
+
+:host .workout-editor-tabs ion-segment-button::part(native) {
+    /** Only reset min-width; avoid extra padding-block here (it stacked with --padding-* and looked too tall). */
+    min-width: 0;
+}
+
+:host .workout-editor-tabs ion-segment-button ion-label {
+    white-space: nowrap;
+}
+
+/** Shorter footer bar: `size="small"` + tighter ion-button padding. */
+:host .workout-editor-footer .workout-editor-footer-btn {
+    --padding-top: 6px;
+    --padding-bottom: 6px;
+    min-height: 0;
+}

@@ -1,49 +1,33 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, ActivatedRoute, Router } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { ModalController } from '@ionic/angular/standalone';
 import { AuthFacade } from '@silver/tabata/auth';
-import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
-import {
-    createMockActivatedRoute,
-    mockAuthFacade,
-    mockModalController,
-    mockWorkoutEditorFacade,
-    createMockWorkoutEditorCancelService,
-    createMockExercisesFacade,
-    createMockWorkoutSubmitService
-} from '@silver/tabata/testing';
+import { mockAuthFacade, mockModalController, createMockExercisesFacade } from '@silver/tabata/testing';
+import type { Exercise } from '@silver/tabata/states/exercises';
 import { WorkoutPhaseComponent } from './workout-phase.component';
-import { WorkoutSubmitService } from '../../services/workout-submit.service';
-import { WorkoutEditorCancelService } from '../../services/workout-editor-cancel.service';
 
-const mockCancelService = createMockWorkoutEditorCancelService(false);
 const mockExercisesFacade = createMockExercisesFacade();
-const mockWorkoutSubmitService = createMockWorkoutSubmitService();
 
 describe('WorkoutPhaseComponent', () => {
     let component: WorkoutPhaseComponent;
     let fixture: ComponentFixture<WorkoutPhaseComponent>;
-    let router: Router;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [WorkoutPhaseComponent],
             providers: [
                 provideRouter([]),
-                { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade },
-                { provide: WorkoutEditorCancelService, useValue: mockCancelService },
                 { provide: ExercisesFacade, useValue: mockExercisesFacade },
-                { provide: ActivatedRoute, useValue: createMockActivatedRoute() },
                 { provide: ModalController, useValue: mockModalController },
-                { provide: AuthFacade, useValue: mockAuthFacade },
-                { provide: WorkoutSubmitService, useValue: mockWorkoutSubmitService }
+                { provide: AuthFacade, useValue: mockAuthFacade }
             ]
         }).compileComponents();
 
         fixture = TestBed.createComponent(WorkoutPhaseComponent);
         component = fixture.componentInstance;
-        router = TestBed.inject(Router);
+        fixture.componentRef.setInput('loadedPhase', null);
+        fixture.componentRef.setInput('phaseType', 'warmup');
         fixture.detectChanges();
     });
 
@@ -51,94 +35,11 @@ describe('WorkoutPhaseComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should set phase to warmup when last url segment is warmup', () => {
-        TestBed.resetTestingModule();
-        TestBed.configureTestingModule({
-            imports: [WorkoutPhaseComponent],
-            providers: [
-                provideRouter([]),
-                { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade },
-                { provide: WorkoutEditorCancelService, useValue: mockCancelService },
-                { provide: ExercisesFacade, useValue: mockExercisesFacade },
-                { provide: ActivatedRoute, useValue: createMockActivatedRoute({ routeConfig: { path: 'warmup' } }) },
-                { provide: ModalController, useValue: mockModalController },
-                { provide: AuthFacade, useValue: mockAuthFacade },
-                { provide: WorkoutSubmitService, useValue: mockWorkoutSubmitService }
-            ]
-        }).compileComponents();
-        const f = TestBed.createComponent(WorkoutPhaseComponent);
-        f.detectChanges();
-        expect(f.componentInstance.phaseType()).toBe('warmup');
-    });
-
-    it('should set phase to cooldown when last url segment is cooldown', () => {
-        TestBed.resetTestingModule();
-        TestBed.configureTestingModule({
-            imports: [WorkoutPhaseComponent],
-            providers: [
-                provideRouter([]),
-                { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade },
-                { provide: WorkoutEditorCancelService, useValue: mockCancelService },
-                { provide: ExercisesFacade, useValue: mockExercisesFacade },
-                { provide: ActivatedRoute, useValue: createMockActivatedRoute({ routeConfig: { path: 'cooldown' } }) },
-                { provide: ModalController, useValue: mockModalController },
-                { provide: AuthFacade, useValue: mockAuthFacade },
-                { provide: WorkoutSubmitService, useValue: mockWorkoutSubmitService }
-            ]
-        }).compileComponents();
-        const f = TestBed.createComponent(WorkoutPhaseComponent);
-        f.detectChanges();
-        expect(f.componentInstance.phaseType()).toBe('cooldown');
-    });
-
-    it('should navigate to workouts on cancel when confirmCancel returns false', async () => {
-        const navSpy = jest.spyOn(router, 'navigate');
-        mockCancelService.confirmCancel.mockResolvedValue(false);
-        await component.onCancel();
-        expect(navSpy).toHaveBeenCalledWith(['/tabs/workouts']);
-    });
-
-    it('should show Finish button label on cooldown', () => {
-        TestBed.resetTestingModule();
-        TestBed.configureTestingModule({
-            imports: [WorkoutPhaseComponent],
-            providers: [
-                provideRouter([]),
-                { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade },
-                { provide: WorkoutEditorCancelService, useValue: mockCancelService },
-                { provide: ExercisesFacade, useValue: mockExercisesFacade },
-                { provide: ActivatedRoute, useValue: createMockActivatedRoute({ routeConfig: { path: 'cooldown' } }) },
-                { provide: ModalController, useValue: mockModalController },
-                { provide: AuthFacade, useValue: mockAuthFacade },
-                { provide: WorkoutSubmitService, useValue: mockWorkoutSubmitService }
-            ]
-        }).compileComponents();
-        const f = TestBed.createComponent(WorkoutPhaseComponent);
-        f.detectChanges();
-        expect(f.componentInstance.nextButtonLabel()).toBe('Finish');
-    });
-
-    it('should call submitWorkout and navigate to workouts when finishing cooldown', () => {
-        TestBed.resetTestingModule();
-        TestBed.configureTestingModule({
-            imports: [WorkoutPhaseComponent],
-            providers: [
-                provideRouter([]),
-                { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade },
-                { provide: WorkoutEditorCancelService, useValue: mockCancelService },
-                { provide: ExercisesFacade, useValue: mockExercisesFacade },
-                { provide: ActivatedRoute, useValue: createMockActivatedRoute({ routeConfig: { path: 'cooldown' } }) },
-                { provide: ModalController, useValue: mockModalController },
-                { provide: AuthFacade, useValue: mockAuthFacade },
-                { provide: WorkoutSubmitService, useValue: mockWorkoutSubmitService }
-            ]
-        }).compileComponents();
-        const f = TestBed.createComponent(WorkoutPhaseComponent);
-        const comp = f.componentInstance;
-        const routerFromTestBed = TestBed.inject(Router);
-        const navSpy = jest.spyOn(routerFromTestBed, 'navigate');
-        const submitSpy = jest.spyOn(mockWorkoutSubmitService, 'submitWorkout');
-        comp.phaseItems.set([
+    it('should emit draftChange when phase items change', async () => {
+        await fixture.whenStable();
+        const emitted: unknown[] = [];
+        component.draftChange.subscribe((v) => emitted.push(v));
+        component.phaseItems.set([
             {
                 exercise: {
                     exerciseId: 'e1',
@@ -153,10 +54,10 @@ describe('WorkoutPhaseComponent', () => {
                 durationSeconds: 60
             }
         ]);
-        f.detectChanges();
-        comp.onNext();
-        expect(submitSpy).toHaveBeenCalled();
-        expect(navSpy).toHaveBeenCalledWith(['/tabs/workouts']);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(emitted.length).toBeGreaterThan(0);
+        expect(emitted.some((e) => typeof e === 'object' && e !== null && 'warmup' in (e as object))).toBe(true);
     });
 
     it('should reorder phase items on ionReorderEnd and update duration modal index', () => {
@@ -183,5 +84,45 @@ describe('WorkoutPhaseComponent', () => {
         } as unknown as CustomEvent<{ from: number; to: number; complete: (data?: boolean | unknown[]) => void }>);
         expect(component.phaseItems().map((p) => p.exercise.exerciseId)).toEqual(['c', 'a', 'b']);
         expect(completeSpy).toHaveBeenCalledWith(true);
+    });
+
+    it('getExerciseImage should prefer images on the exercise over the map', () => {
+        const ex: Exercise = {
+            exerciseId: 'local-thumb',
+            name: 'Local',
+            images: ['https://cdn.example/from-exercise.png'],
+            targetMuscles: [],
+            category: [],
+            equipments: [],
+            secondaryMuscles: [],
+            instructions: []
+        };
+        expect(component.getExerciseImage(ex)).toBe('https://cdn.example/from-exercise.png');
+    });
+
+    it('getExerciseImage should fall back to exercisesMap when exercise has no images', () => {
+        mockExercisesFacade.exercisesMap.set({
+            fallbackId: {
+                exerciseId: 'fallbackId',
+                name: 'F',
+                images: ['https://cdn.example/from-map.png'],
+                targetMuscles: [],
+                category: [],
+                equipments: [],
+                secondaryMuscles: [],
+                instructions: []
+            }
+        });
+        const ex: Exercise = {
+            exerciseId: 'fallbackId',
+            name: 'F',
+            images: [],
+            targetMuscles: [],
+            category: [],
+            equipments: [],
+            secondaryMuscles: [],
+            instructions: []
+        };
+        expect(component.getExerciseImage(ex)).toBe('https://cdn.example/from-map.png');
     });
 });

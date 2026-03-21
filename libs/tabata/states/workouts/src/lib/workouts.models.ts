@@ -6,6 +6,7 @@ export interface WorkoutsState {
     /** Single workout loaded by id (e.g. for details view). Cleared when loading list. */
     loadedWorkout: TabataWorkout | null;
     isLoading: boolean;
+    isSaving: boolean;
     error: string | null;
 }
 
@@ -13,6 +14,7 @@ export const workoutsInitialState: WorkoutsState = {
     workouts: [],
     loadedWorkout: null,
     isLoading: false,
+    isSaving: false,
     error: null
 };
 
@@ -22,7 +24,7 @@ export const workoutsInitialState: WorkoutsState = {
 export interface TabataWorkout {
     id: string;
     name: string;
-    description?: string;
+    description: string;
     totalDurationMinutes: number;
     warmup: Phase;
     blocks: TabataBlock[];
@@ -64,3 +66,13 @@ export interface ExerciseItem {
     exerciseId: string;
     durationSeconds: number;
 }
+
+export type WorkoutInfo = Pick<TabataWorkout, 'name' | 'description' | 'generatedByAi' | 'mainTargetBodypart' | 'secondaryTargetBodyparts' | 'availableEquipments'>;
+
+export type WorkoutInfoFormModel = Omit<WorkoutInfo, 'mainTargetBodypart'> & {
+    mainTargetBodypart: BodyRegion | null;
+};
+
+export type CreateWorkoutPayload = Omit<TabataWorkout, 'id' | 'createdAt' | 'updatedAt'>;
+
+export type UpdateWorkoutPayload = Partial<Omit<TabataWorkout, 'id' | 'createdAt' | 'createdByUserId'>>;

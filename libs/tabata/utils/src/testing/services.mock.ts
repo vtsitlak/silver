@@ -4,8 +4,6 @@
  */
 /// <reference types="jest" />
 
-import { of } from 'rxjs';
-
 function mockFn(): jest.Mock {
     return typeof jest !== 'undefined'
         ? jest.fn()
@@ -44,15 +42,11 @@ export const mockActionSheetController = {
                   })) as unknown as jest.Mock)
 };
 
-/** Mock for WorkoutSubmitService (submitWorkout returns an observable). */
+/** Mock for WorkoutSubmitService (submitWorkout is void). */
 export function createMockWorkoutSubmitService(): {
     submitWorkout: jest.Mock;
-    canSubmitWorkout: jest.Mock;
-    scheduleAutosaveWhen: jest.Mock;
 } {
     return {
-        submitWorkout: mockFn().mockReturnValue(of({})),
-        canSubmitWorkout: mockFn().mockReturnValue(true),
-        scheduleAutosaveWhen: mockFn().mockReturnValue(undefined)
+        submitWorkout: mockFn(),
     };
 }

@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import type { TabataWorkout } from './workouts.models';
+import type { CreateWorkoutPayload, TabataWorkout, UpdateWorkoutPayload } from './workouts.models';
 import { WORKOUTS_API_BASE_URL } from './workouts-api-base-url';
 
 @Injectable({ providedIn: 'root' })
@@ -36,5 +36,15 @@ export class WorkoutsService {
     /** POST a new workout (proxied to Upstash JSON.ARRAPPEND). */
     addWorkout(workout: TabataWorkout): Observable<{ success: boolean }> {
         return this.http.post<{ success: boolean }>(this.apiUrl('/api/workouts'), workout);
+    }
+
+    /** POST a new workout and return the saved workout (id, timestamps). */
+    createWorkout(payload: CreateWorkoutPayload): Observable<TabataWorkout> {
+        return this.http.post<TabataWorkout>(this.apiUrl('/api/workouts'), payload);
+    }
+
+    /** PUT an existing workout and return the updated workout. */
+    updateWorkout(id: string, payload: UpdateWorkoutPayload): Observable<TabataWorkout> {
+        return this.http.put<TabataWorkout>(this.apiUrl(`/api/workouts/${encodeURIComponent(id)}`), payload);
     }
 }

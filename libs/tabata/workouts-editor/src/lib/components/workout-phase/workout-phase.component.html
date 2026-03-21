@@ -1,14 +1,6 @@
-<ion-header [translucent]="true">
-    <tbt-toolbar [title]="pageTitle()">
-        <ion-buttons slot="start">
-            <ion-back-button [defaultHref]="backHref()"></ion-back-button>
-        </ion-buttons>
-    </tbt-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true" class="ion-padding">
+<div class="workout-tab-content">
     <p class="ion-text-center ion-color-medium ion-padding-bottom">
-        {{ phaseType() === 'warmup' ? 'Add exercises and set duration for each.' : 'Add exercises and set duration for each.' }}
+        Add exercises and set duration for each.
     </p>
 
     <ion-button expand="block" (click)="openExerciseSelectorModal()"> Add exercises </ion-button>
@@ -25,10 +17,10 @@
                     @for (item of phaseItems(); track item.exercise.exerciseId; let i = $index) {
                         <ion-item class="exercise-item">
                             <ion-reorder slot="start"></ion-reorder>
-                            @if (getExerciseImage(item.exercise.exerciseId)) {
+                            @if (getExerciseImage(item.exercise)) {
                                 <img
-                                    [src]="getExerciseImage(item.exercise.exerciseId)"
-                                    [alt]="getExerciseName(item.exercise.exerciseId)"
+                                    [src]="getExerciseImage(item.exercise)"
+                                    [alt]="getExerciseName(item.exercise)"
                                     class="w-12 h-12 object-cover rounded-lg bg-gray-100 mr-3"
                                     slot="start"
                                 />
@@ -36,11 +28,12 @@
 
                             <ion-button
                                 fill="clear"
+                                class="exercise-name-button"
                                 (click)="openExerciseDetailsModal(item.exercise.exerciseId)"
                                 (keydown.enter)="openExerciseDetailsModal(item.exercise.exerciseId)"
                                 (keydown.space)="openExerciseDetailsModal(item.exercise.exerciseId); $event.preventDefault()"
                             >
-                                {{ getExerciseName(item.exercise.exerciseId) }}
+                                {{ getExerciseName(item.exercise) }}
                             </ion-button>
 
                             <div class="flex items-center gap-1" slot="end">
@@ -66,23 +59,4 @@
         (durationChange)="durationInputSeconds.set($event)"
         (save)="saveDuration()"
     ></tbt-duration-input-modal>
-</ion-content>
-
-<ion-footer class="ion-no-border">
-    <div class="flex justify-between items-center ion-padding gap-2">
-        <ion-button fill="clear" type="button" (click)="navigateBack()" class="ion-no-padding flex-1 min-w-0">
-            <ion-icon name="arrow-back-outline"></ion-icon>
-            <span class="ion-padding-start">Back</span>
-        </ion-button>
-        <ion-button fill="clear" type="button" (click)="onCancel()" class="ion-no-padding flex-1 min-w-0">Cancel</ion-button>
-        <ion-button fill="clear" type="button" (click)="onNext()" [disabled]="!allHaveDuration() || isSaving()" class="ion-no-padding flex-1 min-w-0">
-            @if (phaseType() === 'warmup') {
-                <span class="ion-padding-end">Next</span>
-                <ion-icon name="arrow-forward-outline"></ion-icon>
-            } @else {
-                <span class="ion-padding-end">Finish</span>
-                <ion-icon name="save-outline"></ion-icon>
-            }
-        </ion-button>
-    </div>
-</ion-footer>
+</div>

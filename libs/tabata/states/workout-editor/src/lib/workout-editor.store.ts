@@ -7,34 +7,70 @@ import { tapResponse } from '@ngrx/operators';
 import {
     workoutEditorInitialState,
     type WorkoutEditorState,
-    type CreateWorkoutPayload,
-    type UpdateWorkoutPayload,
     type WorkoutDraft
 } from './workout-editor.models';
+import { areWorkoutDraftsEqual, draftHasMeaningfulContent } from './workout-draft.util';
 
-/** In create mode, we only consider the draft "changed" if it has meaningful user input. */
-function draftHasMeaningfulContent(draft: WorkoutDraft): boolean {
-    if (Object.keys(draft).length === 0) return false;
-    if (typeof draft.name === 'string' && draft.name.trim() !== '') return true;
-    if (typeof draft.description === 'string' && draft.description.trim() !== '') return true;
-    if (draft.mainTargetBodypart != null) return true;
-    if (Array.isArray(draft.availableEquipments) && draft.availableEquipments.length > 0) return true;
-    if (Array.isArray(draft.secondaryTargetBodyparts) && draft.secondaryTargetBodyparts.length > 0) return true;
-    if (Array.isArray(draft.warmup?.movements) && draft.warmup.movements.length > 0) return true;
-    if (Array.isArray(draft.blocks) && draft.blocks.length > 0) return true;
-    if (Array.isArray(draft.cooldown?.movements) && draft.cooldown.movements.length > 0) return true;
-    return false;
+function draftCanSubmitWorkout(draft: WorkoutDraft): boolean {
+    // Info tab required fields
+    if (draft.name == null || String(draft.name).trim() === '') return false;
+    if (draft.description == null || String(draft.description).trim() === '') return false;
+    if (draft.mainTargetBodypart == null) return false;
+
+    // Warmup required: at least one movement with valid exerciseId + duration
+    const warmupMovements = draft.warmup?.movements;
+    if (!Array.isArray(warmupMovements) || warmupMovements.length === 0) return false;
+    if (
+        warmupMovements.some(
+            (m) =>
+                !m?.exerciseId?.trim() || typeof m.durationSeconds !== 'number' || m.durationSeconds <= 0
+        )
+    )
+        return false;
+
+    // Cooldown required: at least one movement with valid exerciseId + duration
+    const cooldownMovements = draft.cooldown?.movements;
+    if (!Array.isArray(cooldownMovements) || cooldownMovements.length === 0) return false;
+    if (
+        cooldownMovements.some(
+            (m) =>
+                !m?.exerciseId?.trim() || typeof m.durationSeconds !== 'number' || m.durationSeconds <= 0
+        )
+    )
+        return false;
+
+    // Main required: at least one block with valid exerciseId + durations
+    const blocks = draft.blocks;
+    if (!Array.isArray(blocks) || blocks.length === 0) return false;
+    if (
+        blocks.some(
+            (b) =>
+                !b?.exerciseId?.trim() ||
+                typeof b.rounds !== 'number' ||
+                b.rounds <= 0 ||
+                typeof b.workDurationSeconds !== 'number' ||
+                b.workDurationSeconds <= 0 ||
+                typeof b.restDurationSeconds !== 'number' ||
+                b.restDurationSeconds <= 0 ||
+                b.interBlockRestSeconds == null ||
+                typeof b.interBlockRestSeconds !== 'number' ||
+                b.interBlockRestSeconds < 0
+        )
+    )
+        return false;
+
+    return true;
 }
-import { cloneDeep, deepEqual, isNonNullish } from '@silver/shared/helpers';
-import { WorkoutEditorService } from './workout-editor.service';
-import type { TabataWorkout } from '@silver/tabata/states/workouts';
+import { cloneDeep, isNonNullish } from '@silver/shared/helpers';
+import { WorkoutsService, type TabataWorkout } from '@silver/tabata/states/workouts';
 
 export const WorkoutEditorStore = signalStore(
     { providedIn: 'root' },
     withState<WorkoutEditorState>(workoutEditorInitialState),
-    withComputed(({ workout, workoutDraft, initialDraftSnapshot, isLoading, isSaving }) => ({
+    withComputed(({ workout, workoutDraft, initialDraftSnapshot, isLoading }) => ({
         isEditMode: computed(() => workout() !== null),
-        isBusy: computed(() => isLoading() || isSaving()),
+        isBusy: computed(() => isLoading()),
+        canSubmitWorkout: computed(() => draftCanSubmitWorkout(workoutDraft())),
         hasDraftChanges: computed(() => Object.keys(workoutDraft()).length > 0),
         /** True if draft differs from initial (create: meaningful content; edit: draft !== snapshot). */
         hasUnsavedChanges: computed(() => {
@@ -44,7 +80,7 @@ export const WorkoutEditorStore = signalStore(
                 return draftHasMeaningfulContent(draft);
             }
             if (!isNonNullish(initial)) return false;
-            return !deepEqual(draft, initial);
+            return !areWorkoutDraftsEqual(draft, initial);
         }),
         mergedWorkout: computed(() => {
             const current = workout();
@@ -53,16 +89,16 @@ export const WorkoutEditorStore = signalStore(
             return { ...current, ...draft };
         })
     })),
-    withMethods((store, service = inject(WorkoutEditorService)) => {
+    withMethods((store, workoutsService = inject(WorkoutsService)) => {
         const loadWorkout = rxMethod<string>(
             pipe(
                 tap(() => patchState(store, { isLoading: true, error: null })),
                 switchMap((id) =>
-                    service.getWorkoutById(id).pipe(
+                    workoutsService.getWorkoutById(id).pipe(
                         tapResponse({
                             next: (workout) =>
                                 patchState(store, {
-                                    workout,
+                                    workout: workout ?? null,
                                     workoutDraft: workout ? { ...workout } : {},
                                     initialDraftSnapshot: workout ? cloneDeep(workout) : null,
                                     isLoading: false
@@ -75,65 +111,6 @@ export const WorkoutEditorStore = signalStore(
             )
         );
 
-        const createWorkout = rxMethod<CreateWorkoutPayload>(
-            pipe(
-                tap(() => patchState(store, { isSaving: true, error: null })),
-                switchMap((payload) =>
-                    service.createWorkout(payload).pipe(
-                        tapResponse({
-                            next: (workout) => patchState(store, { workout, isSaving: false }),
-                            error: (err: Error) => patchState(store, { error: err.message, isSaving: false })
-                        }),
-                        catchError(() => of(null))
-                    )
-                )
-            )
-        );
-
-        const updateWorkout = rxMethod<{ id: string; payload: UpdateWorkoutPayload }>(
-            pipe(
-                tap(() => patchState(store, { isSaving: true, error: null })),
-                switchMap(({ id, payload }) =>
-                    service.updateWorkout(id, payload).pipe(
-                        tapResponse({
-                            next: (workout) => patchState(store, { workout, isSaving: false }),
-                            error: (err: Error) => patchState(store, { error: err.message, isSaving: false })
-                        }),
-                        catchError(() => of(null))
-                    )
-                )
-            )
-        );
-
-        const deleteWorkout = rxMethod<string>(
-            pipe(
-                tap(() => patchState(store, { isSaving: true, error: null })),
-                switchMap((id) =>
-                    service.deleteWorkout(id).pipe(
-                        tapResponse({
-                            next: () => patchState(store, { workout: null, isSaving: false }),
-                            error: (err: Error) => patchState(store, { error: err.message, isSaving: false })
-                        }),
-                        catchError(() => of({ success: false }))
-                    )
-                )
-            )
-        );
-
-        const startSave = (): void => {
-            patchState(store, { isSaving: true, error: null });
-        };
-
-        const setWorkoutFromResponse = (workout: TabataWorkout): void => {
-            patchState(store, {
-                workout,
-                workoutDraft: { ...workout },
-                initialDraftSnapshot: cloneDeep(workout),
-                isSaving: false,
-                error: null
-            });
-        };
-
         /** Set current workout from list/cache (no API call). Use when opening edit from workouts list. */
         const setWorkout = (workout: TabataWorkout | null): void => {
             patchState(store, {
@@ -145,19 +122,9 @@ export const WorkoutEditorStore = signalStore(
             });
         };
 
-        const setSaveError = (message: string): void => {
-            patchState(store, { error: message, isSaving: false });
-        };
-
         return {
             loadWorkout,
-            createWorkout,
-            updateWorkout: (id: string, payload: UpdateWorkoutPayload) => updateWorkout({ id, payload }),
-            deleteWorkout,
-            startSave,
-            setWorkoutFromResponse,
             setWorkout,
-            setSaveError,
             updateDraft: (changes: WorkoutDraft) => patchState(store, { workoutDraft: { ...store.workoutDraft(), ...changes } }),
             setDraft: (draft: WorkoutDraft) => patchState(store, { workoutDraft: draft }),
             clearDraft: () => patchState(store, { workoutDraft: {}, initialDraftSnapshot: null }),

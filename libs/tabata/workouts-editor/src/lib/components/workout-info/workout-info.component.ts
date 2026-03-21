@@ -1,45 +1,56 @@
-import { Component, computed, effect, inject, OnInit, signal, untracked } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import {
+    Component,
+    computed,
+    effect,
+    inject,
+    input,
+    output,
+    signal,
+    untracked
+} from '@angular/core';
+import { Router } from '@angular/router';
 import { form, FormField, required } from '@angular/forms/signals';
 import {
-    IonHeader,
-    IonContent,
     IonButton,
-    IonButtons,
-    IonBackButton,
+    IonInput,
     IonSelect,
     IonSelectOption,
-    IonFooter,
-    IonIcon,
-    IonSpinner
+    IonSpinner,
+    IonTextarea,
+    ModalController
 } from '@ionic/angular/standalone';
-import { ToolbarComponent } from '@silver/tabata/ui';
-import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
-import { WorkoutEditorCancelService } from '../../services/workout-editor-cancel.service';
+import type { WorkoutDraft } from '@silver/tabata/states/workout-editor';
 import {
     EQUIPMENT_CATEGORY_OPTIONS,
     BODY_REGION_OPTIONS,
-    equipmentOptions,
-    muscleOptions,
-    type EquipmentCategory,
     type BodyRegion
 } from '@silver/tabata/helpers';
-import { AiWorkoutGeneratorService } from '@silver/tabata/ai-workout-generator';
-import type { ExerciseSummary } from '@silver/tabata/ai-workout-generator';
-import { ExercisesService } from '@silver/tabata/states/exercises';
-import { ModalController } from '@ionic/angular/standalone';
+import { SKIP_WORKOUT_EDITOR_CANCEL } from '../../guards/workout-editor-can-deactivate.guard';
+import { AiWorkoutGenerationService } from '../../services/ai-workout-generation.service';
 import { AiWorkoutPreviewModalComponent } from '../ai-workout-preview-modal/ai-workout-preview-modal.component';
-import { addIcons } from 'ionicons';
-import { arrowBackOutline, arrowForwardOutline } from 'ionicons/icons';
-import { WorkoutSubmitService } from '../../services/workout-submit.service';
+import { finalize } from 'rxjs/operators';
+import type { WorkoutInfoFormModel } from '@silver/tabata/states/workouts';
 
-interface WorkoutInfoFormModel {
-    name: string;
-    description: string;
-    mainTargetBodypart: BodyRegion | null;
-    availableEquipments: EquipmentCategory[];
-    secondaryTargetBodyparts: BodyRegion[];
-    generatedByAi: boolean;
+function emptyInfoFormModel(): WorkoutInfoFormModel {
+    return {
+        name: '',
+        description: '',
+        mainTargetBodypart: null,
+        availableEquipments: [],
+        secondaryTargetBodyparts: [],
+        generatedByAi: false
+    };
+}
+
+function mapLoadedToFormModel(loaded: WorkoutInfoFormModel): WorkoutInfoFormModel {
+    return {
+        name: loaded.name,
+        description: loaded.description ?? '',
+        generatedByAi: loaded.generatedByAi,
+        mainTargetBodypart: loaded.mainTargetBodypart,
+        availableEquipments: loaded.availableEquipments ?? [],
+        secondaryTargetBodyparts: loaded.secondaryTargetBodyparts ?? []
+    };
 }
 
 @Component({
@@ -47,231 +58,108 @@ interface WorkoutInfoFormModel {
     templateUrl: 'workout-info.component.html',
     styleUrls: ['workout-info.component.scss'],
     imports: [
-        IonHeader,
-        IonContent,
         IonButton,
-        IonButtons,
-        IonBackButton,
+        IonInput,
         IonSelect,
         IonSelectOption,
-        IonFooter,
-        IonIcon,
         IonSpinner,
-        FormField,
-        ToolbarComponent
+        IonTextarea,
+        FormField
     ]
 })
-export class WorkoutInfoComponent implements OnInit {
-    private readonly route = inject(ActivatedRoute);
+export class WorkoutInfoComponent {
+    private readonly aiWorkoutGeneration = inject(AiWorkoutGenerationService);
     private readonly router = inject(Router);
-    private readonly facade = inject(WorkoutEditorFacade);
-    private readonly cancelService = inject(WorkoutEditorCancelService);
-    private readonly aiGenerator = inject(AiWorkoutGeneratorService);
-    private readonly exercisesService = inject(ExercisesService);
     private readonly modalCtrl = inject(ModalController);
-    private readonly workoutSubmitService = inject(WorkoutSubmitService);
 
-    readonly workoutId = signal<string | null>(null);
-    readonly isEditMode = signal(false);
-    readonly pageTitle = signal('Workout Info');
+    /** Snapshot from the editor's loaded workout (not live draft) — avoids parent↔draft feedback loops. */
+    readonly loadedInfo = input<WorkoutInfoFormModel | null>(null);
+
+    /** When `false` (edit existing workout), AI generation UI is hidden. */
+    readonly isCreateMode = input(true);
+
+    readonly draftChange = output<Partial<WorkoutDraft>>();
+    /** Parent should call `WorkoutEditorFacade.clearDraft()` when AI preview is cancelled. */
+    readonly clearDraftRequested = output<void>();
 
     readonly equipmentOptions = EQUIPMENT_CATEGORY_OPTIONS;
     readonly bodyRegionOptions = BODY_REGION_OPTIONS;
 
-    readonly draft = this.facade.workoutDraft;
+    readonly mainTargetDisabled = computed(() => (region: BodyRegion) => this.formModel().secondaryTargetBodyparts.includes(region));
+    readonly secondaryTargetDisabled = computed(() => (region: BodyRegion) => this.formModel().mainTargetBodypart === region);
 
-    readonly mainTargetDisabled = computed(() => (region: BodyRegion) => this.infoModel().secondaryTargetBodyparts.includes(region));
-    readonly secondaryTargetDisabled = computed(() => (region: BodyRegion) => this.infoModel().mainTargetBodypart === region);
+    readonly formModel = signal<WorkoutInfoFormModel>(emptyInfoFormModel());
 
-    readonly infoModel = signal<WorkoutInfoFormModel>({
-        name: '',
-        description: '',
-        mainTargetBodypart: null,
-        availableEquipments: [],
-        secondaryTargetBodyparts: [],
-        generatedByAi: false
-    });
-
-    infoForm = form(this.infoModel, (schemaPath) => {
+    infoForm = form(this.formModel, (schemaPath) => {
         required(schemaPath.name, { message: 'Name is required' });
         required(schemaPath.description, { message: 'Description is required' });
         required(schemaPath.mainTargetBodypart, { message: 'Main target is required' });
     });
 
     readonly isFormValid = computed(() => this.infoForm().valid());
-
     readonly isGenerating = signal(false);
-    readonly generateError = signal<string | null>(null);
-
-    private readonly hasSyncedDraftToForm = signal(false);
 
     constructor() {
-        addIcons({ arrowBackOutline, arrowForwardOutline });
+        // `loadedInfo` is derived from `workout()` in the parent; it only changes when that workout changes, not on draft patches.
         effect(() => {
-            const d = this.draft();
-            const isEdit = this.isEditMode();
-            const synced = this.hasSyncedDraftToForm();
-            if (!synced && isEdit && d.name != null && d.name !== '') {
-                this.hasSyncedDraftToForm.set(true);
-                untracked(() => {
-                    this.infoModel.set({
-                        name: d.name ?? '',
-                        description: d.description ?? '',
-                        mainTargetBodypart: d.mainTargetBodypart ?? null,
-                        availableEquipments: d.availableEquipments ?? [],
-                        secondaryTargetBodyparts: d.secondaryTargetBodyparts ?? [],
-                        generatedByAi: d.generatedByAi ?? false
-                    });
-                });
-            }
+            const loaded = this.loadedInfo();
+            untracked(() => {
+                if (!loaded) {
+                    this.formModel.set(emptyInfoFormModel());
+                    return;
+                }
+                this.formModel.set(mapLoadedToFormModel(loaded));
+            });
         });
+
         effect(() => {
-            const model = this.infoModel();
-            const canPushToDraft = !this.isEditMode() || this.hasSyncedDraftToForm();
-            if (canPushToDraft) {
-                untracked(() => {
-                    this.facade.updateDraft({
-                        name: model.name || undefined,
-                        description: model.description || undefined,
-                        mainTargetBodypart: model.mainTargetBodypart ?? undefined,
-                        availableEquipments: model.availableEquipments,
-                        secondaryTargetBodyparts: model.secondaryTargetBodyparts,
-                        generatedByAi: model.generatedByAi
-                    });
-                });
-            }
-            return this.workoutSubmitService.scheduleAutosaveWhen(
-                this.facade.hasUnsavedChanges(),
-                this.isEditMode(),
-                !this.facade.isBusy(),
-                this.workoutSubmitService.canSubmitWorkout()
+            const model = this.formModel();
+            untracked(() =>
+                this.draftChange.emit({
+                    name: model.name || undefined,
+                    description: model.description || undefined,
+                    mainTargetBodypart: model.mainTargetBodypart ?? undefined,
+                    availableEquipments: model.availableEquipments,
+                    secondaryTargetBodyparts: model.secondaryTargetBodyparts,
+                    generatedByAi: model.generatedByAi
+                })
             );
         });
     }
 
-    ngOnInit(): void {
-        const id = this.route.snapshot.paramMap.get('workoutId');
-        if (id) {
-            this.workoutId.set(id);
-            this.isEditMode.set(true);
-            this.pageTitle.set('Edit Workout');
-            const existing = this.facade.workout();
-            if (existing?.id !== id) {
-                this.facade.loadWorkout(id);
-            }
-        }
-    }
-
     onGenerateWithAi(): void {
         if (this.infoForm().invalid()) return;
-        const model = this.infoModel();
+        const model = this.formModel();
         const mainTarget = model.mainTargetBodypart;
         if (!mainTarget) return;
-
-        this.generateError.set(null);
         this.isGenerating.set(true);
+        const name = model.name;
+        const description = model.description;
+        if (!name || !description) return;
 
-        const musclesParam = this.getMusclesParamForRegion(mainTarget);
-        const equipmentParam = this.getEquipmentParamForCategories(model.availableEquipments ?? []);
-
-        this.exercisesService
-            .filterExercises({
-                limit: 40,
-                muscles: musclesParam || undefined,
-                equipment: equipmentParam || undefined,
-                sortBy: 'name',
-                sortOrder: 'asc'
+        this.aiWorkoutGeneration
+            .generateWorkout({
+                name,
+                description,
+                mainTargetBodypart: mainTarget,
+                availableEquipments: model.availableEquipments ?? [],
+                secondaryTargetBodyparts: model.secondaryTargetBodyparts ?? []
             })
+            .pipe(finalize(() => this.isGenerating.set(false)))
             .subscribe({
-                next: (exercises) => {
-                    const summaries: ExerciseSummary[] = exercises.map((e) => ({
-                        exerciseId: e.exerciseId,
-                        name: e.name,
-                        targetMuscles: e.targetMuscles ?? [],
-                        secondaryMuscles: e.secondaryMuscles ?? [],
-                        category: e.category ?? [],
-                        equipments: e.equipments ?? []
-                    }));
+                next: (generated) => {
+                    this.draftChange.emit({
+                        totalDurationMinutes: generated.totalDurationMinutes,
+                        warmup: generated.warmup,
+                        blocks: generated.blocks,
+                        cooldown: generated.cooldown,
+                        generatedByAi: true
+                    });
 
-                    if (summaries.length === 0) {
-                        this.generateError.set(
-                            'No exercises found for the selected target and equipment. Try different equipment or a broader target (e.g. Full Body).'
-                        );
-                        this.isGenerating.set(false);
-                        return;
-                    }
-
-                    this.aiGenerator
-                        .generateWorkout({
-                            name: model.name,
-                            description: model.description,
-                            mainTargetBodypart: mainTarget,
-                            availableEquipments: model.availableEquipments,
-                            secondaryTargetBodyparts: model.secondaryTargetBodyparts,
-                            exercises: summaries
-                        })
-                        .subscribe({
-                            next: (output) => {
-                                this.facade.updateDraft({
-                                    totalDurationMinutes: output.totalDurationMinutes,
-                                    warmup: output.warmup,
-                                    blocks: output.blocks,
-                                    cooldown: output.cooldown,
-                                    generatedByAi: true
-                                });
-                                this.infoModel.set({ ...model, generatedByAi: true });
-                                this.isGenerating.set(false);
-                                this.openAiPreviewModal();
-                            },
-                            error: (err: { error?: { error?: string }; message?: string }) => {
-                                const msg = err?.error?.error ?? err?.message ?? 'AI generation failed';
-                                this.generateError.set(msg);
-                                this.isGenerating.set(false);
-                            }
-                        });
-                },
-                error: () => {
-                    this.generateError.set('Failed to load exercises');
-                    this.isGenerating.set(false);
+                    this.formModel.update((m) => ({ ...m, generatedByAi: true }));
+                    this.openAiPreviewModal();
                 }
             });
-    }
-
-    /** Maps BodyRegion to comma-separated muscle names from muscleOptions. Full Body = no filter (empty string). */
-    private getMusclesParamForRegion(region: BodyRegion): string {
-        if (region === 'Full Body') return '';
-        const mapping = muscleOptions.find((m) => m.region === region);
-        if (!mapping?.muscles?.length) return '';
-        return mapping.muscles.join(',');
-    }
-
-    /** Maps selected equipment categories to comma-separated equipment strings. Bodyweight is always included. */
-    private getEquipmentParamForCategories(categories: EquipmentCategory[]): string {
-        const equipmentStrings = new Set<string>();
-        const bodyweightItem = equipmentOptions.find((e) => e.equipmentCategory === 'Bodyweight');
-        bodyweightItem?.equipmentOptions?.forEach((eq) => equipmentStrings.add(eq));
-        for (const cat of categories) {
-            const item = equipmentOptions.find((e) => e.equipmentCategory === cat);
-            item?.equipmentOptions?.forEach((eq) => equipmentStrings.add(eq));
-        }
-        return Array.from(equipmentStrings).join(',');
-    }
-
-    async onCancel(): Promise<void> {
-        const stay = await this.cancelService.confirmCancel();
-        if (!stay) {
-            this.router.navigate(['/tabs/workouts']);
-        }
-    }
-
-    onSubmit(): void {
-        if (this.infoForm().invalid()) return;
-        const id = this.workoutId();
-        if (id) {
-            this.router.navigate(['/tabs/workouts/edit', id, 'warmup']);
-        } else {
-            this.router.navigate(['/tabs/workouts/create/warmup']);
-        }
     }
 
     private openAiPreviewModal(): void {
@@ -282,13 +170,19 @@ export class WorkoutInfoComponent implements OnInit {
             })
             .then((modal) => {
                 modal.onDidDismiss().then(({ role }) => {
-                    if (role === 'save') {
-                        this.router.navigate(['/tabs/workouts']);
-                    } else if (role === 'tryAgain') {
+                    const typedRole = role as 'save' | 'tryAgain' | 'cancel' | undefined;
+                    if (typedRole === 'save') {
+                        /** Same as {@link WorkoutsFacade} after save — skip can-deactivate confirm (draft still looks “dirty”). */
+                        this.router.navigate(['/tabs/workouts'], {
+                            state: { [SKIP_WORKOUT_EDITOR_CANCEL]: true }
+                        });
+                    } else if (typedRole === 'tryAgain') {
                         this.onGenerateWithAi();
-                    } else if (role === 'cancel') {
-                        this.facade.clearDraft();
-                        this.router.navigate(['/tabs/workouts']);
+                    } else if (typedRole === 'cancel') {
+                        this.clearDraftRequested.emit();
+                        this.router.navigate(['/tabs/workouts'], {
+                            state: { [SKIP_WORKOUT_EDITOR_CANCEL]: true }
+                        });
                     }
                 });
                 return modal.present();

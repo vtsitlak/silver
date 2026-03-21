@@ -4,13 +4,17 @@
             <form (submit)="$event.preventDefault(); onSubmit()" method="post" class="rounded-t-2xl bg-white w-full flex flex-col px-4 pb-4">
                 <h2 class="text-xl font-semibold mb-4" i18n="@@authRegisterTitle">Register</h2>
                 <div class="flex flex-col mb-2">
-                    <label for="displayName" i18n="@@authDisplayNameLabel" class="mb-2">Display name</label>
-                    <input
+                    <ion-input
                         id="displayName"
+                        fill="outline"
+                        class="w-full"
                         type="text"
                         [formField]="registerForm.displayName"
+                        label="Display name"
+                        i18n-label="@@authDisplayNameLabel"
                         placeholder="Enter your display name"
                         i18n-placeholder="@@authDisplayNamePlaceholder"
+                        labelPlacement="floating"
                     />
                     <div class="h-5">
                         @if (registerForm.displayName().touched() && registerForm.displayName().invalid()) {
@@ -21,8 +25,18 @@
                     </div>
                 </div>
                 <div class="flex flex-col mb-2">
-                    <label for="email" i18n="@@authEmailLabel" class="mb-2">Email</label>
-                    <input id="email" type="email" [formField]="registerForm.email" placeholder="Enter your email" i18n-placeholder="@@authEmailPlaceholder" />
+                    <ion-input
+                        id="email"
+                        fill="outline"
+                        class="w-full"
+                        type="email"
+                        [formField]="registerForm.email"
+                        label="Email"
+                        i18n-label="@@authEmailLabel"
+                        placeholder="Enter your email"
+                        i18n-placeholder="@@authEmailPlaceholder"
+                        labelPlacement="floating"
+                    />
                     <div class="h-5">
                         @if (registerForm.email().touched() && registerForm.email().invalid()) {
                             @for (err of registerForm.email().errors(); track err.kind) {
@@ -32,25 +46,29 @@
                     </div>
                 </div>
                 <div class="flex flex-col mb-2">
-                    <label for="password" i18n="@@authPasswordLabel" class="mb-2">Password</label>
-                    <div class="relative">
-                        <input
-                            id="password"
-                            [type]="showPassword() ? 'text' : 'password'"
-                            [formField]="registerForm.password"
-                            placeholder="Enter your password"
-                            i18n-placeholder="@@authPasswordPlaceholder"
-                            class="pr-10"
-                        />
-                        <button
+                    <ion-input
+                        id="password"
+                        fill="outline"
+                        class="w-full"
+                        [type]="showPassword() ? 'text' : 'password'"
+                        [formField]="registerForm.password"
+                        label="Password"
+                        i18n-label="@@authPasswordLabel"
+                        placeholder="Enter your password"
+                        i18n-placeholder="@@authPasswordPlaceholder"
+                        labelPlacement="floating"
+                    >
+                        <ion-button
+                            slot="end"
+                            fill="clear"
                             type="button"
-                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            class="text-gray-500"
                             (click)="showPassword.set(!showPassword())"
                             [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
                         >
                             <ion-icon [name]="showPassword() ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
-                        </button>
-                    </div>
+                        </ion-button>
+                    </ion-input>
                     <div class="h-5">
                         @if (registerForm.password().touched() && registerForm.password().invalid()) {
                             @for (err of registerForm.password().errors(); track err.kind) {

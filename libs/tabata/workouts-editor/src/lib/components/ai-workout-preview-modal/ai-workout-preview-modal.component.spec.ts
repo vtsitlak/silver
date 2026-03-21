@@ -3,10 +3,9 @@ import { AiWorkoutPreviewModalComponent } from './ai-workout-preview-modal.compo
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { WorkoutSubmitService } from '../../services/workout-submit.service';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
-import { ToastService } from '@silver/tabata/helpers';
 import { ModalController } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
-import { of } from 'rxjs';
+import { WorkoutsFacade } from '@silver/tabata/states/workouts';
 
 const mockDraft = {
     name: 'AI Core',
@@ -38,23 +37,28 @@ const mockDraft = {
 describe('AiWorkoutPreviewModalComponent', () => {
     let component: AiWorkoutPreviewModalComponent;
     let fixture: ComponentFixture<AiWorkoutPreviewModalComponent>;
-    let mockFacade: { workoutDraft: ReturnType<typeof signal>; isSaving: ReturnType<typeof signal> };
+    let mockFacade: { workoutDraft: ReturnType<typeof signal> };
     let mockSubmitService: { submitWorkout: jest.Mock };
     let mockExercisesFacade: { exercisesMap: ReturnType<typeof signal>; loadExercisesMap: jest.Mock };
-    let mockToast: { showError: jest.Mock };
     let mockModalCtrl: { dismiss: jest.Mock };
+    let mockWorkoutsFacade: { isSaving: ReturnType<typeof signal> };
 
     beforeEach(async () => {
         mockFacade = {
             workoutDraft: signal(mockDraft),
+        };
+        mockWorkoutsFacade = {
             isSaving: signal(false)
         };
-        mockSubmitService = { submitWorkout: jest.fn(() => of({ id: 'w1', ...mockDraft })) };
+        mockSubmitService = {
+            submitWorkout: jest.fn((options?: { onSuccess?: (workout: unknown) => void }) => {
+                options?.onSuccess?.({ id: 'w1', ...mockDraft });
+            })
+        };
         mockExercisesFacade = {
             exercisesMap: signal({ ex1: { name: 'Ex 1', images: [] }, ex2: { name: 'Ex 2', images: [] }, ex3: { name: 'Ex 3', images: [] } }),
             loadExercisesMap: jest.fn()
         };
-        mockToast = { showError: jest.fn() };
         mockModalCtrl = { dismiss: jest.fn().mockResolvedValue(undefined) };
 
         await TestBed.configureTestingModule({
@@ -63,7 +67,7 @@ describe('AiWorkoutPreviewModalComponent', () => {
                 { provide: WorkoutEditorFacade, useValue: mockFacade },
                 { provide: WorkoutSubmitService, useValue: mockSubmitService },
                 { provide: ExercisesFacade, useValue: mockExercisesFacade },
-                { provide: ToastService, useValue: mockToast },
+                { provide: WorkoutsFacade, useValue: mockWorkoutsFacade },
                 { provide: ModalController, useValue: mockModalCtrl }
             ]
         }).compileComponents();
