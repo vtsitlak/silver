@@ -1,4 +1,4 @@
-import type { BodyRegion, EquipmentCategory } from '@silver/tabata/helpers';
+import type { BodyRegion, EquipmentCategory, WorkoutLevel } from '@silver/tabata/helpers';
 
 // Workout and store state models for tabata-workouts.
 export interface WorkoutsState {
@@ -38,6 +38,8 @@ export interface TabataWorkout {
     mainTargetBodypart: BodyRegion;
     secondaryTargetBodyparts: BodyRegion[];
     availableEquipments: EquipmentCategory[];
+    /** Difficulty; optional for legacy stored workouts without this field. */
+    level?: WorkoutLevel;
 }
 
 /**
@@ -69,11 +71,18 @@ export interface ExerciseItem {
 
 export type WorkoutInfo = Pick<
     TabataWorkout,
-    'name' | 'description' | 'generatedByAi' | 'mainTargetBodypart' | 'secondaryTargetBodyparts' | 'availableEquipments'
+    | 'name'
+    | 'description'
+    | 'generatedByAi'
+    | 'mainTargetBodypart'
+    | 'secondaryTargetBodyparts'
+    | 'availableEquipments'
+    | 'level'
 >;
 
-export type WorkoutInfoFormModel = Omit<WorkoutInfo, 'mainTargetBodypart'> & {
+export type WorkoutInfoFormModel = Omit<WorkoutInfo, 'mainTargetBodypart' | 'level'> & {
     mainTargetBodypart: BodyRegion | null;
+    level: WorkoutLevel | null;
 };
 
 export type CreateWorkoutPayload = Omit<TabataWorkout, 'id' | 'createdAt' | 'updatedAt'>;

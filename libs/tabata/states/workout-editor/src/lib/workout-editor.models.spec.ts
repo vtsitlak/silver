@@ -15,8 +15,17 @@ describe('workout-editor.models', () => {
         });
 
         it('preserves non-empty mainTargetBodypart', () => {
-            const draft: WorkoutDraft = { mainTargetBodypart: 'chest' };
-            expect(toWorkoutInfoFormModelFromSnapshot(draft).mainTargetBodypart).toBe('chest');
+            const draft: WorkoutDraft = { mainTargetBodypart: 'Upper Body' as const };
+            expect(toWorkoutInfoFormModelFromSnapshot(draft).mainTargetBodypart).toBe('Upper Body');
+        });
+
+        it('normalizes missing or empty level to null', () => {
+            expect(toWorkoutInfoFormModelFromSnapshot({}).level).toBeNull();
+            expect(toWorkoutInfoFormModelFromSnapshot({ level: '   ' as WorkoutDraft['level'] }).level).toBeNull();
+        });
+
+        it('preserves non-empty level', () => {
+            expect(toWorkoutInfoFormModelFromSnapshot({ level: 'expert' }).level).toBe('expert');
         });
     });
 

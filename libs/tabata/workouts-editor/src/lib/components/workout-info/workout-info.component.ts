@@ -3,7 +3,13 @@ import { Router } from '@angular/router';
 import { form, FormField, required } from '@angular/forms/signals';
 import { IonButton, IonInput, IonItem, IonList, IonSelect, IonSelectOption, IonSpinner, IonTextarea, ModalController } from '@ionic/angular/standalone';
 import { createEmptyWorkoutInfoFormModel, type WorkoutDraft } from '@silver/tabata/states/workout-editor';
-import { EQUIPMENT_CATEGORY_OPTIONS, BODY_REGION_OPTIONS, type BodyRegion } from '@silver/tabata/helpers';
+import {
+    EQUIPMENT_CATEGORY_OPTIONS,
+    BODY_REGION_OPTIONS,
+    WORKOUT_LEVEL_OPTIONS,
+    type BodyRegion,
+    type WorkoutLevel
+} from '@silver/tabata/helpers';
 import { SKIP_WORKOUT_EDITOR_CANCEL } from '../../guards/workout-editor-can-deactivate.guard';
 import { AiWorkoutGenerationService } from '../../services/ai-workout-generation.service';
 import { AiWorkoutPreviewModalComponent } from '../ai-workout-preview-modal/ai-workout-preview-modal.component';
@@ -16,6 +22,7 @@ function mapLoadedToFormModel(loaded: WorkoutInfoFormModel): WorkoutInfoFormMode
         description: loaded.description ?? '',
         generatedByAi: loaded.generatedByAi,
         mainTargetBodypart: loaded.mainTargetBodypart,
+        level: loaded.level,
         availableEquipments: loaded.availableEquipments ?? [],
         secondaryTargetBodyparts: loaded.secondaryTargetBodyparts ?? []
     };
@@ -44,6 +51,12 @@ export class WorkoutInfoComponent {
 
     readonly equipmentOptions = EQUIPMENT_CATEGORY_OPTIONS;
     readonly bodyRegionOptions = BODY_REGION_OPTIONS;
+    readonly workoutLevelOptions = WORKOUT_LEVEL_OPTIONS;
+    readonly workoutLevelLabel: Record<WorkoutLevel, string> = {
+        beginner: 'Beginner',
+        intermediate: 'Intermediate',
+        expert: 'Expert'
+    };
 
     readonly mainTargetDisabled = computed(() => (region: BodyRegion) => this.formModel().secondaryTargetBodyparts.includes(region));
     readonly secondaryTargetDisabled = computed(() => (region: BodyRegion) => this.formModel().mainTargetBodypart === region);
@@ -54,6 +67,7 @@ export class WorkoutInfoComponent {
         required(schemaPath.name, { message: 'Name is required' });
         required(schemaPath.description, { message: 'Description is required' });
         required(schemaPath.mainTargetBodypart, { message: 'Main target is required' });
+        required(schemaPath.level, { message: 'Level is required' });
     });
 
     readonly isFormValid = computed(() => this.infoForm().valid());
@@ -81,6 +95,7 @@ export class WorkoutInfoComponent {
                     name: model.name || undefined,
                     description: model.description || undefined,
                     mainTargetBodypart: model.mainTargetBodypart ?? undefined,
+                    level: model.level ?? undefined,
                     availableEquipments: model.availableEquipments,
                     secondaryTargetBodyparts: model.secondaryTargetBodyparts,
                     generatedByAi: model.generatedByAi

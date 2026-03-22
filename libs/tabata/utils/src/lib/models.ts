@@ -1,5 +1,11 @@
 export type BodyRegion = 'Upper Body' | 'Lower Body' | 'Full Body' | 'Core';
 
+/** Difficulty tier for workouts (aligned with exercise `level` from free-exercise-db / ExerciseDB). */
+export type WorkoutLevel = 'beginner' | 'intermediate' | 'expert';
+
+/** Options for workout info `ion-select` (value = API-style slug). */
+export const WORKOUT_LEVEL_OPTIONS: WorkoutLevel[] = ['beginner', 'intermediate', 'expert'];
+
 export interface TargetBodyRegions {
     bodyRegion: BodyRegion;
     muscles: string[];

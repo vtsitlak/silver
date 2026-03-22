@@ -45,6 +45,22 @@
 
             <ion-item lines="none" class="ion-no-padding">
                 <ion-select
+                    id="workout-level"
+                    class="w-full"
+                    label="Level *"
+                    labelPlacement="stacked"
+                    placeholder="Select level"
+                    [formField]="infoForm.level"
+                    interface="alert"
+                >
+                    @for (lvl of workoutLevelOptions; track lvl) {
+                        <ion-select-option [value]="lvl">{{ workoutLevelLabel[lvl] }}</ion-select-option>
+                    }
+                </ion-select>
+            </ion-item>
+
+            <ion-item lines="none" class="ion-no-padding">
+                <ion-select
                     id="workout-equipment"
                     class="w-full"
                     label="Available equipment"
