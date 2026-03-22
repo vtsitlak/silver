@@ -1,21 +1,17 @@
-import { computed, inject } from '@angular/core';
+import { computed } from '@angular/core';
 import { signalStore, withState, withMethods, patchState, withComputed } from '@ngrx/signals';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { pipe, tap, switchMap, catchError } from 'rxjs';
-import { of } from 'rxjs';
-import { tapResponse } from '@ngrx/operators';
-import {
-    workoutEditorInitialState,
-    type WorkoutEditorState,
-    type WorkoutDraft
-} from './workout-editor.models';
+
+import { cloneDeep } from '@silver/shared/helpers';
+import { TabataWorkout } from '@silver/tabata/states/workouts';
+
+import { type WorkoutEditorState, type WorkoutDraft, initialWorkoutDraft } from './workout-editor.models';
 import { areWorkoutDraftsEqual, draftHasMeaningfulContent } from './workout-draft.util';
 
 function draftCanSubmitWorkout(draft: WorkoutDraft): boolean {
     // Info tab required fields
     if (draft.name == null || String(draft.name).trim() === '') return false;
     if (draft.description == null || String(draft.description).trim() === '') return false;
-    if (draft.mainTargetBodypart == null) return false;
+    if (draft.mainTargetBodypart == null || String(draft.mainTargetBodypart).trim() === '') return false;
 
     // Warmup required: at least one movement with valid exerciseId + duration
     const warmupMovements = draft.warmup?.movements;
@@ -61,14 +57,21 @@ function draftCanSubmitWorkout(draft: WorkoutDraft): boolean {
 
     return true;
 }
-import { cloneDeep, isNonNullish } from '@silver/shared/helpers';
-import { WorkoutsService, type TabataWorkout } from '@silver/tabata/states/workouts';
+
+function createFreshWorkoutEditorState(): WorkoutEditorState {
+    return {
+        workoutDraft: cloneDeep(initialWorkoutDraft),
+        initialDraftSnapshot: cloneDeep(initialWorkoutDraft),
+        isLoading: false,
+        error: null
+    };
+}
 
 export const WorkoutEditorStore = signalStore(
     { providedIn: 'root' },
-    withState<WorkoutEditorState>(workoutEditorInitialState),
-    withComputed(({ workout, workoutDraft, initialDraftSnapshot, isLoading }) => ({
-        isEditMode: computed(() => workout() !== null),
+    withState<WorkoutEditorState>(createFreshWorkoutEditorState()),
+    withComputed(({ workoutDraft, initialDraftSnapshot, isLoading }) => ({
+        isEditMode: computed(() => !!initialDraftSnapshot()?.id),
         isBusy: computed(() => isLoading()),
         canSubmitWorkout: computed(() => draftCanSubmitWorkout(workoutDraft())),
         hasDraftChanges: computed(() => Object.keys(workoutDraft()).length > 0),
@@ -76,66 +79,39 @@ export const WorkoutEditorStore = signalStore(
         hasUnsavedChanges: computed(() => {
             const draft = workoutDraft();
             const initial = initialDraftSnapshot();
-            if (workout() === null) {
+            if (!initial?.id) {
                 return draftHasMeaningfulContent(draft);
             }
-            if (!isNonNullish(initial)) return false;
             return !areWorkoutDraftsEqual(draft, initial);
         }),
         mergedWorkout: computed(() => {
-            const current = workout();
+            const current = initialDraftSnapshot();
             const draft = workoutDraft();
-            if (!current) return draft;
+            if (!current?.id) return draft;
             return { ...current, ...draft };
         })
     })),
-    withMethods((store, workoutsService = inject(WorkoutsService)) => {
-        const loadWorkout = rxMethod<string>(
-            pipe(
-                tap(() => patchState(store, { isLoading: true, error: null })),
-                switchMap((id) =>
-                    workoutsService.getWorkoutById(id).pipe(
-                        tapResponse({
-                            next: (workout) =>
-                                patchState(store, {
-                                    workout: workout ?? null,
-                                    workoutDraft: workout ? { ...workout } : {},
-                                    initialDraftSnapshot: workout ? cloneDeep(workout) : null,
-                                    isLoading: false
-                                }),
-                            error: (err: Error) => patchState(store, { error: err.message, isLoading: false })
-                        }),
-                        catchError(() => of(null))
-                    )
-                )
-            )
-        );
-
-        /** Set current workout from list/cache (no API call). Use when opening edit from workouts list. */
-        const setWorkout = (workout: TabataWorkout | null): void => {
+    withMethods((store) => {
+        /** Applies a loaded workout to draft + baseline snapshot (e.g. after GET by id). */
+        const hydrateEditorFromWorkout = (workout: TabataWorkout): void => {
             patchState(store, {
-                workout,
-                workoutDraft: workout ? { ...workout } : {},
-                initialDraftSnapshot: workout ? cloneDeep(workout) : null,
+                workoutDraft: { ...workout },
+                initialDraftSnapshot: cloneDeep(workout),
                 isLoading: false,
                 error: null
             });
         };
 
         return {
-            loadWorkout,
-            setWorkout,
+            hydrateEditorFromWorkout,
             updateDraft: (changes: WorkoutDraft) => patchState(store, { workoutDraft: { ...store.workoutDraft(), ...changes } }),
             setDraft: (draft: WorkoutDraft) => patchState(store, { workoutDraft: draft }),
-            clearDraft: () => patchState(store, { workoutDraft: {}, initialDraftSnapshot: null }),
-            initDraftFromWorkout: () => {
-                const workout = store.workout();
-                if (workout) {
-                    const draft = { ...workout };
-                    patchState(store, { workoutDraft: draft, initialDraftSnapshot: cloneDeep(draft) });
-                }
-            },
-            reset: () => patchState(store, workoutEditorInitialState)
+            clearDraft: () =>
+                patchState(store, {
+                    workoutDraft: cloneDeep(initialWorkoutDraft),
+                    initialDraftSnapshot: cloneDeep(initialWorkoutDraft)
+                }),
+            reset: () => patchState(store, createFreshWorkoutEditorState())
         };
     })
 );

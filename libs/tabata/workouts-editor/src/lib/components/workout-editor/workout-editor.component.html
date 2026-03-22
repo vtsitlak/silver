@@ -27,7 +27,7 @@
         </ion-segment-button>
     </ion-segment>
 
-    <!-- Keep all tab panels mounted so local state + draft patches survive tab switches (@if destroyed them). -->
+    <!-- Keep tab panels mounted (`[hidden]`) so segment switches do not destroy local draft state. -->
     <div class="workout-editor-content">
         <div [hidden]="selectedTab() !== 'info'">
             <tbt-workout-info

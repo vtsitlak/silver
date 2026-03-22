@@ -7,7 +7,7 @@ import type { TabataWorkout } from '@silver/tabata/states/workouts';
 export class WorkoutEditorFacade {
     private readonly store = inject(WorkoutEditorStore);
 
-    readonly workout = this.store.workout;
+    readonly initialDraftSnapshot = this.store.initialDraftSnapshot;
     readonly workoutDraft = this.store.workoutDraft;
     readonly isLoading = this.store.isLoading;
     readonly error = this.store.error;
@@ -18,13 +18,9 @@ export class WorkoutEditorFacade {
     readonly hasUnsavedChanges = this.store.hasUnsavedChanges;
     readonly mergedWorkout = this.store.mergedWorkout;
 
-    loadWorkout(id: string): void {
-        this.store.loadWorkout(id);
-    }
-
-    /** Set current workout from list/cache (no API call). Use when opening edit from workouts list. */
-    setWorkout(workout: TabataWorkout | null): void {
-        this.store.setWorkout(workout);
+    /** Applies a loaded workout to draft + baseline snapshot (e.g. after GET by id). */
+    hydrateEditorFromWorkout(workout: TabataWorkout): void {
+        this.store.hydrateEditorFromWorkout(workout);
     }
 
     updateDraft(changes: WorkoutDraft): void {
@@ -37,10 +33,6 @@ export class WorkoutEditorFacade {
 
     clearDraft(): void {
         this.store.clearDraft();
-    }
-
-    initDraftFromWorkout(): void {
-        this.store.initDraftFromWorkout();
     }
 
     reset(): void {

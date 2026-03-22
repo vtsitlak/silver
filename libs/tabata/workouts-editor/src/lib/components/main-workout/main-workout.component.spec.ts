@@ -35,6 +35,19 @@ describe('MainWorkoutComponent', () => {
         expect(component).toBeTruthy();
     });
 
+    it('should render Add block button before the blocks list in the DOM', () => {
+        const el = fixture.nativeElement as HTMLElement;
+        const buttons = el.querySelectorAll('ion-button');
+        const addBtn = Array.from(buttons).find((b) => b.textContent?.includes('Add block'));
+        const list = el.querySelector('ion-list.blocks-list');
+        expect(addBtn).toBeTruthy();
+        expect(list).toBeTruthy();
+        if (!addBtn || !list) {
+            throw new Error('Add block button and blocks list should be in the DOM');
+        }
+        expect(addBtn.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
     it('should start with 0 blocks when draft has no blocks', () => {
         expect(component.blocks().length).toBe(0);
     });

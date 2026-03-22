@@ -79,7 +79,7 @@ export class WorkoutInfoComponent {
     readonly isCreateMode = input(true);
 
     readonly draftChange = output<Partial<WorkoutDraft>>();
-    /** Parent should call `WorkoutEditorFacade.clearDraft()` when AI preview is cancelled. */
+    /** Emitted when AI preview is cancelled — parent clears draft / resets as needed. */
     readonly clearDraftRequested = output<void>();
 
     readonly equipmentOptions = EQUIPMENT_CATEGORY_OPTIONS;

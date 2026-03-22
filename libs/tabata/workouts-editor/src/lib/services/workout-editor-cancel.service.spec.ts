@@ -5,13 +5,13 @@ import { WorkoutEditorCancelService } from './workout-editor-cancel.service';
 
 describe('WorkoutEditorCancelService', () => {
     let service: WorkoutEditorCancelService;
-    let facade: { hasUnsavedChanges: jest.Mock; reset: jest.Mock };
+    let facade: { hasUnsavedChanges: jest.Mock; clearDraft: jest.Mock };
     let createSpy: jest.Mock;
 
     beforeEach(() => {
         facade = {
             hasUnsavedChanges: jest.fn(),
-            reset: jest.fn()
+            clearDraft: jest.fn()
         };
         const sheet = {
             present: jest.fn().mockResolvedValue(undefined),

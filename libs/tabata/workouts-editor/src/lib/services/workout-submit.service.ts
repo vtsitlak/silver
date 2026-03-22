@@ -38,14 +38,15 @@ export class WorkoutSubmitService {
     submitWorkout(options: SubmitWorkoutOptions = {}): void {
         const draft = this.workoutEditorFacade.workoutDraft();
         const isEditMode = this.workoutEditorFacade.isEditMode();
-        const existingWorkout = this.workoutEditorFacade.workout();
+        const baseline = this.workoutEditorFacade.initialDraftSnapshot();
+        const existingWorkoutId = baseline?.id;
 
         const userId = this.authFacade.user()?.uid ?? '';
         const navigateToWorkouts = options.navigateToWorkouts ?? true;
         const showSuccessToast = options.showSuccessToast ?? navigateToWorkouts;
         const showErrorToast = options.showErrorToast ?? true;
 
-        if (isEditMode && existingWorkout?.id) {
+        if (isEditMode && existingWorkoutId) {
             const draftObj = draft as Record<string, unknown>;
             const rest = Object.fromEntries(Object.entries(draftObj).filter(([k]) => k !== 'updatedAt'));
             const payload: UpdateWorkoutPayload = {
@@ -55,7 +56,7 @@ export class WorkoutSubmitService {
             };
 
             this.workoutsFacade
-                .submitWorkoutAsUpdate(existingWorkout.id, payload, {
+                .submitWorkoutAsUpdate(existingWorkoutId, payload, {
                     navigateToWorkouts,
                     showSuccessToast,
                     showErrorToast

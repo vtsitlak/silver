@@ -15,11 +15,14 @@ import {
 import { ToolbarComponent } from '@silver/tabata/ui';
 import { WorkoutEditorFacade, type WorkoutDraft } from '@silver/tabata/states/workout-editor';
 import { WorkoutSubmitService } from '../../services/workout-submit.service';
+import { WorkoutEditorInitService } from '../../services/workout-editor-init.service';
 import { Phase, TabataBlock, WorkoutInfoFormModel, WorkoutsFacade } from '@silver/tabata/states/workouts';
 import { WorkoutInfoComponent } from '../workout-info/workout-info.component';
 import { WorkoutPhaseComponent } from '../workout-phase/workout-phase.component';
 import { MainWorkoutComponent } from '../main-workout/main-workout.component';
 export type WorkoutEditorTab = 'info' | 'warmup' | 'main' | 'cooldown';
+
+const EMPTY_PHASE: Phase = { movements: [], totalDurationSeconds: 0 };
 
 @Component({
     selector: 'tbt-workout-editor',
@@ -45,8 +48,9 @@ export type WorkoutEditorTab = 'info' | 'warmup' | 'main' | 'cooldown';
 })
 export class WorkoutEditorComponent {
     private readonly router = inject(Router);
-    private readonly facade = inject(WorkoutEditorFacade);
+    private readonly workoutEditorFacade = inject(WorkoutEditorFacade);
     private readonly workoutsFacade = inject(WorkoutsFacade);
+    private readonly workoutEditorInit = inject(WorkoutEditorInitService);
     private readonly workoutSubmitService = inject(WorkoutSubmitService);
 
     readonly selectedTab = signal<WorkoutEditorTab>('info');
@@ -56,52 +60,68 @@ export class WorkoutEditorComponent {
      * - `workout-editor/:workoutId` => string
      */
     readonly workoutId = input<string | null>(null);
-    readonly isEditMode = this.facade.isEditMode;
+    readonly isEditMode = this.workoutEditorFacade.isEditMode;
     readonly isSaving = this.workoutsFacade.isSaving;
 
-    /**
-     * Loaded workout from the editor store (set by `loadWorkout`, not merged with draft).
-     * Children hydrate local UI from this and emit `draftChange`; this shell updates the draft via the facade.
-     */
-    readonly workout = this.facade.workout;
+    /** Baseline snapshot after load; children read derived props and emit `draftChange`. */
+    readonly initialDraftSnapshot = this.workoutEditorFacade.initialDraftSnapshot;
 
     readonly pageTitle = computed(() => (this.workoutId() ? 'Edit Workout' : 'Create Workout'));
-    readonly loadedInfo = computed<WorkoutInfoFormModel | null>(() => {
-        const w = this.workout();
-        if (!w) return null;
-        const { name, description, generatedByAi, mainTargetBodypart, availableEquipments, secondaryTargetBodyparts } = w;
-        return { name, description, generatedByAi, mainTargetBodypart, availableEquipments, secondaryTargetBodyparts };
+
+    /**
+     * From `initialDraftSnapshot` only (not `workoutDraft()`), or `draftChange` would invalidate this computed
+     * and cause an NG0103 loop with `WorkoutInfoComponent`.
+     * `reset()` clones baseline in the store so this computed re-runs after each `ionViewWillEnter`.
+     */
+    readonly loadedInfo = computed<WorkoutInfoFormModel>(() => {
+        const w = this.initialDraftSnapshot();
+        if (w == null) {
+            return {
+                name: '',
+                description: '',
+                generatedByAi: false,
+                mainTargetBodypart: null,
+                availableEquipments: [],
+                secondaryTargetBodyparts: []
+            };
+        }
+        const main =
+            w.mainTargetBodypart != null && String(w.mainTargetBodypart).trim() !== ''
+                ? w.mainTargetBodypart
+                : null;
+        return {
+            name: w.name ?? '',
+            description: w.description ?? '',
+            generatedByAi: w.generatedByAi ?? false,
+            mainTargetBodypart: main,
+            availableEquipments: w.availableEquipments ?? [],
+            secondaryTargetBodyparts: w.secondaryTargetBodyparts ?? []
+        };
     });
     readonly loadedMainBlocks = computed<TabataBlock[]>(() => {
-        const w = this.workout();
-        if (!w) return [];
-        return w.blocks ?? [];
+        const w = this.initialDraftSnapshot();
+        return w?.blocks ?? [];
     });
-    readonly loadedCooldownPhase = computed<Phase | null>(() => {
-        const w = this.workout();
-        if (!w) return null;
-        return w.cooldown;
+    readonly loadedCooldownPhase = computed<Phase>(() => {
+        const w = this.initialDraftSnapshot();
+        return w?.cooldown ?? EMPTY_PHASE;
     });
-    readonly loadedWarmupPhase = computed<Phase | null>(() => {
-        const w = this.workout();
-        if (!w) return null;
-        return w.warmup ?? null;
+    readonly loadedWarmupPhase = computed<Phase>(() => {
+        const w = this.initialDraftSnapshot();
+        return w?.warmup ?? EMPTY_PHASE;
     });
-
-    constructor() {
-        // Ionic may cache this component between navigations, so we don't rely solely on
-        // `workoutId()` changes to reset state. See `ionViewWillEnter()`.
-    }
 
     /**
      * Called every time the view is about to enter and become active.
      * This fixes cases where Ionic keeps the component instance cached.
      */
     ionViewWillEnter(): void {
-        const id = this.workoutId();
         this.selectedTab.set('info');
-        this.facade.reset();
-        if (id) this.facade.loadWorkout(id);
+        this.workoutEditorFacade.reset();
+        const id = this.workoutId();
+        if (id) {
+            this.workoutEditorInit.loadWorkoutForEditor(id);
+        }
     }
 
     onTabChange(value: string): void {
@@ -109,11 +129,11 @@ export class WorkoutEditorComponent {
     }
 
     onDraftChange(changes: Partial<WorkoutDraft>): void {
-        this.facade.updateDraft(changes);
+        this.workoutEditorFacade.updateDraft(changes);
     }
 
     onClearDraftRequested(): void {
-        this.facade.clearDraft();
+        this.workoutEditorFacade.clearDraft();
     }
 
     onCancel(): void {
@@ -127,6 +147,6 @@ export class WorkoutEditorComponent {
     }
 
     isSaveEnabled(): boolean {
-        return this.facade.isSaveEnabled(this.workoutsFacade.isSaving());
+        return this.workoutEditorFacade.isSaveEnabled(this.workoutsFacade.isSaving());
     }
 }

@@ -72,6 +72,7 @@ export const mockWorkoutsFacade = {
 export const mockWorkoutEditorFacade = {
     workoutDraft: () => ({}),
     mergedWorkout: () => ({}),
+    initialDraftSnapshot: () => null,
     workout: () => null,
     isEditMode: () => false,
     isBusy: () => false,
@@ -79,8 +80,8 @@ export const mockWorkoutEditorFacade = {
     hasUnsavedChanges: () => false,
     isSaveEnabled: () => false,
     loadWorkout: mockFn(),
+    hydrateEditorFromWorkout: mockFn(),
     updateDraft: mockFn(),
     reset: mockFn(),
-    clearDraft: mockFn(),
-    initDraftFromWorkout: mockFn()
+    clearDraft: mockFn()
 };

@@ -78,7 +78,6 @@ export class WorkoutsComponent {
     }
 
     onEditClick(workout: TabataWorkout): void {
-        this.workoutEditorFacade.setWorkout(workout);
         this.router.navigate(['/tabs/workout-editor', workout.id]);
     }
 
