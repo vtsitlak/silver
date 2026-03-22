@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, effect, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, effect, computed } from '@angular/core';
 import {
     IonHeader,
     IonToolbar,
@@ -23,7 +23,7 @@ import { timeOutline, fitnessOutline, flashOutline, saveOutline, refreshOutline,
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { WorkoutSubmitService } from '../../services/workout-submit.service';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
-import { ToastService } from '@silver/tabata/helpers';
+import { WorkoutsFacade } from '@silver/tabata/states/workouts';
 import { formatDurationMinutes, getBlockDurationMinutes, formatSecondsToMinutes } from '@silver/tabata/helpers';
 @Component({
     selector: 'tbt-ai-workout-preview-modal',
@@ -53,11 +53,11 @@ export class AiWorkoutPreviewModalComponent {
     private readonly facade = inject(WorkoutEditorFacade);
     private readonly submitService = inject(WorkoutSubmitService);
     private readonly exercisesFacade = inject(ExercisesFacade);
-    private readonly toast = inject(ToastService);
+    private readonly workoutsFacade = inject(WorkoutsFacade);
     private readonly modalCtrl = inject(ModalController);
 
     readonly draft = this.facade.workoutDraft;
-    readonly isSaving = this.facade.isSaving;
+    readonly isSaving = this.workoutsFacade.isSaving;
     readonly exercisesMap = this.exercisesFacade.exercisesMap;
 
     readonly formatDurationMinutes = formatDurationMinutes;
@@ -101,13 +101,11 @@ export class AiWorkoutPreviewModalComponent {
     }
 
     onSave(): void {
-        this.submitService.submitWorkout().subscribe({
-            next: (workout) => {
-                this.modalCtrl.dismiss({ workout }, 'save');
-            },
-            error: (err: Error) => {
-                this.toast.showError(err.message ?? 'Failed to save workout');
-            }
+        this.submitService.submitWorkout({
+            navigateToWorkouts: false,
+            showSuccessToast: false,
+            showErrorToast: true,
+            onSuccess: (workout) => this.modalCtrl.dismiss({ workout }, 'save')
         });
     }
 

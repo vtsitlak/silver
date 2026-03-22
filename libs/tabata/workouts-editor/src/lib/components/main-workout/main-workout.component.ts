@@ -1,34 +1,18 @@
-import { Component, computed, effect, inject, OnInit, signal, untracked } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import {
-    IonHeader,
-    IonContent,
-    IonFooter,
-    IonButton,
-    IonButtons,
-    IonBackButton,
-    IonLabel,
-    IonItem,
-    IonIcon,
-    IonList,
-    IonReorderGroup,
-    IonReorder
-} from '@ionic/angular/standalone';
+import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { IonButton, IonButtons, IonLabel, IonItem, IonIcon, IonList, IonReorderGroup, IonReorder } from '@ionic/angular/standalone';
 import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { createOutline, trashOutline, arrowBackOutline, arrowForwardOutline } from 'ionicons/icons';
-import { ToolbarComponent } from '@silver/tabata/ui';
-import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
-import { WorkoutEditorCancelService } from '../../services/workout-editor-cancel.service';
+import { createOutline, trashOutline } from 'ionicons/icons';
+import {
+    DEFAULT_TABATA_INTER_BLOCK_REST_SECONDS,
+    DEFAULT_TABATA_REST_DURATION_SECONDS,
+    DEFAULT_TABATA_ROUNDS,
+    DEFAULT_TABATA_WORK_DURATION_SECONDS,
+    type WorkoutDraft
+} from '@silver/tabata/states/workout-editor';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { Exercise, ExerciseSelectorModalComponent, ExerciseDetailsModalComponent } from '@silver/tabata/exercises';
 import type { TabataBlock } from '@silver/tabata/states/workouts';
-import { WorkoutSubmitService } from '../../services/workout-submit.service';
-
-const WORK_SECONDS = 20;
-const REST_SECONDS = 10;
-const DEFAULT_ROUNDS = 8;
-const DEFAULT_INTER_BLOCK_REST_SECONDS = 60;
 
 export interface MainWorkoutBlockItem {
     rounds: number;
@@ -42,185 +26,112 @@ export interface MainWorkoutBlockItem {
     selector: 'tbt-main-workout',
     templateUrl: 'main-workout.component.html',
     styleUrls: ['main-workout.component.scss'],
-    imports: [
-        IonHeader,
-        IonContent,
-        IonFooter,
-        IonButton,
-        IonButtons,
-        IonBackButton,
-        IonLabel,
-        IonItem,
-        IonIcon,
-        IonList,
-        IonReorderGroup,
-        IonReorder,
-        ToolbarComponent
-    ]
+    imports: [IonButton, IonButtons, IonLabel, IonItem, IonIcon, IonList, IonReorderGroup, IonReorder]
 })
-export class MainWorkoutComponent implements OnInit {
-    private readonly route = inject(ActivatedRoute);
-    private readonly router = inject(Router);
-    private readonly facade = inject(WorkoutEditorFacade);
+export class MainWorkoutComponent {
     private readonly exercisesFacade = inject(ExercisesFacade);
     private readonly modalCtrl = inject(ModalController);
-    private readonly cancelService = inject(WorkoutEditorCancelService);
-    private readonly workoutSubmitService = inject(WorkoutSubmitService);
 
-    readonly workoutId = signal<string | null>(null);
-    readonly isEditMode = signal(false);
+    /** Blocks from the loaded workout (stable until a new workout is loaded). */
+    readonly loadedBlocks = input<TabataBlock[]>([]);
+
+    readonly draftChange = output<Partial<WorkoutDraft>>();
+
     readonly blocks = signal<MainWorkoutBlockItem[]>([]);
     readonly blockIndexForExerciseModal = signal<number | null>(null);
 
-    readonly draft = this.facade.workoutDraft;
-
-    readonly pageTitle = computed(() => (this.isEditMode() ? 'Edit Main Workout' : 'Main Workout'));
-
-    readonly backHref = computed(() => {
-        const id = this.workoutId();
-        if (this.isEditMode() && id) {
-            return `/tabs/workouts/edit/${id}/warmup`;
-        }
-        return '/tabs/workouts/create/warmup';
-    });
-
-    readonly canGoNext = computed(() => {
-        const blks = this.blocks();
-        return blks.length > 0 && blks.every((b) => b.exercise != null);
-    });
-
-    readonly workSeconds = WORK_SECONDS;
-    readonly restSeconds = REST_SECONDS;
-    readonly interBlockRestSeconds = DEFAULT_INTER_BLOCK_REST_SECONDS;
+    readonly workSeconds = DEFAULT_TABATA_WORK_DURATION_SECONDS;
+    readonly restSeconds = DEFAULT_TABATA_REST_DURATION_SECONDS;
+    readonly interBlockRestSeconds = DEFAULT_TABATA_INTER_BLOCK_REST_SECONDS;
 
     readonly totalDurationMinutes = computed(() => {
         const count = this.blocks().length;
         if (!count) {
             return 0;
         }
-        const blockSeconds = DEFAULT_ROUNDS * (WORK_SECONDS + REST_SECONDS);
+        const blockSeconds = DEFAULT_TABATA_ROUNDS * (DEFAULT_TABATA_WORK_DURATION_SECONDS + DEFAULT_TABATA_REST_DURATION_SECONDS);
         const totalBlocksSeconds = blockSeconds * count;
-        const totalRestSeconds = DEFAULT_INTER_BLOCK_REST_SECONDS * Math.max(count - 1, 0);
+        const totalRestSeconds = DEFAULT_TABATA_INTER_BLOCK_REST_SECONDS * Math.max(count - 1, 0);
         return Math.ceil((totalBlocksSeconds + totalRestSeconds) / 60);
     });
 
-    private readonly hasSyncedDraft = signal(false);
-
     constructor() {
-        addIcons({ createOutline, trashOutline, arrowBackOutline, arrowForwardOutline });
+        addIcons({ createOutline, trashOutline });
+
+        // `loadedBlocks` comes from `workout()` in the parent; it only changes when that workout changes, not on draft patches.
         effect(() => {
-            const d = this.draft();
-            const synced = this.hasSyncedDraft();
-            const isEdit = this.route.snapshot.paramMap.get('workoutId');
-            if (synced) return;
-            const draftBlocks = d.blocks;
-            if (draftBlocks?.length && isEdit) {
-                this.hasSyncedDraft.set(true);
-                untracked(() => {
-                    this.blocks.set(
-                        draftBlocks.map((b) => {
-                            const id = b.exerciseId ?? (b as { exercises?: string[] }).exercises?.[0];
-                            return {
-                                rounds: b.rounds ?? DEFAULT_ROUNDS,
-                                workDurationSeconds: b.workDurationSeconds ?? WORK_SECONDS,
-                                restDurationSeconds: b.restDurationSeconds ?? REST_SECONDS,
-                                exercise: id
-                                    ? ({
-                                          exerciseId: id,
-                                          name: this.formatIdAsDisplayName(id),
-                                          images: [],
-                                          targetMuscles: [],
-                                          category: [],
-                                          equipments: [],
-                                          secondaryMuscles: [],
-                                          instructions: []
-                                      } as Exercise)
-                                    : null,
-                                interBlockRestSeconds: b.interBlockRestSeconds ?? DEFAULT_INTER_BLOCK_REST_SECONDS
-                            };
-                        })
-                    );
-                });
-            }
-        });
-        effect(() => {
-            const blks = this.blocks();
-            const ids = blks.map((b) => b.exercise?.exerciseId).filter(Boolean) as string[];
-            if (ids.length > 0) {
+            const loaded = this.loadedBlocks();
+            untracked(() => {
+                if (!loaded?.length) {
+                    this.blocks.set([]);
+                    return;
+                }
+                const ids = loaded.map((b) => b.exerciseId ?? (b as { exercises?: string[] }).exercises?.[0]).filter(Boolean) as string[];
                 this.exercisesFacade.loadExercisesMap(ids);
-            }
+                this.blocks.set(
+                    loaded.map((b) => {
+                        const id = b.exerciseId ?? (b as { exercises?: string[] }).exercises?.[0];
+                        return {
+                            rounds: b.rounds ?? DEFAULT_TABATA_ROUNDS,
+                            workDurationSeconds: b.workDurationSeconds ?? DEFAULT_TABATA_WORK_DURATION_SECONDS,
+                            restDurationSeconds: b.restDurationSeconds ?? DEFAULT_TABATA_REST_DURATION_SECONDS,
+                            exercise: id ? this.placeholderExercise(id) : null,
+                            interBlockRestSeconds: b.interBlockRestSeconds ?? DEFAULT_TABATA_INTER_BLOCK_REST_SECONDS
+                        };
+                    })
+                );
+            });
         });
+
+        /** Replace placeholder exercises with `ExercisesFacade.exercisesMap()` entries when the map loads or updates. */
+        effect(() => {
+            const map = this.exercisesFacade.exercisesMap();
+            const blks = this.blocks();
+            if (blks.length === 0) return;
+            untracked(() => {
+                const next = blks.map((block) => {
+                    if (!block.exercise) return block;
+                    const fromMap = map[block.exercise.exerciseId];
+                    return fromMap ? { ...block, exercise: fromMap } : block;
+                });
+                const changed = next.some((n, i) => n.exercise !== blks[i].exercise);
+                if (changed) {
+                    this.blocks.set(next);
+                }
+            });
+        });
+
+        // Do not call `loadExercisesMap` in an effect on `blocks` — the merge above updates
+        // `blocks` when the map loads, which would re-trigger loads in an infinite loop.
+
         effect(() => {
             const blks = this.blocks();
-            const canPushToDraft = this.facade.workout() === null || this.hasSyncedDraft();
-            if (canPushToDraft) {
-                const tabataBlocks: TabataBlock[] = blks.map((b) => ({
-                    rounds: DEFAULT_ROUNDS,
-                    workDurationSeconds: b.workDurationSeconds,
-                    restDurationSeconds: b.restDurationSeconds,
-                    exerciseId: b.exercise?.exerciseId ?? '',
-                    interBlockRestSeconds: b.interBlockRestSeconds
-                }));
-                untracked(() => {
-                    this.facade.updateDraft({ blocks: tabataBlocks });
-                });
-            }
-            return this.workoutSubmitService.scheduleAutosaveWhen(
-                this.facade.hasUnsavedChanges(),
-                this.isEditMode(),
-                !this.facade.isBusy(),
-                this.workoutSubmitService.canSubmitWorkout()
-            );
+            const tabataBlocks: TabataBlock[] = blks.map((b) => ({
+                rounds: DEFAULT_TABATA_ROUNDS,
+                workDurationSeconds: b.workDurationSeconds,
+                restDurationSeconds: b.restDurationSeconds,
+                exerciseId: b.exercise?.exerciseId ?? '',
+                interBlockRestSeconds: b.interBlockRestSeconds
+            }));
+            untracked(() => {
+                this.draftChange.emit({ blocks: tabataBlocks });
+            });
         });
-    }
-
-    ngOnInit(): void {
-        const id = this.route.snapshot.paramMap.get('workoutId');
-        if (id) {
-            this.workoutId.set(id);
-            this.isEditMode.set(true);
-            const existing = this.facade.workout();
-            if (existing?.id !== id) {
-                this.facade.loadWorkout(id);
-            }
-        }
-    }
-
-    async onCancel(): Promise<void> {
-        const stay = await this.cancelService.confirmCancel();
-        if (!stay) {
-            this.router.navigate(['/tabs/workouts']);
-        }
-    }
-
-    navigateBack(): void {
-        this.router.navigateByUrl(this.backHref());
-    }
-
-    onNext(): void {
-        if (!this.canGoNext()) return;
-        const id = this.workoutId();
-        if (this.isEditMode() && id) {
-            this.router.navigate(['/tabs/workouts/edit', id, 'cooldown']);
-        } else {
-            this.router.navigate(['/tabs/workouts/create/cooldown']);
-        }
     }
 
     addBlock(): void {
         this.blocks.update((prev) => [
             ...prev,
             {
-                rounds: DEFAULT_ROUNDS,
-                workDurationSeconds: WORK_SECONDS,
-                restDurationSeconds: REST_SECONDS,
+                rounds: DEFAULT_TABATA_ROUNDS,
+                workDurationSeconds: DEFAULT_TABATA_WORK_DURATION_SECONDS,
+                restDurationSeconds: DEFAULT_TABATA_REST_DURATION_SECONDS,
                 exercise: null,
-                interBlockRestSeconds: DEFAULT_INTER_BLOCK_REST_SECONDS
+                interBlockRestSeconds: DEFAULT_TABATA_INTER_BLOCK_REST_SECONDS
             }
         ]);
     }
 
-    /** Opens exercise selector to add a new block; on confirm adds a block with the selected exercise. */
     openExerciseSelectorForNewBlock(): void {
         this.modalCtrl
             .create({
@@ -246,11 +157,11 @@ export class MainWorkoutComponent implements OnInit {
         this.blocks.update((prev) => [
             ...prev,
             {
-                rounds: DEFAULT_ROUNDS,
-                workDurationSeconds: WORK_SECONDS,
-                restDurationSeconds: REST_SECONDS,
+                rounds: DEFAULT_TABATA_ROUNDS,
+                workDurationSeconds: DEFAULT_TABATA_WORK_DURATION_SECONDS,
+                restDurationSeconds: DEFAULT_TABATA_REST_DURATION_SECONDS,
                 exercise,
-                interBlockRestSeconds: DEFAULT_INTER_BLOCK_REST_SECONDS
+                interBlockRestSeconds: DEFAULT_TABATA_INTER_BLOCK_REST_SECONDS
             }
         ]);
     }
@@ -301,12 +212,15 @@ export class MainWorkoutComponent implements OnInit {
         this.blocks.update((prev) => prev.map((b, i) => (i === blockIndex ? { ...b, exercise } : b)));
     }
 
-    getExerciseName(exerciseId: string): string {
-        return this.exercisesFacade.exercisesMap()[exerciseId]?.name ?? this.formatIdAsDisplayName(exerciseId);
+    getExerciseName(exercise: Exercise): string {
+        const fromMap = this.exercisesFacade.exercisesMap()[exercise.exerciseId]?.name;
+        return (fromMap ?? exercise.name)?.trim() || '';
     }
 
-    getExerciseImage(exerciseId: string): string {
-        const images = this.exercisesFacade.exercisesMap()[exerciseId]?.images;
+    getExerciseImage(exercise: Exercise): string {
+        const fromExercise = exercise.images?.[0];
+        if (fromExercise) return fromExercise;
+        const images = this.exercisesFacade.exercisesMap()[exercise.exerciseId]?.images;
         return images?.length ? images[0] : '';
     }
 
@@ -326,13 +240,16 @@ export class MainWorkoutComponent implements OnInit {
             .then((modal) => modal.present());
     }
 
-    /** Format a raw exercise id as a readable label when we don't have the full exercise (e.g. from draft). */
-    private formatIdAsDisplayName(id: string): string {
-        if (!id) return id;
-        return id
-            .replace(/[-_]/g, ' ')
-            .split(/\s+/)
-            .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-            .join(' ');
+    private placeholderExercise(exerciseId: string): Exercise {
+        return {
+            exerciseId,
+            name: '',
+            images: [],
+            targetMuscles: [],
+            category: [],
+            equipments: [],
+            secondaryMuscles: [],
+            instructions: []
+        } as Exercise;
     }
 }

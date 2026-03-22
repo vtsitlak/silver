@@ -19,7 +19,7 @@ import {
 } from '@ionic/angular/standalone';
 import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { bodyOutline, barbellOutline, fitnessOutline, listOutline } from 'ionicons/icons';
+import { bodyOutline, barbellOutline, fitnessOutline, listOutline, speedometerOutline } from 'ionicons/icons';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
 
 @Component({
@@ -57,7 +57,7 @@ export class ExerciseDetailsModalComponent implements OnDestroy {
     readonly error = this.facade.error;
 
     constructor() {
-        addIcons({ bodyOutline, barbellOutline, fitnessOutline, listOutline });
+        addIcons({ bodyOutline, barbellOutline, fitnessOutline, listOutline, speedometerOutline });
         effect(() => {
             const id = this.exerciseId();
             if (id) {

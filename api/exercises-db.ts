@@ -22,6 +22,8 @@ interface FreeExerciseDbItem {
     secondaryMuscles: string[];
     instructions: string[];
     category: string;
+    /** e.g. beginner | intermediate | expert */
+    level?: string | null;
     images: string[];
 }
 
@@ -31,6 +33,7 @@ interface Exercise {
     images: string[];
     targetMuscles: string[];
     category: string[];
+    level?: string;
     equipments: string[];
     secondaryMuscles: string[];
     instructions: string[];
@@ -38,12 +41,14 @@ interface Exercise {
 
 function mapToExercise(raw: FreeExerciseDbItem): Exercise {
     const images = Array.isArray(raw.images) ? raw.images.map((path) => (path ? `${IMAGE_BASE}${path}` : '')).filter(Boolean) : [];
+    const level = raw.level != null && String(raw.level).trim() !== '' ? String(raw.level).trim() : undefined;
     return {
         exerciseId: raw.id,
         name: raw.name,
         images,
         targetMuscles: Array.isArray(raw.primaryMuscles) ? [...raw.primaryMuscles] : [],
         category: raw.category ? [raw.category] : [],
+        ...(level ? { level } : {}),
         equipments: raw.equipment ? [raw.equipment] : [],
         secondaryMuscles: Array.isArray(raw.secondaryMuscles) ? [...raw.secondaryMuscles] : [],
         instructions: Array.isArray(raw.instructions) ? [...raw.instructions] : []
@@ -74,6 +79,8 @@ function matchesSearch(ex: Exercise, term: string): boolean {
     const t = term.toLowerCase();
     if (ex.name.toLowerCase().includes(t)) return true;
     if (ex.instructions.some((i) => i.toLowerCase().includes(t))) return true;
+    if (ex.level && ex.level.toLowerCase().includes(t)) return true;
+    if (ex.category.some((c) => c.toLowerCase().includes(t))) return true;
     return false;
 }
 
@@ -117,6 +124,10 @@ function sortExercises(exercises: Exercise[], sortBy: string, sortOrder: string)
             case 'equipments':
                 aVal = (a.equipments[0] ?? '').toLowerCase();
                 bVal = (b.equipments[0] ?? '').toLowerCase();
+                break;
+            case 'level':
+                aVal = (a.level ?? '').toLowerCase();
+                bVal = (b.level ?? '').toLowerCase();
                 break;
             default:
                 aVal = a.name.toLowerCase();

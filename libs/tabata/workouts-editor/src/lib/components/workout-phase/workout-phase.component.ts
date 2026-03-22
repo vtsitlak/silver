@@ -1,28 +1,13 @@
-import { Component, computed, effect, inject, OnInit, signal, untracked } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import {
-    IonHeader,
-    IonContent,
-    IonFooter,
-    IonButton,
-    IonButtons,
-    IonBackButton,
-    IonItem,
-    IonList,
-    IonIcon,
-    IonReorderGroup,
-    IonReorder
-} from '@ionic/angular/standalone';
+import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { IonButton, IonItem, IonList, IonIcon, IonReorderGroup, IonReorder } from '@ionic/angular/standalone';
 import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { createOutline, trashOutline, arrowBackOutline, arrowForwardOutline, saveOutline } from 'ionicons/icons';
-import { ToolbarComponent, DurationInputModalComponent } from '@silver/tabata/ui';
-import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
+import { createOutline, trashOutline } from 'ionicons/icons';
+import { DurationInputModalComponent } from '@silver/tabata/ui';
+import type { WorkoutDraft } from '@silver/tabata/states/workout-editor';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { Exercise, ExerciseSelectorModalComponent, ExerciseDetailsModalComponent } from '@silver/tabata/exercises';
 import type { Phase } from '@silver/tabata/states/workouts';
-import { WorkoutSubmitService } from '../../services/workout-submit.service';
-import { WorkoutEditorCancelService } from '../../services/workout-editor-cancel.service';
 
 export type WorkoutPhaseType = 'warmup' | 'cooldown';
 
@@ -35,132 +20,24 @@ export interface PhaseExerciseItem {
     selector: 'tbt-workout-phase',
     templateUrl: 'workout-phase.component.html',
     styleUrls: ['workout-phase.component.scss'],
-    imports: [
-        IonHeader,
-        IonContent,
-        IonFooter,
-        IonButton,
-        IonButtons,
-        IonBackButton,
-        IonItem,
-        IonList,
-        IonIcon,
-        IonReorderGroup,
-        IonReorder,
-        ToolbarComponent,
-        DurationInputModalComponent
-    ]
+    imports: [IonButton, IonItem, IonList, IonIcon, IonReorderGroup, IonReorder, DurationInputModalComponent]
 })
-export class WorkoutPhaseComponent implements OnInit {
-    private readonly route = inject(ActivatedRoute);
-    private readonly router = inject(Router);
-    private readonly facade = inject(WorkoutEditorFacade);
+export class WorkoutPhaseComponent {
     private readonly exercisesFacade = inject(ExercisesFacade);
     private readonly modalCtrl = inject(ModalController);
-    private readonly workoutSubmitService = inject(WorkoutSubmitService);
-    private readonly cancelService = inject(WorkoutEditorCancelService);
 
-    private readonly hasSyncedPhaseFromDraft = signal<WorkoutPhaseType | null>(null);
+    /** Phase from the loaded workout (stable until a new workout is loaded). */
+    readonly loadedPhase = input<Phase | null>(null);
+    readonly phaseType = input.required<WorkoutPhaseType>();
 
-    constructor() {
-        addIcons({ createOutline, trashOutline, arrowBackOutline, arrowForwardOutline, saveOutline });
-        const path = this.route.snapshot.routeConfig?.path ?? '';
-        const phase = path.endsWith('cooldown') ? 'cooldown' : 'warmup';
-        this.phaseType.set(phase);
-        effect(() => {
-            const d = this.draft();
-            const phase = this.phaseType();
-            const syncedPhase = this.hasSyncedPhaseFromDraft();
-            if (syncedPhase === phase) return;
-            const phaseData = phase === 'warmup' ? d.warmup : d.cooldown;
-            const movements = phaseData?.movements;
-            if (movements?.length) {
-                this.hasSyncedPhaseFromDraft.set(phase);
-                untracked(() => {
-                    this.phaseItems.set(
-                        movements.map((m) => ({
-                            exercise: {
-                                exerciseId: m.exerciseId,
-                                name: this.formatIdAsDisplayName(m.exerciseId),
-                                images: [],
-                                targetMuscles: [],
-                                category: [],
-                                equipments: [],
-                                secondaryMuscles: [],
-                                instructions: []
-                            } as Exercise,
-                            durationSeconds: m.durationSeconds ?? 60
-                        }))
-                    );
-                });
-            }
-        });
-        effect(() => {
-            const items = this.phaseItems();
-            const ids = [...new Set(items.map((p) => p.exercise.exerciseId).filter(Boolean))];
-            if (ids.length > 0) {
-                this.exercisesFacade.loadExercisesMap(ids);
-            }
-        });
-        effect(() => {
-            const items = this.phaseItems();
-            const phase = this.phaseType();
-            const canPushToDraft = this.facade.workout() === null || this.hasSyncedPhaseFromDraft() === phase;
-            if (canPushToDraft) {
-                const movements = items.map((p) => ({
-                    exerciseId: p.exercise.exerciseId,
-                    durationSeconds: p.durationSeconds ?? 0
-                }));
-                const totalDurationSeconds = items.reduce((sum, p) => sum + (p.durationSeconds ?? 0), 0);
-                const phaseData: Phase = { totalDurationSeconds, movements };
-                untracked(() => {
-                    this.facade.updateDraft(phase === 'warmup' ? { warmup: phaseData } : { cooldown: phaseData });
-                });
-            }
-            return this.workoutSubmitService.scheduleAutosaveWhen(
-                this.facade.hasUnsavedChanges(),
-                this.isEditMode(),
-                !this.facade.isBusy(),
-                this.workoutSubmitService.canSubmitWorkout()
-            );
-        });
-    }
-
-    readonly workoutId = signal<string | null>(null);
-    readonly isEditMode = signal(false);
-    readonly phaseType = signal<WorkoutPhaseType>('warmup');
+    readonly draftChange = output<Partial<WorkoutDraft>>();
 
     readonly phaseItems = signal<PhaseExerciseItem[]>([]);
     readonly durationModalOpen = signal(false);
     readonly durationModalItemIndex = signal<number | null>(null);
     readonly durationInputSeconds = signal<number>(60);
 
-    readonly pageTitle = computed(() => {
-        const phase = this.phaseType();
-        const cap = phase === 'warmup' ? 'Warmup' : 'Cooldown';
-        return this.isEditMode() ? `Edit ${cap}` : cap;
-    });
-
-    readonly draft = this.facade.workoutDraft;
-    readonly isSaving = this.facade.isSaving;
-
-    readonly backHref = computed(() => {
-        const id = this.workoutId();
-        const phase = this.phaseType();
-        if (this.isEditMode() && id) {
-            return phase === 'cooldown' ? `/tabs/workouts/edit/${id}/main-workout` : `/tabs/workouts/edit/${id}/info`;
-        }
-        return phase === 'cooldown' ? '/tabs/workouts/create/main-workout' : '/tabs/workouts/create/info';
-    });
-
-    readonly allHaveDuration = computed(() => {
-        const items = this.phaseItems();
-        return items.length > 0 && items.every((p) => p.durationSeconds != null && p.durationSeconds > 0);
-    });
-
     readonly totalDurationSeconds = computed(() => this.phaseItems().reduce((sum, p) => sum + (p.durationSeconds ?? 0), 0));
-
-    readonly nextButtonLabel = computed(() => (this.phaseType() === 'cooldown' ? 'Finish' : 'Next'));
 
     readonly editingItem = computed(() => {
         const idx = this.durationModalItemIndex();
@@ -170,63 +47,71 @@ export class WorkoutPhaseComponent implements OnInit {
 
     readonly durationModalExerciseName = computed(() => {
         const item = this.editingItem();
-        return item?.exercise ? this.getExerciseName(item.exercise.exerciseId) : null;
+        return item?.exercise ? this.getExerciseName(item.exercise) : null;
     });
 
-    ngOnInit(): void {
-        const path = this.route.snapshot.routeConfig?.path ?? '';
-        const phase = path.endsWith('cooldown') ? 'cooldown' : 'warmup';
-        this.phaseType.set(phase);
-        const id = this.route.snapshot.paramMap.get('workoutId');
-        if (id) {
-            this.workoutId.set(id);
-            this.isEditMode.set(true);
-            const existing = this.facade.workout();
-            if (existing?.id !== id) {
-                this.facade.loadWorkout(id);
-            }
-        }
-    }
+    constructor() {
+        addIcons({ createOutline, trashOutline });
 
-    async onCancel(): Promise<void> {
-        const stay = await this.cancelService.confirmCancel();
-        if (!stay) {
-            this.router.navigate(['/tabs/workouts']);
-        }
-    }
+        // `loadedPhase` comes from `workout()` in the parent; it only changes when that workout changes, not on draft patches.
+        effect(() => {
+            const loaded = this.loadedPhase();
+            untracked(() => {
+                const movements = loaded?.movements;
+                if (!movements?.length) {
+                    this.phaseItems.set([]);
+                    return;
+                }
+                const ids = movements.map((m) => m.exerciseId).filter(Boolean);
+                this.exercisesFacade.loadExercisesMap(ids);
+                this.phaseItems.set(
+                    movements.map((m) => ({
+                        exercise: this.placeholderExercise(m.exerciseId),
+                        durationSeconds: m.durationSeconds ?? 60
+                    }))
+                );
+            });
+        });
 
-    navigateBack(): void {
-        this.router.navigateByUrl(this.backHref());
-    }
-
-    onNext(): void {
-        if (!this.allHaveDuration()) return;
-        const phase = this.phaseType();
-        if (phase === 'warmup') {
-            const id = this.workoutId();
-            if (this.isEditMode() && id) {
-                this.router.navigate(['/tabs/workouts/edit', id, 'main-workout']);
-            } else {
-                this.router.navigate(['/tabs/workouts/create/main-workout']);
-            }
-        } else {
-            this.workoutSubmitService.submitWorkout().subscribe({
-                next: () => this.router.navigate(['/tabs/workouts']),
-                error: () => {
-                    /* Error is reflected in facade.error(); navigation is skipped. */
+        /** Replace placeholder exercises with `ExercisesFacade.exercisesMap()` entries when the map loads or updates. */
+        effect(() => {
+            const map = this.exercisesFacade.exercisesMap();
+            const items = this.phaseItems();
+            if (items.length === 0) return;
+            untracked(() => {
+                const next = items.map((item) => {
+                    const fromMap = map[item.exercise.exerciseId];
+                    return fromMap ? { ...item, exercise: fromMap } : item;
+                });
+                const changed = next.some((n, i) => n.exercise !== items[i].exercise);
+                if (changed) {
+                    this.phaseItems.set(next);
                 }
             });
-        }
+        });
+
+        // Do not call `loadExercisesMap` in an effect on `phaseItems` — the merge above updates
+        // `phaseItems` when the map loads, which would re-trigger loads in an infinite loop.
+
+        effect(() => {
+            const items = this.phaseItems();
+            const phase = this.phaseType();
+            const movements = items.map((p) => ({
+                exerciseId: p.exercise.exerciseId,
+                durationSeconds: p.durationSeconds ?? 0
+            }));
+            const totalDurationSeconds = items.reduce((sum, p) => sum + (p.durationSeconds ?? 0), 0);
+            const phaseData: Phase = { totalDurationSeconds, movements };
+            untracked(() => {
+                this.draftChange.emit(phase === 'warmup' ? { warmup: phaseData } : { cooldown: phaseData });
+            });
+        });
     }
 
     onExerciseSelected(exercises: Exercise[]): void {
         const existingIds = new Set(this.phaseItems().map((p) => p.exercise.exerciseId));
         const toAdd = exercises.filter((ex) => !existingIds.has(ex.exerciseId)).map((ex) => ({ exercise: ex, durationSeconds: 60 }));
         this.phaseItems.update((prev) => [...prev, ...toAdd]);
-    }
-
-    onExerciseCancelled(): void {
-        // No-op: keep current phase items
     }
 
     openExerciseSelectorModal(): void {
@@ -308,10 +193,6 @@ export class WorkoutPhaseComponent implements OnInit {
             .then((modal) => modal.present());
     }
 
-    closeExerciseDetailsModal(): void {
-        // No-op when using ModalController; modal dismisses itself
-    }
-
     saveDuration(): void {
         const idx = this.durationModalItemIndex();
         const seconds = this.durationInputSeconds();
@@ -328,21 +209,33 @@ export class WorkoutPhaseComponent implements OnInit {
         return s ? `${m}m ${s}s` : `${m}m`;
     }
 
-    private formatIdAsDisplayName(id: string): string {
-        if (!id) return id;
-        return id
-            .replace(/[-_]/g, ' ')
-            .split(/\s+/)
-            .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-            .join(' ');
+    private placeholderExercise(exerciseId: string): Exercise {
+        return {
+            exerciseId,
+            name: '',
+            images: [],
+            targetMuscles: [],
+            category: [],
+            equipments: [],
+            secondaryMuscles: [],
+            instructions: []
+        } as Exercise;
     }
 
-    getExerciseName(exerciseId: string): string {
-        return this.exercisesFacade.exercisesMap()[exerciseId]?.name ?? this.formatIdAsDisplayName(exerciseId);
+    /** Prefer `exercisesMap` (API); fall back to `exercise.name` (merged row or selector). */
+    getExerciseName(exercise: Exercise): string {
+        const fromMap = this.exercisesFacade.exercisesMap()[exercise.exerciseId]?.name;
+        return (fromMap ?? exercise.name)?.trim() || '';
     }
 
-    getExerciseImage(exerciseId: string): string {
-        const images = this.exercisesFacade.exercisesMap()[exerciseId]?.images;
+    /**
+     * Prefer images on the merged `Exercise` — `exercisesMap` is merged across loads and may omit
+     * ids loaded in another tab/context until the next fetch.
+     */
+    getExerciseImage(exercise: Exercise): string {
+        const fromExercise = exercise.images?.[0];
+        if (fromExercise) return fromExercise;
+        const images = this.exercisesFacade.exercisesMap()[exercise.exerciseId]?.images;
         return images?.length ? images[0] : '';
     }
 }

@@ -6,7 +6,10 @@ export interface Exercise {
     name: string;
     images: string[];
     targetMuscles: string[];
+    /** e.g. strength, stretching, cardio (from API; stored as array for filters). */
     category: string[];
+    /** e.g. beginner, intermediate, expert (free-exercise-db / ExerciseDB). */
+    level?: string;
     equipments: string[];
     secondaryMuscles: string[];
     instructions: string[];
@@ -36,5 +39,5 @@ export interface NameListResponse {
     data: { name: string }[];
 }
 
-export type SortBy = 'name' | 'exerciseId' | 'targetMuscles' | 'category' | 'equipments';
+export type SortBy = 'name' | 'exerciseId' | 'targetMuscles' | 'category' | 'equipments' | 'level';
 export type SortOrder = 'asc' | 'desc';

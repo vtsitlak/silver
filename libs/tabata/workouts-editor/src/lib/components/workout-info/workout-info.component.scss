@@ -1,0 +1,26 @@
+.workout-info-form {
+    gap: 0.75rem;
+}
+
+.workout-info-list {
+    --background: transparent;
+    margin: 0;
+
+    ion-item {
+        --background: transparent;
+        --inner-padding-end: 0;
+        --inner-padding-start: 0;
+        --padding-start: 0;
+        --padding-end: 0;
+    }
+
+    ion-input,
+    ion-textarea,
+    ion-select {
+        --color: #1f2937;
+        --placeholder-color: #6b7280;
+        display: block;
+        width: 100%;
+        margin: 0;
+    }
+}

@@ -1,107 +1,34 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, ActivatedRoute, Router } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { AuthFacade } from '@silver/tabata/auth';
-import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
-import {
-    createMockActivatedRoute,
-    mockAuthFacade,
-    mockWorkoutEditorFacade,
-    createMockWorkoutEditorCancelService,
-    mockModalController
-} from '@silver/tabata/testing';
+import { mockAuthFacade, mockModalController } from '@silver/tabata/testing';
 import { WorkoutInfoComponent } from './workout-info.component';
-import { WorkoutEditorCancelService } from '../../services/workout-editor-cancel.service';
 import { ModalController } from '@ionic/angular/standalone';
-import { AiWorkoutGeneratorService } from '@silver/tabata/ai-workout-generator';
-import { ExercisesService } from '@silver/tabata/states/exercises';
-import { of } from 'rxjs';
+import { AiWorkoutGenerationService } from '../../services/ai-workout-generation.service';
+import { EMPTY } from 'rxjs';
 
-const mockCancelService = createMockWorkoutEditorCancelService(false);
-const mockAiGenerator = {
-    generateWorkout: jest.fn(() =>
-        of({
-            totalDurationMinutes: 20,
-            warmup: { totalDurationSeconds: 180, movements: [] },
-            blocks: [],
-            cooldown: { totalDurationSeconds: 120, movements: [] }
-        })
-    )
+const mockAiWorkoutGenerationService = {
+    generateWorkout: jest.fn(() => EMPTY)
 };
-const mockExercisesService = { filterExercises: jest.fn(() => of([])) };
 
 describe('WorkoutInfoComponent', () => {
     let component: WorkoutInfoComponent;
     let fixture: ComponentFixture<WorkoutInfoComponent>;
-    let router: Router;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [WorkoutInfoComponent],
             providers: [
                 provideRouter([]),
-                { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade },
-                { provide: WorkoutEditorCancelService, useValue: mockCancelService },
                 { provide: AuthFacade, useValue: mockAuthFacade },
                 { provide: ModalController, useValue: mockModalController },
-                { provide: AiWorkoutGeneratorService, useValue: mockAiGenerator },
-                { provide: ExercisesService, useValue: mockExercisesService },
-                {
-                    provide: ActivatedRoute,
-                    useValue: createMockActivatedRoute()
-                }
+                { provide: AiWorkoutGenerationService, useValue: mockAiWorkoutGenerationService }
             ]
         }).compileComponents();
 
         fixture = TestBed.createComponent(WorkoutInfoComponent);
         component = fixture.componentInstance;
-        router = TestBed.inject(Router);
-        fixture.detectChanges();
-    });
-
-    it('should create', () => {
-        expect(component).toBeTruthy();
-    });
-
-    it('should update draft when form model changes', () => {
-        const spy = jest.spyOn(mockWorkoutEditorFacade, 'updateDraft');
-        component.infoModel.set({
-            name: 'Test',
-            description: 'Desc',
-            mainTargetBodypart: 'Upper Body',
-            availableEquipments: ['Machine'],
-            secondaryTargetBodyparts: ['Core'],
-            generatedByAi: false
-        });
-        fixture.detectChanges();
-        expect(spy).toHaveBeenCalledWith(
-            expect.objectContaining({
-                name: 'Test',
-                description: 'Desc',
-                mainTargetBodypart: 'Upper Body',
-                availableEquipments: ['Machine'],
-                secondaryTargetBodyparts: ['Core']
-            })
-        );
-    });
-
-    it('should navigate to warmup on submit when form is valid', () => {
-        const navSpy = jest.spyOn(router, 'navigate');
-        component.infoModel.set({
-            name: 'Workout',
-            description: 'Description',
-            mainTargetBodypart: 'Upper Body',
-            availableEquipments: [],
-            secondaryTargetBodyparts: [],
-            generatedByAi: false
-        });
-        fixture.detectChanges();
-        component.onSubmit();
-        expect(navSpy).toHaveBeenCalledWith(['/tabs/workouts/create/warmup']);
-    });
-
-    it('should not navigate when form is invalid on submit', () => {
-        const navSpy = jest.spyOn(router, 'navigate');
-        component.infoModel.set({
+        fixture.componentRef.setInput('loadedInfo', {
             name: '',
             description: '',
             mainTargetBodypart: null,
@@ -110,15 +37,25 @@ describe('WorkoutInfoComponent', () => {
             generatedByAi: false
         });
         fixture.detectChanges();
-        component.onSubmit();
-        expect(navSpy).not.toHaveBeenCalled();
     });
 
-    it('should navigate to workouts when confirmCancel returns false', async () => {
-        const navSpy = jest.spyOn(router, 'navigate');
-        mockCancelService.confirmCancel.mockResolvedValue(false);
-        await component.onCancel();
-        expect(navSpy).toHaveBeenCalledWith(['/tabs/workouts']);
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
+
+    it('should emit draftChange when form model changes', () => {
+        const emitted: Partial<{ name?: string }>[] = [];
+        component.draftChange.subscribe((v) => emitted.push(v));
+        component.formModel.set({
+            name: 'Test',
+            description: 'Desc',
+            mainTargetBodypart: 'Upper Body',
+            availableEquipments: ['Machine'],
+            secondaryTargetBodyparts: ['Core'],
+            generatedByAi: false
+        });
+        fixture.detectChanges();
+        expect(emitted.some((e) => e.name === 'Test')).toBe(true);
     });
 
     it('should have invalid form when required fields are empty', () => {
@@ -126,14 +63,46 @@ describe('WorkoutInfoComponent', () => {
     });
 
     it('should have valid form when name, description and main target are set', () => {
-        component.infoModel.set({
+        component.formModel.set({
             name: 'Workout',
             description: 'Description',
             mainTargetBodypart: 'Upper Body',
             availableEquipments: [],
-            secondaryTargetBodyparts: []
+            secondaryTargetBodyparts: [],
+            generatedByAi: false
         });
         fixture.detectChanges();
         expect(component.isFormValid()).toBe(true);
+    });
+
+    it('should show Generate with AI when isCreateMode is true', () => {
+        fixture.componentRef.setInput('isCreateMode', true);
+        fixture.detectChanges();
+        const el = fixture.nativeElement as HTMLElement;
+        expect(el.querySelector('ion-button')?.textContent?.trim()).toContain('Generate with AI');
+    });
+
+    it('should not show Generate with AI when isCreateMode is false', () => {
+        fixture.componentRef.setInput('isCreateMode', false);
+        fixture.detectChanges();
+        const el = fixture.nativeElement as HTMLElement;
+        expect(el.textContent).not.toContain('Generate with AI');
+    });
+
+    it('should clear touched state when loadedInfo is re-applied (e.g. Add workout after Save)', () => {
+        component.infoForm.name().markAsTouched();
+        fixture.detectChanges();
+        expect(component.infoForm.name().touched()).toBe(true);
+
+        fixture.componentRef.setInput('loadedInfo', {
+            name: '',
+            description: '',
+            mainTargetBodypart: null,
+            availableEquipments: [],
+            secondaryTargetBodyparts: [],
+            generatedByAi: false
+        });
+        fixture.detectChanges();
+        expect(component.infoForm.name().touched()).toBe(false);
     });
 });

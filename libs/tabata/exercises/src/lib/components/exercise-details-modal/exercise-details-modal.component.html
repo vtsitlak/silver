@@ -85,6 +85,22 @@
             </ion-card-content>
         </ion-card>
 
+        @if (ex.level) {
+            <ion-card class="mb-3">
+                <ion-card-header>
+                    <ion-card-title class="flex items-center gap-2 text-lg">
+                        <ion-icon name="speedometer-outline"></ion-icon>
+                        Level
+                    </ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                    <ion-chip color="warning">
+                        <ion-label>{{ formatMuscle(ex.level) }}</ion-label>
+                    </ion-chip>
+                </ion-card-content>
+            </ion-card>
+        }
+
         <ion-card class="mb-3">
             <ion-card-header>
                 <ion-card-title class="flex items-center gap-2 text-lg">

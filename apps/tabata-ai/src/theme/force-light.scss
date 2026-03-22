@@ -80,7 +80,19 @@ ion-item.selected,
     --background: rgba(0, 0, 0, 0.06) !important;
 }
 
+/**
+ * Action sheet: never set `background` on the `ion-action-sheet` host — it is full-screen;
+ * a solid host background hides the backdrop and the page behind it. Use Ionic vars only.
+ */
 ion-action-sheet,
+.ion-palette-dark ion-action-sheet,
+.dark ion-action-sheet,
+[data-theme='dark'] ion-action-sheet {
+    --background: #ffffff !important;
+    --color: #1f2937 !important;
+    --backdrop-opacity: 0.45 !important;
+}
+
 ion-modal ion-content,
 .about-modal-sheet ion-content {
     --background: #ffffff !important;
@@ -165,4 +177,34 @@ ion-tab-bar ion-tab-button[aria-selected='true']::part(native),
 .ion-palette-dark ion-tab-bar ion-tab-button.tab-selected::part(native),
 .dark ion-tab-bar ion-tab-button.tab-selected::part(native) {
     color: #24197d !important;
+}
+
+/* Fixed footers: opaque surface everywhere (matches tab bar; avoids see-through over ion-content). */
+ion-footer,
+.ion-palette-dark ion-footer,
+.dark ion-footer,
+[data-theme='dark'] ion-footer,
+body ion-footer {
+    --background: #ffffff !important;
+    --ion-toolbar-background: #ffffff !important;
+    background: #ffffff !important;
+}
+
+ion-footer ion-toolbar,
+.ion-palette-dark ion-footer ion-toolbar,
+.dark ion-footer ion-toolbar,
+[data-theme='dark'] ion-footer ion-toolbar {
+    --background: #ffffff !important;
+    --ion-toolbar-background: #ffffff !important;
+    background: #ffffff !important;
+}
+
+ion-footer[translucent],
+.ion-palette-dark ion-footer[translucent],
+.dark ion-footer[translucent],
+[data-theme='dark'] ion-footer[translucent] {
+    --backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    --background: #ffffff !important;
+    background: #ffffff !important;
 }

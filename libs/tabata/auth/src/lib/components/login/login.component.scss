@@ -7,11 +7,24 @@
         color: #1f2937;
     }
 
-    input {
-        color: #1f2937;
-        background-color: #ffffff;
-        &::placeholder {
-            color: #6b7280;
-        }
+    ion-input {
+        --color: #1f2937;
+        --background: #ffffff;
+        --placeholder-color: #6b7280;
     }
+}
+
+/*
+ * Reduce layout shift when focusing outline + floating ion-input (MD notch / bottom slot).
+ * Keeps the same visual style; does not remove outline or floating labels.
+ */
+.auth-field-row {
+    isolation: isolate;
+    contain: layout style;
+}
+
+:host ::ng-deep ion-input .input-bottom {
+    display: none !important;
+    min-height: 0 !important;
+    padding: 0 !important;
 }

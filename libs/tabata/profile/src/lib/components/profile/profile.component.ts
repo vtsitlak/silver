@@ -1,6 +1,6 @@
 import { Component, inject, linkedSignal, OnInit, signal } from '@angular/core';
 import { disabled, email, form, FormField, required, validate } from '@angular/forms/signals';
-import { IonHeader, IonContent, IonButton, IonToggle, IonSpinner, IonIcon, ActionSheetController } from '@ionic/angular/standalone';
+import { IonHeader, IonContent, IonButton, IonToggle, IonSpinner, IonIcon, IonInput, ActionSheetController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { logOutOutline } from 'ionicons/icons';
 import { ToolbarComponent } from '@silver/tabata/ui';
@@ -17,7 +17,7 @@ interface ProfileFormModel {
 
 @Component({
     selector: 'tbt-profile',
-    imports: [IonToggle, IonHeader, IonContent, ToolbarComponent, FormField, IonButton, IonSpinner, IonIcon],
+    imports: [IonToggle, IonHeader, IonContent, ToolbarComponent, FormField, IonButton, IonSpinner, IonIcon, IonInput],
     templateUrl: './profile.component.html',
     styleUrl: './profile.component.scss'
 })

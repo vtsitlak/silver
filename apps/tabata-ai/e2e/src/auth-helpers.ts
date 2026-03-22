@@ -17,6 +17,16 @@ export function requireAuthEnv(): void {
 }
 
 /**
+ * Ionic `<ion-input>` hosts a native `<input>` in the shadow DOM; Playwright `fill()` must target
+ * that inner input, not the custom element (see https://playwright.dev/docs/locators#locate-in-shadow-dom).
+ */
+export async function fillIonInput(page: Page, fieldId: string, value: string): Promise<void> {
+    const input = page.locator(`ion-input#${fieldId} input`);
+    await input.waitFor({ state: 'visible', timeout: 10000 });
+    await input.fill(value);
+}
+
+/**
  * Log in with test credentials and wait until the app has navigated to the dashboard.
  * Call requireAuthEnv() in beforeAll when using this.
  * Waits for the Dashboard tab to be visible (SPA-friendly) and optionally the URL; uses
@@ -24,17 +34,9 @@ export function requireAuthEnv(): void {
  */
 export async function loginAndWaitForDashboard(page: Page): Promise<void> {
     await page.goto('/auth/login');
-    await page.getByLabel('Email').or(page.locator('#email')).first().waitFor({ state: 'visible', timeout: 10000 });
-    await page
-        .getByLabel('Email')
-        .or(page.locator('#email'))
-        .first()
-        .fill(TEST_USER_EMAIL ?? '');
-    await page
-        .getByLabel('Password')
-        .or(page.locator('#password'))
-        .first()
-        .fill(TEST_USER_PASSWORD ?? '');
+    await page.locator('ion-input#email').waitFor({ state: 'visible', timeout: 10000 });
+    await fillIonInput(page, 'email', TEST_USER_EMAIL ?? '');
+    await fillIonInput(page, 'password', TEST_USER_PASSWORD ?? '');
     await page.getByRole('button', { name: 'Login' }).click();
     await page.waitForURL(/\/tabs\/dashboard/, { timeout: 30000, waitUntil: 'commit' });
     await page.getByRole('tab', { name: 'Dashboard' }).waitFor({ state: 'visible', timeout: 15000 });

@@ -115,8 +115,7 @@ export class WorkoutDetailsComponent {
     editWorkout(): void {
         const w = this.workout();
         if (w) {
-            this.workoutEditorFacade.setWorkout(w);
-            this.router.navigate(['/tabs/workouts/edit', w.id, 'info']);
+            this.router.navigate(['/tabs/workout-editor', w.id]);
         }
     }
 

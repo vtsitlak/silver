@@ -45,7 +45,7 @@ export class WorkoutsComponent {
 
     private isWorkoutsListUrl(): boolean {
         const url = this.router.url;
-        return url.includes('/workouts') && !url.includes('/workouts/edit') && !url.includes('/workouts/create') && !/\/workouts\/[^/]+$/.test(url);
+        return url.includes('/workouts') && !url.includes('/workout-editor') && !/\/workouts\/[^/]+$/.test(url);
     }
 
     readonly searchTerm = signal('');
@@ -70,7 +70,7 @@ export class WorkoutsComponent {
 
     addWorkout(): void {
         this.workoutEditorFacade.reset();
-        this.router.navigate(['/tabs/workouts/create']);
+        this.router.navigate(['/tabs/workout-editor/create']);
     }
 
     onDetailsClick(workout: TabataWorkout): void {
@@ -78,8 +78,7 @@ export class WorkoutsComponent {
     }
 
     onEditClick(workout: TabataWorkout): void {
-        this.workoutEditorFacade.setWorkout(workout);
-        this.router.navigate(['/tabs/workouts/edit', workout.id, 'info']);
+        this.router.navigate(['/tabs/workout-editor', workout.id]);
     }
 
     onPlayClick(workout: TabataWorkout): void {

@@ -1,0 +1,69 @@
+<ion-header [translucent]="true">
+    <tbt-toolbar [title]="pageTitle()">
+        <ion-buttons slot="start">
+            <ion-back-button defaultHref="/tabs/workouts"></ion-back-button>
+        </ion-buttons>
+    </tbt-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding workout-editor-page">
+    <ion-segment [scrollable]="true" [value]="selectedTab()" (ionChange)="onTabChange($any($event).detail.value)" class="mb-2 w-full workout-editor-tabs">
+        <ion-segment-button value="info">
+            <ion-label class="text-base font-medium leading-snug text-center">Info</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="warmup">
+            <ion-label class="text-base font-medium leading-snug text-center">Warmup</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="main">
+            <ion-label class="text-base font-medium leading-snug text-center">Main</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="cooldown">
+            <ion-label class="text-base font-medium leading-snug text-center">Cooldown</ion-label>
+        </ion-segment-button>
+    </ion-segment>
+
+    <!-- Keep tab panels mounted (`[hidden]`) so segment switches do not destroy local draft state. -->
+    <div class="workout-editor-content">
+        <div [hidden]="selectedTab() !== 'info'">
+            <tbt-workout-info
+                [loadedInfo]="loadedInfo()"
+                [isCreateMode]="!workoutId()"
+                (draftChange)="onDraftChange($event)"
+                (clearDraftRequested)="onClearDraftRequested()"
+            />
+        </div>
+        <div [hidden]="selectedTab() !== 'warmup'">
+            <tbt-workout-phase [loadedPhase]="loadedWarmupPhase()" phaseType="warmup" (draftChange)="onDraftChange($event)" />
+        </div>
+        <div [hidden]="selectedTab() !== 'main'">
+            <tbt-main-workout [loadedBlocks]="loadedMainBlocks()" (draftChange)="onDraftChange($event)" />
+        </div>
+        <div [hidden]="selectedTab() !== 'cooldown'">
+            <tbt-workout-phase [loadedPhase]="loadedCooldownPhase()" phaseType="cooldown" (draftChange)="onDraftChange($event)" />
+        </div>
+    </div>
+</ion-content>
+
+<ion-footer class="ion-no-border workout-editor-footer">
+    <div class="flex justify-between items-center gap-2 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+        <ion-button fill="clear" type="button" size="small" (click)="onCancel()" class="ion-no-padding flex-1 min-w-0 workout-editor-footer-btn">
+            Cancel
+        </ion-button>
+        <ion-button
+            fill="solid"
+            type="button"
+            size="small"
+            (click)="onSave()"
+            [disabled]="!isSaveEnabled()"
+            class="ion-no-padding flex-1 min-w-0 workout-editor-footer-btn"
+        >
+            <span class="flex w-full items-center justify-center">
+                @if (isSaving()) {
+                    <ion-spinner name="crescent" class="h-3.5 w-3.5"></ion-spinner>
+                } @else {
+                    {{ isEditMode() ? 'Update' : 'Save' }}
+                }
+            </span>
+        </ion-button>
+    </div>
+</ion-footer>

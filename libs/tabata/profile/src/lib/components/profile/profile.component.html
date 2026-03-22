@@ -4,17 +4,21 @@
 
 <ion-content [fullscreen]="true">
     <div class="flex flex-col">
-        <form (submit)="$event.preventDefault(); onSubmit()" method="post" class="bg-white w-full flex flex-col px-4 py-4">
+        <form (submit)="$event.preventDefault(); onSubmit()" method="post" class="profile-form bg-white w-full flex flex-col px-4 py-4">
             <h2 class="text-xl font-semibold mb-4" i18n="@@profileTitle">Profile Settings</h2>
 
             <div class="flex flex-col mb-2">
-                <label for="displayName" i18n="@@profileDisplayNameLabel" class="mb-2">Display Name</label>
-                <input
+                <ion-input
                     id="displayName"
+                    fill="outline"
+                    class="w-full"
                     type="text"
                     [formField]="profileForm.displayName"
+                    label="Display Name"
+                    i18n-label="@@profileDisplayNameLabel"
                     placeholder="Enter your display name"
                     i18n-placeholder="@@profileDisplayNamePlaceholder"
+                    labelPlacement="floating"
                 />
                 <div class="h-5">
                     @if (profileForm.displayName().touched() && profileForm.displayName().invalid()) {
@@ -26,8 +30,19 @@
             </div>
 
             <div class="flex flex-col mb-2">
-                <label for="email" i18n="@@profileEmailLabel" class="mb-2">Email</label>
-                <input id="email" type="email" [formField]="profileForm.email" placeholder="Enter your email" i18n-placeholder="@@profileEmailPlaceholder" />
+                <ion-input
+                    id="email"
+                    fill="outline"
+                    class="w-full"
+                    type="email"
+                    [formField]="profileForm.email"
+                    label="Email"
+                    i18n-label="@@profileEmailLabel"
+                    placeholder="Enter your email"
+                    i18n-placeholder="@@profileEmailPlaceholder"
+                    labelPlacement="floating"
+                    [readonly]="true"
+                />
                 <div class="h-5">
                     @if (profileForm.email().touched() && profileForm.email().invalid()) {
                         @for (err of profileForm.email().errors(); track err.kind) {
@@ -45,13 +60,17 @@
 
                 @if (showPasswordField) {
                     <div class="flex flex-col mb-2">
-                        <label for="currentPassword" i18n="@@profileCurrentPasswordLabel" class="mb-2">Current Password</label>
-                        <input
+                        <ion-input
                             id="currentPassword"
+                            fill="outline"
+                            class="w-full"
                             type="password"
                             [formField]="profileForm.currentPassword"
+                            label="Current Password"
+                            i18n-label="@@profileCurrentPasswordLabel"
                             placeholder="Enter your current password"
                             i18n-placeholder="@@profileCurrentPasswordPlaceholder"
+                            labelPlacement="floating"
                         />
                         <div class="h-5">
                             @if (profileForm.currentPassword().touched() && profileForm.currentPassword().invalid()) {
@@ -64,13 +83,17 @@
 
                     @if (profileForm.currentPassword().value() && profileForm.currentPassword().valid()) {
                         <div class="flex flex-col mb-2">
-                            <label for="newPassword" i18n="@@profileNewPasswordLabel" class="mb-2">New Password</label>
-                            <input
+                            <ion-input
                                 id="newPassword"
+                                fill="outline"
+                                class="w-full"
                                 type="password"
                                 [formField]="profileForm.newPassword"
+                                label="New Password"
+                                i18n-label="@@profileNewPasswordLabel"
                                 placeholder="Enter your new password"
                                 i18n-placeholder="@@profileNewPasswordPlaceholder"
+                                labelPlacement="floating"
                             />
                             <div class="h-5">
                                 @if (profileForm.newPassword().touched() && profileForm.newPassword().invalid()) {
@@ -82,13 +105,17 @@
                         </div>
 
                         <div class="flex flex-col mb-2">
-                            <label for="confirmNewPassword" i18n="@@profileConfirmNewPasswordLabel" class="mb-2">Confirm New Password</label>
-                            <input
+                            <ion-input
                                 id="confirmNewPassword"
+                                fill="outline"
+                                class="w-full"
                                 type="password"
                                 [formField]="profileForm.confirmNewPassword"
+                                label="Confirm New Password"
+                                i18n-label="@@profileConfirmNewPasswordLabel"
                                 placeholder="Confirm your new password"
                                 i18n-placeholder="@@profileConfirmNewPasswordPlaceholder"
+                                labelPlacement="floating"
                             />
                             <div class="h-5">
                                 @if (profileForm.confirmNewPassword().touched() && profileForm.confirmNewPassword().invalid()) {
@@ -103,11 +130,13 @@
             }
 
             <ion-button expand="block" type="submit" [disabled]="!profileForm().dirty() || profileForm().invalid()">
-                @if (isLoading()) {
-                    <ion-spinner name="crescent"></ion-spinner>
-                } @else {
-                    <span i18n="@@profileUpdateButton">Update Profile</span>
-                }
+                <span class="flex w-full items-center justify-center">
+                    @if (isLoading()) {
+                        <ion-spinner name="crescent" class="h-4 w-4"></ion-spinner>
+                    } @else {
+                        <span i18n="@@profileUpdateButton">Update Profile</span>
+                    }
+                </span>
             </ion-button>
 
             <ion-button expand="block" fill="outline" color="danger" (click)="onLogoutClick()" class="ion-margin-top">

@@ -37,7 +37,16 @@ export function deepEqual<T>(a: T, b: T) {
     return JSON.stringify(a) === JSON.stringify(b);
 }
 
-export const cloneDeep = <T>(value: T): T => structuredClone(value);
+/**
+ * Deep clone. Uses `structuredClone` when available (browser / Node 17+);
+ * falls back to JSON for Jest / older Node where `structuredClone` may be missing.
+ */
+export const cloneDeep = <T>(value: T): T => {
+    if (typeof structuredClone === 'function') {
+        return structuredClone(value);
+    }
+    return JSON.parse(JSON.stringify(value)) as T;
+};
 
 export const isDeepEqual = (valueA: object, valueB: object): boolean => {
     if (valueA === valueB) {

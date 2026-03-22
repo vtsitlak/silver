@@ -52,6 +52,7 @@ export function createMockWorkoutsFacade(): {
     workouts: ReturnType<typeof signal>;
     loadedWorkout: ReturnType<typeof signal>;
     isLoading: ReturnType<typeof signal>;
+    isSaving: ReturnType<typeof signal>;
     error: ReturnType<typeof signal>;
     loadWorkouts: jest.Mock;
     loadWorkoutById: jest.Mock;
@@ -60,6 +61,7 @@ export function createMockWorkoutsFacade(): {
     const loadedWorkout = signal<typeof workout | null>(workout);
     const workouts = signal([workout]);
     const isLoading = signal(false);
+    const isSaving = signal(false);
     const error = signal<string | null>(null);
     const loadWorkouts = mockFn();
     const loadWorkoutById =
@@ -74,6 +76,7 @@ export function createMockWorkoutsFacade(): {
         workouts,
         loadedWorkout,
         isLoading,
+        isSaving,
         error,
         loadWorkouts,
         loadWorkoutById
@@ -110,7 +113,8 @@ export const mockExercisesArray = [
         name: 'Push Up',
         images: [] as string[],
         targetMuscles: ['chest'],
-        category: ['upper body'],
+        category: ['strength'],
+        level: 'beginner',
         equipments: ['body weight'],
         secondaryMuscles: [] as string[],
         instructions: [] as string[]

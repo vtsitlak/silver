@@ -149,6 +149,58 @@ ion-toggle[aria-checked='true'] {
     --ion-color-primary: var(--color-primary-dark) !important;
 }
 
+/*
+ * Spinners inside ion-button: don’t let the default Ionic size inflate button height;
+ * templates set explicit h-3.5 / h-4 via Tailwind on the host.
+ */
+ion-button ion-spinner {
+    flex-shrink: 0;
+    max-width: 1rem;
+    max-height: 1rem;
+    box-sizing: border-box;
+}
+
+/*
+ * Stacked form fields in ion-list (auth, workout editor, etc.):
+ * consistent spacing; no filled outline; avoid extra bottom slot growth on focus.
+ */
+.tbt-form-fields-list {
+    --background: transparent;
+    margin: 0;
+
+    ion-item {
+        --background: transparent;
+        --min-height: 0;
+        --padding-top: 0;
+        --padding-bottom: 0;
+        --inner-padding-end: 0;
+        --inner-padding-start: 0;
+        --inner-padding-top: 0;
+        --inner-padding-bottom: 0;
+        --padding-start: 0;
+        --padding-end: 0;
+        margin: 0 0 0.75rem;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    ion-input,
+    ion-textarea,
+    ion-select {
+        --color: #1f2937;
+        --placeholder-color: #6b7280;
+        display: block;
+        width: 100%;
+        margin: 0;
+    }
+
+    ion-textarea {
+        --padding-bottom: 0.25rem;
+    }
+}
+
 /* Ion Button Variations */
 ion-button.primary,
 ion-button[color='primary'] {
@@ -397,6 +449,26 @@ ion-action-sheet.tbt-action-sheet-visible {
     color: #1f2937 !important;
 }
 
+/* Fixed footers: solid surface so scrolling content does not show through (Ionic can look transparent). */
+ion-footer {
+    --background: var(--color-surface);
+    --ion-toolbar-background: var(--color-surface);
+    background: var(--color-surface);
+}
+
+ion-footer ion-toolbar {
+    --background: var(--color-surface);
+    --ion-toolbar-background: var(--color-surface);
+    background: var(--color-surface);
+}
+
+ion-footer[translucent] {
+    --backdrop-filter: none;
+    backdrop-filter: none;
+    --background: var(--color-surface);
+    background: var(--color-surface);
+}
+
 /* Tab bar: ensure unselected icons and labels are visible */
 ion-tab-bar {
     --color: #4b5563;
@@ -437,7 +509,6 @@ ion-toolbar:not(.ion-color) ion-button[aria-label='About this app'] ion-icon {
 /* Custom Input Container */
 .input-wrapper {
     position: relative;
-    margin-bottom: 16px;
 
     &.ion-focused {
         ion-label {

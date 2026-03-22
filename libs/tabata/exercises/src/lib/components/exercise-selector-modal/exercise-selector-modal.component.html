@@ -29,7 +29,7 @@
                 placeholder="Muscle"
                 [value]="selectedMuscles()"
                 (ionChange)="onMuscleChange($event)"
-                interface="popover"
+                interface="alert"
                 multiple="true"
                 class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
             >
@@ -42,7 +42,7 @@
                 placeholder="Equipment"
                 [value]="selectedEquipment()"
                 (ionChange)="onEquipmentChange($event)"
-                interface="popover"
+                interface="alert"
                 multiple="true"
                 class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
             >
@@ -55,7 +55,7 @@
                 placeholder="Category"
                 [value]="selectedCategory()"
                 (ionChange)="onCategoryChange($event)"
-                interface="popover"
+                interface="alert"
                 multiple="true"
                 class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
             >
@@ -111,6 +111,19 @@
                                     {{ formatName(muscle) }}{{ !last ? ', ' : '' }}
                                 }
                             </p>
+                            @if (exercise.category.length > 0 || exercise.level) {
+                                <p class="text-xs text-gray-400 mt-0.5">
+                                    @for (cat of exercise.category; track cat; let last = $last) {
+                                        {{ formatName(cat) }}{{ !last ? ', ' : '' }}
+                                    }
+                                    @if (exercise.level) {
+                                        @if (exercise.category.length > 0) {
+                                            <span> · </span>
+                                        }
+                                        {{ formatName(exercise.level) }}
+                                    }
+                                </p>
+                            }
                         </ion-label>
                         @if (multiple()) {
                             <ion-checkbox

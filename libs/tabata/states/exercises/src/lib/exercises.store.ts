@@ -280,7 +280,10 @@ export const ExercisesStore = signalStore(
                     .pipe(
                         take(1),
                         tapResponse({
-                            next: (exercisesMap) => patchState(store, { exercisesMap }),
+                            next: (exercisesMap) =>
+                                patchState(store, {
+                                    exercisesMap: { ...store.exercisesMap(), ...exercisesMap }
+                                }),
                             error: (err: Error) => patchState(store, { error: err.message })
                         }),
                         catchError((err: unknown) => {

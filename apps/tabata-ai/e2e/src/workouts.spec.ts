@@ -22,7 +22,7 @@ test.describe('Workouts', () => {
 
     test('should navigate to create workout when add is clicked', async ({ page }) => {
         await page.getByRole('button', { name: 'Add workout' }).or(page.locator('ion-button[aria-label="Add workout"]')).first().click();
-        await expect(page).toHaveURL(/\/tabs\/workouts\/create\/info/, { timeout: 10000 });
-        await expect(page.getByLabel('Workout Name').or(page.locator('#workout-name'))).toBeVisible({ timeout: 5000 });
+        await expect(page).toHaveURL(/\/tabs\/workout-editor\/create/, { timeout: 10000 });
+        await expect(page.locator('ion-input#workout-name')).toBeVisible({ timeout: 5000 });
     });
 });
