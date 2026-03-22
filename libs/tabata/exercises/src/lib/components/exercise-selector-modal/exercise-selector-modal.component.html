@@ -25,53 +25,44 @@
         ></ion-searchbar>
 
         <div class="filters-row flex flex-wrap gap-2">
-            <ion-select
-                label="Muscle"
-                labelPlacement="floating"
-                placeholder="Any"
-                [value]="selectedMuscles()"
-                (ionChange)="onMuscleChange($event)"
-                interface="popover"
-                multiple="true"
-                fill="outline"
-                class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
-            >
-                @for (muscle of musclesList(); track muscle) {
-                    <ion-select-option [value]="muscle">{{ formatName(muscle) }}</ion-select-option>
-                }
-            </ion-select>
+          <ion-select
+          placeholder="Muscle"
+          [value]="selectedMuscles()"
+          (ionChange)="onMuscleChange($event)"
+          interface="alert"
+          multiple="true"
+          class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
+      >
+          @for (muscle of musclesList(); track muscle) {
+              <ion-select-option [value]="muscle">{{ formatName(muscle) }}</ion-select-option>
+          }
+      </ion-select>
 
-            <ion-select
-                label="Equipment"
-                labelPlacement="floating"
-                placeholder="Any"
-                [value]="selectedEquipment()"
-                (ionChange)="onEquipmentChange($event)"
-                interface="popover"
-                multiple="true"
-                fill="outline"
-                class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
-            >
-                @for (equipment of equipmentList(); track equipment) {
-                    <ion-select-option [value]="equipment">{{ formatName(equipment) }}</ion-select-option>
-                }
-            </ion-select>
+      <ion-select
+          placeholder="Equipment"
+          [value]="selectedEquipment()"
+          (ionChange)="onEquipmentChange($event)"
+          interface="alert"
+          multiple="true"
+          class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
+      >
+          @for (equipment of equipmentList(); track equipment) {
+              <ion-select-option [value]="equipment">{{ formatName(equipment) }}</ion-select-option>
+          }
+      </ion-select>
 
-            <ion-select
-                label="Category"
-                labelPlacement="floating"
-                placeholder="Any"
-                [value]="selectedCategory()"
-                (ionChange)="onCategoryChange($event)"
-                interface="popover"
-                multiple="true"
-                fill="outline"
-                class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
-            >
-                @for (cat of categoryList(); track cat) {
-                    <ion-select-option [value]="cat">{{ formatName(cat) }}</ion-select-option>
-                }
-            </ion-select>
+      <ion-select
+          placeholder="Category"
+          [value]="selectedCategory()"
+          (ionChange)="onCategoryChange($event)"
+          interface="alert"
+          multiple="true"
+          class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
+      >
+          @for (cat of categoryList(); track cat) {
+              <ion-select-option [value]="cat">{{ formatName(cat) }}</ion-select-option>
+          }
+      </ion-select>
         </div>
 
         @if (selectedMuscles().length > 0 || selectedEquipment().length > 0 || selectedCategory().length > 0) {

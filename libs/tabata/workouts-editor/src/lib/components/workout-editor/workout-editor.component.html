@@ -70,10 +70,13 @@
             [disabled]="!isSaveEnabled()"
             class="ion-no-padding flex-1 min-w-0 workout-editor-footer-btn"
         >
-            @if (isSaving()) {
-                <ion-spinner name="crescent" class="ion-margin-end"></ion-spinner>
-            }
-            {{ isEditMode() ? 'Update' : 'Save' }}
+            <span class="flex w-full items-center justify-center">
+                @if (isSaving()) {
+                    <ion-spinner name="crescent" class="h-3.5 w-3.5"></ion-spinner>
+                } @else {
+                    {{ isEditMode() ? 'Update' : 'Save' }}
+                }
+            </span>
         </ion-button>
     </div>
 </ion-footer>

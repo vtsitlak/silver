@@ -75,7 +75,6 @@ export const mockWorkoutEditorFacade = {
     initialDraftSnapshot: () => null,
     workout: () => null,
     isEditMode: () => false,
-    isBusy: () => false,
     canSubmitWorkout: () => false,
     hasUnsavedChanges: () => false,
     isSaveEnabled: () => false,

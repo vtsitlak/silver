@@ -12,12 +12,8 @@
 <ion-content class="ion-padding">
     @if (draft(); as d) {
         <div class="workout-preview mb-6">
-            <div class="flex items-center gap-2 mb-2">
-                <h1 class="text-xl font-bold flex-1">{{ d.name ?? 'Untitled' }}</h1>
-                <ion-chip color="tertiary">
-                    <ion-icon name="flash-outline"></ion-icon>
-                    <ion-label>AI Generated</ion-label>
-                </ion-chip>
+            <div class="mb-2">
+                <h1 class="text-xl font-bold">{{ d.name ?? 'Untitled' }}</h1>
             </div>
             @if (d.description) {
                 <p class="text-gray-500 text-sm mb-4">{{ d.description }}</p>
@@ -42,7 +38,7 @@
                     </p>
                 }
             </div>
-            <div class="flex flex-wrap gap-2 mb-4">
+            <div class="flex flex-wrap items-center gap-4 mb-4">
                 <ion-chip color="primary">
                     <ion-icon name="time-outline"></ion-icon>
                     <ion-label>{{ formatDurationMinutes(d.totalDurationMinutes ?? 0) }}</ion-label>
@@ -50,6 +46,10 @@
                 <ion-chip color="secondary">
                     <ion-icon name="fitness-outline"></ion-icon>
                     <ion-label>{{ d.blocks?.length ?? 0 }} {{ (d.blocks?.length ?? 0) === 1 ? 'block' : 'blocks' }}</ion-label>
+                </ion-chip>
+                <ion-chip color="tertiary">
+                    <ion-icon name="flash-outline"></ion-icon>
+                    <ion-label>AI Generated</ion-label>
                 </ion-chip>
             </div>
         </div>
@@ -149,11 +149,16 @@
 
     <div class="flex flex-col gap-2 ion-padding-top">
         <ion-button expand="block" (click)="onSave()" [disabled]="isSaving()">
-            @if (isSaving()) {
-                <ion-spinner name="crescent" class="ion-margin-end"></ion-spinner>
-            }
-            <ion-icon name="save-outline" class="ion-margin-end"></ion-icon>
-            Save workout
+            <span class="flex w-full items-center justify-center">
+                @if (isSaving()) {
+                    <ion-spinner name="crescent" class="h-4 w-4"></ion-spinner>
+                } @else {
+                    <span class="inline-flex items-center justify-center gap-2">
+                        <ion-icon name="save-outline" class="text-base shrink-0"></ion-icon>
+                        <span>Save workout</span>
+                    </span>
+                }
+            </span>
         </ion-button>
         <ion-button expand="block" fill="outline" (click)="onTryAgain()" [disabled]="isSaving()">
             <ion-icon name="refresh-outline" class="ion-margin-end"></ion-icon>

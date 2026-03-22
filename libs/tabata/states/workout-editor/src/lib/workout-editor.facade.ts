@@ -9,10 +9,7 @@ export class WorkoutEditorFacade {
 
     readonly initialDraftSnapshot = this.store.initialDraftSnapshot;
     readonly workoutDraft = this.store.workoutDraft;
-    readonly isLoading = this.store.isLoading;
-    readonly error = this.store.error;
     readonly isEditMode = this.store.isEditMode;
-    readonly isBusy = this.store.isBusy;
     readonly canSubmitWorkout = this.store.canSubmitWorkout;
     readonly hasDraftChanges = this.store.hasDraftChanges;
     readonly hasUnsavedChanges = this.store.hasUnsavedChanges;

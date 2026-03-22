@@ -81,6 +81,13 @@ describe('AiWorkoutPreviewModalComponent', () => {
         expect(component).toBeTruthy();
     });
 
+    it('should show AI Generated chip alongside duration and block count chips', () => {
+        const el = fixture.nativeElement as HTMLElement;
+        const chipTexts = Array.from(el.querySelectorAll('ion-chip')).map((c) => c.textContent?.replace(/\s+/g, ' ').trim() ?? '');
+        expect(chipTexts.some((t) => t.includes('AI Generated'))).toBe(true);
+        expect(chipTexts.some((t) => /block/i.test(t))).toBe(true);
+    });
+
     it('should resolve exercise name from map', () => {
         expect(component.getExerciseName('ex1')).toBe('Ex 1');
         expect(component.getExerciseName('unknown')).toBe('unknown');

@@ -12,15 +12,16 @@ import {
 import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { createOutline, trashOutline } from 'ionicons/icons';
-import type { WorkoutDraft } from '@silver/tabata/states/workout-editor';
+import {
+    DEFAULT_TABATA_INTER_BLOCK_REST_SECONDS,
+    DEFAULT_TABATA_REST_DURATION_SECONDS,
+    DEFAULT_TABATA_ROUNDS,
+    DEFAULT_TABATA_WORK_DURATION_SECONDS,
+    type WorkoutDraft
+} from '@silver/tabata/states/workout-editor';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { Exercise, ExerciseSelectorModalComponent, ExerciseDetailsModalComponent } from '@silver/tabata/exercises';
 import type { TabataBlock } from '@silver/tabata/states/workouts';
-
-const WORK_SECONDS = 20;
-const REST_SECONDS = 10;
-const DEFAULT_ROUNDS = 8;
-const DEFAULT_INTER_BLOCK_REST_SECONDS = 60;
 
 export interface MainWorkoutBlockItem {
     rounds: number;
@@ -57,18 +58,20 @@ export class MainWorkoutComponent {
     readonly blocks = signal<MainWorkoutBlockItem[]>([]);
     readonly blockIndexForExerciseModal = signal<number | null>(null);
 
-    readonly workSeconds = WORK_SECONDS;
-    readonly restSeconds = REST_SECONDS;
-    readonly interBlockRestSeconds = DEFAULT_INTER_BLOCK_REST_SECONDS;
+    readonly workSeconds = DEFAULT_TABATA_WORK_DURATION_SECONDS;
+    readonly restSeconds = DEFAULT_TABATA_REST_DURATION_SECONDS;
+    readonly interBlockRestSeconds = DEFAULT_TABATA_INTER_BLOCK_REST_SECONDS;
 
     readonly totalDurationMinutes = computed(() => {
         const count = this.blocks().length;
         if (!count) {
             return 0;
         }
-        const blockSeconds = DEFAULT_ROUNDS * (WORK_SECONDS + REST_SECONDS);
+        const blockSeconds =
+            DEFAULT_TABATA_ROUNDS *
+            (DEFAULT_TABATA_WORK_DURATION_SECONDS + DEFAULT_TABATA_REST_DURATION_SECONDS);
         const totalBlocksSeconds = blockSeconds * count;
-        const totalRestSeconds = DEFAULT_INTER_BLOCK_REST_SECONDS * Math.max(count - 1, 0);
+        const totalRestSeconds = DEFAULT_TABATA_INTER_BLOCK_REST_SECONDS * Math.max(count - 1, 0);
         return Math.ceil((totalBlocksSeconds + totalRestSeconds) / 60);
     });
 
@@ -91,11 +94,14 @@ export class MainWorkoutComponent {
                     loaded.map((b) => {
                         const id = b.exerciseId ?? (b as { exercises?: string[] }).exercises?.[0];
                         return {
-                            rounds: b.rounds ?? DEFAULT_ROUNDS,
-                            workDurationSeconds: b.workDurationSeconds ?? WORK_SECONDS,
-                            restDurationSeconds: b.restDurationSeconds ?? REST_SECONDS,
+                            rounds: b.rounds ?? DEFAULT_TABATA_ROUNDS,
+                            workDurationSeconds:
+                                b.workDurationSeconds ?? DEFAULT_TABATA_WORK_DURATION_SECONDS,
+                            restDurationSeconds:
+                                b.restDurationSeconds ?? DEFAULT_TABATA_REST_DURATION_SECONDS,
                             exercise: id ? this.placeholderExercise(id) : null,
-                            interBlockRestSeconds: b.interBlockRestSeconds ?? DEFAULT_INTER_BLOCK_REST_SECONDS
+                            interBlockRestSeconds:
+                                b.interBlockRestSeconds ?? DEFAULT_TABATA_INTER_BLOCK_REST_SECONDS
                         };
                     })
                 );
@@ -126,7 +132,7 @@ export class MainWorkoutComponent {
         effect(() => {
             const blks = this.blocks();
             const tabataBlocks: TabataBlock[] = blks.map((b) => ({
-                rounds: DEFAULT_ROUNDS,
+                rounds: DEFAULT_TABATA_ROUNDS,
                 workDurationSeconds: b.workDurationSeconds,
                 restDurationSeconds: b.restDurationSeconds,
                 exerciseId: b.exercise?.exerciseId ?? '',
@@ -142,11 +148,11 @@ export class MainWorkoutComponent {
         this.blocks.update((prev) => [
             ...prev,
             {
-                rounds: DEFAULT_ROUNDS,
-                workDurationSeconds: WORK_SECONDS,
-                restDurationSeconds: REST_SECONDS,
+                rounds: DEFAULT_TABATA_ROUNDS,
+                workDurationSeconds: DEFAULT_TABATA_WORK_DURATION_SECONDS,
+                restDurationSeconds: DEFAULT_TABATA_REST_DURATION_SECONDS,
                 exercise: null,
-                interBlockRestSeconds: DEFAULT_INTER_BLOCK_REST_SECONDS
+                interBlockRestSeconds: DEFAULT_TABATA_INTER_BLOCK_REST_SECONDS
             }
         ]);
     }
@@ -176,11 +182,11 @@ export class MainWorkoutComponent {
         this.blocks.update((prev) => [
             ...prev,
             {
-                rounds: DEFAULT_ROUNDS,
-                workDurationSeconds: WORK_SECONDS,
-                restDurationSeconds: REST_SECONDS,
+                rounds: DEFAULT_TABATA_ROUNDS,
+                workDurationSeconds: DEFAULT_TABATA_WORK_DURATION_SECONDS,
+                restDurationSeconds: DEFAULT_TABATA_REST_DURATION_SECONDS,
                 exercise,
-                interBlockRestSeconds: DEFAULT_INTER_BLOCK_REST_SECONDS
+                interBlockRestSeconds: DEFAULT_TABATA_INTER_BLOCK_REST_SECONDS
             }
         ]);
     }

@@ -102,10 +102,13 @@
                 Fill the required fields, then generate a workout with AI — or use the tabs to fill the phases manually.
             </p>
             <ion-button expand="block" type="button" (click)="onGenerateWithAi()" [disabled]="!isFormValid() || isGenerating()">
-                @if (isGenerating()) {
-                    <ion-spinner name="crescent" class="ion-margin-end"></ion-spinner>
-                }
-                Generate with AI
+                <span class="flex w-full items-center justify-center">
+                    @if (isGenerating()) {
+                        <ion-spinner name="crescent" class="h-4 w-4"></ion-spinner>
+                    } @else {
+                        Generate with AI
+                    }
+                </span>
             </ion-button>
         }
     </form>

@@ -19,7 +19,7 @@ import {
     IonTextarea,
     ModalController
 } from '@ionic/angular/standalone';
-import type { WorkoutDraft } from '@silver/tabata/states/workout-editor';
+import { createEmptyWorkoutInfoFormModel, type WorkoutDraft } from '@silver/tabata/states/workout-editor';
 import {
     EQUIPMENT_CATEGORY_OPTIONS,
     BODY_REGION_OPTIONS,
@@ -30,17 +30,6 @@ import { AiWorkoutGenerationService } from '../../services/ai-workout-generation
 import { AiWorkoutPreviewModalComponent } from '../ai-workout-preview-modal/ai-workout-preview-modal.component';
 import { finalize } from 'rxjs/operators';
 import type { WorkoutInfoFormModel } from '@silver/tabata/states/workouts';
-
-function emptyInfoFormModel(): WorkoutInfoFormModel {
-    return {
-        name: '',
-        description: '',
-        mainTargetBodypart: null,
-        availableEquipments: [],
-        secondaryTargetBodyparts: [],
-        generatedByAi: false
-    };
-}
 
 function mapLoadedToFormModel(loaded: WorkoutInfoFormModel): WorkoutInfoFormModel {
     return {
@@ -88,7 +77,7 @@ export class WorkoutInfoComponent {
     readonly mainTargetDisabled = computed(() => (region: BodyRegion) => this.formModel().secondaryTargetBodyparts.includes(region));
     readonly secondaryTargetDisabled = computed(() => (region: BodyRegion) => this.formModel().mainTargetBodypart === region);
 
-    readonly formModel = signal<WorkoutInfoFormModel>(emptyInfoFormModel());
+    readonly formModel = signal<WorkoutInfoFormModel>(createEmptyWorkoutInfoFormModel());
 
     infoForm = form(this.formModel, (schemaPath) => {
         required(schemaPath.name, { message: 'Name is required' });
@@ -105,10 +94,12 @@ export class WorkoutInfoComponent {
             const loaded = this.loadedInfo();
             untracked(() => {
                 if (!loaded) {
-                    this.formModel.set(emptyInfoFormModel());
-                    return;
+                    this.formModel.set(createEmptyWorkoutInfoFormModel());
+                } else {
+                    this.formModel.set(mapLoadedToFormModel(loaded));
                 }
-                this.formModel.set(mapLoadedToFormModel(loaded));
+                /** Re-hydrating from the editor snapshot must clear interaction state (e.g. after Save → Add workout). */
+                this.infoForm().reset();
             });
         });
 

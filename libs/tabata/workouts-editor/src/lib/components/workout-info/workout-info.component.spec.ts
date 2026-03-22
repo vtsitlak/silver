@@ -88,4 +88,21 @@ describe('WorkoutInfoComponent', () => {
         const el = fixture.nativeElement as HTMLElement;
         expect(el.textContent).not.toContain('Generate with AI');
     });
+
+    it('should clear touched state when loadedInfo is re-applied (e.g. Add workout after Save)', () => {
+        component.infoForm.name().markAsTouched();
+        fixture.detectChanges();
+        expect(component.infoForm.name().touched()).toBe(true);
+
+        fixture.componentRef.setInput('loadedInfo', {
+            name: '',
+            description: '',
+            mainTargetBodypart: null,
+            availableEquipments: [],
+            secondaryTargetBodyparts: [],
+            generatedByAi: false
+        });
+        fixture.detectChanges();
+        expect(component.infoForm.name().touched()).toBe(false);
+    });
 });

@@ -149,6 +149,17 @@ ion-toggle[aria-checked='true'] {
     --ion-color-primary: var(--color-primary-dark) !important;
 }
 
+/*
+ * Spinners inside ion-button: don’t let the default Ionic size inflate button height;
+ * templates set explicit h-3.5 / h-4 via Tailwind on the host.
+ */
+ion-button ion-spinner {
+    flex-shrink: 0;
+    max-width: 1rem;
+    max-height: 1rem;
+    box-sizing: border-box;
+}
+
 /* Ion Button Variations */
 ion-button.primary,
 ion-button[color='primary'] {

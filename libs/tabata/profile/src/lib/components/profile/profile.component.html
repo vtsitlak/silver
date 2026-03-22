@@ -130,11 +130,13 @@
             }
 
             <ion-button expand="block" type="submit" [disabled]="!profileForm().dirty() || profileForm().invalid()">
-                @if (isLoading()) {
-                    <ion-spinner name="crescent"></ion-spinner>
-                } @else {
-                    <span i18n="@@profileUpdateButton">Update Profile</span>
-                }
+                <span class="flex w-full items-center justify-center">
+                    @if (isLoading()) {
+                        <ion-spinner name="crescent" class="h-4 w-4"></ion-spinner>
+                    } @else {
+                        <span i18n="@@profileUpdateButton">Update Profile</span>
+                    }
+                </span>
             </ion-button>
 
             <ion-button expand="block" fill="outline" color="danger" (click)="onLogoutClick()" class="ion-margin-top">

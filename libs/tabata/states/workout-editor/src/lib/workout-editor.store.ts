@@ -61,18 +61,15 @@ function draftCanSubmitWorkout(draft: WorkoutDraft): boolean {
 function createFreshWorkoutEditorState(): WorkoutEditorState {
     return {
         workoutDraft: cloneDeep(initialWorkoutDraft),
-        initialDraftSnapshot: cloneDeep(initialWorkoutDraft),
-        isLoading: false,
-        error: null
+        initialDraftSnapshot: cloneDeep(initialWorkoutDraft)
     };
 }
 
 export const WorkoutEditorStore = signalStore(
     { providedIn: 'root' },
     withState<WorkoutEditorState>(createFreshWorkoutEditorState()),
-    withComputed(({ workoutDraft, initialDraftSnapshot, isLoading }) => ({
+    withComputed(({ workoutDraft, initialDraftSnapshot }) => ({
         isEditMode: computed(() => !!initialDraftSnapshot()?.id),
-        isBusy: computed(() => isLoading()),
         canSubmitWorkout: computed(() => draftCanSubmitWorkout(workoutDraft())),
         hasDraftChanges: computed(() => Object.keys(workoutDraft()).length > 0),
         /** True if draft differs from initial (create: meaningful content; edit: draft !== snapshot). */
@@ -96,9 +93,7 @@ export const WorkoutEditorStore = signalStore(
         const hydrateEditorFromWorkout = (workout: TabataWorkout): void => {
             patchState(store, {
                 workoutDraft: { ...workout },
-                initialDraftSnapshot: cloneDeep(workout),
-                isLoading: false,
-                error: null
+                initialDraftSnapshot: cloneDeep(workout)
             });
         };
 
