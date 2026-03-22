@@ -113,7 +113,8 @@ export const mockExercisesArray = [
         name: 'Push Up',
         images: [] as string[],
         targetMuscles: ['chest'],
-        category: ['upper body'],
+        category: ['strength'],
+        level: 'beginner',
         equipments: ['body weight'],
         secondaryMuscles: [] as string[],
         instructions: [] as string[]

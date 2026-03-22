@@ -64,11 +64,9 @@ export const initialWorkoutDraft: WorkoutDraft = {
     warmup: EMPTY_PHASE,
     cooldown: EMPTY_PHASE,
     blocks: []
-  }
+};
 
 export const workoutEditorInitialState: WorkoutEditorState = {
     workoutDraft: initialWorkoutDraft,
     initialDraftSnapshot: initialWorkoutDraft
 };
-
-

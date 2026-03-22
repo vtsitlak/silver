@@ -1,30 +1,9 @@
-import {
-    Component,
-    computed,
-    effect,
-    inject,
-    input,
-    output,
-    signal,
-    untracked
-} from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 import { form, FormField, required } from '@angular/forms/signals';
-import {
-    IonButton,
-    IonInput,
-    IonSelect,
-    IonSelectOption,
-    IonSpinner,
-    IonTextarea,
-    ModalController
-} from '@ionic/angular/standalone';
+import { IonButton, IonInput, IonItem, IonList, IonSelect, IonSelectOption, IonSpinner, IonTextarea, ModalController } from '@ionic/angular/standalone';
 import { createEmptyWorkoutInfoFormModel, type WorkoutDraft } from '@silver/tabata/states/workout-editor';
-import {
-    EQUIPMENT_CATEGORY_OPTIONS,
-    BODY_REGION_OPTIONS,
-    type BodyRegion
-} from '@silver/tabata/helpers';
+import { EQUIPMENT_CATEGORY_OPTIONS, BODY_REGION_OPTIONS, type BodyRegion } from '@silver/tabata/helpers';
 import { SKIP_WORKOUT_EDITOR_CANCEL } from '../../guards/workout-editor-can-deactivate.guard';
 import { AiWorkoutGenerationService } from '../../services/ai-workout-generation.service';
 import { AiWorkoutPreviewModalComponent } from '../ai-workout-preview-modal/ai-workout-preview-modal.component';
@@ -46,15 +25,7 @@ function mapLoadedToFormModel(loaded: WorkoutInfoFormModel): WorkoutInfoFormMode
     selector: 'tbt-workout-info',
     templateUrl: 'workout-info.component.html',
     styleUrls: ['workout-info.component.scss'],
-    imports: [
-        IonButton,
-        IonInput,
-        IonSelect,
-        IonSelectOption,
-        IonSpinner,
-        IonTextarea,
-        FormField
-    ]
+    imports: [IonButton, IonInput, IonItem, IonList, IonSelect, IonSelectOption, IonSpinner, IonTextarea, FormField]
 })
 export class WorkoutInfoComponent {
     private readonly aiWorkoutGeneration = inject(AiWorkoutGenerationService);

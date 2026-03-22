@@ -13,12 +13,7 @@ import {
     IonSpinner
 } from '@ionic/angular/standalone';
 import { ToolbarComponent } from '@silver/tabata/ui';
-import {
-    EMPTY_PHASE,
-    toWorkoutInfoFormModelFromSnapshot,
-    WorkoutEditorFacade,
-    type WorkoutDraft
-} from '@silver/tabata/states/workout-editor';
+import { EMPTY_PHASE, toWorkoutInfoFormModelFromSnapshot, WorkoutEditorFacade, type WorkoutDraft } from '@silver/tabata/states/workout-editor';
 import { WorkoutSubmitService } from '../../services/workout-submit.service';
 import { WorkoutEditorInitService } from '../../services/workout-editor-init.service';
 import { Phase, TabataBlock, WorkoutsFacade } from '@silver/tabata/states/workouts';
@@ -26,7 +21,6 @@ import { WorkoutInfoComponent } from '../workout-info/workout-info.component';
 import { WorkoutPhaseComponent } from '../workout-phase/workout-phase.component';
 import { MainWorkoutComponent } from '../main-workout/main-workout.component';
 export type WorkoutEditorTab = 'info' | 'warmup' | 'main' | 'cooldown';
-
 
 @Component({
     selector: 'tbt-workout-editor',

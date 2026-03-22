@@ -1,14 +1,5 @@
 import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
-import {
-    IonButton,
-    IonButtons,
-    IonLabel,
-    IonItem,
-    IonIcon,
-    IonList,
-    IonReorderGroup,
-    IonReorder
-} from '@ionic/angular/standalone';
+import { IonButton, IonButtons, IonLabel, IonItem, IonIcon, IonList, IonReorderGroup, IonReorder } from '@ionic/angular/standalone';
 import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { createOutline, trashOutline } from 'ionicons/icons';
@@ -35,16 +26,7 @@ export interface MainWorkoutBlockItem {
     selector: 'tbt-main-workout',
     templateUrl: 'main-workout.component.html',
     styleUrls: ['main-workout.component.scss'],
-    imports: [
-        IonButton,
-        IonButtons,
-        IonLabel,
-        IonItem,
-        IonIcon,
-        IonList,
-        IonReorderGroup,
-        IonReorder
-    ]
+    imports: [IonButton, IonButtons, IonLabel, IonItem, IonIcon, IonList, IonReorderGroup, IonReorder]
 })
 export class MainWorkoutComponent {
     private readonly exercisesFacade = inject(ExercisesFacade);
@@ -67,9 +49,7 @@ export class MainWorkoutComponent {
         if (!count) {
             return 0;
         }
-        const blockSeconds =
-            DEFAULT_TABATA_ROUNDS *
-            (DEFAULT_TABATA_WORK_DURATION_SECONDS + DEFAULT_TABATA_REST_DURATION_SECONDS);
+        const blockSeconds = DEFAULT_TABATA_ROUNDS * (DEFAULT_TABATA_WORK_DURATION_SECONDS + DEFAULT_TABATA_REST_DURATION_SECONDS);
         const totalBlocksSeconds = blockSeconds * count;
         const totalRestSeconds = DEFAULT_TABATA_INTER_BLOCK_REST_SECONDS * Math.max(count - 1, 0);
         return Math.ceil((totalBlocksSeconds + totalRestSeconds) / 60);
@@ -86,22 +66,17 @@ export class MainWorkoutComponent {
                     this.blocks.set([]);
                     return;
                 }
-                const ids = loaded
-                    .map((b) => b.exerciseId ?? (b as { exercises?: string[] }).exercises?.[0])
-                    .filter(Boolean) as string[];
+                const ids = loaded.map((b) => b.exerciseId ?? (b as { exercises?: string[] }).exercises?.[0]).filter(Boolean) as string[];
                 this.exercisesFacade.loadExercisesMap(ids);
                 this.blocks.set(
                     loaded.map((b) => {
                         const id = b.exerciseId ?? (b as { exercises?: string[] }).exercises?.[0];
                         return {
                             rounds: b.rounds ?? DEFAULT_TABATA_ROUNDS,
-                            workDurationSeconds:
-                                b.workDurationSeconds ?? DEFAULT_TABATA_WORK_DURATION_SECONDS,
-                            restDurationSeconds:
-                                b.restDurationSeconds ?? DEFAULT_TABATA_REST_DURATION_SECONDS,
+                            workDurationSeconds: b.workDurationSeconds ?? DEFAULT_TABATA_WORK_DURATION_SECONDS,
+                            restDurationSeconds: b.restDurationSeconds ?? DEFAULT_TABATA_REST_DURATION_SECONDS,
                             exercise: id ? this.placeholderExercise(id) : null,
-                            interBlockRestSeconds:
-                                b.interBlockRestSeconds ?? DEFAULT_TABATA_INTER_BLOCK_REST_SECONDS
+                            interBlockRestSeconds: b.interBlockRestSeconds ?? DEFAULT_TABATA_INTER_BLOCK_REST_SECONDS
                         };
                     })
                 );

@@ -52,9 +52,7 @@ export class WorkoutsFacade {
         const successMessage = action === 'update' ? 'Workout updated' : 'Workout created';
 
         const request$ =
-            action === 'update'
-                ? this.store.updateWorkout(id!, payload as UpdateWorkoutPayload)
-                : this.store.createWorkout(payload as CreateWorkoutPayload);
+            action === 'update' ? this.store.updateWorkout(id!, payload as UpdateWorkoutPayload) : this.store.createWorkout(payload as CreateWorkoutPayload);
 
         return request$.pipe(
             tap((_workout) => {

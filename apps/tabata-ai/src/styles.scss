@@ -160,6 +160,47 @@ ion-button ion-spinner {
     box-sizing: border-box;
 }
 
+/*
+ * Stacked form fields in ion-list (auth, workout editor, etc.):
+ * consistent spacing; no filled outline; avoid extra bottom slot growth on focus.
+ */
+.tbt-form-fields-list {
+    --background: transparent;
+    margin: 0;
+
+    ion-item {
+        --background: transparent;
+        --min-height: 0;
+        --padding-top: 0;
+        --padding-bottom: 0;
+        --inner-padding-end: 0;
+        --inner-padding-start: 0;
+        --inner-padding-top: 0;
+        --inner-padding-bottom: 0;
+        --padding-start: 0;
+        --padding-end: 0;
+        margin: 0 0 0.75rem;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    ion-input,
+    ion-textarea,
+    ion-select {
+        --color: #1f2937;
+        --placeholder-color: #6b7280;
+        display: block;
+        width: 100%;
+        margin: 0;
+    }
+
+    ion-textarea {
+        --padding-bottom: 0.25rem;
+    }
+}
+
 /* Ion Button Variations */
 ion-button.primary,
 ion-button[color='primary'] {
@@ -468,7 +509,6 @@ ion-toolbar:not(.ion-color) ion-button[aria-label='About this app'] ion-icon {
 /* Custom Input Container */
 .input-wrapper {
     position: relative;
-    margin-bottom: 16px;
 
     &.ion-focused {
         ion-label {

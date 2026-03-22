@@ -29,9 +29,7 @@ function valuesEqualNormalized(x: unknown, y: unknown): boolean {
 }
 
 function phaseMovementMeaningful(m: { exerciseId?: string; durationSeconds?: number } | undefined): boolean {
-    return Boolean(
-        m?.exerciseId?.trim() && typeof m.durationSeconds === 'number' && m.durationSeconds > 0
-    );
+    return Boolean(m?.exerciseId?.trim() && typeof m.durationSeconds === 'number' && m.durationSeconds > 0);
 }
 
 function blockMeaningful(b: { exerciseId?: string } | undefined): boolean {

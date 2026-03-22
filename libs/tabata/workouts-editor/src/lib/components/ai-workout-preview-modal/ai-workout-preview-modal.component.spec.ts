@@ -45,7 +45,7 @@ describe('AiWorkoutPreviewModalComponent', () => {
 
     beforeEach(async () => {
         mockFacade = {
-            workoutDraft: signal(mockDraft),
+            workoutDraft: signal(mockDraft)
         };
         mockWorkoutsFacade = {
             isSaving: signal(false)

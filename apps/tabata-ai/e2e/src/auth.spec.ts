@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import * as dotenv from 'dotenv';
 import { join } from 'path';
+import { fillIonInput } from './auth-helpers';
 
 dotenv.config({ path: join(__dirname, '../.env') });
 
@@ -20,21 +21,12 @@ test.describe('Authentication', () => {
     test.beforeEach(async ({ page }) => {
         await page.goto('/auth/login');
 
-        // Wait for the login form to be ready (email input by id or label)
-        await page.getByLabel('Email').or(page.locator('#email')).first().waitFor({ state: 'visible', timeout: 10000 });
+        await page.locator('ion-input#email').waitFor({ state: 'visible', timeout: 10000 });
     });
 
     test('should successfully login with valid credentials', async ({ page }) => {
-        await page
-            .getByLabel('Email')
-            .or(page.locator('#email'))
-            .first()
-            .fill(TEST_USER_EMAIL ?? '');
-        await page
-            .getByLabel('Password')
-            .or(page.locator('#password'))
-            .first()
-            .fill(TEST_USER_PASSWORD ?? '');
+        await fillIonInput(page, 'email', TEST_USER_EMAIL ?? '');
+        await fillIonInput(page, 'password', TEST_USER_PASSWORD ?? '');
         await page.getByRole('button', { name: 'Login' }).click();
         await page.waitForURL(/\/tabs\/dashboard/, { timeout: 30000, waitUntil: 'commit' });
         await page.getByRole('tab', { name: 'Dashboard' }).waitFor({ state: 'visible', timeout: 15000 });

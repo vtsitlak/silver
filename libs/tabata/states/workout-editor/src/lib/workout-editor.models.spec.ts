@@ -1,9 +1,4 @@
-import {
-    createEmptyWorkoutInfoFormModel,
-    EMPTY_WORKOUT_INFO_FORM_MODEL,
-    toWorkoutInfoFormModelFromSnapshot,
-    type WorkoutDraft
-} from './workout-editor.models';
+import { createEmptyWorkoutInfoFormModel, EMPTY_WORKOUT_INFO_FORM_MODEL, toWorkoutInfoFormModelFromSnapshot, type WorkoutDraft } from './workout-editor.models';
 
 describe('workout-editor.models', () => {
     describe('toWorkoutInfoFormModelFromSnapshot', () => {

@@ -1,11 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import {
-    provideRouter,
-    Router,
-    type ActivatedRouteSnapshot,
-    type Navigation,
-    type RouterStateSnapshot
-} from '@angular/router';
+import { provideRouter, Router, type ActivatedRouteSnapshot, type Navigation, type RouterStateSnapshot } from '@angular/router';
 import { workoutEditorCanDeactivateGuard, SKIP_WORKOUT_EDITOR_CANCEL } from './workout-editor-can-deactivate.guard';
 import { WorkoutEditorCancelService } from '../services/workout-editor-cancel.service';
 import type { WorkoutEditorComponent } from '../components/workout-editor/workout-editor.component';
@@ -22,10 +16,7 @@ describe('workoutEditorCanDeactivateGuard', () => {
     beforeEach(() => {
         cancelService = { confirmCancel: jest.fn() };
         TestBed.configureTestingModule({
-            providers: [
-                provideRouter([]),
-                { provide: WorkoutEditorCancelService, useValue: cancelService }
-            ]
+            providers: [provideRouter([]), { provide: WorkoutEditorCancelService, useValue: cancelService }]
         });
         router = TestBed.inject(Router);
     });
@@ -35,9 +26,7 @@ describe('workoutEditorCanDeactivateGuard', () => {
             extras: { state: { [SKIP_WORKOUT_EDITOR_CANCEL]: true } }
         } as unknown as Navigation);
 
-        const result = TestBed.runInInjectionContext(() =>
-            workoutEditorCanDeactivateGuard(component, route, state, nextState)
-        );
+        const result = TestBed.runInInjectionContext(() => workoutEditorCanDeactivateGuard(component, route, state, nextState));
         expect(result).toBe(true);
         expect(cancelService.confirmCancel).not.toHaveBeenCalled();
     });
@@ -48,9 +37,7 @@ describe('workoutEditorCanDeactivateGuard', () => {
         } as unknown as Navigation);
         cancelService.confirmCancel.mockResolvedValue(false);
 
-        const result = TestBed.runInInjectionContext(() =>
-            workoutEditorCanDeactivateGuard(component, route, state, nextState)
-        );
+        const result = TestBed.runInInjectionContext(() => workoutEditorCanDeactivateGuard(component, route, state, nextState));
         await expect(result).resolves.toBe(true);
         expect(cancelService.confirmCancel).toHaveBeenCalled();
     });
@@ -61,9 +48,7 @@ describe('workoutEditorCanDeactivateGuard', () => {
         } as unknown as Navigation);
         cancelService.confirmCancel.mockResolvedValue(true);
 
-        const result = TestBed.runInInjectionContext(() =>
-            workoutEditorCanDeactivateGuard(component, route, state, nextState)
-        );
+        const result = TestBed.runInInjectionContext(() => workoutEditorCanDeactivateGuard(component, route, state, nextState));
         await expect(result).resolves.toBe(false);
     });
 });

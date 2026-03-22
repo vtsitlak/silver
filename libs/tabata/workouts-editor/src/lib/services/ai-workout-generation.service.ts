@@ -54,20 +54,22 @@ export class AiWorkoutGenerationService {
                         return EMPTY;
                     }
 
-                    return this.aiGenerator.generateWorkout({
-                        name: request.name,
-                        description: request.description,
-                        mainTargetBodypart: request.mainTargetBodypart,
-                        availableEquipments: request.availableEquipments,
-                        secondaryTargetBodyparts: request.secondaryTargetBodyparts,
-                        exercises: summaries
-                    }).pipe(
-                        catchError((err: unknown) => {
-                            const msg = err instanceof Error ? err.message : 'AI generation failed';
-                            this.toast.showError(msg);
-                            return EMPTY;
+                    return this.aiGenerator
+                        .generateWorkout({
+                            name: request.name,
+                            description: request.description,
+                            mainTargetBodypart: request.mainTargetBodypart,
+                            availableEquipments: request.availableEquipments,
+                            secondaryTargetBodyparts: request.secondaryTargetBodyparts,
+                            exercises: summaries
                         })
-                    );
+                        .pipe(
+                            catchError((err: unknown) => {
+                                const msg = err instanceof Error ? err.message : 'AI generation failed';
+                                this.toast.showError(msg);
+                                return EMPTY;
+                            })
+                        );
                 })
             );
     }
@@ -92,4 +94,3 @@ export class AiWorkoutGenerationService {
         return Array.from(equipmentStrings).join(',');
     }
 }
-

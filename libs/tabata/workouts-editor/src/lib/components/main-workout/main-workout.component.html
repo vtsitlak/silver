@@ -14,12 +14,7 @@
                 <ion-item class="block-item">
                     <ion-reorder slot="start"></ion-reorder>
                     @if (block.exercise && getExerciseImage(block.exercise)) {
-                        <img
-                            [src]="getExerciseImage(block.exercise)"
-                            [alt]="getExerciseName(block.exercise)"
-                            class="block-exercise-thumb"
-                            slot="start"
-                        />
+                        <img [src]="getExerciseImage(block.exercise)" [alt]="getExerciseName(block.exercise)" class="block-exercise-thumb" slot="start" />
                     }
                     <ion-label class="block-label">
                         <h2 class="font-medium">Block {{ i + 1 }}</h2>

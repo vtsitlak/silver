@@ -10,12 +10,7 @@ import { isObservable, lastValueFrom } from 'rxjs';
  * `inject()`, so we capture {@link Injector} synchronously and run the implementation inside
  * {@link runInInjectionContext}.
  */
-export const workoutEditorCanDeactivateGuard: CanDeactivateFn<unknown> = async (
-    component,
-    route,
-    state,
-    nextState
-) => {
+export const workoutEditorCanDeactivateGuard: CanDeactivateFn<unknown> = async (component, route, state, nextState) => {
     const injector = inject(Injector);
     const { workoutEditorCanDeactivateGuard: impl } = await import('@silver/tabata/workouts-editor');
     return runInInjectionContext(injector, () => {

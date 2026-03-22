@@ -78,7 +78,14 @@ function forceLightTheme(): void {
 export const appConfig = {
     providers: [
         { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-        provideIonicAngular(),
+        /**
+         * Web: disable Ionic scroll assist so focus doesn’t aggressively scroll
+         * `ion-content` (noticeable on auth’s bottom-anchored flex layout).
+         * Native: keep assist for keyboard avoidance.
+         */
+        provideIonicAngular({
+            scrollAssist: Capacitor.isNativePlatform()
+        }),
         provideRouter(routes, withComponentInputBinding(), withPreloading(PreloadAllModules)),
         provideHttpClient(withInterceptors([rateLimitInterceptor])),
         provideAppInitializer(() => {

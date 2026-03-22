@@ -67,7 +67,10 @@ export interface ExerciseItem {
     durationSeconds: number;
 }
 
-export type WorkoutInfo = Pick<TabataWorkout, 'name' | 'description' | 'generatedByAi' | 'mainTargetBodypart' | 'secondaryTargetBodyparts' | 'availableEquipments'>;
+export type WorkoutInfo = Pick<
+    TabataWorkout,
+    'name' | 'description' | 'generatedByAi' | 'mainTargetBodypart' | 'secondaryTargetBodyparts' | 'availableEquipments'
+>;
 
 export type WorkoutInfoFormModel = Omit<WorkoutInfo, 'mainTargetBodypart'> & {
     mainTargetBodypart: BodyRegion | null;

@@ -17,8 +17,9 @@ test.describe('Profile', () => {
 
     test('should show Display Name and Email fields', async ({ page }) => {
         const profileForm = page.locator('form').filter({ has: page.getByRole('heading', { name: 'Profile Settings' }) });
-        await expect(profileForm.getByLabel('Display Name').or(profileForm.locator('#displayName'))).toBeVisible({ timeout: 5000 });
-        await expect(profileForm.getByLabel('Email').or(profileForm.locator('#email'))).toBeVisible();
+        // Ionic ion-input: assert host visibility (labels live in shadow DOM; getByLabel is unreliable).
+        await expect(profileForm.locator('ion-input#displayName')).toBeVisible({ timeout: 5000 });
+        await expect(profileForm.locator('ion-input#email')).toBeVisible({ timeout: 5000 });
     });
 
     test('should show Logout button', async ({ page }) => {

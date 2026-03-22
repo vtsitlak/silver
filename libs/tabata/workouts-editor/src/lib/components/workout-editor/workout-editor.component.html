@@ -7,12 +7,7 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding workout-editor-page">
-    <ion-segment
-        [scrollable]="true"
-        [value]="selectedTab()"
-        (ionChange)="onTabChange($any($event).detail.value)"
-        class="mb-2 w-full workout-editor-tabs"
-    >
+    <ion-segment [scrollable]="true" [value]="selectedTab()" (ionChange)="onTabChange($any($event).detail.value)" class="mb-2 w-full workout-editor-tabs">
         <ion-segment-button value="info">
             <ion-label class="text-base font-medium leading-snug text-center">Info</ion-label>
         </ion-segment-button>
@@ -38,21 +33,13 @@
             />
         </div>
         <div [hidden]="selectedTab() !== 'warmup'">
-            <tbt-workout-phase
-                [loadedPhase]="loadedWarmupPhase()"
-                phaseType="warmup"
-                (draftChange)="onDraftChange($event)"
-            />
+            <tbt-workout-phase [loadedPhase]="loadedWarmupPhase()" phaseType="warmup" (draftChange)="onDraftChange($event)" />
         </div>
         <div [hidden]="selectedTab() !== 'main'">
             <tbt-main-workout [loadedBlocks]="loadedMainBlocks()" (draftChange)="onDraftChange($event)" />
         </div>
         <div [hidden]="selectedTab() !== 'cooldown'">
-            <tbt-workout-phase
-                [loadedPhase]="loadedCooldownPhase()"
-                phaseType="cooldown"
-                (draftChange)="onDraftChange($event)"
-            />
+            <tbt-workout-phase [loadedPhase]="loadedCooldownPhase()" phaseType="cooldown" (draftChange)="onDraftChange($event)" />
         </div>
     </div>
 </ion-content>

@@ -20,9 +20,7 @@ describe('workoutEditorCanDeactivateGuard (lazy)', () => {
     it('should delegate to the workouts-editor guard and return its result', async () => {
         mockImpl.mockResolvedValue(true);
 
-        const result = await TestBed.runInInjectionContext(() =>
-            workoutEditorCanDeactivateGuard({} as never, route, state, nextState)
-        );
+        const result = await TestBed.runInInjectionContext(() => workoutEditorCanDeactivateGuard({} as never, route, state, nextState));
 
         expect(mockImpl).toHaveBeenCalledTimes(1);
         expect(mockImpl).toHaveBeenCalledWith({}, route, state, nextState);

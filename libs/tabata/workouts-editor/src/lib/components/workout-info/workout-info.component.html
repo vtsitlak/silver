@@ -1,104 +1,105 @@
 <div class="workout-tab-content">
-    <form class="workout-info-form bg-white w-full flex flex-col px-4 py-4" novalidate>
-        <div class="flex flex-col">
-            <ion-input
-                id="workout-name"
-                fill="outline"
-                class="w-full"
-                type="text"
-                [formField]="infoForm.name"
-                label="Workout Name *"
-                placeholder="Enter workout name"
-                labelPlacement="floating"
-            />
-            @if (infoForm.name().touched() && infoForm.name().invalid()) {
-                <div class="mt-1">
-                    @for (err of infoForm.name().errors(); track err.kind) {
-                        <p class="text-error text-sm">{{ err.message }}</p>
-                    }
+    <form class="workout-info-form bg-white w-full flex flex-col" novalidate>
+        <ion-list lines="none" class="workout-info-list w-full bg-transparent p-0">
+            <ion-item lines="none" class="ion-no-padding">
+                <div class="w-full flex flex-col">
+                    <ion-input
+                        id="workout-name"
+                        class="w-full"
+                        type="text"
+                        [formField]="infoForm.name"
+                        label="Workout Name *"
+                        placeholder="Enter workout name"
+                        labelPlacement="stacked"
+                    />
+                    <!--             @if (infoForm.name().touched() && infoForm.name().invalid()) {
+                        <div>
+                            @for (err of infoForm.name().errors(); track err.kind) {
+                                <p class="text-error text-sm">{{ err.message }}</p>
+                            }
+                        </div>
+                    } -->
                 </div>
-            }
-        </div>
+            </ion-item>
 
-        <div class="flex flex-col">
-            <ion-textarea
-                id="workout-description"
-                fill="outline"
-                class="w-full"
-                [formField]="infoForm.description"
-                label="Description *"
-                placeholder="Describe the workout. A good description improves AI generation."
-                rows="3"
-                labelPlacement="floating"
-            />
-            @if (infoForm.description().touched() && infoForm.description().invalid()) {
-                <div class="mt-1">
-                    @for (err of infoForm.description().errors(); track err.kind) {
-                        <p class="text-error text-sm">{{ err.message }}</p>
-                    }
+            <ion-item lines="none" class="ion-no-padding">
+                <div class="w-full flex flex-col">
+                    <ion-textarea
+                        id="workout-description"
+                        class="w-full"
+                        [formField]="infoForm.description"
+                        label="Description *"
+                        placeholder="Describe the workout. A good description improves AI generation."
+                        rows="3"
+                        labelPlacement="stacked"
+                    />
+                    <!--                  @if (infoForm.description().touched() && infoForm.description().invalid()) {
+                        <div>
+                            @for (err of infoForm.description().errors(); track err.kind) {
+                                <p class="text-error text-sm">{{ err.message }}</p>
+                            }
+                        </div>
+                    } -->
                 </div>
-            }
-        </div>
+            </ion-item>
 
-        <div class="flex flex-col">
-            <ion-select
-                id="workout-equipment"
-                fill="outline"
-                class="w-full"
-                label="Available equipment"
-                labelPlacement="floating"
-                placeholder="Select equipment"
-                [formField]="infoForm.availableEquipments"
-                multiple="true"
-                interface="alert"
-            >
-                @for (eq of equipmentOptions; track eq) {
-                    <ion-select-option [value]="eq">{{ eq }}</ion-select-option>
-                }
-            </ion-select>
-        </div>
+            <ion-item lines="none" class="ion-no-padding">
+                <ion-select
+                    id="workout-equipment"
+                    class="w-full"
+                    label="Available equipment"
+                    labelPlacement="stacked"
+                    placeholder="Select equipment"
+                    [formField]="infoForm.availableEquipments"
+                    multiple="true"
+                    interface="alert"
+                >
+                    @for (eq of equipmentOptions; track eq) {
+                        <ion-select-option [value]="eq">{{ eq }}</ion-select-option>
+                    }
+                </ion-select>
+            </ion-item>
 
-        <div class="flex flex-col">
-            <ion-select
-                id="workout-main-target"
-                fill="outline"
-                class="w-full"
-                label="Main target *"
-                labelPlacement="floating"
-                placeholder="Select main target"
-                [formField]="infoForm.mainTargetBodypart"
-                interface="alert"
-            >
-                @for (region of bodyRegionOptions; track region) {
-                    <ion-select-option [value]="region" [disabled]="mainTargetDisabled()(region)">
-                        {{ region }}
-                    </ion-select-option>
-                }
-            </ion-select>
-        </div>
+            <ion-item lines="none" class="ion-no-padding">
+                <ion-select
+                    id="workout-main-target"
+                    class="w-full"
+                    label="Main target *"
+                    labelPlacement="stacked"
+                    placeholder="Select main target"
+                    [formField]="infoForm.mainTargetBodypart"
+                    interface="alert"
+                >
+                    @for (region of bodyRegionOptions; track region) {
+                        <ion-select-option [value]="region" [disabled]="mainTargetDisabled()(region)">
+                            {{ region }}
+                        </ion-select-option>
+                    }
+                </ion-select>
+            </ion-item>
 
-        <div class="flex flex-col">
-            <ion-select
-                id="workout-secondary-targets"
-                fill="outline"
-                class="w-full"
-                label="Secondary targets"
-                labelPlacement="floating"
-                placeholder="Select secondary targets"
-                [formField]="infoForm.secondaryTargetBodyparts"
-                multiple="true"
-                interface="alert"
-            >
-                @for (region of bodyRegionOptions; track region) {
-                    <ion-select-option [value]="region" [disabled]="secondaryTargetDisabled()(region)">
-                        {{ region }}
-                    </ion-select-option>
-                }
-            </ion-select>
-        </div>
+            <ion-item lines="none" class="ion-no-padding">
+                <ion-select
+                    id="workout-secondary-targets"
+                    class="w-full"
+                    label="Secondary targets"
+                    labelPlacement="stacked"
+                    placeholder="Select secondary targets"
+                    [formField]="infoForm.secondaryTargetBodyparts"
+                    multiple="true"
+                    interface="alert"
+                >
+                    @for (region of bodyRegionOptions; track region) {
+                        <ion-select-option [value]="region" [disabled]="secondaryTargetDisabled()(region)">
+                            {{ region }}
+                        </ion-select-option>
+                    }
+                </ion-select>
+            </ion-item>
+        </ion-list>
 
         @if (isCreateMode()) {
-            <p class="text-sm text-gray-600" i18n="@@workoutInfoAiHint">
+            <p class="text-sm text-gray-600 mt-2" i18n="@@workoutInfoAiHint">
                 Fill the required fields, then generate a workout with AI — or use the tabs to fill the phases manually.
             </p>
             <ion-button expand="block" type="button" (click)="onGenerateWithAi()" [disabled]="!isFormValid() || isGenerating()">

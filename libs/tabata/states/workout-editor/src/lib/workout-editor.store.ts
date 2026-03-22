@@ -16,24 +16,12 @@ function draftCanSubmitWorkout(draft: WorkoutDraft): boolean {
     // Warmup required: at least one movement with valid exerciseId + duration
     const warmupMovements = draft.warmup?.movements;
     if (!Array.isArray(warmupMovements) || warmupMovements.length === 0) return false;
-    if (
-        warmupMovements.some(
-            (m) =>
-                !m?.exerciseId?.trim() || typeof m.durationSeconds !== 'number' || m.durationSeconds <= 0
-        )
-    )
-        return false;
+    if (warmupMovements.some((m) => !m?.exerciseId?.trim() || typeof m.durationSeconds !== 'number' || m.durationSeconds <= 0)) return false;
 
     // Cooldown required: at least one movement with valid exerciseId + duration
     const cooldownMovements = draft.cooldown?.movements;
     if (!Array.isArray(cooldownMovements) || cooldownMovements.length === 0) return false;
-    if (
-        cooldownMovements.some(
-            (m) =>
-                !m?.exerciseId?.trim() || typeof m.durationSeconds !== 'number' || m.durationSeconds <= 0
-        )
-    )
-        return false;
+    if (cooldownMovements.some((m) => !m?.exerciseId?.trim() || typeof m.durationSeconds !== 'number' || m.durationSeconds <= 0)) return false;
 
     // Main required: at least one block with valid exerciseId + durations
     const blocks = draft.blocks;

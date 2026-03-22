@@ -47,6 +47,6 @@ export function createMockWorkoutSubmitService(): {
     submitWorkout: jest.Mock;
 } {
     return {
-        submitWorkout: mockFn(),
+        submitWorkout: mockFn()
     };
 }

@@ -25,44 +25,44 @@
         ></ion-searchbar>
 
         <div class="filters-row flex flex-wrap gap-2">
-          <ion-select
-          placeholder="Muscle"
-          [value]="selectedMuscles()"
-          (ionChange)="onMuscleChange($event)"
-          interface="alert"
-          multiple="true"
-          class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
-      >
-          @for (muscle of musclesList(); track muscle) {
-              <ion-select-option [value]="muscle">{{ formatName(muscle) }}</ion-select-option>
-          }
-      </ion-select>
+            <ion-select
+                placeholder="Muscle"
+                [value]="selectedMuscles()"
+                (ionChange)="onMuscleChange($event)"
+                interface="alert"
+                multiple="true"
+                class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
+            >
+                @for (muscle of musclesList(); track muscle) {
+                    <ion-select-option [value]="muscle">{{ formatName(muscle) }}</ion-select-option>
+                }
+            </ion-select>
 
-      <ion-select
-          placeholder="Equipment"
-          [value]="selectedEquipment()"
-          (ionChange)="onEquipmentChange($event)"
-          interface="alert"
-          multiple="true"
-          class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
-      >
-          @for (equipment of equipmentList(); track equipment) {
-              <ion-select-option [value]="equipment">{{ formatName(equipment) }}</ion-select-option>
-          }
-      </ion-select>
+            <ion-select
+                placeholder="Equipment"
+                [value]="selectedEquipment()"
+                (ionChange)="onEquipmentChange($event)"
+                interface="alert"
+                multiple="true"
+                class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
+            >
+                @for (equipment of equipmentList(); track equipment) {
+                    <ion-select-option [value]="equipment">{{ formatName(equipment) }}</ion-select-option>
+                }
+            </ion-select>
 
-      <ion-select
-          placeholder="Category"
-          [value]="selectedCategory()"
-          (ionChange)="onCategoryChange($event)"
-          interface="alert"
-          multiple="true"
-          class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
-      >
-          @for (cat of categoryList(); track cat) {
-              <ion-select-option [value]="cat">{{ formatName(cat) }}</ion-select-option>
-          }
-      </ion-select>
+            <ion-select
+                placeholder="Category"
+                [value]="selectedCategory()"
+                (ionChange)="onCategoryChange($event)"
+                interface="alert"
+                multiple="true"
+                class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
+            >
+                @for (cat of categoryList(); track cat) {
+                    <ion-select-option [value]="cat">{{ formatName(cat) }}</ion-select-option>
+                }
+            </ion-select>
         </div>
 
         @if (selectedMuscles().length > 0 || selectedEquipment().length > 0 || selectedCategory().length > 0) {
@@ -111,6 +111,19 @@
                                     {{ formatName(muscle) }}{{ !last ? ', ' : '' }}
                                 }
                             </p>
+                            @if (exercise.category.length > 0 || exercise.level) {
+                                <p class="text-xs text-gray-400 mt-0.5">
+                                    @for (cat of exercise.category; track cat; let last = $last) {
+                                        {{ formatName(cat) }}{{ !last ? ', ' : '' }}
+                                    }
+                                    @if (exercise.level) {
+                                        @if (exercise.category.length > 0) {
+                                            <span> · </span>
+                                        }
+                                        {{ formatName(exercise.level) }}
+                                    }
+                                </p>
+                            }
                         </ion-label>
                         @if (multiple()) {
                             <ion-checkbox
