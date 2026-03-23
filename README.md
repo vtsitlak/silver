@@ -102,7 +102,7 @@ silver/
 
     | Login                                | Dashboard                                    | Workouts                                   |
     | ------------------------------------ | -------------------------------------------- | ------------------------------------------ |
-    | ![Login](docs/screenshots/login.png) | ![Dashboard](docs/screenshots/dashboard.png) | ![Workouts](docs/screenshots/workouts.png) |
+    | ![Login](docs/screenshots/login-screen.png) | ![Dashboard](docs/screenshots/dashboard-screen.png) | ![Workouts](docs/screenshots/workouts-screen.png) |
 
 ---
 

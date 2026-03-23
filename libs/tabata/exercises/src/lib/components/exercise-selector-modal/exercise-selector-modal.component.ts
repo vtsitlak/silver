@@ -71,7 +71,9 @@ export class ExerciseSelectorModalComponent implements OnInit {
     readonly selectedMuscles = signal<string[]>([]);
     readonly selectedEquipment = signal<string[]>([]);
     readonly selectedCategory = signal<string[]>([]);
+    readonly selectedLevel = signal<string[]>([]);
     readonly selectedExercises = signal<Map<string, Exercise>>(new Map());
+    readonly levelOptions = ['beginner', 'intermediate', 'expert'];
 
     private currentOffset = 0;
     private readonly pageSize = 20;
@@ -97,6 +99,10 @@ export class ExerciseSelectorModalComponent implements OnInit {
     });
 
     readonly filteredExercises = computed(() => this.exercises());
+
+    readonly hasActiveFilters = computed(
+        () => this.selectedMuscles().length > 0 || this.selectedEquipment().length > 0 || this.selectedCategory().length > 0 || this.selectedLevel().length > 0
+    );
 
     constructor() {
         addIcons({ checkmark });
@@ -175,16 +181,26 @@ export class ExerciseSelectorModalComponent implements OnInit {
         this.filterService.updateFilters({ category: next });
     }
 
+    onLevelChange(ev: Event): void {
+        const customEv = ev as CustomEvent<{ value: string | string[] }>;
+        const v = customEv.detail?.value as string | string[] | undefined;
+        const next = Array.isArray(v) ? v : v ? [v] : [];
+        this.selectedLevel.set(next);
+        this.filterService.updateFilters({ level: next });
+    }
+
     clearFilters(): void {
         this.selectedMuscles.set([]);
         this.selectedEquipment.set([]);
         this.selectedCategory.set([]);
+        this.selectedLevel.set([]);
         this.searchTerm.set('');
         this.filterService.updateFilters({
             term: '',
             muscles: [],
             equipment: [],
-            category: []
+            category: [],
+            level: []
         });
     }
 

@@ -125,4 +125,14 @@ describe('ExerciseSelectorModalComponent', () => {
         expect(component.selectedEquipment()).toEqual(['barbell', 'dumbbell']);
         expect(spy).toHaveBeenCalledWith(expect.objectContaining({ equipment: ['barbell', 'dumbbell'] }));
     });
+
+    it('should support multiple level selection', () => {
+        const spy = jest.spyOn(filterService, 'updateFilters');
+        const event = { detail: { value: ['beginner', 'expert'] } } as unknown as CustomEvent<{ value: string | string[] }>;
+
+        component.onLevelChange(event);
+
+        expect(component.selectedLevel()).toEqual(['beginner', 'expert']);
+        expect(spy).toHaveBeenCalledWith(expect.objectContaining({ level: ['beginner', 'expert'] }));
+    });
 });

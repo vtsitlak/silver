@@ -20,6 +20,8 @@ describe('buildGenerateWorkoutPrompt', () => {
         mainTargetBodypart: 'Upper Body',
         availableEquipments: ['Bodyweight'],
         secondaryTargetBodyparts: [],
+        level: 'beginner',
+        primaryGoal: 'Strength',
         exercises: [
             {
                 exerciseId: 'ex1',
@@ -27,7 +29,8 @@ describe('buildGenerateWorkoutPrompt', () => {
                 targetMuscles: ['chest', 'triceps'],
                 secondaryMuscles: ['shoulders'],
                 category: ['strength'],
-                equipments: ['body only']
+                equipments: ['body only'],
+                level: 'beginner'
             }
         ]
     };

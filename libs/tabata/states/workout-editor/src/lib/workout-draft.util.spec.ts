@@ -73,4 +73,12 @@ describe('draftHasMeaningfulContent', () => {
         };
         expect(draftHasMeaningfulContent(draft)).toBe(true);
     });
+
+    it('should be true when level is set', () => {
+        expect(draftHasMeaningfulContent({ level: 'beginner' } as WorkoutDraft)).toBe(true);
+    });
+
+    it('should be true when primaryGoal is set', () => {
+        expect(draftHasMeaningfulContent({ primaryGoal: 'Strength' } as WorkoutDraft)).toBe(true);
+    });
 });

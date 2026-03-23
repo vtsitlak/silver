@@ -187,6 +187,7 @@ export const ExercisesStore = signalStore(
                 muscles?: string;
                 equipment?: string;
                 category?: string;
+                level?: string;
                 sortBy?: SortBy;
                 sortOrder?: SortOrder;
             }>(

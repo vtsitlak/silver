@@ -12,6 +12,8 @@ function draftCanSubmitWorkout(draft: WorkoutDraft): boolean {
     if (draft.name == null || String(draft.name).trim() === '') return false;
     if (draft.description == null || String(draft.description).trim() === '') return false;
     if (draft.mainTargetBodypart == null || String(draft.mainTargetBodypart).trim() === '') return false;
+    if (draft.level == null || String(draft.level).trim() === '') return false;
+    if (draft.primaryGoal == null || String(draft.primaryGoal).trim() === '') return false;
 
     // Warmup required: at least one movement with valid exerciseId + duration
     const warmupMovements = draft.warmup?.movements;

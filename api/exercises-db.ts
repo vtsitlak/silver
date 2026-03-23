@@ -7,6 +7,7 @@
 
 const FREE_EXERCISE_DB_JSON_URL = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json';
 const IMAGE_BASE = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/';
+const EXCLUDED_CATEGORIES = new Set(['olympic weightlifting', 'powerlifting', 'strongman']);
 
 const CORS_HEADERS: Record<string, string> = {
     'Access-Control-Allow-Origin': '*',
@@ -39,6 +40,10 @@ interface Exercise {
     instructions: string[];
 }
 
+function hasExcludedCategory(ex: Exercise): boolean {
+    return ex.category.some((c) => EXCLUDED_CATEGORIES.has(c.toLowerCase()));
+}
+
 function mapToExercise(raw: FreeExerciseDbItem): Exercise {
     const images = Array.isArray(raw.images) ? raw.images.map((path) => (path ? `${IMAGE_BASE}${path}` : '')).filter(Boolean) : [];
     const level = raw.level != null && String(raw.level).trim() !== '' ? String(raw.level).trim() : undefined;
@@ -62,7 +67,7 @@ async function getExercises(): Promise<Exercise[]> {
     const res = await fetch(FREE_EXERCISE_DB_JSON_URL);
     if (!res.ok) throw new Error(`Failed to fetch exercises: ${res.status}`);
     const raw = (await res.json()) as FreeExerciseDbItem[];
-    cachedExercises = raw.map(mapToExercise);
+    cachedExercises = raw.map(mapToExercise).filter((ex) => !hasExcludedCategory(ex));
     return cachedExercises;
 }
 
@@ -101,6 +106,12 @@ function matchesCategory(ex: Exercise, category: string[]): boolean {
     if (category.length === 0) return true;
     const exCat = ex.category.map((c) => c.toLowerCase());
     return category.some((c) => exCat.includes(c));
+}
+
+function matchesLevel(ex: Exercise, level: string[]): boolean {
+    if (level.length === 0) return true;
+    const exLevel = (ex.level ?? '').toLowerCase();
+    return level.some((l) => exLevel === l);
 }
 
 function sortExercises(exercises: Exercise[], sortBy: string, sortOrder: string): Exercise[] {
@@ -241,13 +252,19 @@ export default async function handler(req: any, res: any): Promise<void> {
                 const muscles = parseCommaList(url.searchParams.get('muscles'));
                 const equipment = parseCommaList(url.searchParams.get('equipment'));
                 const category = parseCommaList(url.searchParams.get('category'));
+                const level = parseCommaList(url.searchParams.get('level'));
                 const offset = Math.max(0, parseInt(url.searchParams.get('offset') ?? '0', 10) || 0);
                 const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get('limit') ?? '20', 10) || 20));
                 const sortBy = url.searchParams.get('sortBy') ?? 'name';
                 const sortOrder = url.searchParams.get('sortOrder') ?? 'desc';
 
                 let filtered = exercises.filter(
-                    (ex) => matchesSearch(ex, search) && matchesMuscles(ex, muscles) && matchesEquipment(ex, equipment) && matchesCategory(ex, category)
+                    (ex) =>
+                        matchesSearch(ex, search) &&
+                        matchesMuscles(ex, muscles) &&
+                        matchesEquipment(ex, equipment) &&
+                        matchesCategory(ex, category) &&
+                        matchesLevel(ex, level)
                 );
                 filtered = sortExercises(filtered, sortBy, sortOrder);
                 const total = filtered.length;

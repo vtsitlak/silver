@@ -15,6 +15,8 @@ export const EMPTY_WORKOUT_INFO_FORM_MODEL: WorkoutInfoFormModel = {
     description: '',
     generatedByAi: false,
     mainTargetBodypart: null,
+    level: null,
+    primaryGoal: null,
     availableEquipments: [],
     secondaryTargetBodyparts: []
 };
@@ -37,11 +39,15 @@ export function toWorkoutInfoFormModelFromSnapshot(w: WorkoutDraft | null | unde
         return EMPTY_WORKOUT_INFO_FORM_MODEL;
     }
     const main = w.mainTargetBodypart;
+    const lvl = w.level;
+    const primaryGoal = w.primaryGoal;
     return {
         name: w.name ?? '',
         description: w.description ?? '',
         generatedByAi: w.generatedByAi ?? false,
         mainTargetBodypart: main != null && String(main).trim() !== '' ? main : null,
+        level: lvl != null && String(lvl).trim() !== '' ? lvl : null,
+        primaryGoal: primaryGoal != null && String(primaryGoal).trim() !== '' ? primaryGoal : null,
         availableEquipments: w.availableEquipments ?? [],
         secondaryTargetBodyparts: w.secondaryTargetBodyparts ?? []
     };

@@ -37,6 +37,18 @@
             }
 
             <div class="space-y-1 mb-4 text-sm text-gray-700">
+                @if (w.level) {
+                    <p>
+                        <span class="font-medium text-gray-900" i18n="@@workoutDetailsLevel">Level:</span>
+                        <span class="capitalize">{{ w.level }}</span>
+                    </p>
+                }
+                @if (w.primaryGoal) {
+                    <p>
+                        <span class="font-medium text-gray-900" i18n="@@workoutDetailsPrimaryGoal">Primary goal:</span>
+                        {{ w.primaryGoal }}
+                    </p>
+                }
                 @if (w.mainTargetBodypart) {
                     <p>
                         <span class="font-medium text-gray-900" i18n="@@workoutDetailsMainTarget">Main target:</span>

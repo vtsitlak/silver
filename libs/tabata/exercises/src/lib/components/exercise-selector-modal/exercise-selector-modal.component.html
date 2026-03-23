@@ -24,14 +24,14 @@
             class="exercise-search p-0 mb-3"
         ></ion-searchbar>
 
-        <div class="filters-row flex flex-wrap gap-2">
+        <div class="filters-row flex w-full justify-between items-start gap-0">
             <ion-select
                 placeholder="Muscle"
                 [value]="selectedMuscles()"
                 (ionChange)="onMuscleChange($event)"
                 interface="alert"
                 multiple="true"
-                class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
+                class="filter-select flex-1 min-w-0 max-w-[25%] text-sm"
             >
                 @for (muscle of musclesList(); track muscle) {
                     <ion-select-option [value]="muscle">{{ formatName(muscle) }}</ion-select-option>
@@ -44,7 +44,7 @@
                 (ionChange)="onEquipmentChange($event)"
                 interface="alert"
                 multiple="true"
-                class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
+                class="filter-select flex-1 min-w-0 max-w-[25%] text-sm"
             >
                 @for (equipment of equipmentList(); track equipment) {
                     <ion-select-option [value]="equipment">{{ formatName(equipment) }}</ion-select-option>
@@ -57,17 +57,30 @@
                 (ionChange)="onCategoryChange($event)"
                 interface="alert"
                 multiple="true"
-                class="filter-select flex-1 min-w-[100px] max-w-[150px] text-sm"
+                class="filter-select flex-1 min-w-0 max-w-[25%] text-sm"
             >
                 @for (cat of categoryList(); track cat) {
                     <ion-select-option [value]="cat">{{ formatName(cat) }}</ion-select-option>
                 }
             </ion-select>
+
+            <ion-select
+                placeholder="Level"
+                [value]="selectedLevel()"
+                (ionChange)="onLevelChange($event)"
+                interface="alert"
+                multiple="true"
+                class="filter-select flex-1 min-w-0 max-w-[25%] text-sm"
+            >
+                @for (level of levelOptions; track level) {
+                    <ion-select-option [value]="level">{{ formatName(level) }}</ion-select-option>
+                }
+            </ion-select>
         </div>
 
-        @if (selectedMuscles().length > 0 || selectedEquipment().length > 0 || selectedCategory().length > 0) {
-            <ion-button fill="clear" size="small" (click)="clearFilters()" class="mt-2">Clear Filters</ion-button>
-        }
+        <div class="flex justify-end mt-1">
+            <ion-button fill="clear" color="primary" size="small" (click)="clearFilters()" [disabled]="!hasActiveFilters()"> Clear Filters </ion-button>
+        </div>
     </div>
 
     @if (selectedCount() > 0) {

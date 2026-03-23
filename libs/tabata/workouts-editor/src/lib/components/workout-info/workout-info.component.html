@@ -1,4 +1,10 @@
 <div class="workout-tab-content">
+    @if (isCreateMode()) {
+        <p class="text-sm text-gray-600 mt-2" i18n="@@workoutInfoAiHint">
+            Fill the required fields, then generate a workout with AI — or use the tabs to fill the phases manually.
+        </p>
+    }
+
     <form class="workout-info-form bg-white w-full flex flex-col" novalidate>
         <ion-list lines="none" class="workout-info-list w-full bg-transparent p-0">
             <ion-item lines="none" class="ion-no-padding">
@@ -41,6 +47,38 @@
                         </div>
                     } -->
                 </div>
+            </ion-item>
+
+            <ion-item lines="none" class="ion-no-padding">
+                <ion-select
+                    id="workout-level"
+                    class="w-full"
+                    label="Level *"
+                    labelPlacement="stacked"
+                    placeholder="Select level"
+                    [formField]="infoForm.level"
+                    interface="alert"
+                >
+                    @for (lvl of workoutLevelOptions; track lvl) {
+                        <ion-select-option [value]="lvl">{{ workoutLevelLabel[lvl] }}</ion-select-option>
+                    }
+                </ion-select>
+            </ion-item>
+
+            <ion-item lines="none" class="ion-no-padding">
+                <ion-select
+                    id="workout-primary-goal"
+                    class="w-full"
+                    label="Primary goal *"
+                    labelPlacement="stacked"
+                    placeholder="Select primary goal"
+                    [formField]="infoForm.primaryGoal"
+                    interface="alert"
+                >
+                    @for (goal of workoutPrimaryGoalOptions; track goal) {
+                        <ion-select-option [value]="goal">{{ workoutPrimaryGoalLabel[goal] }}</ion-select-option>
+                    }
+                </ion-select>
             </ion-item>
 
             <ion-item lines="none" class="ion-no-padding">
@@ -99,9 +137,6 @@
         </ion-list>
 
         @if (isCreateMode()) {
-            <p class="text-sm text-gray-600 mt-2" i18n="@@workoutInfoAiHint">
-                Fill the required fields, then generate a workout with AI — or use the tabs to fill the phases manually.
-            </p>
             <ion-button expand="block" type="button" (click)="onGenerateWithAi()" [disabled]="!isFormValid() || isGenerating()">
                 <span class="flex w-full items-center justify-center">
                     @if (isGenerating()) {
