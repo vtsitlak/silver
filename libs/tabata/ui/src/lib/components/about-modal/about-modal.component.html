@@ -7,49 +7,121 @@
     </ion-toolbar>
 </ion-header>
 <ion-content class="ion-padding">
+    <ion-segment [value]="selectedTab()" (ionChange)="onTabChange($any($event).detail.value)" class="mb-4">
+        <ion-segment-button value="overview">
+            <ion-label class="text-base font-medium leading-snug text-center">Overview</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="how-to-use">
+            <ion-label class="text-base font-medium leading-snug text-center">How to use</ion-label>
+        </ion-segment-button>
+    </ion-segment>
+
     <div class="about-modal-content">
-        <section class="about-section">
-            <h3 class="about-heading">Demo app</h3>
-            <p class="about-body"> When viewed from web, switch to mobile view (browser DevTools or responsive mode) for the best experience. </p>
-            <p class="about-body">
-                This is a demonstration application for learning and example code only. It is not intended for commercial use. Use it to explore Tabata workout
-                flows, AI-generated workouts, and modern Angular patterns.
-            </p>
-            <p class="about-body"> <strong>Tested only on:</strong> web and Android (OnePlus 10 Pro). Other devices and iOS have not been tested. </p>
-        </section>
+        @if (selectedTab() === 'overview') {
+            <section class="about-section">
+                <h3 class="about-heading">Demo app</h3>
+                <p class="about-body"> When viewed from web, switch to mobile view (browser DevTools or responsive mode) for the best experience. </p>
+                <p class="about-body">
+                    This is a demonstration application for learning and example code only. It is not intended for commercial use. Use it to explore Tabata workout
+                    flows, AI-generated workouts, and modern Angular patterns.
+                </p>
+                <p class="about-body"> <strong>Tested only on:</strong> web and Android (OnePlus 10 Pro). Other devices and iOS have not been tested. </p>
+            </section>
 
-        <section class="about-section">
-            <h3 class="about-heading">Technologies</h3>
-            <ul class="about-list">
-                <li><strong>Angular</strong> — Signals, standalone components, control flow (<code>&#64;if</code>, <code>&#64;for</code>)</li>
-                <li><strong>Ionic</strong> — UI components, tabs, modals, action sheets</li>
-                <li><strong>Firebase</strong> — Authentication and optional backend</li>
-                <li><strong>Nx</strong> — Monorepo, libs, build pipeline</li>
-                <li><strong>Google Gemini</strong> — AI workout generation via API</li>
-                <li><strong>REST API</strong> — Generate-workout endpoint (serverless function)</li>
-                <li><strong>Environment</strong> — Secret API keys via env vars (e.g. GEMINI_API_KEY)</li>
-                <li><strong>Vercel</strong> — Deployment and serverless functions</li>
-                <li><strong>Upstash</strong> — Serverless data / Redis when used</li>
-                <li><strong>Capacitor</strong> — Native mobile builds (iOS / Android)</li>
-            </ul>
-        </section>
+            <section class="about-section">
+                <h3 class="about-heading">Technologies</h3>
+                <ul class="about-list">
+                    <li><strong>Angular</strong> — Signals, standalone components, control flow (<code>&#64;if</code>, <code>&#64;for</code>)</li>
+                    <li><strong>Ionic</strong> — UI components, tabs, modals, action sheets</li>
+                    <li><strong>Firebase</strong> — Authentication and optional backend</li>
+                    <li><strong>Nx</strong> — Monorepo, libs, build pipeline</li>
+                    <li><strong>Google Gemini</strong> — AI workout generation via API</li>
+                    <li><strong>REST API</strong> — Generate-workout endpoint (serverless function)</li>
+                    <li><strong>Environment</strong> — Secret API keys via env vars (e.g. GEMINI_API_KEY)</li>
+                    <li><strong>Vercel</strong> — Deployment and serverless functions</li>
+                    <li><strong>Upstash</strong> — Serverless data / Redis when used</li>
+                    <li><strong>Capacitor</strong> — Native mobile builds (iOS / Android)</li>
+                </ul>
+            </section>
 
-        <section class="about-section">
-            <h3 class="about-heading">State management</h3>
-            <p class="about-body">
-                NgRx-style facades and stores (e.g. AuthFacade, workout state). Angular Signals for reactive UI and computed values. Data persisted via
-                Firebase.
-            </p>
-        </section>
+            <section class="about-section">
+                <h3 class="about-heading">State management</h3>
+                <p class="about-body">
+                    NgRx-style facades and stores (e.g. AuthFacade, workout state). Angular Signals for reactive UI and computed values. Data persisted via
+                    Firebase.
+                </p>
+            </section>
 
-        <section class="about-section">
-            <h3 class="about-heading">How to use</h3>
-            <ul class="about-list">
-                <li><strong>Dashboard</strong> — Last and popular workouts, quick play.</li>
-                <li><strong>Workouts</strong> — Browse, create, or edit. Use “Generate with AI” on the create flow for an AI-generated structure.</li>
-                <li><strong>History</strong> — Workout history, most used, and favorites.</li>
-                <li><strong>Profile</strong> — Display name, email, password. Log out from here.</li>
-            </ul>
-        </section>
+            <section class="about-section">
+                <h3 class="about-heading">Credentials & source</h3>
+                <p class="about-body">Login credentials are handled by Firebase Authentication.</p>
+                <p class="about-body">
+                    Source on GitHub:
+                    <a href="https://github.com/vtsitlak" target="_blank" rel="noreferrer">vtsitlak</a>
+                </p>
+            </section>
+        } @else {
+            <section class="about-section">
+                <h3 class="about-heading">Traditional Tabata (what you’re building)</h3>
+                <p class="about-body">
+                    A classic Tabata workout is built from high-intensity work intervals (20s) and short recoveries (10s), repeated for 8 rounds.
+                    In this app, each “main” block follows that structure.
+                </p>
+            </section>
+
+            <section class="about-section">
+                <h3 class="about-heading">Warmup, main workout, cooldown</h3>
+                <ul class="about-list">
+                    <li><strong>Warmup</strong> — Low-intensity cardio + safe stretching. It prepares joints and helps your muscles wake up (typically 5–10 minutes).</li>
+                    <li><strong>Main workout</strong> — Tabata blocks (work/rest intervals). Your level + primary goal shape the exercise categories, while target muscles match the selection.</li>
+                    <li><strong>Cooldown</strong> — Lower intensity only. It uses stretching exercises and avoids high-impact categories (typically 3–7 minutes).</li>
+                </ul>
+            </section>
+
+            <section class="about-section">
+                <h3 class="about-heading">How to create a workout</h3>
+                <ul class="about-list">
+                    <li><strong>Open</strong> the Workouts tab and start creating a new workout.</li>
+                    <li><strong>Fill “Workout info”</strong>: name, description, level, primary goal, available equipment, main target, and optional secondary targets.</li>
+                    <li><strong>Generate with AI</strong> (in create mode): the AI uses your level + primary goal + equipment + targets to select exercises and build warmup/main/cooldown.</li>
+                    <li><strong>Adjust manually</strong> if needed: use the Warmup/Main/Cooldown phase tabs to review and refine exercises.</li>
+                </ul>
+            </section>
+
+            <section class="about-section">
+                <h3 class="about-heading">Best results with the AI generator</h3>
+                <ul class="about-list">
+                    <li><strong>Match the vibe</strong>: write a description that reflects your goal (for example: quick cardio burn, strength focus, or explosion/plyometric emphasis).</li>
+                    <li><strong>Be consistent</strong>: choose a level that matches how hard you want the workout to feel (downward compatibility is enforced: harder tier never gets “up-leveled” moves).</li>
+                    <li><strong>Choose correct equipment</strong>: if you select only “body only”, the AI will avoid exercises requiring equipment.</li>
+                    <li><strong>Cover targets</strong>: set main + secondary targets so the selector can choose exercises that overlap those muscles.</li>
+                </ul>
+                <p class="about-body mt-2">
+                    The generator also prevents duplicate exercise selection across warmup, main, and cooldown, so the workout stays varied.
+                </p>
+            </section>
+
+            <section class="about-section">
+                <h3 class="about-heading">Workout player (during execution)</h3>
+                <p class="about-body">
+                    When you start playing, the player guides you through each phase:
+                    Warmup first, then Main blocks (each exercise shows its interval work/rest), and finally Cooldown.
+                </p>
+                <p class="about-body">
+                    When the workout ends you’ll see a completion screen (and you can restart or go back).
+                </p>
+            </section>
+
+            <section class="about-section">
+                <h3 class="about-heading">Workout info options (quick reference)</h3>
+                <ul class="about-list">
+                    <li><strong>Name + description</strong> — used as the “brief” so the AI understands what to build.</li>
+                    <li><strong>Level</strong> — difficulty tier; controls which exercise difficulty is allowed (downward compatibility).</li>
+                    <li><strong>Primary goal</strong> — maps to exercise categories (Strength → strength, Cardio → cardio, Explosion → plyometrics).</li>
+                    <li><strong>Available equipment</strong> — filters exercises to what you have.</li>
+                    <li><strong>Main target</strong> + <strong>Secondary targets</strong> — tells the generator which muscles should overlap with chosen exercises.</li>
+                </ul>
+            </section>
+        }
     </div>
 </ion-content>
