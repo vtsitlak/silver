@@ -100,8 +100,8 @@ silver/
 - **Live demo:** [https://silver-tabata-ai.vercel.app/](https://silver-tabata-ai.vercel.app/)
 - **Screenshots** (see [apps/tabata-ai/README.md](apps/tabata-ai/README.md) for more):
 
-    | Login                                | Dashboard                                    | Workouts                                   |
-    | ------------------------------------ | -------------------------------------------- | ------------------------------------------ |
+    | Login                                       | Dashboard                                           | Workouts                                          |
+    | ------------------------------------------- | --------------------------------------------------- | ------------------------------------------------- |
     | ![Login](docs/screenshots/login-screen.png) | ![Dashboard](docs/screenshots/dashboard-screen.png) | ![Workouts](docs/screenshots/workouts-screen.png) |
 
 ---
