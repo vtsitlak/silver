@@ -28,4 +28,3 @@ test.describe('About modal', () => {
         await expect(page.getByRole('heading', { name: /Technologies/ })).toBeVisible({ timeout: 10000 });
     });
 });
-

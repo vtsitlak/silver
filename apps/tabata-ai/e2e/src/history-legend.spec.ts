@@ -16,4 +16,3 @@ test.describe('History legend', () => {
         await expect(legend.getByText('Canceled', { exact: true })).toBeVisible({ timeout: 10000 });
     });
 });
-

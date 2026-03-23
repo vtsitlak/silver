@@ -16,7 +16,10 @@ test.describe('Workout player', () => {
 
         // If workouts exist, click the first "Play workout" button.
         // If not, the UI shows an empty-state message.
-        await playButtons.first().click({ timeout: 5000 }).catch(() => undefined);
+        await playButtons
+            .first()
+            .click({ timeout: 5000 })
+            .catch(() => undefined);
 
         await expect
             .poll(
@@ -37,7 +40,10 @@ test.describe('Workout player', () => {
                 async () => {
                     const onPlayerRoute = /\/workouts\/.+\/play/.test(page.url());
                     if (!onPlayerRoute) return true;
-                    const phaseVisible = await page.getByText(/Warmup|Main|Cooldown|Rest/i).first().isVisible();
+                    const phaseVisible = await page
+                        .getByText(/Warmup|Main|Cooldown|Rest/i)
+                        .first()
+                        .isVisible();
                     const totalRemainingVisible = await page.getByText(/Total remaining/i).isVisible();
                     return phaseVisible && totalRemainingVisible;
                 },
@@ -46,4 +52,3 @@ test.describe('Workout player', () => {
             .toBeTruthy();
     });
 });
-

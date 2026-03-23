@@ -38,4 +38,3 @@ test.describe('Workout editor (create flow)', () => {
         await expect(page.getByRole('button', { name: 'Add exercises' })).toBeVisible();
     });
 });
-
