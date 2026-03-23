@@ -6,29 +6,38 @@
 
 const FREE_EXERCISE_DB_JSON_URL = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json';
 const IMAGE_BASE = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/';
+const EXCLUDED_CATEGORIES = new Set(['olympic weightlifting', 'powerlifting', 'strongman']);
 
 const PORT = Number(process.env.EXERCISES_DB_PORT) || 3456;
 
 let cachedExercises = null;
+
+function hasExcludedCategory(exercise) {
+    return exercise.category.some((category) => EXCLUDED_CATEGORIES.has(String(category).toLowerCase()));
+}
 
 async function getExercises() {
     if (cachedExercises) return cachedExercises;
     const res = await fetch(FREE_EXERCISE_DB_JSON_URL);
     if (!res.ok) throw new Error(`Failed to fetch exercises: ${res.status}`);
     const raw = await res.json();
-    cachedExercises = raw.map((r) => {
-        const images = Array.isArray(r.images) ? r.images.map((path) => (path ? `${IMAGE_BASE}${path}` : '')).filter(Boolean) : [];
-        return {
-            exerciseId: r.id,
-            name: r.name,
-            images,
-            targetMuscles: Array.isArray(r.primaryMuscles) ? [...r.primaryMuscles] : [],
-            category: r.category ? [r.category] : [],
-            equipments: r.equipment ? [r.equipment] : [],
-            secondaryMuscles: Array.isArray(r.secondaryMuscles) ? [...r.secondaryMuscles] : [],
-            instructions: Array.isArray(r.instructions) ? [...r.instructions] : []
-        };
-    });
+    cachedExercises = raw
+        .map((r) => {
+            const images = Array.isArray(r.images) ? r.images.map((path) => (path ? `${IMAGE_BASE}${path}` : '')).filter(Boolean) : [];
+            const level = r.level != null && String(r.level).trim() !== '' ? String(r.level).trim() : undefined;
+            return {
+                exerciseId: r.id,
+                name: r.name,
+                images,
+                targetMuscles: Array.isArray(r.primaryMuscles) ? [...r.primaryMuscles] : [],
+                category: r.category ? [r.category] : [],
+                ...(level ? { level } : {}),
+                equipments: r.equipment ? [r.equipment] : [],
+                secondaryMuscles: Array.isArray(r.secondaryMuscles) ? [...r.secondaryMuscles] : [],
+                instructions: Array.isArray(r.instructions) ? [...r.instructions] : []
+            };
+        })
+        .filter((exercise) => !hasExcludedCategory(exercise));
     return cachedExercises;
 }
 
@@ -65,6 +74,12 @@ function matchesCategory(ex, category) {
     if (category.length === 0) return true;
     const exCat = ex.category.map((c) => c.toLowerCase());
     return category.some((c) => exCat.includes(c));
+}
+
+function matchesLevel(ex, level) {
+    if (level.length === 0) return true;
+    const exLevel = (ex.level ?? '').toLowerCase();
+    return level.some((l) => exLevel === l);
 }
 
 function sortExercises(exercises, sortBy, sortOrder) {
@@ -191,13 +206,19 @@ export default async function createApp() {
             const muscles = parseCommaList(req.query.muscles ?? null);
             const equipment = parseCommaList(req.query.equipment ?? null);
             const category = parseCommaList(req.query.category ?? null);
+            const level = parseCommaList(req.query.level ?? null);
             const offset = Math.max(0, parseInt(req.query.offset ?? '0', 10) || 0);
             const limit = Math.min(100, Math.max(1, parseInt(req.query.limit ?? '20', 10) || 20));
             const sortBy = req.query.sortBy ?? 'name';
             const sortOrder = req.query.sortOrder ?? 'desc';
 
             let filtered = exercises.filter(
-                (ex) => matchesSearch(ex, search) && matchesMuscles(ex, muscles) && matchesEquipment(ex, equipment) && matchesCategory(ex, category)
+                (ex) =>
+                    matchesSearch(ex, search) &&
+                    matchesMuscles(ex, muscles) &&
+                    matchesEquipment(ex, equipment) &&
+                    matchesCategory(ex, category) &&
+                    matchesLevel(ex, level)
             );
             filtered = sortExercises(filtered, sortBy, sortOrder);
             const total = filtered.length;

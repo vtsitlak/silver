@@ -48,6 +48,7 @@ export function draftHasMeaningfulContent(draft: WorkoutDraft): boolean {
     if (Array.isArray(draft.availableEquipments) && draft.availableEquipments.length > 0) return true;
     if (Array.isArray(draft.secondaryTargetBodyparts) && draft.secondaryTargetBodyparts.length > 0) return true;
     if (draft.level != null && String(draft.level).trim() !== '') return true;
+    if (draft.primaryGoal != null && String(draft.primaryGoal).trim() !== '') return true;
     if (draft.generatedByAi === true) return true;
 
     const warmupMovements = draft.warmup?.movements;

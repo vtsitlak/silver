@@ -27,6 +27,15 @@ describe('workout-editor.models', () => {
         it('preserves non-empty level', () => {
             expect(toWorkoutInfoFormModelFromSnapshot({ level: 'expert' }).level).toBe('expert');
         });
+
+        it('normalizes missing or empty primaryGoal to null', () => {
+            expect(toWorkoutInfoFormModelFromSnapshot({}).primaryGoal).toBeNull();
+            expect(toWorkoutInfoFormModelFromSnapshot({ primaryGoal: '   ' as WorkoutDraft['primaryGoal'] }).primaryGoal).toBeNull();
+        });
+
+        it('preserves non-empty primaryGoal', () => {
+            expect(toWorkoutInfoFormModelFromSnapshot({ primaryGoal: 'Cardio' }).primaryGoal).toBe('Cardio');
+        });
     });
 
     describe('createEmptyWorkoutInfoFormModel', () => {

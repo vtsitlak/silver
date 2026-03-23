@@ -6,7 +6,7 @@
         <p class="text-sm text-gray-500"> Total duration of main phase: {{ totalDurationMinutes() }} min. </p>
     </div>
 
-    <ion-button expand="block" fill="outline" class="ion-margin-bottom" (click)="openExerciseSelectorForNewBlock()"> Add block </ion-button>
+    <ion-button expand="block" (click)="openExerciseSelectorForNewBlock()"> Add block </ion-button>
 
     <ion-list lines="full" class="blocks-list">
         <ion-reorder-group [disabled]="false" (ionReorderEnd)="handleReorderEnd($event)">

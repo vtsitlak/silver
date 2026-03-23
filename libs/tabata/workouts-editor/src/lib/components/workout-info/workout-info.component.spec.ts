@@ -33,6 +33,7 @@ describe('WorkoutInfoComponent', () => {
             description: '',
             mainTargetBodypart: null,
             level: null,
+            primaryGoal: null,
             availableEquipments: [],
             secondaryTargetBodyparts: [],
             generatedByAi: false
@@ -52,6 +53,7 @@ describe('WorkoutInfoComponent', () => {
             description: 'Desc',
             mainTargetBodypart: 'Upper Body',
             level: 'beginner',
+            primaryGoal: 'Cardio',
             availableEquipments: ['Machine'],
             secondaryTargetBodyparts: ['Core'],
             generatedByAi: false
@@ -64,12 +66,13 @@ describe('WorkoutInfoComponent', () => {
         expect(component.isFormValid()).toBe(false);
     });
 
-    it('should have valid form when name, description, main target and level are set', () => {
+    it('should have valid form when name, description, main target, level and primary goal are set', () => {
         component.formModel.set({
             name: 'Workout',
             description: 'Description',
             mainTargetBodypart: 'Upper Body',
             level: 'beginner',
+            primaryGoal: 'Strength',
             availableEquipments: [],
             secondaryTargetBodyparts: [],
             generatedByAi: false
@@ -102,6 +105,7 @@ describe('WorkoutInfoComponent', () => {
             description: '',
             mainTargetBodypart: null,
             level: null,
+            primaryGoal: null,
             availableEquipments: [],
             secondaryTargetBodyparts: [],
             generatedByAi: false

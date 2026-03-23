@@ -6,6 +6,12 @@ export type WorkoutLevel = 'beginner' | 'intermediate' | 'expert';
 /** Options for workout info `ion-select` (value = API-style slug). */
 export const WORKOUT_LEVEL_OPTIONS: WorkoutLevel[] = ['beginner', 'intermediate', 'expert'];
 
+/** Primary workout goal/style. */
+export type WorkoutPrimaryGoal = 'Cardio' | 'Strength' | 'Explosion';
+
+/** Options for workout info `ion-select`. */
+export const WORKOUT_PRIMARY_GOAL_OPTIONS: WorkoutPrimaryGoal[] = ['Cardio', 'Strength', 'Explosion'];
+
 export interface TargetBodyRegions {
     bodyRegion: BodyRegion;
     muscles: string[];

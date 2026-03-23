@@ -7,6 +7,7 @@ interface ExerciseFilterState {
     muscles: string[];
     equipment: string[];
     category: string[];
+    level: string[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -18,7 +19,8 @@ export class ExerciseFilterService {
         term: '',
         muscles: [],
         equipment: [],
-        category: []
+        category: [],
+        level: []
     });
 
     private readonly pageSize = 20;
@@ -64,9 +66,9 @@ export class ExerciseFilterService {
                     return;
                 }
 
-                const { term, muscles, equipment, category } = this.filterState();
+                const { term, muscles, equipment, category, level } = this.filterState();
 
-                const hasOtherFilters = muscles.length > 0 || equipment.length > 0 || category.length > 0;
+                const hasOtherFilters = muscles.length > 0 || equipment.length > 0 || category.length > 0 || level.length > 0;
                 if (!hasOtherFilters && term.length > 0 && term.length < 3) {
                     return;
                 }
@@ -77,6 +79,7 @@ export class ExerciseFilterService {
                 const musclesParam = muscles.length > 0 ? muscles.join(',') : undefined;
                 const equipmentParam = equipment.length > 0 ? equipment.join(',') : undefined;
                 const categoryParam = category.length > 0 ? category.join(',') : undefined;
+                const levelParam = level.length > 0 ? level.join(',') : undefined;
 
                 if (this.filterTimeoutId !== null) {
                     clearTimeout(this.filterTimeoutId);
@@ -96,6 +99,7 @@ export class ExerciseFilterService {
                         muscles: musclesParam,
                         equipment: equipmentParam,
                         category: categoryParam,
+                        level: levelParam,
                         sortBy: 'name',
                         sortOrder: 'desc'
                     });
@@ -118,11 +122,12 @@ export class ExerciseFilterService {
             return;
         }
 
-        const { term, muscles, equipment, category } = this.filterState();
+        const { term, muscles, equipment, category, level } = this.filterState();
 
         const musclesParam = muscles.length > 0 ? muscles.join(',') : undefined;
         const equipmentParam = equipment.length > 0 ? equipment.join(',') : undefined;
         const categoryParam = category.length > 0 ? category.join(',') : undefined;
+        const levelParam = level.length > 0 ? level.join(',') : undefined;
 
         this.facade.filterExercises({
             limit: this.pageSize,
@@ -131,6 +136,7 @@ export class ExerciseFilterService {
             muscles: musclesParam,
             equipment: equipmentParam,
             category: categoryParam,
+            level: levelParam,
             sortBy: 'name',
             sortOrder: 'desc'
         });

@@ -43,6 +43,12 @@
                         <span class="capitalize">{{ w.level }}</span>
                     </p>
                 }
+                @if (w.primaryGoal) {
+                    <p>
+                        <span class="font-medium text-gray-900" i18n="@@workoutDetailsPrimaryGoal">Primary goal:</span>
+                        {{ w.primaryGoal }}
+                    </p>
+                }
                 @if (w.mainTargetBodypart) {
                     <p>
                         <span class="font-medium text-gray-900" i18n="@@workoutDetailsMainTarget">Main target:</span>

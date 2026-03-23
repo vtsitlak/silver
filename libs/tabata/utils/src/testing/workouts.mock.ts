@@ -44,6 +44,7 @@ export const mockTabataWorkout = {
     },
     mainTargetBodypart: 'Upper Body' as const,
     level: 'intermediate' as const,
+    primaryGoal: 'Strength' as const,
     secondaryTargetBodyparts: [] as string[],
     availableEquipments: [] as unknown[]
 };

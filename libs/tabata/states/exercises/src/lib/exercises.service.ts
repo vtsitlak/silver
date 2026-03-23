@@ -9,6 +9,7 @@ import { EXERCISES_API_BASE_URL } from './exercises-api-base-url';
 const DEFAULT_LIMIT = 10;
 const MIN_LIMIT = 1;
 const MAX_LIMIT = 25;
+const EXCLUDED_CATEGORIES = new Set(['olympic weightlifting', 'powerlifting', 'strongman']);
 
 @Injectable({
     providedIn: 'root'
@@ -30,13 +31,19 @@ export class ExercisesService {
         return p;
     }
 
+    private withExcludedCategoriesRemoved(exercises: Exercise[]): Exercise[] {
+        return exercises.filter((exercise) => !exercise.category.some((category) => EXCLUDED_CATEGORIES.has(category.toLowerCase())));
+    }
+
     /**
      * Get all exercises with optional search and sort.
      * For the local API, this is implemented via /exercises/filter without constraints.
      */
     getAllExercises(limit = DEFAULT_LIMIT, offset = 0, search = '', sortBy: SortBy = 'targetMuscles', sortOrder: SortOrder = 'desc'): Observable<Exercise[]> {
         const params = this.params(offset, limit, { search, sortBy, sortOrder });
-        return this.http.get<ExerciseListResponse>(`${this.getBaseUrl()}/exercises/filter`, { params }).pipe(map((res) => (res.success ? res.data : [])));
+        return this.http
+            .get<ExerciseListResponse>(`${this.getBaseUrl()}/exercises/filter`, { params })
+            .pipe(map((res) => (res.success ? this.withExcludedCategoriesRemoved(res.data) : [])));
     }
 
     /** Search exercises with fuzzy matching (GET /api/v1/exercises/search) */
@@ -53,12 +60,15 @@ export class ExercisesService {
         muscles?: string;
         equipment?: string;
         category?: string;
+        level?: string;
         sortBy?: SortBy;
         sortOrder?: SortOrder;
     }): Observable<Exercise[]> {
-        const { offset = 0, limit = DEFAULT_LIMIT, search, muscles, equipment, category, sortBy = 'name', sortOrder = 'desc' } = options;
-        const params = this.params(offset, limit, { search, muscles, equipment, category, sortBy, sortOrder });
-        return this.http.get<ExerciseListResponse>(`${this.getBaseUrl()}/exercises/filter`, { params }).pipe(map((res) => (res.success ? res.data : [])));
+        const { offset = 0, limit = DEFAULT_LIMIT, search, muscles, equipment, category, level, sortBy = 'name', sortOrder = 'desc' } = options;
+        const params = this.params(offset, limit, { search, muscles, equipment, category, level, sortBy, sortOrder });
+        return this.http
+            .get<ExerciseListResponse>(`${this.getBaseUrl()}/exercises/filter`, { params })
+            .pipe(map((res) => (res.success ? this.withExcludedCategoriesRemoved(res.data) : [])));
     }
 
     /** Get single exercise by ID (GET /api/v1/exercises/{exerciseId}) */
@@ -91,7 +101,7 @@ export class ExercisesService {
         const params = this.params(offset, limit);
         return this.http
             .get<ExerciseListResponse>(`${this.getBaseUrl()}/category/${encodeURIComponent(categoryName)}/exercises`, { params })
-            .pipe(map((res) => (res.success ? res.data : [])));
+            .pipe(map((res) => (res.success ? this.withExcludedCategoriesRemoved(res.data) : [])));
     }
 
     /** Get exercises by equipment (GET /api/v1/equipments/{equipmentName}/exercises) */
@@ -123,6 +133,8 @@ export class ExercisesService {
 
     /** Get all categories (GET /api/v1/category) */
     getCategoryList(): Observable<string[]> {
-        return this.http.get<NameListResponse>(`${this.getBaseUrl()}/category`).pipe(map((res) => (res.success ? res.data.map((x) => x.name) : [])));
+        return this.http
+            .get<NameListResponse>(`${this.getBaseUrl()}/category`)
+            .pipe(map((res) => (res.success ? res.data.map((x) => x.name).filter((name) => !EXCLUDED_CATEGORIES.has(name.toLowerCase())) : [])));
     }
 }

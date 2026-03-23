@@ -38,6 +38,7 @@ export class ExercisesFacade {
         muscles?: string;
         equipment?: string;
         category?: string;
+        level?: string;
         sortBy?: SortBy;
         sortOrder?: SortOrder;
     }): void {

@@ -25,3 +25,12 @@ ion-checkbox {
 ion-button ion-badge {
     margin-inline-start: 6px;
 }
+
+ion-select.filter-select {
+    margin: 0;
+    padding: 0;
+    --padding-top: 0;
+    --padding-bottom: 0;
+    --padding-start: 0;
+    --padding-end: 0;
+}

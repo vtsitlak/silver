@@ -7,8 +7,10 @@ import {
     EQUIPMENT_CATEGORY_OPTIONS,
     BODY_REGION_OPTIONS,
     WORKOUT_LEVEL_OPTIONS,
+    WORKOUT_PRIMARY_GOAL_OPTIONS,
     type BodyRegion,
-    type WorkoutLevel
+    type WorkoutLevel,
+    type WorkoutPrimaryGoal
 } from '@silver/tabata/helpers';
 import { SKIP_WORKOUT_EDITOR_CANCEL } from '../../guards/workout-editor-can-deactivate.guard';
 import { AiWorkoutGenerationService } from '../../services/ai-workout-generation.service';
@@ -23,6 +25,7 @@ function mapLoadedToFormModel(loaded: WorkoutInfoFormModel): WorkoutInfoFormMode
         generatedByAi: loaded.generatedByAi,
         mainTargetBodypart: loaded.mainTargetBodypart,
         level: loaded.level,
+        primaryGoal: loaded.primaryGoal,
         availableEquipments: loaded.availableEquipments ?? [],
         secondaryTargetBodyparts: loaded.secondaryTargetBodyparts ?? []
     };
@@ -52,10 +55,16 @@ export class WorkoutInfoComponent {
     readonly equipmentOptions = EQUIPMENT_CATEGORY_OPTIONS;
     readonly bodyRegionOptions = BODY_REGION_OPTIONS;
     readonly workoutLevelOptions = WORKOUT_LEVEL_OPTIONS;
+    readonly workoutPrimaryGoalOptions = WORKOUT_PRIMARY_GOAL_OPTIONS;
     readonly workoutLevelLabel: Record<WorkoutLevel, string> = {
         beginner: 'Beginner',
         intermediate: 'Intermediate',
         expert: 'Expert'
+    };
+    readonly workoutPrimaryGoalLabel: Record<WorkoutPrimaryGoal, string> = {
+        Cardio: 'Cardio',
+        Strength: 'Strength',
+        Explosion: 'Explosion'
     };
 
     readonly mainTargetDisabled = computed(() => (region: BodyRegion) => this.formModel().secondaryTargetBodyparts.includes(region));
@@ -68,6 +77,7 @@ export class WorkoutInfoComponent {
         required(schemaPath.description, { message: 'Description is required' });
         required(schemaPath.mainTargetBodypart, { message: 'Main target is required' });
         required(schemaPath.level, { message: 'Level is required' });
+        required(schemaPath.primaryGoal, { message: 'Primary goal is required' });
     });
 
     readonly isFormValid = computed(() => this.infoForm().valid());
@@ -96,6 +106,7 @@ export class WorkoutInfoComponent {
                     description: model.description || undefined,
                     mainTargetBodypart: model.mainTargetBodypart ?? undefined,
                     level: model.level ?? undefined,
+                    primaryGoal: model.primaryGoal ?? undefined,
                     availableEquipments: model.availableEquipments,
                     secondaryTargetBodyparts: model.secondaryTargetBodyparts,
                     generatedByAi: model.generatedByAi
