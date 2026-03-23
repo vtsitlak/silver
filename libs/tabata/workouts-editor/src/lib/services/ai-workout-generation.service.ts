@@ -1,5 +1,12 @@
 import { inject, Injectable } from '@angular/core';
-import { type BodyRegion, type EquipmentCategory, equipmentOptions, type WorkoutLevel, type WorkoutPrimaryGoal } from '@silver/tabata/helpers';
+import {
+    EQUIPMENT_CATEGORY_OPTIONS,
+    type BodyRegion,
+    type EquipmentCategory,
+    equipmentOptions,
+    type WorkoutLevel,
+    type WorkoutPrimaryGoal
+} from '@silver/tabata/helpers';
 import { ExercisesService } from '@silver/tabata/states/exercises';
 import { AiWorkoutGeneratorService, type GenerateWorkoutOutput } from '@silver/tabata/ai-workout-generator';
 import { ToastService } from '@silver/tabata/helpers';
@@ -24,7 +31,10 @@ export class AiWorkoutGenerationService {
     private readonly toast = inject(ToastService);
 
     generateWorkout(request: AiWorkoutGenerationInput): Observable<GenerateWorkoutOutput> {
-        const equipmentParam = this.getEquipmentParamForCategories(request.availableEquipments ?? []);
+        const selectedEquipmentCategories = request.availableEquipments ?? [];
+        const equipmentParam = this.getEquipmentParamForCategories(selectedEquipmentCategories);
+        // When user selects no equipment categories, do not bias prompt toward "body only".
+        const availableEquipmentsForPrompt = selectedEquipmentCategories.length > 0 ? selectedEquipmentCategories : EQUIPMENT_CATEGORY_OPTIONS;
         const levelParam = this.getExerciseLevelParam(request.level);
 
         return this.loadAllExercisesForGeneration({
@@ -56,7 +66,7 @@ export class AiWorkoutGenerationService {
                         name: request.name,
                         description: request.description,
                         mainTargetBodypart: request.mainTargetBodypart,
-                        availableEquipments: request.availableEquipments,
+                        availableEquipments: availableEquipmentsForPrompt,
                         secondaryTargetBodyparts: request.secondaryTargetBodyparts,
                         exercises: summaries,
                         level: request.level,
@@ -122,6 +132,11 @@ export class AiWorkoutGenerationService {
     }
 
     private getEquipmentParamForCategories(categories: EquipmentCategory[]): string {
+        // Requirement:
+        // - If the user selected *no* equipment categories, do not apply any equipment filter.
+        // - If at least one category is selected, always include `body only` as well.
+        if (!Array.isArray(categories) || categories.length === 0) return '';
+
         const equipmentStrings = new Set<string>();
         const bodyweightItem = equipmentOptions.find((e) => e.equipmentCategory === 'Bodyweight');
         bodyweightItem?.equipmentOptions?.forEach((eq) => equipmentStrings.add(eq));
