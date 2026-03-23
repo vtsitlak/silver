@@ -163,13 +163,40 @@ function buildPrompt(input: {
     mainTargetBodypart: string;
     availableEquipments: string[];
     secondaryTargetBodyparts: string[];
-    exercises: { exerciseId: string; name: string; targetMuscles?: string[]; equipments?: string[] }[];
+    level?: string;
+    primaryGoal?: string;
+    exercises: {
+        exerciseId: string;
+        name: string;
+        targetMuscles?: string[];
+        equipments?: string[];
+        category?: string[];
+        level?: string;
+    }[];
     requestedBlocks: number | null;
     requestedWarmupSeconds: number | null;
     requestedCooldownSeconds: number | null;
 }): string {
+    const primaryGoalToCategorySlug = (goal: string | undefined): string => {
+        switch (goal) {
+            case 'Strength':
+                return 'strength';
+            case 'Cardio':
+                return 'cardio';
+            case 'Explosion':
+                return 'plyometrics';
+            default:
+                return goal ? goal.toLowerCase() : 'unknown';
+        }
+    };
+    const goalCategorySlug = primaryGoalToCategorySlug(input.primaryGoal);
+
     const exerciseList = input.exercises
-        .map((e) => `- ${e.exerciseId}: ${e.name} (targets: ${(e.targetMuscles || []).join(', ')}, equipment: ${(e.equipments || []).join(', ')})`)
+        .map((e) => {
+            const category = (e.category ?? []).join(', ');
+            const level = e.level ?? 'unknown';
+            return `- ${e.exerciseId}: ${e.name} (targets: ${(e.targetMuscles || []).join(', ')}, equipment: ${(e.equipments || []).join(', ')}, category: ${category}, level: ${level})`;
+        })
         .join('\n');
 
     const equipmentList = ['body only', ...(input.availableEquipments || []).filter((e: string) => e !== 'Bodyweight')].join(', ');
@@ -190,11 +217,13 @@ WORKOUT BRIEF (honor these in every phase):
 - Description: ${input.description}
 - Main target body part: ${input.mainTargetBodypart}
 - Secondary target body parts: ${(input.secondaryTargetBodyparts || []).join(', ') || 'none'}
+- Workout level (difficulty tier): ${input.level ?? 'unknown'}
+- Primary goal: ${input.primaryGoal ?? 'unknown'} (prefer exercise category: ${goalCategorySlug})
 - Available equipment: ${equipmentList}
 ${requestedBlocksLine}
 ${requestedWarmupLine}
 ${requestedCooldownLine}
-Note: body only is always available; choose exercises that match the target body parts and the listed equipment.
+Note: body only is always available; choose exercises that match the target body parts and the listed equipment. Additionally, prefer exercises whose category includes "${goalCategorySlug}".
 
 AVAILABLE EXERCISES (use only these exerciseId values):
 ${exerciseList}
@@ -202,24 +231,41 @@ ${exerciseList}
 ---
 
 WARMUP (5–10 minutes):
-Purpose: Prepare muscles for high-intensity intervals. Total warmup duration must be 300–600 seconds (5–10 min).
-- Prefer dynamic movements: e.g. jumping jacks, mountain climbers, high knees, butt kicks when bodyweight is available.
-- If equipment is available: light cardio on bike/rower or myofascial release–style movements are also suitable.
-- Pick 2–4 movements from the list that fit the main/secondary targets and equipment. Each movement can be 60–120 seconds.
+Purpose: Low-intensity joint and muscle preparation (safe “beginner level” warmup).
+Technical Constraints (STRICT):
+- Warmup MUST be built ONLY from exercises where category includes "cardio" OR category includes "stretching".
+- Warmup MUST use exercise level "beginner" for every movement (ignore the workout’s main level).
+- Warmup MUST NOT use exercises with category "plyometrics" or category "strength".
+- Total warmup duration must be between 300–600 seconds (5–10 min). A usual target is ~5 minutes, but it may be shorter/longer as long as it stays <= 10 minutes.
+- Pick 2–4 UNIQUE movements from the list (no exerciseId reuse anywhere in the workout). Each movement can be 60–120 seconds.
 
 MAIN PHASE – TABATA BLOCKS:
 - Each block = one exercise only, 8 rounds of 20 seconds work + 10 seconds rest (4 minutes per block).
 - Default recommendation (ONLY if the user did not specify otherwise): Use 4–5 blocks for a full workout (~20 min of work).
 - If the user says “one block” (or any specific number), output EXACTLY that many blocks.
 - Rest between blocks: 1 minute (interBlockRestSeconds: 60) unless the user specifies a different rest.
-- Choose different exercises per block that align with the main and secondary target body parts and available equipment.
+- Choose blocks from exercises that match the workout targets and equipment, with category/level constraints below.
+- STRICT UNIQUENESS: do not reuse any exerciseId across warmup, blocks, or cooldown.
+- Category mix (3-category mix):
+  - Allowed block categories are "strength", "cardio", and "plyometrics" ONLY (exclude "stretching" category entirely from the main blocks).
+  - Prefer blocks whose category includes "${goalCategorySlug}" (primary goal bias).
+- Primary goal bias: choose the majority of blocks from category "${goalCategorySlug}" (at least ceil(blockCount * 0.5)), when possible.
+  - If the workout has 3 or more blocks, ensure at least one block from each of the three categories: strength + cardio + plyometrics.
+- Downward Compatibility (STRICT):
+  - Workout level "beginner" => ONLY exercises with level "beginner".
+  - Workout level "intermediate" => exercises with level "beginner" or "intermediate".
+  - Workout level "expert" => exercises with level "beginner", "intermediate", or "expert".
+- Target matching: for every block, select exercises whose main OR secondary muscles overlap with the target muscles list.
 - Rounds: 8, workDurationSeconds: 20, restDurationSeconds: 10, interBlockRestSeconds: 60 for every block.
 
-COOLDOWN (5–10 minutes):
-Purpose: Gradually lower heart rate. Total cooldown duration must be 300–600 seconds (5–10 min).
-- Prefer low-intensity movements and stretching for the muscle groups worked: e.g. walking-in-place style moves, then static stretches.
-- If equipment allows: light pedaling or resistance-band assisted stretching from the list.
-- Pick 2–4 movements from the list; each can be 60–120 seconds.
+COOLDOWN (3–7 minutes):
+Purpose: Lower intensity for recovery (no high-impact work).
+Technical Constraints (STRICT):
+- Cooldown MUST use ONLY exercises where category includes "stretching".
+- Cooldown MUST use exercise level "beginner" for every movement (ignore the workout’s main level).
+- Cooldown MUST exclude category "plyometrics" and exclude category "cardio" entirely.
+- Total cooldown duration must be between 180–420 seconds (3–7 min).
+- Pick 2–4 UNIQUE movements from the list (no exerciseId reuse anywhere in the workout). Each movement can be 60–120 seconds.
 
 ---
 
@@ -240,12 +286,12 @@ Return a single JSON object with this exact structure (no markdown, no code fenc
     }
   ],
   "cooldown": {
-    "totalDurationSeconds": <number, between 300 and 600>,
+    "totalDurationSeconds": <number, between 180 and 420>,
     "movements": [{"exerciseId": "<id from list>", "durationSeconds": <number>}, ...]
   }
 }
 
-Rules: Use only exerciseIds from the list. Warmup and cooldown each 5–10 min (300–600 s). Main phase: 4–5 blocks, one exercise per block. Output valid JSON only.`;
+Rules: Use only exerciseIds from the list. Warmup must be 5–10 min (300–600 s). Cooldown must be 3–7 min (180–420 s). Main phase: 4–5 blocks, one exercise per block. Output valid JSON only.`;
 }
 
 export default {
@@ -277,7 +323,16 @@ export default {
             mainTargetBodypart?: string;
             availableEquipments?: string[];
             secondaryTargetBodyparts?: string[];
-            exercises?: { exerciseId: string; name: string; targetMuscles?: string[]; equipments?: string[] }[];
+            level?: string;
+            primaryGoal?: string;
+            exercises?: {
+                exerciseId: string;
+                name: string;
+                targetMuscles?: string[];
+                equipments?: string[];
+                category?: string[];
+                level?: string;
+            }[];
         };
 
         if (!input?.name || !input?.mainTargetBodypart || !Array.isArray(input.exercises) || input.exercises.length === 0) {
@@ -291,11 +346,12 @@ export default {
 
         try {
             const { genkit } = await import('genkit');
-            const { googleAI, gemini } = await import('@genkit-ai/googleai');
+            const { googleAI } = await import('@genkit-ai/googleai');
 
             const ai = genkit({
                 plugins: [googleAI({ apiKey })],
-                model: gemini(modelId)
+                // Use googleAI.model() instead of deprecated gemini(modelId).
+                model: googleAI.model(modelId as `gemini-${string}`)
             });
 
             const requestedBlocks = extractRequestedBlocks(input.description ?? '');
@@ -307,6 +363,8 @@ export default {
                 mainTargetBodypart: input.mainTargetBodypart,
                 availableEquipments: input.availableEquipments ?? [],
                 secondaryTargetBodyparts: input.secondaryTargetBodyparts ?? [],
+                level: input.level,
+                primaryGoal: input.primaryGoal,
                 exercises: input.exercises,
                 requestedBlocks,
                 requestedWarmupSeconds,

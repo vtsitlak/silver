@@ -31,6 +31,8 @@ describe('AiWorkoutGeneratorService', () => {
             mainTargetBodypart: 'Upper Body',
             availableEquipments: ['Bodyweight'],
             secondaryTargetBodyparts: [],
+            level: 'beginner',
+            primaryGoal: 'Strength',
             exercises: [
                 {
                     exerciseId: 'e1',
@@ -38,7 +40,8 @@ describe('AiWorkoutGeneratorService', () => {
                     targetMuscles: [],
                     secondaryMuscles: [],
                     category: [],
-                    equipments: []
+                    equipments: [],
+                    level: 'beginner'
                 }
             ]
         };

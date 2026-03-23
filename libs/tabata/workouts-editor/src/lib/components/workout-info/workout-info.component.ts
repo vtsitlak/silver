@@ -120,6 +120,9 @@ export class WorkoutInfoComponent {
         const model = this.formModel();
         const mainTarget = model.mainTargetBodypart;
         if (!mainTarget) return;
+        const level = model.level;
+        const primaryGoal = model.primaryGoal;
+        if (!level || !primaryGoal) return;
         this.isGenerating.set(true);
         const name = model.name;
         const description = model.description;
@@ -131,7 +134,9 @@ export class WorkoutInfoComponent {
                 description,
                 mainTargetBodypart: mainTarget,
                 availableEquipments: model.availableEquipments ?? [],
-                secondaryTargetBodyparts: model.secondaryTargetBodyparts ?? []
+                secondaryTargetBodyparts: model.secondaryTargetBodyparts ?? [],
+                level,
+                primaryGoal
             })
             .pipe(finalize(() => this.isGenerating.set(false)))
             .subscribe({

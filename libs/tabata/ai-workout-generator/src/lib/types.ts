@@ -1,4 +1,4 @@
-import type { BodyRegion, EquipmentCategory } from '@silver/tabata/helpers';
+import type { BodyRegion, EquipmentCategory, WorkoutLevel, WorkoutPrimaryGoal } from '@silver/tabata/helpers';
 
 /** Input for the AI workout generation API (matches workout info form + exercise list). */
 export interface GenerateWorkoutInput {
@@ -7,6 +7,8 @@ export interface GenerateWorkoutInput {
     mainTargetBodypart: BodyRegion;
     availableEquipments: EquipmentCategory[];
     secondaryTargetBodyparts: BodyRegion[];
+    level: WorkoutLevel;
+    primaryGoal: WorkoutPrimaryGoal;
     /** Exercise summaries for the model to choose from (ids must exist in your DB). */
     exercises: ExerciseSummary[];
 }
@@ -19,6 +21,7 @@ export interface ExerciseSummary {
     secondaryMuscles: string[];
     category: string[];
     equipments: string[];
+    level?: string;
 }
 
 /** Generated structure returned by the API (no id, timestamps, or userIds). */
