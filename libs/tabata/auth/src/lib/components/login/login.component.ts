@@ -66,10 +66,13 @@ export class LoginComponent {
             subHeader:
                 'When viewed from web, switch to mobile view (DevTools or responsive mode) for the best experience.\n\n' +
                 'Demo app — for practice and example code only.\n\n' +
-                '• Not for commercial use.\n' +
-                '• Login is powered by Firebase (Firebase Auth). Your credentials are handled by Firebase.\n' +
-                '• Workout data and AI-generated content are for illustration only.\n' +
-                '• Use as reference code or for personal practice only.',
+                '• This is a demonstration application for learning and practicing. It is not intended for commercial use.\n' +
+                '• Login and authentication are powered by Firebase (Firebase Auth). Your credentials are handled by Firebase services.\n' +
+                '• Workout data and AI-generated content are for illustration purposes only.\n' +
+                '• Use this app as reference code or for personal practice only.\n' +
+                '• Tested only on web and Android (OnePlus 10 Pro). Other devices and iOS have not been tested.\n\n' +
+                'Credentials are handled by Firebase Auth.\n' +
+                'GitHub: vtsitlak',
             cssClass: 'tbt-action-sheet-visible',
             buttons: [{ text: 'Close', role: 'cancel' }]
         });
