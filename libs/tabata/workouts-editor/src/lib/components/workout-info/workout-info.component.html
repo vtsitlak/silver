@@ -93,7 +93,7 @@
                     interface="alert"
                 >
                     @for (eq of equipmentOptions; track eq) {
-                        <ion-select-option [value]="eq">{{ eq }}</ion-select-option>
+                        <ion-select-option [value]="eq" [disabled]="eq === 'Bodyweight'">{{ eq }}</ion-select-option>
                     }
                 </ion-select>
             </ion-item>

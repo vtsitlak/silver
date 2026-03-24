@@ -2,7 +2,13 @@ import { Component, computed, effect, inject, input, output, signal, untracked }
 import { Router } from '@angular/router';
 import { form, FormField, required } from '@angular/forms/signals';
 import { IonButton, IonInput, IonItem, IonList, IonSelect, IonSelectOption, IonSpinner, IonTextarea, ModalController } from '@ionic/angular/standalone';
-import { createEmptyWorkoutInfoFormModel, type WorkoutDraft } from '@silver/tabata/states/workout-editor';
+import {
+    BODYWEIGHT_CATEGORY,
+    createEmptyWorkoutInfoFormModel,
+    ensureBodyweightIncluded,
+    mapLoadedWorkoutInfoToFormModel,
+    type WorkoutDraft
+} from '@silver/tabata/states/workout-editor';
 import {
     EQUIPMENT_CATEGORY_OPTIONS,
     BODY_REGION_OPTIONS,
@@ -17,19 +23,6 @@ import { AiWorkoutGenerationService } from '../../services/ai-workout-generation
 import { AiWorkoutPreviewModalComponent } from '../ai-workout-preview-modal/ai-workout-preview-modal.component';
 import { finalize } from 'rxjs/operators';
 import type { WorkoutInfoFormModel } from '@silver/tabata/states/workouts';
-
-function mapLoadedToFormModel(loaded: WorkoutInfoFormModel): WorkoutInfoFormModel {
-    return {
-        name: loaded.name,
-        description: loaded.description ?? '',
-        generatedByAi: loaded.generatedByAi,
-        mainTargetBodypart: loaded.mainTargetBodypart,
-        level: loaded.level,
-        primaryGoal: loaded.primaryGoal,
-        availableEquipments: loaded.availableEquipments ?? [],
-        secondaryTargetBodyparts: loaded.secondaryTargetBodyparts ?? []
-    };
-}
 
 @Component({
     selector: 'tbt-workout-info',
@@ -52,7 +45,7 @@ export class WorkoutInfoComponent {
     /** Emitted when AI preview is cancelled — parent clears draft / resets as needed. */
     readonly clearDraftRequested = output<void>();
 
-    readonly equipmentOptions = EQUIPMENT_CATEGORY_OPTIONS;
+    readonly equipmentOptions = [BODYWEIGHT_CATEGORY, ...EQUIPMENT_CATEGORY_OPTIONS.filter((eq) => eq !== BODYWEIGHT_CATEGORY)];
     readonly bodyRegionOptions = BODY_REGION_OPTIONS;
     readonly workoutLevelOptions = WORKOUT_LEVEL_OPTIONS;
     readonly workoutPrimaryGoalOptions = WORKOUT_PRIMARY_GOAL_OPTIONS;
@@ -91,7 +84,7 @@ export class WorkoutInfoComponent {
                 if (!loaded) {
                     this.formModel.set(createEmptyWorkoutInfoFormModel());
                 } else {
-                    this.formModel.set(mapLoadedToFormModel(loaded));
+                    this.formModel.set(mapLoadedWorkoutInfoToFormModel(loaded));
                 }
                 /** Re-hydrating from the editor snapshot must clear interaction state (e.g. after Save → Add workout). */
                 this.infoForm().reset();
@@ -112,6 +105,15 @@ export class WorkoutInfoComponent {
                     generatedByAi: model.generatedByAi
                 })
             );
+        });
+
+        // Keep Bodyweight always selected in form state (UI option is disabled).
+        effect(() => {
+            const model = this.formModel();
+            const normalized = ensureBodyweightIncluded(model.availableEquipments);
+            if (normalized.length !== model.availableEquipments.length || normalized.some((v, i) => v !== model.availableEquipments[i])) {
+                untracked(() => this.formModel.update((m) => ({ ...m, availableEquipments: normalized })));
+            }
         });
     }
 

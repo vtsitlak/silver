@@ -52,9 +52,7 @@ describe('WorkoutPlayerComponent', () => {
 
     it('should create a fresh session on restart so replay can be recorded', () => {
         component.workoutId.set('w1');
-        component.segments.set([
-            { phase: 'warmup', label: 'Warmup', durationSeconds: 10, exerciseId: 'e1', isRest: false }
-        ]);
+        component.segments.set([{ phase: 'warmup', label: 'Warmup', durationSeconds: 10, exerciseId: 'e1', isRest: false }]);
         component.currentSession.set({
             workoutId: 'w1',
             startedAt: '2026-01-01T00:00:00.000Z',

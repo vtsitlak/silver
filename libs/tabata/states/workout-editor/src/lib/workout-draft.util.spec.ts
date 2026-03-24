@@ -81,4 +81,12 @@ describe('draftHasMeaningfulContent', () => {
     it('should be true when primaryGoal is set', () => {
         expect(draftHasMeaningfulContent({ primaryGoal: 'Strength' } as WorkoutDraft)).toBe(true);
     });
+
+    it('should be false when only default Bodyweight equipment exists', () => {
+        expect(draftHasMeaningfulContent({ availableEquipments: ['Bodyweight'] } as WorkoutDraft)).toBe(false);
+    });
+
+    it('should be true when non-default equipment is selected', () => {
+        expect(draftHasMeaningfulContent({ availableEquipments: ['Bodyweight', 'Machine'] } as WorkoutDraft)).toBe(true);
+    });
 });

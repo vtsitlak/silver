@@ -34,7 +34,7 @@ describe('WorkoutInfoComponent', () => {
             mainTargetBodypart: null,
             level: null,
             primaryGoal: null,
-            availableEquipments: [],
+            availableEquipments: ['Bodyweight'],
             secondaryTargetBodyparts: [],
             generatedByAi: false
         });
@@ -54,7 +54,7 @@ describe('WorkoutInfoComponent', () => {
             mainTargetBodypart: 'Upper Body',
             level: 'beginner',
             primaryGoal: 'Cardio',
-            availableEquipments: ['Machine'],
+            availableEquipments: ['Bodyweight', 'Machine'],
             secondaryTargetBodyparts: ['Core'],
             generatedByAi: false
         });
@@ -73,7 +73,7 @@ describe('WorkoutInfoComponent', () => {
             mainTargetBodypart: 'Upper Body',
             level: 'beginner',
             primaryGoal: 'Strength',
-            availableEquipments: [],
+            availableEquipments: ['Bodyweight'],
             secondaryTargetBodyparts: [],
             generatedByAi: false
         });
@@ -106,7 +106,7 @@ describe('WorkoutInfoComponent', () => {
             mainTargetBodypart: null,
             level: null,
             primaryGoal: null,
-            availableEquipments: [],
+            availableEquipments: ['Bodyweight'],
             secondaryTargetBodyparts: [],
             generatedByAi: false
         });

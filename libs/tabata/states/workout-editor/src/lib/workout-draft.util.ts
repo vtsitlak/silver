@@ -1,4 +1,5 @@
 import type { WorkoutDraft } from './workout-editor.models';
+import { BODYWEIGHT_CATEGORY } from './workout-editor.models';
 
 /**
  * Edit mode: compare draft to initial snapshot without JSON.stringify (key order breaks equality)
@@ -45,7 +46,7 @@ export function draftHasMeaningfulContent(draft: WorkoutDraft): boolean {
     if (typeof draft.name === 'string' && draft.name.trim() !== '') return true;
     if (typeof draft.description === 'string' && draft.description.trim() !== '') return true;
     if (draft.mainTargetBodypart != null) return true;
-    if (Array.isArray(draft.availableEquipments) && draft.availableEquipments.length > 0) return true;
+    if (Array.isArray(draft.availableEquipments) && draft.availableEquipments.some((eq) => eq !== BODYWEIGHT_CATEGORY)) return true;
     if (Array.isArray(draft.secondaryTargetBodyparts) && draft.secondaryTargetBodyparts.length > 0) return true;
     if (draft.level != null && String(draft.level).trim() !== '') return true;
     if (draft.primaryGoal != null && String(draft.primaryGoal).trim() !== '') return true;

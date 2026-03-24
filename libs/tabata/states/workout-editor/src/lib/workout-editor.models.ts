@@ -1,4 +1,4 @@
-import { BodyRegion } from '@silver/tabata/helpers';
+import { BodyRegion, type EquipmentCategory } from '@silver/tabata/helpers';
 import type { Phase, TabataWorkout, WorkoutInfoFormModel } from '@silver/tabata/states/workouts';
 
 export type WorkoutDraft = Partial<TabataWorkout>;
@@ -9,6 +9,28 @@ export const DEFAULT_TABATA_REST_DURATION_SECONDS = 10;
 export const DEFAULT_TABATA_ROUNDS = 8;
 export const DEFAULT_TABATA_INTER_BLOCK_REST_SECONDS = 60;
 
+export const BODYWEIGHT_CATEGORY: EquipmentCategory = 'Bodyweight';
+
+export function ensureBodyweightIncluded(categories: EquipmentCategory[] | undefined): EquipmentCategory[] {
+    const next = new Set<EquipmentCategory>(categories ?? []);
+    next.add(BODYWEIGHT_CATEGORY);
+    // Keep Bodyweight first for consistent UI ordering/value.
+    return [BODYWEIGHT_CATEGORY, ...Array.from(next).filter((c) => c !== BODYWEIGHT_CATEGORY)];
+}
+
+export function mapLoadedWorkoutInfoToFormModel(loaded: WorkoutInfoFormModel): WorkoutInfoFormModel {
+    return {
+        name: loaded.name,
+        description: loaded.description ?? '',
+        generatedByAi: loaded.generatedByAi,
+        mainTargetBodypart: loaded.mainTargetBodypart,
+        level: loaded.level,
+        primaryGoal: loaded.primaryGoal,
+        availableEquipments: ensureBodyweightIncluded(loaded.availableEquipments),
+        secondaryTargetBodyparts: loaded.secondaryTargetBodyparts ?? []
+    };
+}
+
 /** Default info tab shape when no snapshot is loaded (create flow). */
 export const EMPTY_WORKOUT_INFO_FORM_MODEL: WorkoutInfoFormModel = {
     name: '',
@@ -17,7 +39,7 @@ export const EMPTY_WORKOUT_INFO_FORM_MODEL: WorkoutInfoFormModel = {
     mainTargetBodypart: null,
     level: null,
     primaryGoal: null,
-    availableEquipments: [],
+    availableEquipments: [BODYWEIGHT_CATEGORY],
     secondaryTargetBodyparts: []
 };
 
@@ -48,7 +70,7 @@ export function toWorkoutInfoFormModelFromSnapshot(w: WorkoutDraft | null | unde
         mainTargetBodypart: main != null && String(main).trim() !== '' ? main : null,
         level: lvl != null && String(lvl).trim() !== '' ? lvl : null,
         primaryGoal: primaryGoal != null && String(primaryGoal).trim() !== '' ? primaryGoal : null,
-        availableEquipments: w.availableEquipments ?? [],
+        availableEquipments: ensureBodyweightIncluded(w.availableEquipments),
         secondaryTargetBodyparts: w.secondaryTargetBodyparts ?? []
     };
 }
@@ -65,7 +87,7 @@ export const initialWorkoutDraft: WorkoutDraft = {
     name: '',
     description: '',
     mainTargetBodypart: undefined as BodyRegion | undefined,
-    availableEquipments: [],
+    availableEquipments: [BODYWEIGHT_CATEGORY],
     secondaryTargetBodyparts: [],
     warmup: EMPTY_PHASE,
     cooldown: EMPTY_PHASE,
