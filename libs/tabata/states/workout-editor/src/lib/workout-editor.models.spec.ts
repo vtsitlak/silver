@@ -5,6 +5,7 @@ describe('workout-editor.models', () => {
         it('returns EMPTY_WORKOUT_INFO_FORM_MODEL when snapshot is null or undefined', () => {
             expect(toWorkoutInfoFormModelFromSnapshot(null)).toBe(EMPTY_WORKOUT_INFO_FORM_MODEL);
             expect(toWorkoutInfoFormModelFromSnapshot(undefined)).toBe(EMPTY_WORKOUT_INFO_FORM_MODEL);
+            expect(EMPTY_WORKOUT_INFO_FORM_MODEL.availableEquipments).toEqual(['Bodyweight']);
         });
 
         it('normalizes empty or whitespace mainTargetBodypart to null', () => {
@@ -35,6 +36,11 @@ describe('workout-editor.models', () => {
 
         it('preserves non-empty primaryGoal', () => {
             expect(toWorkoutInfoFormModelFromSnapshot({ primaryGoal: 'Cardio' }).primaryGoal).toBe('Cardio');
+        });
+
+        it('always includes Bodyweight in availableEquipments', () => {
+            expect(toWorkoutInfoFormModelFromSnapshot({ availableEquipments: [] }).availableEquipments).toEqual(['Bodyweight']);
+            expect(toWorkoutInfoFormModelFromSnapshot({ availableEquipments: ['Machine'] }).availableEquipments).toEqual(['Bodyweight', 'Machine']);
         });
     });
 

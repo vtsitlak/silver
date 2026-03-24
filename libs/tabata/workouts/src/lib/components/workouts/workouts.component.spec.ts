@@ -6,20 +6,33 @@ import { ToastService } from '@silver/tabata/helpers';
 import { mockAuthFacade, mockModalController, mockToastService, createMockWorkoutsFacade, mockActionSheetController } from '@silver/tabata/testing';
 import { WorkoutsComponent } from './workouts.component';
 import { ActionSheetController, ModalController } from '@ionic/angular/standalone';
+import { of } from 'rxjs';
+import { DeleteWorkoutService } from '../../services/delete-workout.service';
 
 describe('WorkoutsComponent', () => {
     let component: WorkoutsComponent;
     let fixture: ComponentFixture<WorkoutsComponent>;
     const mockWorkoutsFacade = createMockWorkoutsFacade();
+    const mockDeleteWorkoutService = {
+        deleteWorkoutAndCleanup: jest.fn(() => of({ success: true }))
+    };
 
     beforeEach(async () => {
         mockAuthFacade.user.set(null);
+        mockDeleteWorkoutService.deleteWorkoutAndCleanup.mockReset();
+        mockDeleteWorkoutService.deleteWorkoutAndCleanup.mockReturnValue(of({ success: true }));
+        mockActionSheetController.create.mockReset();
+        mockActionSheetController.create.mockResolvedValue({
+            present: jest.fn(),
+            onDidDismiss: jest.fn().mockResolvedValue({ role: 'destructive' })
+        });
         await TestBed.configureTestingModule({
             imports: [WorkoutsComponent],
             providers: [
                 provideRouter([]),
                 { provide: AuthFacade, useValue: mockAuthFacade },
                 { provide: WorkoutsFacade, useValue: mockWorkoutsFacade },
+                { provide: DeleteWorkoutService, useValue: mockDeleteWorkoutService },
                 { provide: ModalController, useValue: mockModalController },
                 { provide: ToastService, useValue: mockToastService },
                 { provide: ActionSheetController, useValue: mockActionSheetController }
@@ -51,5 +64,11 @@ describe('WorkoutsComponent', () => {
 
         const result = component['userWorkouts']();
         expect(result.map((w: { id: string }) => w.id)).toEqual(['w1']);
+    });
+
+    it('should call deleteWorkoutAndCleanup when delete is confirmed', async () => {
+        await component.onRemoveClick({ id: 'w1', name: 'Workout 1' } as TabataWorkout);
+
+        expect(mockDeleteWorkoutService.deleteWorkoutAndCleanup).toHaveBeenCalledWith('w1');
     });
 });

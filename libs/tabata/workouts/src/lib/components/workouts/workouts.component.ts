@@ -13,6 +13,7 @@ import { AuthFacade } from '@silver/tabata/auth';
 import { ToastService } from '@silver/tabata/helpers';
 import { WorkoutItemComponent } from '../workout-item/workout-item.component';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
+import { DeleteWorkoutService } from '../../services/delete-workout.service';
 
 @Component({
     selector: 'tbt-workouts',
@@ -28,6 +29,7 @@ export class WorkoutsComponent {
     private readonly toast = inject(ToastService);
     private readonly workoutEditorFacade = inject(WorkoutEditorFacade);
     private readonly actionSheetCtrl = inject(ActionSheetController);
+    private readonly deleteWorkoutService = inject(DeleteWorkoutService);
 
     constructor() {
         addIcons({ add });
@@ -98,7 +100,7 @@ export class WorkoutsComponent {
         const { role } = await sheet.onDidDismiss();
         if (role !== 'destructive') return;
 
-        this.facade.removeWorkout(workout.id).subscribe({
+        this.deleteWorkoutService.deleteWorkoutAndCleanup(workout.id).subscribe({
             next: (res) => {
                 if (res?.success) {
                     this.toast.showSuccess('Workout deleted');

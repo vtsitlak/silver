@@ -4,7 +4,7 @@ import { signalStore, withState, withMethods, patchState, withComputed } from '@
 import { cloneDeep } from '@silver/shared/helpers';
 import { TabataWorkout } from '@silver/tabata/states/workouts';
 
-import { type WorkoutEditorState, type WorkoutDraft, initialWorkoutDraft } from './workout-editor.models';
+import { type WorkoutEditorState, type WorkoutDraft, ensureBodyweightIncluded, initialWorkoutDraft } from './workout-editor.models';
 import { areWorkoutDraftsEqual, draftHasMeaningfulContent } from './workout-draft.util';
 
 function draftCanSubmitWorkout(draft: WorkoutDraft): boolean {
@@ -81,9 +81,13 @@ export const WorkoutEditorStore = signalStore(
     withMethods((store) => {
         /** Applies a loaded workout to draft + baseline snapshot (e.g. after GET by id). */
         const hydrateEditorFromWorkout = (workout: TabataWorkout): void => {
+            const normalizedWorkout: TabataWorkout = {
+                ...workout,
+                availableEquipments: ensureBodyweightIncluded(workout.availableEquipments)
+            };
             patchState(store, {
-                workoutDraft: { ...workout },
-                initialDraftSnapshot: cloneDeep(workout)
+                workoutDraft: { ...normalizedWorkout },
+                initialDraftSnapshot: cloneDeep(normalizedWorkout)
             });
         };
 

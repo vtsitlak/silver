@@ -208,18 +208,7 @@ export class WorkoutPlayerComponent implements OnDestroy {
             return;
         }
         const next = !this.isPlaying();
-        if (next && !this.hasStarted()) {
-            this.hasStarted.set(true);
-            const id = this.workoutId();
-            if (id) {
-                this.currentSession.set({
-                    workoutId: id,
-                    startedAt: new Date().toISOString(),
-                    finishedAt: '',
-                    completed: false
-                });
-            }
-        }
+        if (next) this.ensureSessionStarted();
         this.isPlaying.set(next);
     }
 
@@ -303,10 +292,28 @@ export class WorkoutPlayerComponent implements OnDestroy {
     restart(): void {
         const segs = this.segments();
         if (segs.length === 0) return;
+        // New run => fresh session, so completion is persisted each time.
+        this.currentSession.set(null);
+        this.hasStarted.set(false);
         this.currentIndex.set(0);
         this.remainingInSegment.set(segs[0].durationSeconds);
         this.finished.set(false);
+        this.ensureSessionStarted();
         this.isPlaying.set(true);
+    }
+
+    private ensureSessionStarted(): void {
+        if (this.hasStarted()) return;
+        this.hasStarted.set(true);
+        const id = this.workoutId();
+        if (id) {
+            this.currentSession.set({
+                workoutId: id,
+                startedAt: new Date().toISOString(),
+                finishedAt: '',
+                completed: false
+            });
+        }
     }
 
     phaseLabel(seg: WorkoutSegment | null): string {
