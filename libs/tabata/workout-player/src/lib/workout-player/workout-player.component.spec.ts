@@ -25,6 +25,7 @@ describe('WorkoutPlayerComponent', () => {
     const mockExercisesFacade = createMockExercisesFacade();
 
     beforeEach(async () => {
+        mockUserWorkoutsFacade.saveUserWorkout.mockReset();
         await TestBed.configureTestingModule({
             imports: [WorkoutPlayerComponent],
             providers: [
@@ -47,5 +48,34 @@ describe('WorkoutPlayerComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should create a fresh session on restart so replay can be recorded', () => {
+        component.workoutId.set('w1');
+        component.segments.set([
+            { phase: 'warmup', label: 'Warmup', durationSeconds: 10, exerciseId: 'e1', isRest: false }
+        ]);
+        component.currentSession.set({
+            workoutId: 'w1',
+            startedAt: '2026-01-01T00:00:00.000Z',
+            finishedAt: '',
+            completed: false
+        });
+        component.hasStarted.set(true);
+        component.finished.set(true);
+        component.isPlaying.set(false);
+
+        component.restart();
+
+        expect(component.finished()).toBe(false);
+        expect(component.isPlaying()).toBe(true);
+        expect(component.hasStarted()).toBe(true);
+        expect(component.currentSession()).toEqual(
+            expect.objectContaining({
+                workoutId: 'w1',
+                finishedAt: '',
+                completed: false
+            })
+        );
     });
 });
