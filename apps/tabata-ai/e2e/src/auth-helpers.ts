@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
 import * as dotenv from 'dotenv';
 import { join } from 'path';
 
@@ -27,10 +27,10 @@ export async function fillIonInput(page: Page, fieldId: string, value: string): 
 }
 
 /**
- * Log in with test credentials and wait until the app has navigated to the dashboard.
+ * Log in with test credentials and wait until the app has entered the tabs shell.
  * Call requireAuthEnv() in beforeAll when using this.
- * Waits for the Dashboard tab to be visible (SPA-friendly) and optionally the URL; uses
- * waitUntil: 'commit' for URL wait so client-side navigation does not hang on missing 'load' event.
+ * Do not require a strict `/tabs/dashboard` URL because Ionic may restore the last selected tab
+ * (e.g. Workouts/History) from persisted app state in some environments.
  */
 export async function loginAndWaitForDashboard(page: Page): Promise<void> {
     await page.goto('/auth/login');
@@ -38,6 +38,17 @@ export async function loginAndWaitForDashboard(page: Page): Promise<void> {
     await fillIonInput(page, 'email', TEST_USER_EMAIL ?? '');
     await fillIonInput(page, 'password', TEST_USER_PASSWORD ?? '');
     await page.getByRole('button', { name: 'Login' }).click();
-    await page.waitForURL(/\/tabs\/dashboard/, { timeout: 30000, waitUntil: 'commit' });
+
+    await expect
+        .poll(
+            async () => {
+                const url = page.url();
+                if (/\/tabs\//.test(url)) return true;
+                return await page.getByRole('tab', { name: 'Dashboard' }).isVisible();
+            },
+            { timeout: 30000 }
+        )
+        .toBeTruthy();
+
     await page.getByRole('tab', { name: 'Dashboard' }).waitFor({ state: 'visible', timeout: 15000 });
 }
