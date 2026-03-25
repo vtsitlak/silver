@@ -43,12 +43,17 @@ export async function loginAndWaitForDashboard(page: Page): Promise<void> {
         .poll(
             async () => {
                 const url = page.url();
-                if (/\/tabs\//.test(url)) return true;
-                return await page.getByRole('tab', { name: 'Dashboard' }).isVisible();
+                // Ionic tab routes are SPA-driven; WebKit/CI can restore a previously selected tab
+                // so avoid relying on the exact `/tabs/dashboard` URL or the Dashboard tab visibility.
+                if (/\/tabs/.test(url)) return true;
+
+                // Wait for *any* Ion tab button to appear (tabs shell is ready).
+                return (await page.getByRole('tab').count()) > 0;
             },
             { timeout: 30000 }
         )
         .toBeTruthy();
 
-    await page.getByRole('tab', { name: 'Dashboard' }).waitFor({ state: 'visible', timeout: 15000 });
+    // Ensure at least one tab button is visible before returning.
+    await page.getByRole('tab').first().waitFor({ state: 'visible', timeout: 15000 });
 }
