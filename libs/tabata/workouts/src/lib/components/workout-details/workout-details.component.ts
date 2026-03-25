@@ -25,7 +25,7 @@ import { AuthFacade } from '@silver/tabata/auth';
 import { UserWorkoutsFacade } from '@silver/tabata/states/user-workouts';
 import type { UserWorkoutItem } from '@silver/tabata/states/user-workouts';
 import { computed } from '@angular/core';
-import { formatDurationMinutes, getBlockDurationMinutes, formatSecondsToMinutes } from '@silver/tabata/helpers';
+import { formatDurationMinutes, getBlockDurationMinutes, formatSecondsToMinutes, resolveExerciseName } from '@silver/tabata/helpers';
 import { ToolbarComponent } from '@silver/tabata/ui';
 import { PhaseMovementsListComponent } from '../phase-movements-list/phase-movements-list.component';
 
@@ -68,6 +68,8 @@ export class WorkoutDetailsComponent {
 
     readonly isLoading = this.facade.isLoading;
     readonly error = this.facade.error;
+
+    readonly hasExercisesMap = computed(() => Object.keys(this.exercisesFacade.exercisesMap()).length > 0);
 
     readonly isFavorite = computed(() => {
         const id = this.workoutId();
@@ -146,7 +148,7 @@ export class WorkoutDetailsComponent {
 
     /** Resolve exercise id to display name (from exercisesMap, or id as fallback). */
     getExerciseName(exerciseId: string): string {
-        return this.exercisesFacade.exercisesMap()[exerciseId]?.name ?? exerciseId;
+        return resolveExerciseName(this.exercisesFacade.exercisesMap(), exerciseId, this.hasExercisesMap());
     }
 
     /** Resolve exercise id to first image URL for thumbnail (empty string if none). */

@@ -3,6 +3,8 @@ import type { Phase, TabataWorkout, WorkoutInfoFormModel } from '@silver/tabata/
 
 export type WorkoutDraft = Partial<TabataWorkout>;
 
+export type WorkoutEditorTab = 'info' | 'warmup' | 'main' | 'cooldown';
+
 /** Default main-tab block timing in the editor (classic 20s work / 10s rest, 8 rounds). */
 export const DEFAULT_TABATA_WORK_DURATION_SECONDS = 20;
 export const DEFAULT_TABATA_REST_DURATION_SECONDS = 10;

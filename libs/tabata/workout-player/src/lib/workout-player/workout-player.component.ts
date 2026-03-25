@@ -55,6 +55,9 @@ export class WorkoutPlayerComponent implements OnDestroy {
     /** Current workout session to record (startedAt set on first play; finishedAt/completed on finish or cancel). */
     readonly currentSession = signal<UserWorkoutItem | null>(null);
 
+    private keepAwakeActive = false;
+    private pageActive = true;
+
     readonly currentSegment = computed(() => this.segments()[this.currentIndex()] ?? null);
 
     readonly totalDurationSeconds = computed(() => this.segments().reduce((acc, seg) => acc + seg.durationSeconds, 0));
@@ -105,10 +108,65 @@ export class WorkoutPlayerComponent implements OnDestroy {
             }
             this.startTimer();
         });
+
+        // Keep the device awake only while an active workout session is in progress.
+        // Using Ionic page lifecycle is important because the view can be cached.
+        effect(() => {
+            const shouldBeAwake = this.pageActive && this.hasStarted() && !this.finished();
+            if (shouldBeAwake) {
+                void this.enableKeepAwake();
+            } else {
+                void this.disableKeepAwake();
+            }
+        });
     }
 
     ngOnDestroy(): void {
+        this.pageActive = false;
         this.clearTimer();
+        void this.disableKeepAwake();
+    }
+
+    ionViewWillEnter(): void {
+        this.pageActive = true;
+    }
+
+    ionViewWillLeave(): void {
+        // Called when the page is about to be navigated away from.
+        // If Ionic caches pages, ngOnDestroy may not run immediately, so we release here too.
+        this.pageActive = false;
+        void this.disableKeepAwake();
+    }
+
+    private async enableKeepAwake(): Promise<void> {
+        if (this.keepAwakeActive) return;
+        try {
+            const mod = await import('@capacitor-community/keep-awake');
+            const KeepAwake = mod.KeepAwake as {
+                isSupported: () => Promise<{ isSupported: boolean }>;
+                keepAwake: () => Promise<void>;
+            };
+            const res = await KeepAwake.isSupported();
+            if (!res?.isSupported) return;
+
+            await KeepAwake.keepAwake();
+            this.keepAwakeActive = true;
+        } catch {
+            // No-op: keep-awake is not available on non-native platforms (e.g. web/Jest).
+        }
+    }
+
+    private async disableKeepAwake(): Promise<void> {
+        if (!this.keepAwakeActive) return;
+        try {
+            const mod = await import('@capacitor-community/keep-awake');
+            const KeepAwake = mod.KeepAwake as { allowSleep: () => Promise<void> };
+            await KeepAwake.allowSleep();
+        } catch {
+            // No-op
+        } finally {
+            this.keepAwakeActive = false;
+        }
     }
 
     private buildSegments(workout: TabataWorkout): void {

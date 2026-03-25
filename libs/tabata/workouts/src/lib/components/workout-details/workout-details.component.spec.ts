@@ -94,6 +94,19 @@ describe('WorkoutDetailsComponent', () => {
         expect(component.getExerciseImage('Burpees')).toBe('https://example.com/burpee.gif');
     });
 
+    it('should not fall back to exerciseId while exercises map is not loaded', () => {
+        mockExercisesFacade.exercisesMap.set({});
+        fixture.detectChanges();
+        expect(component.getExerciseName('UnknownId')).toBe('');
+    });
+
+    it('should fall back to exerciseId when exercises map is loaded but id is missing', () => {
+        const burpees = mockExercisesFacade.exercisesMap()['Burpees'];
+        mockExercisesFacade.exercisesMap.set({ Burpees: burpees });
+        fixture.detectChanges();
+        expect(component.getExerciseName('UnknownId')).toBe('UnknownId');
+    });
+
     it('should return empty string for unknown exercise image', () => {
         expect(component.getExerciseImage('UnknownId')).toBe('');
     });

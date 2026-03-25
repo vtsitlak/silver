@@ -55,4 +55,8 @@ describe('DashboardComponent', () => {
         component.openWorkoutDetails('w1');
         expect(navSpy).toHaveBeenCalledWith(['/tabs/workouts', 'w1']);
     });
+
+    it('should not fall back to workoutId while workouts list is not loaded', () => {
+        expect(component.getWorkoutName('w1')).toBe('');
+    });
 });
