@@ -24,7 +24,7 @@ import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { WorkoutSubmitService } from '../../services/workout-submit.service';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { WorkoutsFacade } from '@silver/tabata/states/workouts';
-import { formatDurationMinutes, getBlockDurationMinutes, formatSecondsToMinutes } from '@silver/tabata/helpers';
+import { formatDurationMinutes, getBlockDurationMinutes, formatSecondsToMinutes, resolveExerciseName } from '@silver/tabata/helpers';
 @Component({
     selector: 'tbt-ai-workout-preview-modal',
     templateUrl: './ai-workout-preview-modal.component.html',
@@ -59,6 +59,7 @@ export class AiWorkoutPreviewModalComponent {
     readonly draft = this.facade.workoutDraft;
     readonly isSaving = this.workoutsFacade.isSaving;
     readonly exercisesMap = this.exercisesFacade.exercisesMap;
+    readonly hasExercisesMap = computed(() => Object.keys(this.exercisesMap()).length > 0);
 
     readonly formatDurationMinutes = formatDurationMinutes;
     readonly getBlockDurationMinutes = getBlockDurationMinutes;
@@ -92,7 +93,7 @@ export class AiWorkoutPreviewModalComponent {
     }
 
     getExerciseName(exerciseId: string): string {
-        return this.exercisesMap()[exerciseId]?.name ?? exerciseId;
+        return resolveExerciseName(this.exercisesMap(), exerciseId, this.hasExercisesMap());
     }
 
     getExerciseImage(exerciseId: string): string {

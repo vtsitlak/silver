@@ -22,7 +22,7 @@ import {
 import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { checkmark } from 'ionicons/icons';
-import { ExercisesFacade, Exercise } from '@silver/tabata/states/exercises';
+import { EXERCISE_LEVEL_OPTIONS, ExercisesFacade, type ExerciseLevel, Exercise } from '@silver/tabata/states/exercises';
 import { ExerciseFilterService } from '../../services/exercise-filter.service';
 
 @Component({
@@ -71,9 +71,9 @@ export class ExerciseSelectorModalComponent implements OnInit {
     readonly selectedMuscles = signal<string[]>([]);
     readonly selectedEquipment = signal<string[]>([]);
     readonly selectedCategory = signal<string[]>([]);
-    readonly selectedLevel = signal<string[]>([]);
+    readonly selectedLevel = signal<ExerciseLevel[]>([]);
     readonly selectedExercises = signal<Map<string, Exercise>>(new Map());
-    readonly levelOptions = ['beginner', 'intermediate', 'expert'];
+    readonly levelOptions = EXERCISE_LEVEL_OPTIONS;
 
     private currentOffset = 0;
     private readonly pageSize = 20;
@@ -184,7 +184,7 @@ export class ExerciseSelectorModalComponent implements OnInit {
     onLevelChange(ev: Event): void {
         const customEv = ev as CustomEvent<{ value: string | string[] }>;
         const v = customEv.detail?.value as string | string[] | undefined;
-        const next = Array.isArray(v) ? v : v ? [v] : [];
+        const next = (Array.isArray(v) ? v : v ? [v] : []) as ExerciseLevel[];
         this.selectedLevel.set(next);
         this.filterService.updateFilters({ level: next });
     }

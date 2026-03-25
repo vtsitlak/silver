@@ -7,6 +7,7 @@ import { ToolbarComponent } from '@silver/tabata/ui';
 import { AuthFacade } from '@silver/tabata/auth';
 import { UserWorkoutsFacade } from '@silver/tabata/states/user-workouts';
 import { WorkoutsFacade } from '@silver/tabata/states/workouts';
+import { resolveWorkoutName } from '@silver/tabata/helpers';
 
 @Component({
     selector: 'tbt-dashboard',
@@ -71,7 +72,7 @@ export class DashboardComponent {
     }
 
     getWorkoutName(workoutId: string): string {
-        return this.workoutNameMap().get(workoutId) ?? workoutId;
+        return resolveWorkoutName(this.workoutNameMap(), workoutId, this.workoutsFacade.hasWorkouts());
     }
 
     formatDateTime(dateStr: string): string {

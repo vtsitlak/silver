@@ -1,6 +1,10 @@
 /**
  * Exercise model; images array matches free-exercise-db (list shows first, details show all).
  */
+export type ExerciseLevel = 'beginner' | 'intermediate' | 'expert';
+
+export const EXERCISE_LEVEL_OPTIONS: ExerciseLevel[] = ['beginner', 'intermediate', 'expert'];
+
 export interface Exercise {
     exerciseId: string;
     name: string;
