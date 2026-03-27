@@ -4,8 +4,8 @@
  *
  * Env:
  * - GEMINI_API_KEY or GOOGLE_GENAI_API_KEY: API key from https://aistudio.google.com/apikey
- * - GEMINI_MODEL (optional): Model id, e.g. gemini-2.5-flash-lite, gemini-2.5-flash, gemini-2.5-pro.
- *   Default: gemini-2.5-flash-lite (good free-tier quota). Avoid gemini-2.0-flash (deprecated, quota often 0).
+ * - GEMINI_MODEL (optional): Model id, e.g. gemini-3-flash-preview.
+ *   Default: gemini-3-flash-preview.
  *
  * Request body: GenerateWorkoutInput (name, description, mainTargetBodypart, availableEquipments, secondaryTargetBodyparts, exercises[]).
  * Response: GenerateWorkoutOutput (totalDurationMinutes, warmup, blocks, cooldown).
@@ -71,6 +71,36 @@ function enforceBlockCount<T extends { exerciseId: string }>(blocks: T[], reques
 }
 
 type PhaseOut = { totalDurationSeconds: number; movements: { exerciseId: string; durationSeconds: number }[] };
+type BodyRegion = 'Upper Body' | 'Lower Body' | 'Full Body' | 'Core';
+
+const TARGET_MUSCLES_BY_REGION: Record<Exclude<BodyRegion, 'Full Body'>, string[]> = {
+    'Upper Body': ['neck', 'shoulders', 'chest', 'biceps', 'triceps', 'forearms', 'traps', 'lats', 'middle back'],
+    'Lower Body': ['quadriceps', 'hamstrings', 'glutes', 'calves', 'abductors', 'adductors'],
+    Core: ['abdominals', 'lower back']
+};
+
+const ALL_MUSCLES_FULL_BODY = Array.from(
+    new Set([...TARGET_MUSCLES_BY_REGION['Upper Body'], ...TARGET_MUSCLES_BY_REGION['Lower Body'], ...TARGET_MUSCLES_BY_REGION['Core']])
+);
+
+function getTargetMusclesForRegions(mainRegion: string, secondaryRegions: string[]): { muscles: string[]; isFullBody: boolean } {
+    const main = (mainRegion as BodyRegion) ?? 'Upper Body';
+    const secondary = Array.isArray(secondaryRegions) ? (secondaryRegions as BodyRegion[]) : [];
+
+    if (main === 'Full Body') {
+        return { muscles: [...ALL_MUSCLES_FULL_BODY], isFullBody: true };
+    }
+
+    const musclesSet = new Set<string>(TARGET_MUSCLES_BY_REGION[main] ?? []);
+    for (const r of secondary) {
+        if (r === 'Full Body') {
+            ALL_MUSCLES_FULL_BODY.forEach((m) => musclesSet.add(m));
+            continue;
+        }
+        (TARGET_MUSCLES_BY_REGION[r] ?? []).forEach((m) => musclesSet.add(m));
+    }
+    return { muscles: [...musclesSet], isFullBody: false };
+}
 
 function extractRequestedPhaseSeconds(description: string, phase: 'warmup' | 'cooldown'): number | null {
     const d = (description || '').toLowerCase();
@@ -157,7 +187,7 @@ function computeTotalDurationMinutes(output: {
     return Math.round((warmupSeconds + blocksSeconds + cooldownSeconds) / 60);
 }
 
-function buildPrompt(input: {
+function buildGenerateWorkoutPrompt(input: {
     name: string;
     description: string;
     mainTargetBodypart: string;
@@ -169,15 +199,19 @@ function buildPrompt(input: {
         exerciseId: string;
         name: string;
         targetMuscles?: string[];
+        secondaryMuscles?: string[];
         equipments?: string[];
         category?: string[];
         level?: string;
     }[];
-    requestedBlocks: number | null;
-    requestedWarmupSeconds: number | null;
-    requestedCooldownSeconds: number | null;
+    requestedBlocks?: number | null;
+    requestedWarmupSeconds?: number | null;
+    requestedCooldownSeconds?: number | null;
 }): string {
-    const primaryGoalToCategorySlug = (goal: string | undefined): string => {
+    const { muscles: targetMuscles, isFullBody } = getTargetMusclesForRegions(input.mainTargetBodypart, input.secondaryTargetBodyparts);
+    const targetMusclesList = targetMuscles.length > 0 ? targetMuscles.join(', ') : '';
+
+    const primaryGoalToCategorySlug = (goal: string): string => {
         switch (goal) {
             case 'Strength':
                 return 'strength';
@@ -186,26 +220,29 @@ function buildPrompt(input: {
             case 'Explosion':
                 return 'plyometrics';
             default:
-                return goal ? goal.toLowerCase() : 'unknown';
+                return goal.toLowerCase();
         }
     };
-    const goalCategorySlug = primaryGoalToCategorySlug(input.primaryGoal);
+    const goalCategorySlug = primaryGoalToCategorySlug(input.primaryGoal ?? 'unknown');
 
     const exerciseList = input.exercises
         .map((e) => {
             const category = (e.category ?? []).join(', ');
             const level = e.level ?? 'unknown';
-            return `- ${e.exerciseId}: ${e.name} (targets: ${(e.targetMuscles || []).join(', ')}, equipment: ${(e.equipments || []).join(', ')}, category: ${category}, level: ${level})`;
+            return `- ${e.exerciseId}: ${e.name} (main: ${(e.targetMuscles ?? []).join(', ')}, secondary: ${(e.secondaryMuscles ?? []).join(', ')}, category: ${category}, level: ${level})`;
         })
         .join('\n');
-
-    const equipmentList = ['body only', ...(input.availableEquipments || []).filter((e: string) => e !== 'Bodyweight')].join(', ');
 
     const requestedBlocksLine = input.requestedBlocks != null ? `- Requested number of blocks: ${input.requestedBlocks} (MUST match exactly)` : '';
     const requestedWarmupLine =
         input.requestedWarmupSeconds != null ? `- Requested warmup duration: ${input.requestedWarmupSeconds}s (MUST match exactly)` : '';
     const requestedCooldownLine =
         input.requestedCooldownSeconds != null ? `- Requested cooldown duration: ${input.requestedCooldownSeconds}s (MUST match exactly)` : '';
+
+    const fullBodyInstruction = isFullBody
+        ? `
+FULL BODY: The target includes all muscle groups (Upper Body, Lower Body, Core). You MUST balance the workout across body parts: include a mix of exercises that target upper body, lower body, and core. Do not cluster all blocks in one region; spread them so the workout is balanced.`
+        : '';
 
     return `You are an expert Tabata workout designer.
 Design a workout that STRICTLY follows the user's brief and uses ONLY the exercise IDs from the list below. Do not invent any exercise IDs.
@@ -216,14 +253,18 @@ WORKOUT BRIEF (honor these in every phase):
 - Name: ${input.name}
 - Description: ${input.description}
 - Main target body part: ${input.mainTargetBodypart}
-- Secondary target body parts: ${(input.secondaryTargetBodyparts || []).join(', ') || 'none'}
+- Secondary target body parts: ${input.secondaryTargetBodyparts.join(', ') || 'none'}
+- Target muscles for this workout (choose exercises whose main OR secondary muscles overlap with these): ${targetMusclesList || 'all regions'}
 - Workout level (difficulty tier): ${input.level ?? 'unknown'}
 - Primary goal: ${input.primaryGoal ?? 'unknown'} (prefer exercise category: ${goalCategorySlug})
-- Available equipment: ${equipmentList}
 ${requestedBlocksLine}
 ${requestedWarmupLine}
 ${requestedCooldownLine}
-Note: body only is always available; choose exercises that match the target body parts and the listed equipment. Additionally, prefer exercises whose category includes "${goalCategorySlug}".
+Note: Exercises are already prefiltered by available equipment before prompt generation. Prefer exercises whose category includes "${goalCategorySlug}".
+${fullBodyInstruction}
+
+EXERCISE SELECTION RULE:
+For each phase (warmup, blocks, cooldown), select exercises where at least one of the exercise's main muscles (targetMuscles) or secondary muscles (secondaryMuscles) is in the target muscles list above. Prefer exercises whose main muscles match; secondary muscle match is also valid. Use the exercise name, category, and level to align with the workout name and description.
 
 AVAILABLE EXERCISES (use only these exerciseId values):
 ${exerciseList}
@@ -244,7 +285,7 @@ MAIN PHASE – TABATA BLOCKS:
 - Default recommendation (ONLY if the user did not specify otherwise): Use 4–5 blocks for a full workout (~20 min of work).
 - If the user says “one block” (or any specific number), output EXACTLY that many blocks.
 - Rest between blocks: 1 minute (interBlockRestSeconds: 60) unless the user specifies a different rest.
-- Choose blocks from exercises that match the workout targets and equipment, with category/level constraints below.
+- Choose blocks from exercises that match the workout targets, with category/level constraints below.
 - STRICT UNIQUENESS: do not reuse any exerciseId across warmup, blocks, or cooldown.
 - Category mix (3-category mix):
   - Allowed block categories are "strength", "cardio", and "plyometrics" ONLY (exclude "stretching" category entirely from the main blocks).
@@ -255,7 +296,7 @@ MAIN PHASE – TABATA BLOCKS:
   - Workout level "beginner" => ONLY exercises with level "beginner".
   - Workout level "intermediate" => exercises with level "beginner" or "intermediate".
   - Workout level "expert" => exercises with level "beginner", "intermediate", or "expert".
-- Target matching: for every block, select exercises whose main OR secondary muscles overlap with the target muscles list.
+- Target matching: for every block, select exercises whose main OR secondary muscles overlap with the target muscles list above.
 - Rounds: 8, workDurationSeconds: 20, restDurationSeconds: 10, interBlockRestSeconds: 60 for every block.
 
 COOLDOWN (3–7 minutes):
@@ -308,7 +349,7 @@ export default {
         if (!apiKey) {
             return jsonResponse(JSON.stringify({ error: 'GEMINI_API_KEY (or GOOGLE_GENAI_API_KEY) must be set' }), 503);
         }
-        const modelId = (process.env['GEMINI_MODEL'] ?? 'gemini-2.5-flash-lite').trim() || 'gemini-2.5-flash-lite';
+        const modelId = (process.env['GEMINI_MODEL'] ?? 'gemini-3-flash-preview').trim() || 'gemini-3-flash-preview';
 
         let body: unknown;
         try {
@@ -357,7 +398,7 @@ export default {
             const requestedBlocks = extractRequestedBlocks(input.description ?? '');
             const requestedWarmupSeconds = extractRequestedPhaseSeconds(input.description ?? '', 'warmup');
             const requestedCooldownSeconds = extractRequestedPhaseSeconds(input.description ?? '', 'cooldown');
-            const prompt = buildPrompt({
+            const prompt = buildGenerateWorkoutPrompt({
                 name: input.name,
                 description: input.description ?? '',
                 mainTargetBodypart: input.mainTargetBodypart,
@@ -417,7 +458,7 @@ export default {
             if (isQuota) {
                 return jsonResponse(
                     JSON.stringify({
-                        error: 'AI quota limit reached. Try: (1) Set GEMINI_MODEL=gemini-2.5-flash-lite or gemini-2.5-flash (gemini-2.0-flash is deprecated and often has no free quota). (2) Check API key at https://aistudio.google.com/apikey and quota at https://ai.google.dev/gemini-api/docs/rate-limits'
+                        error: 'AI quota limit reached. Try: (1) Set GEMINI_MODEL=gemini-3-flash-preview. (2) Check API key at https://aistudio.google.com/apikey and quota at https://ai.google.dev/gemini-api/docs/rate-limits'
                     }),
                     429
                 );
