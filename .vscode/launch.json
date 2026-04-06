@@ -23,6 +23,21 @@
             "request": "attach",
             "port": 9222,
             "webRoot": "${workspaceFolder}/apps/tabata-ai/src"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug books-club-api with Nx",
+            "runtimeExecutable": "npx",
+            "runtimeArgs": ["nx", "serve", "books-club-api"],
+            "env": {
+                "NODE_OPTIONS": "--inspect=9229"
+            },
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "skipFiles": ["<node_internals>/**"],
+            "sourceMaps": true,
+            "outFiles": ["${workspaceFolder}/apps/books-club-api/dist/**/*.(m|c|)js", "!**/node_modules/**"]
         }
     ],
     "compounds": [
