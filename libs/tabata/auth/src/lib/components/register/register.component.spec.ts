@@ -22,4 +22,10 @@ describe('RegisterComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
+
+    it('should disable native browser validation on the form', () => {
+        const formElement = fixture.nativeElement.querySelector('form') as HTMLFormElement;
+
+        expect(formElement.hasAttribute('novalidate')).toBe(true);
+    });
 });
