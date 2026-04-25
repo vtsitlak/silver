@@ -23,9 +23,15 @@ describe('RegisterComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should disable native browser validation on the form', () => {
+    it('should not use novalidate on the form', () => {
         const formElement = fixture.nativeElement.querySelector('form') as HTMLFormElement;
 
-        expect(formElement.hasAttribute('novalidate')).toBe(true);
+        expect(formElement.hasAttribute('novalidate')).toBe(false);
+    });
+
+    it('should use a non-submit primary action button', () => {
+        const submitButton = fixture.nativeElement.querySelector('ion-button[type="button"]');
+
+        expect(submitButton).toBeTruthy();
     });
 });
