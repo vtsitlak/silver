@@ -200,7 +200,8 @@ export const AuthStore = signalStore(
                     authService.updateDisplayName(displayName).pipe(
                         tapResponse({
                             next: () => {
-                                const updatedUser = { ...store.user, displayName } as unknown as ProfileUser;
+                                const currentUser = store.user();
+                                const updatedUser = currentUser ? { ...currentUser, displayName } : currentUser;
                                 patchState(store, { user: updatedUser, isLoading: false });
                             },
                             error: (error: Error) => {
