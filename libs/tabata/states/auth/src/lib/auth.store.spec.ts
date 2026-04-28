@@ -5,6 +5,10 @@ import { of } from 'rxjs';
 import { AuthService } from './auth.service';
 import { AuthStore } from './auth.store';
 
+jest.mock('@silver/tabata/helpers', () => ({
+    ToastService: class ToastService {}
+}));
+
 describe('AuthStore', () => {
     const firebaseUser = {
         uid: 'user-123',
