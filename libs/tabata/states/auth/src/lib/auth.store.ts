@@ -54,7 +54,7 @@ export const AuthStore = signalStore(
                         if (state) {
                             patchState(store, { ...state, isLoading: false });
                         } else {
-                            patchState(store, { isLoading: false });
+                            patchState(store, { user: null, usePassword: false, useGoogle: false, isLoading: false });
                         }
                     })
                 )
