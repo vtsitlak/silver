@@ -94,21 +94,25 @@ export class AuthFacade {
     }
 
     sign(credentials: LoginUser): void {
+        this.store.clearError();
         this.pendingNavigation.set('/tabs/dashboard');
         this.store.sign(credentials);
     }
 
     signWithGoogle(): void {
+        this.store.clearError();
         this.pendingNavigation.set('/tabs/dashboard');
         this.store.signWithGoogle();
     }
 
     register(newUser: NewUser): void {
+        this.store.clearError();
         this.pendingNavigation.set('/tabs/dashboard');
         this.store.register(newUser);
     }
 
     sendPasswordResetEmail(email: string): void {
+        this.store.clearError();
         this.pendingNavigation.set('/auth/login');
         this.store.sendPasswordResetEmail(email);
     }
@@ -122,6 +126,7 @@ export class AuthFacade {
     }
 
     logout(): void {
+        this.store.clearError();
         this.pendingNavigation.set('/auth/login');
         this.store.logout();
     }
