@@ -2,9 +2,9 @@ import { signal, type WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { ToastService } from '@silver/tabata/helpers';
+import type { LoginUser, NewUser } from './auth.models';
 import { AuthFacade } from './auth.facade';
 import { AuthStore } from './auth.store';
-import type { LoginUser, NewUser } from './auth.models';
 
 jest.mock('@silver/tabata/helpers', () => ({
     ToastService: class ToastService {}
@@ -113,5 +113,45 @@ describe('AuthFacade', () => {
         expect(store.clearError).toHaveBeenCalledTimes(1);
         expect(store.register).toHaveBeenCalledWith(newUser);
         expect(store.clearError.mock.invocationCallOrder[0]).toBeLessThan(store.register.mock.invocationCallOrder[0]);
+    });
+
+    it('clears stale auth errors before signing in with Google', () => {
+        // Arrange
+        store.loginError.set('Popup closed');
+
+        // Act
+        facade.signWithGoogle();
+
+        // Assert
+        expect(store.clearError).toHaveBeenCalledTimes(1);
+        expect(store.signWithGoogle).toHaveBeenCalledTimes(1);
+        expect(store.clearError.mock.invocationCallOrder[0]).toBeLessThan(store.signWithGoogle.mock.invocationCallOrder[0]);
+    });
+
+    it('clears stale auth errors before sending a password reset email', () => {
+        // Arrange
+        const email = 'test@example.com';
+        store.loginError.set('Invalid credentials');
+
+        // Act
+        facade.sendPasswordResetEmail(email);
+
+        // Assert
+        expect(store.clearError).toHaveBeenCalledTimes(1);
+        expect(store.sendPasswordResetEmail).toHaveBeenCalledWith(email);
+        expect(store.clearError.mock.invocationCallOrder[0]).toBeLessThan(store.sendPasswordResetEmail.mock.invocationCallOrder[0]);
+    });
+
+    it('clears stale auth errors before logging out', () => {
+        // Arrange
+        store.updatePasswordError.set('Requires recent login');
+
+        // Act
+        facade.logout();
+
+        // Assert
+        expect(store.clearError).toHaveBeenCalledTimes(1);
+        expect(store.logout).toHaveBeenCalledTimes(1);
+        expect(store.clearError.mock.invocationCallOrder[0]).toBeLessThan(store.logout.mock.invocationCallOrder[0]);
     });
 });
