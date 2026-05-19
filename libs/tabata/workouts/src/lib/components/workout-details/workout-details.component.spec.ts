@@ -5,7 +5,7 @@ import { ModalController } from '@ionic/angular/standalone';
 import { WorkoutDetailsComponent } from './workout-details.component';
 import { WorkoutsFacade, TabataBlock } from '@silver/tabata/states/workouts';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
-import { UserWorkoutsFacade } from '@silver/tabata/states/user-workouts';
+import { UserWorkoutsFacade, type UserWorkout } from '@silver/tabata/states/user-workouts';
 import {
     mockAuthFacade,
     mockUserWorkoutsFacade,
@@ -26,6 +26,10 @@ describe('WorkoutDetailsComponent', () => {
     beforeEach(async () => {
         mockWorkoutsFacade = createMockWorkoutsFacade();
         mockExercisesFacade = createMockExercisesFacade();
+        mockAuthFacade.user.set(null);
+        mockUserWorkoutsFacade.userWorkout = () => null;
+        mockUserWorkoutsFacade.saveUserWorkout.mockReset();
+        mockUserWorkoutsFacade.getOrCreateUserWorkout.mockReset();
         await TestBed.configureTestingModule({
             imports: [WorkoutDetailsComponent],
             providers: [
@@ -113,5 +117,44 @@ describe('WorkoutDetailsComponent', () => {
 
     it('should call loadExercisesMap with workout exercise ids when workout is set', () => {
         expect(mockExercisesFacade.loadExercisesMap).toHaveBeenCalledWith(['Burpees']);
+    });
+
+    it('does not overwrite user workout data when toggling favorite before hydration', () => {
+        // Arrange
+        mockAuthFacade.user.set({ uid: 'user1' });
+
+        // Act
+        component.toggleFavorite();
+
+        // Assert
+        expect(mockUserWorkoutsFacade.saveUserWorkout).not.toHaveBeenCalled();
+        expect(mockUserWorkoutsFacade.getOrCreateUserWorkout).toHaveBeenCalledWith('user1');
+    });
+
+    it('preserves workout history when adding a favorite from hydrated data', () => {
+        // Arrange
+        const current: UserWorkout = {
+            userId: 'user1',
+            favoriteWorkouts: ['existing-favorite'],
+            workoutItems: [
+                {
+                    workoutId: 'completed-workout',
+                    startedAt: '2026-01-01T00:00:00.000Z',
+                    finishedAt: '2026-01-01T00:10:00.000Z',
+                    completed: true
+                }
+            ]
+        };
+        mockAuthFacade.user.set({ uid: 'user1' });
+        mockUserWorkoutsFacade.userWorkout = () => current;
+
+        // Act
+        component.toggleFavorite();
+
+        // Assert
+        expect(mockUserWorkoutsFacade.saveUserWorkout).toHaveBeenCalledWith({
+            ...current,
+            favoriteWorkouts: ['existing-favorite', '1']
+        });
     });
 });

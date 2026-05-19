@@ -23,7 +23,6 @@ import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { AuthFacade } from '@silver/tabata/auth';
 import { UserWorkoutsFacade } from '@silver/tabata/states/user-workouts';
-import type { UserWorkoutItem } from '@silver/tabata/states/user-workouts';
 import { computed } from '@angular/core';
 import { formatDurationMinutes, getBlockDurationMinutes, formatSecondsToMinutes, resolveExerciseName } from '@silver/tabata/helpers';
 import { ToolbarComponent } from '@silver/tabata/ui';
@@ -134,11 +133,15 @@ export class WorkoutDetailsComponent {
         if (!id || !userId) return;
 
         const current = this.userWorkoutsFacade.userWorkout();
-        const base = current?.userId === userId ? current : { userId, favoriteWorkouts: [] as string[], workoutItems: [] as UserWorkoutItem[] };
-        const favs = base.favoriteWorkouts ?? [];
+        if (current?.userId !== userId) {
+            this.userWorkoutsFacade.getOrCreateUserWorkout(userId);
+            return;
+        }
+
+        const favs = current.favoriteWorkouts ?? [];
         const isFav = favs.includes(id);
         const newFavs = isFav ? favs.filter((f) => f !== id) : [...favs, id];
-        this.userWorkoutsFacade.saveUserWorkout({ ...base, favoriteWorkouts: newFavs });
+        this.userWorkoutsFacade.saveUserWorkout({ ...current, favoriteWorkouts: newFavs });
     }
 
     /** Expose helpers for template (duration/block formatting). */
