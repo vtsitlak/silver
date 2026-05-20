@@ -60,9 +60,11 @@ export class WorkoutPlayerComponent implements OnDestroy {
     /** Current workout session to record (startedAt set on first play; finishedAt/completed on finish or cancel). */
     readonly currentSession = signal<UserWorkoutItem | null>(null);
     private readonly pendingSession = signal<PendingWorkoutSession | null>(null);
+    readonly isSavingSession = computed(() => this.pendingSession() !== null);
 
     private keepAwakeActive = false;
     private pageActive = true;
+    private navigateAfterPendingSessionSave = false;
 
     readonly currentSegment = computed(() => this.segments()[this.currentIndex()] ?? null);
 
@@ -119,6 +121,10 @@ export class WorkoutPlayerComponent implements OnDestroy {
             const session = this.currentSession();
             if (session?.workoutId === pending.item.workoutId && session.startedAt === pending.item.startedAt) {
                 this.currentSession.set(null);
+            }
+            if (this.navigateAfterPendingSessionSave) {
+                this.navigateAfterPendingSessionSave = false;
+                this.router.navigate(['/tabs/workouts']);
             }
         });
 
@@ -316,7 +322,7 @@ export class WorkoutPlayerComponent implements OnDestroy {
 
     async cancel(): Promise<void> {
         if (this.finished()) {
-            this.router.navigate(['/tabs/workouts']);
+            this.navigateToWorkoutsAfterSessionSave();
             return;
         }
 
@@ -336,7 +342,7 @@ export class WorkoutPlayerComponent implements OnDestroy {
                             this.finishSession(false);
                         }
                         this.clearTimer();
-                        this.router.navigate(['/tabs/workouts']);
+                        this.navigateToWorkoutsAfterSessionSave();
                     }
                 },
                 {
@@ -372,6 +378,17 @@ export class WorkoutPlayerComponent implements OnDestroy {
 
         this.pendingSession.set({ userId, item });
         this.userWorkoutsFacade.getOrCreateUserWorkout(userId);
+    }
+
+    private navigateToWorkoutsAfterSessionSave(): void {
+        const pending = this.pendingSession();
+        if (!pending) {
+            this.router.navigate(['/tabs/workouts']);
+            return;
+        }
+
+        this.navigateAfterPendingSessionSave = true;
+        this.userWorkoutsFacade.getOrCreateUserWorkout(pending.userId);
     }
 
     private saveSessionItem(current: UserWorkout, item: UserWorkoutItem): void {

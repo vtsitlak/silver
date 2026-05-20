@@ -1,7 +1,7 @@
 import { signal, type WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { WorkoutPlayerComponent } from './workout-player.component';
 import { WorkoutsFacade } from '@silver/tabata/states/workouts';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
@@ -190,5 +190,59 @@ describe('WorkoutPlayerComponent', () => {
             ]
         });
         expect(component.currentSession()).toBeNull();
+    });
+
+    it('waits to leave the finished player until a pending session is saved', async () => {
+        // Arrange
+        const router = TestBed.inject(Router);
+        const navigateSpy = jest.spyOn(router, 'navigate').mockResolvedValue(true);
+        const existingItem: UserWorkoutItem = {
+            workoutId: 'old-workout',
+            startedAt: '2026-01-01T00:00:00.000Z',
+            finishedAt: '2026-01-01T00:10:00.000Z',
+            completed: true
+        };
+        component.workoutId.set('w1');
+        component.segments.set([{ phase: 'warmup', label: 'Warmup', durationSeconds: 10, exerciseId: 'e1', isRest: false }]);
+        component.currentSession.set({
+            workoutId: 'w1',
+            startedAt: '2026-01-02T00:00:00.000Z',
+            finishedAt: '',
+            completed: false
+        });
+        userWorkoutsFacade.getOrCreateUserWorkout.mockClear();
+        component.skip();
+
+        // Act
+        await component.cancel();
+
+        // Assert
+        expect(navigateSpy).not.toHaveBeenCalled();
+        expect(userWorkoutsFacade.saveUserWorkout).not.toHaveBeenCalled();
+        expect(userWorkoutsFacade.getOrCreateUserWorkout).toHaveBeenCalledWith('user1');
+
+        // Act
+        userWorkoutState.set({
+            userId: 'user1',
+            favoriteWorkouts: ['favorite-workout'],
+            workoutItems: [existingItem]
+        });
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        // Assert
+        expect(userWorkoutsFacade.saveUserWorkout).toHaveBeenCalledWith({
+            userId: 'user1',
+            favoriteWorkouts: ['favorite-workout'],
+            workoutItems: [
+                existingItem,
+                expect.objectContaining({
+                    workoutId: 'w1',
+                    startedAt: '2026-01-02T00:00:00.000Z',
+                    completed: true
+                })
+            ]
+        });
+        expect(navigateSpy).toHaveBeenCalledWith(['/tabs/workouts']);
     });
 });
