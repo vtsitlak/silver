@@ -75,6 +75,63 @@ describe('UserWorkoutsStore', () => {
         expect(userWorkoutsService.saveUserWorkout).toHaveBeenNthCalledWith(2, secondPayload);
         expect(store.userWorkout()).toEqual(secondPayload);
     });
+
+    it('keeps queued save payloads visible so later appends cannot overwrite them with stale history', () => {
+        // Arrange
+        const firstItem = createWorkoutItem('first-session');
+        const secondItem = createWorkoutItem('second-session');
+        const thirdItem = createWorkoutItem('third-session');
+        const firstPayload = createUserWorkout([firstItem]);
+
+        // Act
+        store.saveUserWorkout(firstPayload);
+        const stateAfterFirstSave = store.userWorkout();
+        const secondPayload: UserWorkout = {
+            ...(stateAfterFirstSave as UserWorkout),
+            workoutItems: [...(stateAfterFirstSave?.workoutItems ?? []), secondItem]
+        };
+        store.saveUserWorkout(secondPayload);
+        const stateAfterSecondSave = store.userWorkout();
+        const thirdPayload: UserWorkout = {
+            ...(stateAfterSecondSave as UserWorkout),
+            workoutItems: [...(stateAfterSecondSave?.workoutItems ?? []), thirdItem]
+        };
+        store.saveUserWorkout(thirdPayload);
+
+        // Assert
+        expect(stateAfterSecondSave?.workoutItems).toEqual([firstItem, secondItem]);
+        expect(thirdPayload.workoutItems).toEqual([firstItem, secondItem, thirdItem]);
+        expect(store.userWorkout()).toEqual(thirdPayload);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(1);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenNthCalledWith(1, firstPayload);
+
+        // Act
+        saveResponses[0].next(firstPayload);
+        saveResponses[0].complete();
+
+        // Assert
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(2);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenNthCalledWith(2, secondPayload);
+        expect(store.userWorkout()).toEqual(thirdPayload);
+
+        // Act
+        saveResponses[1].next(secondPayload);
+        saveResponses[1].complete();
+
+        // Assert
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(3);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenNthCalledWith(3, thirdPayload);
+        expect(store.userWorkout()).toEqual(thirdPayload);
+
+        // Act
+        saveResponses[2].next(thirdPayload);
+        saveResponses[2].complete();
+
+        // Assert
+        expect(store.userWorkout()).toEqual(thirdPayload);
+        expect(store.isLoading()).toBe(false);
+        expect(store.error()).toBeNull();
+    });
 });
 
 function createUserWorkout(workoutItems: UserWorkoutItem[]): UserWorkout {
