@@ -1,7 +1,7 @@
 import { computed, inject } from '@angular/core';
 import { signalStore, withState, withMethods, patchState, withComputed } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { tap, switchMap, catchError } from 'rxjs/operators';
+import { tap, switchMap, concatMap, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { Subject } from 'rxjs';
 import { tapResponse } from '@ngrx/operators';
@@ -43,9 +43,9 @@ export const UserWorkoutsStore = signalStore(
 
         rxMethod<UserWorkout>((payload$) =>
             payload$.pipe(
-                tap(() => patchState(store, { isLoading: true, error: null })),
-                switchMap((payload) =>
-                    userWorkoutsService.saveUserWorkout(payload).pipe(
+                concatMap((payload) => {
+                    patchState(store, { userWorkout: payload, isLoading: true, error: null });
+                    return userWorkoutsService.saveUserWorkout(payload).pipe(
                         tapResponse({
                             next: (saved) => patchState(store, { userWorkout: saved, isLoading: false }),
                             error: (err: Error) => patchState(store, { error: err.message, isLoading: false })
@@ -57,8 +57,8 @@ export const UserWorkoutsStore = signalStore(
                             });
                             return of(null as unknown as UserWorkout);
                         })
-                    )
-                )
+                    );
+                })
             )
         )(saveTrigger);
 
