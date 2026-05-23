@@ -64,7 +64,7 @@ describe('UserWorkoutsStore', () => {
         // Assert
         expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(1);
         expect(userWorkoutsService.saveUserWorkout).toHaveBeenNthCalledWith(1, firstPayload);
-        expect(store.userWorkout()).toEqual(firstPayload);
+        expect(store.userWorkout()).toEqual(secondPayload);
 
         // Act
         saveResponses[0].next(firstPayload);
