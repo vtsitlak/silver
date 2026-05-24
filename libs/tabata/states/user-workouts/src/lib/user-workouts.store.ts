@@ -1,7 +1,7 @@
 import { computed, inject } from '@angular/core';
 import { signalStore, withState, withMethods, patchState, withComputed } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { tap, switchMap, concatMap, catchError } from 'rxjs/operators';
+import { tap, switchMap, concatMap, catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { Subject } from 'rxjs';
 import { tapResponse } from '@ngrx/operators';
@@ -19,6 +19,7 @@ export const UserWorkoutsStore = signalStore(
         const loadTrigger = new Subject<string>();
         const saveTrigger = new Subject<UserWorkout>();
         const getOrCreateTrigger = new Subject<string>();
+        let latestSaveRequestId = 0;
 
         rxMethod<string>((userId$) =>
             userId$.pipe(
@@ -43,18 +44,29 @@ export const UserWorkoutsStore = signalStore(
 
         rxMethod<UserWorkout>((payload$) =>
             payload$.pipe(
-                concatMap((payload) => {
-                    patchState(store, { userWorkout: payload, isLoading: true, error: null });
+                map((payload) => ({ payload, requestId: ++latestSaveRequestId })),
+                tap(({ payload }) => patchState(store, { userWorkout: payload, isLoading: true, error: null })),
+                concatMap(({ payload, requestId }) => {
                     return userWorkoutsService.saveUserWorkout(payload).pipe(
                         tapResponse({
-                            next: (saved) => patchState(store, { userWorkout: saved, isLoading: false }),
-                            error: (err: Error) => patchState(store, { error: err.message, isLoading: false })
+                            next: (saved) => {
+                                if (requestId === latestSaveRequestId) {
+                                    patchState(store, { userWorkout: saved, isLoading: false });
+                                }
+                            },
+                            error: (err: Error) => {
+                                if (requestId === latestSaveRequestId) {
+                                    patchState(store, { error: err.message, isLoading: false });
+                                }
+                            }
                         }),
                         catchError((err: unknown) => {
-                            patchState(store, {
-                                error: err instanceof Error ? err.message : String(err),
-                                isLoading: false
-                            });
+                            if (requestId === latestSaveRequestId) {
+                                patchState(store, {
+                                    error: err instanceof Error ? err.message : String(err),
+                                    isLoading: false
+                                });
+                            }
                             return of(null as unknown as UserWorkout);
                         })
                     );
