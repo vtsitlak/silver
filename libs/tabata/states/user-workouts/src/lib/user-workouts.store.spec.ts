@@ -52,6 +52,28 @@ describe('UserWorkoutsStore', () => {
         expect(secondPayload.workoutItems).toEqual([firstItem, secondItem]);
     });
 
+    it('exposes every queued save payload before older requests complete so repeated appends do not drop history', () => {
+        // Arrange
+        const firstItem = createWorkoutItem('first-session');
+        const secondItem = createWorkoutItem('second-session');
+        const thirdItem = createWorkoutItem('third-session');
+
+        // Act
+        store.saveUserWorkout(createUserWorkout([firstItem]));
+        const stateAfterFirstSave = store.userWorkout();
+        const secondPayload = createUserWorkout([...(stateAfterFirstSave?.workoutItems ?? []), secondItem]);
+        store.saveUserWorkout(secondPayload);
+        const stateAfterSecondSave = store.userWorkout();
+        const thirdPayload = createUserWorkout([...(stateAfterSecondSave?.workoutItems ?? []), thirdItem]);
+        store.saveUserWorkout(thirdPayload);
+
+        // Assert
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(1);
+        expect(stateAfterSecondSave?.workoutItems).toEqual([firstItem, secondItem]);
+        expect(thirdPayload.workoutItems).toEqual([firstItem, secondItem, thirdItem]);
+        expect(store.userWorkout()).toEqual(thirdPayload);
+    });
+
     it('serializes save requests so a later save cannot cancel an earlier workout history write', () => {
         // Arrange
         const firstPayload = createUserWorkout([createWorkoutItem('first-session')]);
@@ -73,6 +95,22 @@ describe('UserWorkoutsStore', () => {
         // Assert
         expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(2);
         expect(userWorkoutsService.saveUserWorkout).toHaveBeenNthCalledWith(2, secondPayload);
+        expect(store.userWorkout()).toEqual(secondPayload);
+    });
+
+    it('ignores stale responses from older saves while newer payloads are queued', () => {
+        // Arrange
+        const firstPayload = createUserWorkout([createWorkoutItem('first-session')]);
+        const secondPayload = createUserWorkout([createWorkoutItem('first-session'), createWorkoutItem('second-session')]);
+
+        // Act
+        store.saveUserWorkout(firstPayload);
+        store.saveUserWorkout(secondPayload);
+        saveResponses[0].next(firstPayload);
+        saveResponses[0].complete();
+
+        // Assert
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(2);
         expect(store.userWorkout()).toEqual(secondPayload);
     });
 });
