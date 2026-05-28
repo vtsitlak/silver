@@ -52,6 +52,52 @@ describe('UserWorkoutsStore', () => {
         expect(secondPayload.workoutItems).toEqual([firstItem, secondItem]);
     });
 
+    it('keeps every queued save visible so a third rapid save cannot drop the second save payload', () => {
+        // Arrange
+        const firstItem = createWorkoutItem('first-session');
+        const secondItem = createWorkoutItem('second-session');
+        const thirdItem = createWorkoutItem('third-session');
+        const firstPayload = createUserWorkout([firstItem]);
+
+        // Act
+        store.saveUserWorkout(firstPayload);
+        const stateAfterFirstSave = store.userWorkout();
+        const secondPayload = createUserWorkout([...(stateAfterFirstSave?.workoutItems ?? []), secondItem]);
+        store.saveUserWorkout(secondPayload);
+        const stateAfterSecondSave = store.userWorkout();
+        const thirdPayload = createUserWorkout([...(stateAfterSecondSave?.workoutItems ?? []), thirdItem]);
+        store.saveUserWorkout(thirdPayload);
+
+        // Assert
+        expect(stateAfterSecondSave?.workoutItems).toEqual([firstItem, secondItem]);
+        expect(thirdPayload.workoutItems).toEqual([firstItem, secondItem, thirdItem]);
+        expect(store.userWorkout()).toEqual(thirdPayload);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(1);
+
+        // Act
+        saveResponses[0].next(firstPayload);
+        saveResponses[0].complete();
+
+        // Assert
+        expect(store.userWorkout()).toEqual(thirdPayload);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(2);
+
+        // Act
+        saveResponses[1].next(secondPayload);
+        saveResponses[1].complete();
+
+        // Assert
+        expect(store.userWorkout()).toEqual(thirdPayload);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(3);
+
+        // Act
+        saveResponses[2].next(thirdPayload);
+        saveResponses[2].complete();
+
+        // Assert
+        expect(store.userWorkout()).toEqual(thirdPayload);
+    });
+
     it('serializes save requests so a later save cannot cancel an earlier workout history write', () => {
         // Arrange
         const firstPayload = createUserWorkout([createWorkoutItem('first-session')]);
@@ -64,7 +110,7 @@ describe('UserWorkoutsStore', () => {
         // Assert
         expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(1);
         expect(userWorkoutsService.saveUserWorkout).toHaveBeenNthCalledWith(1, firstPayload);
-        expect(store.userWorkout()).toEqual(firstPayload);
+        expect(store.userWorkout()).toEqual(secondPayload);
 
         // Act
         saveResponses[0].next(firstPayload);
