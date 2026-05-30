@@ -1,6 +1,37 @@
 process.env['UPSTASH_URL'] = 'https://upstash.example';
 process.env['UPSTASH_TOKEN'] = 'test-token';
 
+class TestRequest {
+    readonly method: string;
+    private readonly body: string | undefined;
+
+    constructor(readonly url: string, init?: { method?: string; body?: string }) {
+        this.method = init?.method ?? 'GET';
+        this.body = init?.body;
+    }
+
+    async json(): Promise<unknown> {
+        return this.body ? JSON.parse(this.body) : null;
+    }
+}
+
+class TestResponse {
+    readonly ok: boolean;
+    readonly status: number;
+
+    constructor(private readonly body: string | null, init?: { status?: number }) {
+        this.status = init?.status ?? 200;
+        this.ok = this.status >= 200 && this.status < 300;
+    }
+
+    async json(): Promise<unknown> {
+        return this.body ? JSON.parse(this.body) : null;
+    }
+}
+
+global.Request = TestRequest as unknown as typeof Request;
+global.Response = TestResponse as unknown as typeof Response;
+
 const handler = require('../../api/user-workouts').default as {
     fetch: (request: Request) => Promise<Response>;
 };
