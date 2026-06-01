@@ -132,6 +132,58 @@ describe('UserWorkoutsStore', () => {
         expect(store.isLoading()).toBe(false);
         expect(store.error()).toBeNull();
     });
+
+    it('does not let a refresh overwrite pending save state with stale user workout data', () => {
+        // Arrange
+        const completedItem = createWorkoutItem('completed-session');
+        const pendingPayload = createUserWorkout([completedItem]);
+
+        // Act
+        store.saveUserWorkout(pendingPayload);
+        store.getOrCreateUserWorkout('user1');
+        const nextPayload: UserWorkout = {
+            ...(store.userWorkout() as UserWorkout),
+            favoriteWorkouts: ['favorite-workout']
+        };
+        store.saveUserWorkout(nextPayload);
+
+        // Assert
+        expect(userWorkoutsService.getOrCreateUserWorkout).not.toHaveBeenCalled();
+        expect(nextPayload.workoutItems).toEqual([completedItem]);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(1);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenNthCalledWith(1, pendingPayload);
+
+        // Act
+        saveResponses[0].next(pendingPayload);
+        saveResponses[0].complete();
+        saveResponses[1].next(nextPayload);
+        saveResponses[1].complete();
+
+        // Assert
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(2);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenNthCalledWith(2, nextPayload);
+        expect(store.userWorkout()).toEqual(nextPayload);
+    });
+
+    it('ignores refresh responses that started before a newer save', () => {
+        // Arrange
+        const refreshResponse = new Subject<UserWorkout>();
+        userWorkoutsService.getOrCreateUserWorkout.mockReturnValueOnce(refreshResponse.asObservable());
+        const pendingPayload = createUserWorkout([createWorkoutItem('completed-session')]);
+        const stalePayload = createUserWorkout([]);
+
+        // Act
+        store.getOrCreateUserWorkout('user1');
+        store.saveUserWorkout(pendingPayload);
+        saveResponses[0].next(pendingPayload);
+        saveResponses[0].complete();
+        refreshResponse.next(stalePayload);
+        refreshResponse.complete();
+
+        // Assert
+        expect(store.userWorkout()).toEqual(pendingPayload);
+        expect(store.isLoading()).toBe(false);
+    });
 });
 
 function createUserWorkout(workoutItems: UserWorkoutItem[]): UserWorkout {
