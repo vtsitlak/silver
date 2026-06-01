@@ -42,6 +42,15 @@ export const UserWorkoutsStore = signalStore(
             patchState(store, { userWorkout, isLoading: false });
         };
 
+        const queueSaveUserWorkout = (userWorkout: UserWorkout): void => {
+            const requestId = latestSaveRequestId + 1;
+            latestSaveRequestId = requestId;
+            userWorkoutRevision += 1;
+            latestPendingSaveByUserId.set(userWorkout.userId, requestId);
+            patchState(store, { userWorkout, isLoading: true, error: null });
+            saveTrigger.next({ requestId, userWorkout });
+        };
+
         rxMethod<UserWorkoutLoadRequest>((request$) =>
             request$.pipe(
                 tap(() => patchState(store, { isLoading: true, error: null })),
@@ -104,9 +113,18 @@ export const UserWorkoutsStore = signalStore(
                 tap(() => patchState(store, { isLoading: true, error: null })),
                 switchMap((request) => {
                     const { userId } = request;
-                    return userWorkoutsService.getOrCreateUserWorkout(userId).pipe(
+                    return userWorkoutsService.getUserWorkout(userId).pipe(
                         tapResponse({
-                            next: (userWorkout) => applyLoadedUserWorkout(request, userWorkout),
+                            next: (userWorkout) => {
+                                if (userWorkout) {
+                                    applyLoadedUserWorkout(request, userWorkout);
+                                    return;
+                                }
+                                if (request.revision !== userWorkoutRevision || hasPendingSaveForUser(userId)) {
+                                    return;
+                                }
+                                queueSaveUserWorkout({ userId, favoriteWorkouts: [], workoutItems: [] });
+                            },
                             error: (err: Error) => patchState(store, { error: err.message, isLoading: false })
                         }),
                         catchError((err: unknown) => {
@@ -126,14 +144,7 @@ export const UserWorkoutsStore = signalStore(
                 if (hasPendingSaveForUser(userId)) return;
                 loadTrigger.next({ userId, revision: userWorkoutRevision });
             },
-            saveUserWorkout: (userWorkout: UserWorkout) => {
-                const requestId = latestSaveRequestId + 1;
-                latestSaveRequestId = requestId;
-                userWorkoutRevision += 1;
-                latestPendingSaveByUserId.set(userWorkout.userId, requestId);
-                patchState(store, { userWorkout, isLoading: true, error: null });
-                saveTrigger.next({ requestId, userWorkout });
-            },
+            saveUserWorkout: queueSaveUserWorkout,
             getOrCreateUserWorkout: (userId: string) => {
                 if (hasPendingSaveForUser(userId)) return;
                 getOrCreateTrigger.next({ userId, revision: userWorkoutRevision });

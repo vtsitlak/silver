@@ -167,8 +167,8 @@ describe('UserWorkoutsStore', () => {
 
     it('ignores refresh responses that started before a newer save', () => {
         // Arrange
-        const refreshResponse = new Subject<UserWorkout>();
-        userWorkoutsService.getOrCreateUserWorkout.mockReturnValueOnce(refreshResponse.asObservable());
+        const refreshResponse = new Subject<UserWorkout | null>();
+        userWorkoutsService.getUserWorkout.mockReturnValueOnce(refreshResponse.asObservable());
         const pendingPayload = createUserWorkout([createWorkoutItem('completed-session')]);
         const stalePayload = createUserWorkout([]);
 
@@ -182,6 +182,32 @@ describe('UserWorkoutsStore', () => {
 
         // Assert
         expect(store.userWorkout()).toEqual(pendingPayload);
+        expect(store.isLoading()).toBe(false);
+    });
+
+    it('creates missing user workout records through the serialized save queue', () => {
+        // Arrange
+        const loadResponse = new Subject<UserWorkout | null>();
+        const emptyPayload = createUserWorkout([]);
+        userWorkoutsService.getUserWorkout.mockReturnValueOnce(loadResponse.asObservable());
+
+        // Act
+        store.getOrCreateUserWorkout('user1');
+        loadResponse.next(null);
+        loadResponse.complete();
+
+        // Assert
+        expect(userWorkoutsService.getUserWorkout).toHaveBeenCalledWith('user1');
+        expect(userWorkoutsService.getOrCreateUserWorkout).not.toHaveBeenCalled();
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(1);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenNthCalledWith(1, emptyPayload);
+
+        // Act
+        saveResponses[0].next(emptyPayload);
+        saveResponses[0].complete();
+
+        // Assert
+        expect(store.userWorkout()).toEqual(emptyPayload);
         expect(store.isLoading()).toBe(false);
     });
 });
