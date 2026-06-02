@@ -8,7 +8,7 @@ import type { UserWorkout, UserWorkoutItem } from './user-workouts.model';
 
 describe('UserWorkoutsStore', () => {
     let store: InstanceType<typeof UserWorkoutsStore>;
-    let authUser: WritableSignal<{ uid: string } | null>;
+    let activeUserId: WritableSignal<string | null>;
     let saveResponses: Subject<UserWorkout>[];
     let userWorkoutsService: {
         getUserWorkout: jest.Mock;
@@ -17,7 +17,7 @@ describe('UserWorkoutsStore', () => {
     };
 
     beforeEach(() => {
-        authUser = signal<{ uid: string } | null>({ uid: 'user1' });
+        activeUserId = signal<string | null>('user1');
         saveResponses = [];
         userWorkoutsService = {
             getUserWorkout: jest.fn(() => of(null)),
@@ -32,7 +32,7 @@ describe('UserWorkoutsStore', () => {
         TestBed.configureTestingModule({
             providers: [
                 UserWorkoutsStore,
-                { provide: USER_WORKOUTS_ACTIVE_USER_ID, useValue: authUser },
+                { provide: USER_WORKOUTS_ACTIVE_USER_ID, useValue: activeUserId },
                 { provide: UserWorkoutsService, useValue: userWorkoutsService }
             ]
         });
@@ -225,7 +225,7 @@ describe('UserWorkoutsStore', () => {
 
         // Act
         store.saveUserWorkout(userOnePayload);
-        authUser.set(null);
+        activeUserId.set(null);
         flushSignalEffects();
         saveResponses[0].next(userOnePayload);
         saveResponses[0].complete();
@@ -248,7 +248,7 @@ describe('UserWorkoutsStore', () => {
 
         // Act
         store.getOrCreateUserWorkout('user1');
-        authUser.set({ uid: 'user2' });
+        activeUserId.set('user2');
         flushSignalEffects();
         store.getOrCreateUserWorkout('user2');
         userOneResponse.next(userOnePayload);
