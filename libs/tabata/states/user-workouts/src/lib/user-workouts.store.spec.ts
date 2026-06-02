@@ -1,11 +1,14 @@
+import { signal, type WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Subject, of } from 'rxjs';
+import { AuthStore } from '@silver/tabata/states/auth';
 import { UserWorkoutsService } from './user-workouts.service';
 import { UserWorkoutsStore } from './user-workouts.store';
 import type { UserWorkout, UserWorkoutItem } from './user-workouts.model';
 
 describe('UserWorkoutsStore', () => {
     let store: InstanceType<typeof UserWorkoutsStore>;
+    let authUser: WritableSignal<{ uid: string } | null>;
     let saveResponses: Subject<UserWorkout>[];
     let userWorkoutsService: {
         getUserWorkout: jest.Mock;
@@ -14,6 +17,7 @@ describe('UserWorkoutsStore', () => {
     };
 
     beforeEach(() => {
+        authUser = signal<{ uid: string } | null>({ uid: 'user1' });
         saveResponses = [];
         userWorkoutsService = {
             getUserWorkout: jest.fn(() => of(null)),
@@ -26,7 +30,11 @@ describe('UserWorkoutsStore', () => {
         };
 
         TestBed.configureTestingModule({
-            providers: [UserWorkoutsStore, { provide: UserWorkoutsService, useValue: userWorkoutsService }]
+            providers: [
+                UserWorkoutsStore,
+                { provide: AuthStore, useValue: { user: authUser } },
+                { provide: UserWorkoutsService, useValue: userWorkoutsService }
+            ]
         });
 
         store = TestBed.inject(UserWorkoutsStore);
@@ -210,11 +218,53 @@ describe('UserWorkoutsStore', () => {
         expect(store.userWorkout()).toEqual(emptyPayload);
         expect(store.isLoading()).toBe(false);
     });
+
+    it('clears user workout state and ignores in-flight save responses when the active user changes', () => {
+        // Arrange
+        const userOnePayload = createUserWorkout([createWorkoutItem('user-one-session')], 'user1');
+
+        // Act
+        store.saveUserWorkout(userOnePayload);
+        authUser.set(null);
+        flushSignalEffects();
+        saveResponses[0].next(userOnePayload);
+        saveResponses[0].complete();
+
+        // Assert
+        expect(store.userWorkout()).toBeNull();
+        expect(store.isLoading()).toBe(false);
+        expect(store.error()).toBeNull();
+    });
+
+    it('ignores stale previous-user loads while allowing the next user to hydrate', () => {
+        // Arrange
+        const userOneResponse = new Subject<UserWorkout | null>();
+        const userTwoResponse = new Subject<UserWorkout | null>();
+        const userOnePayload = createUserWorkout([createWorkoutItem('user-one-session')], 'user1');
+        const userTwoPayload = createUserWorkout([createWorkoutItem('user-two-session')], 'user2');
+        userWorkoutsService.getUserWorkout
+            .mockReturnValueOnce(userOneResponse.asObservable())
+            .mockReturnValueOnce(userTwoResponse.asObservable());
+
+        // Act
+        store.getOrCreateUserWorkout('user1');
+        authUser.set({ uid: 'user2' });
+        flushSignalEffects();
+        store.getOrCreateUserWorkout('user2');
+        userOneResponse.next(userOnePayload);
+        userOneResponse.complete();
+        userTwoResponse.next(userTwoPayload);
+        userTwoResponse.complete();
+
+        // Assert
+        expect(store.userWorkout()).toEqual(userTwoPayload);
+        expect(store.isLoading()).toBe(false);
+    });
 });
 
-function createUserWorkout(workoutItems: UserWorkoutItem[]): UserWorkout {
+function createUserWorkout(workoutItems: UserWorkoutItem[], userId = 'user1'): UserWorkout {
     return {
-        userId: 'user1',
+        userId,
         favoriteWorkouts: [],
         workoutItems
     };
@@ -227,4 +277,8 @@ function createWorkoutItem(workoutId: string): UserWorkoutItem {
         finishedAt: `2026-01-01T00:10:00.000Z-${workoutId}`,
         completed: true
     };
+}
+
+function flushSignalEffects(): void {
+    TestBed.flushEffects();
 }
