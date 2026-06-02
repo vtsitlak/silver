@@ -32,6 +32,80 @@ interface UserWorkoutRecord {
     workoutItems: { workoutId: string; completed: boolean; startedAt: string; finishedAt: string }[];
 }
 
+interface UpstashResponse {
+    result?: unknown;
+    error?: string;
+}
+
+function userWorkoutKey(userId: string): string {
+    return `user_workouts:${encodeURIComponent(userId)}`;
+}
+
+function parseJsonResult<T>(result: unknown, fallback: T): T {
+    if (typeof result === 'string') {
+        return JSON.parse(result) as T;
+    }
+    return (result ?? fallback) as T;
+}
+
+function normalizeUserWorkout(body: Partial<UserWorkoutRecord> | null | undefined, userId: string): UserWorkoutRecord {
+    return {
+        userId,
+        favoriteWorkouts: Array.isArray(body?.favoriteWorkouts) ? body.favoriteWorkouts.map((id) => String(id)) : [],
+        workoutItems: Array.isArray(body?.workoutItems)
+            ? body.workoutItems.map((item) => ({
+                  workoutId: String(item?.workoutId ?? ''),
+                  completed: Boolean(item?.completed),
+                  startedAt: String(item?.startedAt ?? ''),
+                  finishedAt: String(item?.finishedAt ?? '')
+              }))
+            : []
+    };
+}
+
+async function postUpstashCommand(headers: Record<string, string>, command: string[]): Promise<UpstashResponse> {
+    const response = await fetch(UPSTASH_URL as string, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(command)
+    });
+    const data = (await response.json()) as UpstashResponse;
+    if (!response.ok || data.error) {
+        throw new Error(data.error ?? `Upstash request failed with status ${response.status}`);
+    }
+    return data;
+}
+
+async function readLegacyUserWorkouts(headers: Record<string, string>): Promise<UserWorkoutRecord[]> {
+    const response = await fetch(`${UPSTASH_URL}/JSON.GET/user_workouts`, { headers });
+    const data = (await response.json()) as UpstashResponse;
+    if (!response.ok || data.error) {
+        throw new Error(data.error ?? `Upstash request failed with status ${response.status}`);
+    }
+    const parsed = parseJsonResult<unknown>(data.result, []);
+    return Array.isArray(parsed) ? (parsed as UserWorkoutRecord[]) : [];
+}
+
+async function readUserWorkout(headers: Record<string, string>, userId: string): Promise<UserWorkoutRecord | null> {
+    const data = await postUpstashCommand(headers, ['JSON.GET', userWorkoutKey(userId)]);
+    const directRecord = parseJsonResult<UserWorkoutRecord | null>(data.result, null);
+    if (directRecord !== null) {
+        return normalizeUserWorkout(directRecord, userId);
+    }
+
+    const legacyList = await readLegacyUserWorkouts(headers);
+    const legacyRecord = legacyList.find((u) => String(u?.userId) === userId) ?? null;
+    return legacyRecord ? normalizeUserWorkout(legacyRecord, userId) : null;
+}
+
+async function deleteLegacyUserWorkout(headers: Record<string, string>, userId: string): Promise<void> {
+    const legacyList = await readLegacyUserWorkouts(headers);
+    const index = legacyList.findIndex((u) => String(u?.userId) === userId);
+    if (index < 0) return;
+
+    await postUpstashCommand(headers, ['JSON.DEL', 'user_workouts', `$[${index}]`]);
+}
+
 export default {
     async fetch(request: Request): Promise<Response> {
         if (request.method === 'OPTIONS') {
@@ -58,63 +132,21 @@ export default {
         }
 
         try {
-            const response = await fetch(`${UPSTASH_URL}/JSON.GET/user_workouts`, { headers });
-            const data = await response.json();
-            const parsed = typeof data.result === 'string' ? JSON.parse(data.result) : (data.result ?? []);
-            const list: UserWorkoutRecord[] = Array.isArray(parsed) ? parsed : [];
-            const index = list.findIndex((u: UserWorkoutRecord) => String(u?.userId) === userId);
-
             if (method === 'GET') {
-                const record = index >= 0 ? list[index] : null;
+                const record = await readUserWorkout(headers, userId);
                 return jsonResponse(JSON.stringify(record), 200);
             }
 
             if (method === 'DELETE') {
-                const newList = list.filter((u) => String(u?.userId) !== userId);
-                const setRes = await fetch(UPSTASH_URL, {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify(['JSON.SET', 'user_workouts', '$', JSON.stringify(newList)])
-                });
-                const setData = await setRes.json();
-                if (setData.error) {
-                    return jsonResponse(JSON.stringify({ error: setData.error }), 400);
-                }
+                await postUpstashCommand(headers, ['DEL', userWorkoutKey(userId)]);
+                await deleteLegacyUserWorkout(headers, userId);
                 return jsonResponse(JSON.stringify({ success: true }), 200);
             }
 
             if (method === 'PUT') {
-                const body = (await request.json()) as UserWorkoutRecord;
-                const normalized: UserWorkoutRecord = {
-                    userId: String(body.userId ?? userId),
-                    favoriteWorkouts: Array.isArray(body.favoriteWorkouts) ? body.favoriteWorkouts : [],
-                    workoutItems: Array.isArray(body.workoutItems)
-                        ? body.workoutItems.map((item) => ({
-                              workoutId: String(item.workoutId),
-                              completed: Boolean(item.completed),
-                              startedAt: String(item.startedAt ?? ''),
-                              finishedAt: String(item.finishedAt ?? '')
-                          }))
-                        : []
-                };
-
-                let newList: UserWorkoutRecord[];
-                if (index >= 0) {
-                    newList = [...list];
-                    newList[index] = normalized;
-                } else {
-                    newList = [...list, normalized];
-                }
-
-                const setRes = await fetch(UPSTASH_URL, {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify(['JSON.SET', 'user_workouts', '$', JSON.stringify(newList)])
-                });
-                const setData = await setRes.json();
-                if (setData.error) {
-                    return jsonResponse(JSON.stringify({ error: setData.error }), 400);
-                }
+                const body = (await request.json()) as Partial<UserWorkoutRecord>;
+                const normalized = normalizeUserWorkout(body, userId);
+                await postUpstashCommand(headers, ['JSON.SET', userWorkoutKey(userId), '$', JSON.stringify(normalized)]);
                 return jsonResponse(JSON.stringify(normalized), 200);
             }
 
