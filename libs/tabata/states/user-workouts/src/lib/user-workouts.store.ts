@@ -5,10 +5,10 @@ import { tap, switchMap, concatMap, catchError, finalize } from 'rxjs/operators'
 import { of } from 'rxjs';
 import { Subject } from 'rxjs';
 import { tapResponse } from '@ngrx/operators';
-import { AuthStore } from '@silver/tabata/states/auth';
 import { userWorkoutsInitialState, type UserWorkoutsState } from './user-workouts.model';
 import { UserWorkoutsService } from './user-workouts.service';
 import type { UserWorkout } from './user-workouts.model';
+import { USER_WORKOUTS_ACTIVE_USER_ID } from './user-workouts-active-user-id';
 
 interface SaveUserWorkoutRequest {
     requestId: number;
@@ -26,13 +26,13 @@ export const UserWorkoutsStore = signalStore(
     withComputed(({ userWorkout }) => ({
         hasUserWorkout: computed(() => userWorkout() !== null)
     })),
-    withMethods((store, userWorkoutsService = inject(UserWorkoutsService), authStore = inject(AuthStore)) => {
+    withMethods((store, userWorkoutsService = inject(UserWorkoutsService), activeUserIdSignal = inject(USER_WORKOUTS_ACTIVE_USER_ID)) => {
         const loadTrigger = new Subject<UserWorkoutLoadRequest>();
         const saveTrigger = new Subject<SaveUserWorkoutRequest>();
         const getOrCreateTrigger = new Subject<UserWorkoutLoadRequest>();
         let latestSaveRequestId = 0;
         let userWorkoutRevision = 0;
-        let activeUserId = authStore.user()?.uid ?? null;
+        let activeUserId = activeUserIdSignal();
         const latestPendingSaveByUserId = new Map<string, number>();
 
         const hasPendingSaveForUser = (userId: string): boolean => latestPendingSaveByUserId.has(userId);
@@ -46,7 +46,7 @@ export const UserWorkoutsStore = signalStore(
         };
 
         effect(() => {
-            const userId = authStore.user()?.uid ?? null;
+            const userId = activeUserIdSignal();
             if (userId === activeUserId) return;
             activeUserId = userId;
             resetUserWorkoutState();

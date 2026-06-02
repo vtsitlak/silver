@@ -1,7 +1,7 @@
 import { signal, type WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Subject, of } from 'rxjs';
-import { AuthStore } from '@silver/tabata/states/auth';
+import { USER_WORKOUTS_ACTIVE_USER_ID } from './user-workouts-active-user-id';
 import { UserWorkoutsService } from './user-workouts.service';
 import { UserWorkoutsStore } from './user-workouts.store';
 import type { UserWorkout, UserWorkoutItem } from './user-workouts.model';
@@ -32,7 +32,7 @@ describe('UserWorkoutsStore', () => {
         TestBed.configureTestingModule({
             providers: [
                 UserWorkoutsStore,
-                { provide: AuthStore, useValue: { user: authUser } },
+                { provide: USER_WORKOUTS_ACTIVE_USER_ID, useValue: authUser },
                 { provide: UserWorkoutsService, useValue: userWorkoutsService }
             ]
         });
