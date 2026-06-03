@@ -1,25 +1,21 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { Auth } from '@angular/fire/auth';
 import { UserWorkoutsService } from './user-workouts.service';
 import { USER_WORKOUTS_API_BASE_URL } from './user-workouts-api-base-url';
+import { USER_WORKOUTS_AUTH_TOKEN, type UserWorkoutsAuthTokenProvider } from './user-workouts-auth-token';
 
 describe('UserWorkoutsService', () => {
     let service: UserWorkoutsService;
     let httpMock: HttpTestingController;
-    let auth: { currentUser: { getIdToken: jest.Mock<Promise<string>, []> } | null };
+    let authTokenProvider: jest.MockedFunction<UserWorkoutsAuthTokenProvider>;
 
     beforeEach(() => {
-        auth = {
-            currentUser: {
-                getIdToken: jest.fn().mockResolvedValue('firebase-token')
-            }
-        };
+        authTokenProvider = jest.fn().mockResolvedValue('firebase-token');
 
         TestBed.configureTestingModule({
             imports: [HttpClientTestingModule],
             providers: [
-                { provide: Auth, useValue: auth },
+                { provide: USER_WORKOUTS_AUTH_TOKEN, useValue: authTokenProvider },
                 { provide: USER_WORKOUTS_API_BASE_URL, useValue: '' }
             ]
         });
@@ -92,7 +88,7 @@ describe('UserWorkoutsService', () => {
 
     it('fails before sending a request when there is no signed-in Firebase user', fakeAsync(() => {
         // Arrange
-        auth.currentUser = null;
+        authTokenProvider.mockReturnValue(null);
         let error: unknown;
 
         // Act

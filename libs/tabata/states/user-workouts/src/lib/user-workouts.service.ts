@@ -1,17 +1,17 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Auth } from '@angular/fire/auth';
 import { from, Observable, of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { map, switchMap } from 'rxjs/operators';
 import type { UserWorkout } from './user-workouts.model';
 import { USER_WORKOUTS_API_BASE_URL } from './user-workouts-api-base-url';
+import { USER_WORKOUTS_AUTH_TOKEN } from './user-workouts-auth-token';
 
 @Injectable({ providedIn: 'root' })
 export class UserWorkoutsService {
     private readonly http = inject(HttpClient);
-    private readonly auth = inject(Auth);
     private readonly baseUrl = inject(USER_WORKOUTS_API_BASE_URL);
+    private readonly authTokenProvider = inject(USER_WORKOUTS_AUTH_TOKEN);
 
     private apiUrl(path: string): string {
         const base = (this.baseUrl || '').replace(/\/$/, '');
@@ -20,12 +20,12 @@ export class UserWorkoutsService {
     }
 
     private authenticatedOptions(): Observable<{ headers: { Authorization: string } }> {
-        const currentUser = this.auth.currentUser;
-        if (!currentUser) {
+        const token = this.authTokenProvider();
+        if (!token) {
             return throwError(() => new Error('No user signed in.'));
         }
 
-        return from(currentUser.getIdToken()).pipe(map((token) => ({ headers: { Authorization: `Bearer ${token}` } })));
+        return from(Promise.resolve(token)).pipe(map((resolvedToken) => ({ headers: { Authorization: `Bearer ${resolvedToken}` } })));
     }
 
     /**
