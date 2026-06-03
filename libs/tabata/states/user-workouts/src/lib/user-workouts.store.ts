@@ -1,4 +1,4 @@
-import { computed, inject } from '@angular/core';
+import { computed, effect, inject } from '@angular/core';
 import { signalStore, withState, withMethods, patchState, withComputed } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tap, switchMap, concatMap, catchError, finalize } from 'rxjs/operators';
@@ -8,6 +8,7 @@ import { tapResponse } from '@ngrx/operators';
 import { userWorkoutsInitialState, type UserWorkoutsState } from './user-workouts.model';
 import { UserWorkoutsService } from './user-workouts.service';
 import type { UserWorkout } from './user-workouts.model';
+import { USER_WORKOUTS_ACTIVE_USER_ID } from './user-workouts-active-user-id';
 
 interface SaveUserWorkoutRequest {
     requestId: number;
@@ -25,24 +26,42 @@ export const UserWorkoutsStore = signalStore(
     withComputed(({ userWorkout }) => ({
         hasUserWorkout: computed(() => userWorkout() !== null)
     })),
-    withMethods((store, userWorkoutsService = inject(UserWorkoutsService)) => {
+    withMethods((store, userWorkoutsService = inject(UserWorkoutsService), activeUserIdSignal = inject(USER_WORKOUTS_ACTIVE_USER_ID)) => {
         const loadTrigger = new Subject<UserWorkoutLoadRequest>();
         const saveTrigger = new Subject<SaveUserWorkoutRequest>();
         const getOrCreateTrigger = new Subject<UserWorkoutLoadRequest>();
         let latestSaveRequestId = 0;
         let userWorkoutRevision = 0;
+        let activeUserId = activeUserIdSignal();
         const latestPendingSaveByUserId = new Map<string, number>();
 
         const hasPendingSaveForUser = (userId: string): boolean => latestPendingSaveByUserId.has(userId);
+        const isActiveUser = (userId: string): boolean => activeUserId === userId;
+
+        const resetUserWorkoutState = (): void => {
+            latestSaveRequestId += 1;
+            userWorkoutRevision += 1;
+            latestPendingSaveByUserId.clear();
+            patchState(store, userWorkoutsInitialState);
+        };
+
+        effect(() => {
+            const userId = activeUserIdSignal();
+            if (userId === activeUserId) return;
+            activeUserId = userId;
+            resetUserWorkoutState();
+        });
 
         const applyLoadedUserWorkout = ({ userId, revision }: UserWorkoutLoadRequest, userWorkout: UserWorkout | null): void => {
-            if (revision !== userWorkoutRevision || hasPendingSaveForUser(userId)) {
+            if (!isActiveUser(userId) || revision !== userWorkoutRevision || hasPendingSaveForUser(userId)) {
                 return;
             }
             patchState(store, { userWorkout, isLoading: false });
         };
 
         const queueSaveUserWorkout = (userWorkout: UserWorkout): void => {
+            if (!isActiveUser(userWorkout.userId)) return;
+
             const requestId = latestSaveRequestId + 1;
             latestSaveRequestId = requestId;
             userWorkoutRevision += 1;
@@ -79,7 +98,7 @@ export const UserWorkoutsStore = signalStore(
                     userWorkoutsService.saveUserWorkout(userWorkout).pipe(
                         tapResponse({
                             next: (saved) => {
-                                if (requestId === latestSaveRequestId) {
+                                if (requestId === latestSaveRequestId && isActiveUser(saved.userId)) {
                                     patchState(store, { userWorkout: saved, isLoading: false, error: null });
                                 }
                             },
@@ -141,12 +160,12 @@ export const UserWorkoutsStore = signalStore(
 
         return {
             loadUserWorkout: (userId: string) => {
-                if (hasPendingSaveForUser(userId)) return;
+                if (!isActiveUser(userId) || hasPendingSaveForUser(userId)) return;
                 loadTrigger.next({ userId, revision: userWorkoutRevision });
             },
             saveUserWorkout: queueSaveUserWorkout,
             getOrCreateUserWorkout: (userId: string) => {
-                if (hasPendingSaveForUser(userId)) return;
+                if (!isActiveUser(userId) || hasPendingSaveForUser(userId)) return;
                 getOrCreateTrigger.next({ userId, revision: userWorkoutRevision });
             }
         };

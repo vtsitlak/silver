@@ -7,6 +7,8 @@
 
 const UPSTASH_URL = process.env['UPSTASH_URL'];
 const UPSTASH_TOKEN = process.env['UPSTASH_TOKEN'];
+const FIREBASE_PROJECT_ID = process.env['FIREBASE_PROJECT_ID'] ?? 'tabata-ai-player';
+const FIREBASE_JWKS_URL = 'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com';
 
 const CORS_HEADERS: Record<string, string> = {
     'Access-Control-Allow-Origin': '*',
@@ -39,8 +41,108 @@ interface UpstashResponse {
     error?: string;
 }
 
+interface FirebaseJwtHeader {
+    alg?: string;
+    kid?: string;
+}
+
+interface FirebaseJwtPayload {
+    aud?: string;
+    exp?: number;
+    iat?: number;
+    iss?: string;
+    sub?: string;
+    user_id?: string;
+}
+
+interface FirebaseJwksResponse {
+    keys?: JsonWebKey[];
+}
+
+class AuthError extends Error {
+    constructor(
+        message: string,
+        readonly status: number = 401
+    ) {
+        super(message);
+    }
+}
+
 function userWorkoutKey(userId: string): string {
     return `user_workouts:${encodeURIComponent(userId)}`;
+}
+
+function legacyUserWorkoutPath(userId: string): string {
+    return `$[?(@.userId==${JSON.stringify(userId)})]`;
+}
+
+function decodeBase64Url(input: string): Uint8Array {
+    const normalized = input.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
+    if (typeof atob === 'function') {
+        const binary = atob(padded);
+        return Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    }
+    return Uint8Array.from(Buffer.from(padded, 'base64'));
+}
+
+function decodeJwtPart<T>(input: string): T {
+    return JSON.parse(new TextDecoder().decode(decodeBase64Url(input))) as T;
+}
+
+async function fetchFirebasePublicKeys(): Promise<JsonWebKey[]> {
+    const response = await fetch(FIREBASE_JWKS_URL);
+    const data = (await response.json()) as FirebaseJwksResponse;
+    if (!response.ok) {
+        throw new AuthError('Unable to verify bearer token');
+    }
+    return data.keys ?? [];
+}
+
+async function verifyFirebaseIdToken(token: string): Promise<string> {
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+        throw new AuthError('Invalid bearer token');
+    }
+
+    const [encodedHeader, encodedPayload, encodedSignature] = parts as [string, string, string];
+    const header = decodeJwtPart<FirebaseJwtHeader>(encodedHeader);
+    if (header.alg !== 'RS256' || !header.kid) {
+        throw new AuthError('Invalid bearer token');
+    }
+
+    const publicKeys = await fetchFirebasePublicKeys();
+    const publicKey = publicKeys.find((key) => key.kid === header.kid && key.alg === 'RS256');
+    if (!publicKey) {
+        throw new AuthError('Invalid bearer token');
+    }
+
+    const key = await crypto.subtle.importKey('jwk', publicKey, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
+    const signature = decodeBase64Url(encodedSignature);
+    const signedData = new TextEncoder().encode(`${encodedHeader}.${encodedPayload}`);
+    const isValid = await crypto.subtle.verify({ name: 'RSASSA-PKCS1-v1_5' }, key, signature, signedData);
+    if (!isValid) {
+        throw new AuthError('Invalid bearer token');
+    }
+
+    const payload = decodeJwtPart<FirebaseJwtPayload>(encodedPayload);
+    const now = Math.floor(Date.now() / 1000);
+    const expectedIssuer = `https://securetoken.google.com/${FIREBASE_PROJECT_ID}`;
+    const uid = payload.user_id ?? payload.sub;
+    if (payload.aud !== FIREBASE_PROJECT_ID || payload.iss !== expectedIssuer || !uid || payload.exp === undefined || payload.exp <= now) {
+        throw new AuthError('Invalid bearer token');
+    }
+
+    return uid;
+}
+
+async function requireAuthenticatedUserId(request: Request): Promise<string> {
+    const authorization = request.headers.get('Authorization');
+    const match = authorization?.match(/^Bearer\s+(.+)$/i);
+    if (!match) {
+        throw new AuthError('Missing bearer token');
+    }
+    return verifyFirebaseIdToken(match[1]!);
 }
 
 function parseJsonResult<T>(result: unknown, fallback: T): T {
@@ -101,11 +203,7 @@ async function readUserWorkout(headers: Record<string, string>, userId: string):
 }
 
 async function deleteLegacyUserWorkout(headers: Record<string, string>, userId: string): Promise<void> {
-    const legacyList = await readLegacyUserWorkouts(headers);
-    const index = legacyList.findIndex((u) => String(u?.userId) === userId);
-    if (index < 0) return;
-
-    await postUpstashCommand(headers, ['JSON.DEL', 'user_workouts', `$[${index}]`]);
+    await postUpstashCommand(headers, ['JSON.DEL', 'user_workouts', legacyUserWorkoutPath(userId)]);
 }
 
 export default {
@@ -135,6 +233,11 @@ export default {
         }
 
         try {
+            const authenticatedUserId = await requireAuthenticatedUserId(request);
+            if (authenticatedUserId !== userId) {
+                return jsonResponse(JSON.stringify({ error: 'Authenticated user cannot access another user workout record' }), 403);
+            }
+
             if (method === 'GET') {
                 const record = await readUserWorkout(headers, userId);
                 return jsonResponse(JSON.stringify(record), 200);
@@ -157,7 +260,8 @@ export default {
             return jsonResponse(JSON.stringify({ error: 'Method not allowed' }), 405);
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Internal Server Error';
-            return jsonResponse(JSON.stringify({ error: message }), 500);
+            const status = error instanceof AuthError ? error.status : 500;
+            return jsonResponse(JSON.stringify({ error: message }), status);
         }
     }
 };
