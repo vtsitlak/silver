@@ -56,6 +56,47 @@ describe('UserWorkoutsService', () => {
         req.flush(payload);
     }));
 
+    it('deleteUserWorkout should use the provided token without reading the current auth user', fakeAsync(() => {
+        // Arrange
+        authTokenProvider.mockReturnValue(null);
+
+        // Act
+        service.deleteUserWorkout('user1', 'captured-token').subscribe((data) => {
+            expect(data.success).toBe(true);
+        });
+        tick();
+
+        // Assert
+        expect(authTokenProvider).not.toHaveBeenCalled();
+        const req = httpMock.expectOne('/api/user-workouts/user1');
+        expect(req.request.method).toBe('DELETE');
+        expect(req.request.headers.get('Authorization')).toBe('Bearer captured-token');
+        req.flush({ success: true });
+    }));
+
+    it('deleteUserWorkout should keep the provided token for the wipe fallback', fakeAsync(() => {
+        // Arrange
+        authTokenProvider.mockReturnValue(null);
+
+        // Act
+        service.deleteUserWorkout('user1', 'captured-token').subscribe((data) => {
+            expect(data.success).toBe(true);
+        });
+        tick();
+
+        // Assert
+        const deleteReq = httpMock.expectOne('/api/user-workouts/user1');
+        expect(deleteReq.request.method).toBe('DELETE');
+        expect(deleteReq.request.headers.get('Authorization')).toBe('Bearer captured-token');
+        deleteReq.flush({ message: 'method disabled' }, { status: 405, statusText: 'Method Not Allowed' });
+        tick();
+
+        const putReq = httpMock.expectOne('/api/user-workouts/user1');
+        expect(putReq.request.method).toBe('PUT');
+        expect(putReq.request.headers.get('Authorization')).toBe('Bearer captured-token');
+        putReq.flush({ userId: 'user1', favoriteWorkouts: [], workoutItems: [] });
+    }));
+
     it('getOrCreateUserWorkout should return existing when GET returns data', fakeAsync(() => {
         const existing = { userId: 'u1', favoriteWorkouts: [], workoutItems: [] };
         service.getOrCreateUserWorkout('u1').subscribe((data) => {
