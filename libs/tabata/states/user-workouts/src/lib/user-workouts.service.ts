@@ -7,6 +7,8 @@ import type { UserWorkout } from './user-workouts.model';
 import { USER_WORKOUTS_API_BASE_URL } from './user-workouts-api-base-url';
 import { USER_WORKOUTS_AUTH_TOKEN } from './user-workouts-auth-token';
 
+type AuthToken = Promise<string> | string | null | undefined;
+
 @Injectable({ providedIn: 'root' })
 export class UserWorkoutsService {
     private readonly http = inject(HttpClient);
@@ -19,8 +21,8 @@ export class UserWorkoutsService {
         return base ? `${base}${p}` : p;
     }
 
-    private authenticatedOptions(): Observable<{ headers: { Authorization: string } }> {
-        const token = this.authTokenProvider();
+    private authenticatedOptions(authToken?: AuthToken): Observable<{ headers: { Authorization: string } }> {
+        const token = authToken ?? this.authTokenProvider();
         if (!token) {
             return throwError(() => new Error('No user signed in.'));
         }
@@ -43,8 +45,8 @@ export class UserWorkoutsService {
      * Create or update user workout data (upsert).
      * If a record for the userId exists it is updated; otherwise a new one is created.
      */
-    saveUserWorkout(userWorkout: UserWorkout): Observable<UserWorkout> {
-        return this.authenticatedOptions().pipe(
+    saveUserWorkout(userWorkout: UserWorkout, authToken?: AuthToken): Observable<UserWorkout> {
+        return this.authenticatedOptions(authToken).pipe(
             switchMap((options) =>
                 this.http.put<UserWorkout>(this.apiUrl(`/api/user-workouts/${encodeURIComponent(userWorkout.userId)}`), userWorkout, options)
             )
@@ -61,12 +63,12 @@ export class UserWorkoutsService {
     }
 
     /** DELETE user workout record by userId. */
-    deleteUserWorkout(userId: string): Observable<{ success: boolean }> {
-        return this.authenticatedOptions()
+    deleteUserWorkout(userId: string, authToken?: AuthToken): Observable<{ success: boolean }> {
+        return this.authenticatedOptions(authToken)
             .pipe(switchMap((options) => this.http.delete<{ success: boolean }>(this.apiUrl(`/api/user-workouts/${encodeURIComponent(userId)}`), options)))
             .pipe(
                 // Some deployments may not have DELETE enabled yet; fall back to wiping the record via upsert.
-                catchError(() => this.saveUserWorkout({ userId, favoriteWorkouts: [], workoutItems: [] }).pipe(switchMap(() => of({ success: true }))))
+                catchError(() => this.saveUserWorkout({ userId, favoriteWorkouts: [], workoutItems: [] }, authToken).pipe(switchMap(() => of({ success: true }))))
             );
     }
 }
