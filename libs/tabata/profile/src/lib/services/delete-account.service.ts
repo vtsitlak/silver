@@ -4,8 +4,8 @@ import { ToastService } from '@silver/tabata/helpers';
 import { AuthFacade } from '@silver/tabata/auth';
 import { AuthService } from '@silver/tabata/states/auth';
 import { WorkoutsService } from '@silver/tabata/states/workouts';
-import { UserWorkoutsService } from '@silver/tabata/states/user-workouts';
-import { catchError, concatMap, map, of, switchMap, toArray } from 'rxjs';
+import { USER_WORKOUTS_AUTH_TOKEN, UserWorkoutsService } from '@silver/tabata/states/user-workouts';
+import { catchError, concatMap, defer, from, map, of, switchMap, toArray, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class DeleteAccountService {
@@ -13,6 +13,7 @@ export class DeleteAccountService {
     private readonly authService = inject(AuthService);
     private readonly workoutsService = inject(WorkoutsService);
     private readonly userWorkoutsService = inject(UserWorkoutsService);
+    private readonly userWorkoutsAuthToken = inject(USER_WORKOUTS_AUTH_TOKEN);
     private readonly toast = inject(ToastService);
     private readonly router = inject(Router);
 
@@ -23,8 +24,15 @@ export class DeleteAccountService {
             return of(false);
         }
 
-        return this.authService.deleteCurrentUser().pipe(
-            switchMap(() =>
+        return defer(() => from(Promise.resolve(this.userWorkoutsAuthToken()))).pipe(
+            switchMap((userWorkoutsAuthToken) => {
+                if (!userWorkoutsAuthToken) {
+                    return throwError(() => new Error('No user signed in.'));
+                }
+
+                return this.authService.deleteCurrentUser().pipe(map(() => userWorkoutsAuthToken));
+            }),
+            switchMap((userWorkoutsAuthToken) =>
                 this.workoutsService.getWorkouts().pipe(
                     map((all) => all.filter((w) => w.createdByUserId === userId)),
                     switchMap((owned) =>
@@ -34,10 +42,11 @@ export class DeleteAccountService {
                                   concatMap((w) => this.workoutsService.deleteWorkout(w.id)),
                                   toArray()
                               )
-                    )
+                    ),
+                    map(() => userWorkoutsAuthToken)
                 )
             ),
-            switchMap(() => this.userWorkoutsService.deleteUserWorkout(userId)),
+            switchMap((userWorkoutsAuthToken) => this.userWorkoutsService.deleteUserWorkout(userId, userWorkoutsAuthToken)),
             map(() => true),
             catchError((err: unknown) => {
                 const message = err instanceof Error ? err.message : String(err);
