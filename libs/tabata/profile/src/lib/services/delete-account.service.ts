@@ -30,10 +30,7 @@ export class DeleteAccountService {
                     return throwError(() => new Error('No user signed in.'));
                 }
 
-                return this.authService.deleteCurrentUser().pipe(map(() => userWorkoutsAuthToken));
-            }),
-            switchMap((userWorkoutsAuthToken) =>
-                this.workoutsService.getWorkouts().pipe(
+                return this.workoutsService.getWorkouts().pipe(
                     map((all) => all.filter((w) => w.createdByUserId === userId)),
                     switchMap((owned) =>
                         owned.length === 0
@@ -43,10 +40,10 @@ export class DeleteAccountService {
                                   toArray()
                               )
                     ),
-                    map(() => userWorkoutsAuthToken)
-                )
-            ),
-            switchMap((userWorkoutsAuthToken) => this.userWorkoutsService.deleteUserWorkout(userId, userWorkoutsAuthToken)),
+                    switchMap(() => this.userWorkoutsService.deleteUserWorkout(userId, userWorkoutsAuthToken)),
+                    switchMap(() => this.authService.deleteCurrentUser())
+                );
+            }),
             map(() => true),
             catchError((err: unknown) => {
                 const message = err instanceof Error ? err.message : String(err);

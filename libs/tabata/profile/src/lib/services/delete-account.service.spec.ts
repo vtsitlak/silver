@@ -63,9 +63,27 @@ describe('DeleteAccountService', () => {
         userWorkoutsService.deleteUserWorkout.mockReturnValue(of({ success: true }));
     });
 
-    it('should capture the user-workouts token before deleting the user account', (done) => {
+    it('should clean up workout data with the captured token before deleting the user account', (done) => {
         // Arrange
+        const calls: string[] = [];
+        userWorkoutsAuthToken.mockImplementation(() => {
+            calls.push('capture-token');
+            return 'captured-token';
+        });
+        workoutsService.getWorkouts.mockImplementation(() => {
+            calls.push('get-workouts');
+            return of([createWorkout('w1', 'u1'), createWorkout('w2', 'other')]);
+        });
+        workoutsService.deleteWorkout.mockImplementation((id: string) => {
+            calls.push(`delete-workout:${id}`);
+            return of({ success: true });
+        });
+        userWorkoutsService.deleteUserWorkout.mockImplementation((userId: string, token?: string) => {
+            calls.push(`delete-user-workout:${userId}:${token}`);
+            return of({ success: true });
+        });
         authService.deleteCurrentUser.mockImplementationOnce(() => {
+            calls.push('delete-current-user');
             userWorkoutsAuthToken.mockReturnValue(null);
             return of(undefined);
         });
@@ -78,6 +96,13 @@ describe('DeleteAccountService', () => {
             expect(workoutsService.getWorkouts).toHaveBeenCalled();
             expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1');
             expect(userWorkoutsService.deleteUserWorkout).toHaveBeenCalledWith('u1', 'captured-token');
+            expect(calls).toEqual([
+                'capture-token',
+                'get-workouts',
+                'delete-workout:w1',
+                'delete-user-workout:u1:captured-token',
+                'delete-current-user'
+            ]);
             expect(toast.showSuccess).toHaveBeenCalledWith('Account deleted');
             expect(router.navigateByUrl).toHaveBeenCalledWith('/auth/login');
             done();
@@ -104,6 +129,23 @@ describe('DeleteAccountService', () => {
         service.deleteAccount().subscribe((ok) => {
             expect(ok).toBe(false);
             expect(toast.showError).toHaveBeenCalledWith('nope');
+            done();
+        });
+    });
+
+    it('should not delete the user account when user-workout cleanup fails', (done) => {
+        // Arrange
+        userWorkoutsService.deleteUserWorkout.mockReturnValueOnce(throwError(() => new Error('cleanup failed')));
+
+        // Act
+        service.deleteAccount().subscribe((ok) => {
+            // Assert
+            expect(ok).toBe(false);
+            expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1');
+            expect(userWorkoutsService.deleteUserWorkout).toHaveBeenCalledWith('u1', 'captured-token');
+            expect(authService.deleteCurrentUser).not.toHaveBeenCalled();
+            expect(toast.showError).toHaveBeenCalledWith('cleanup failed');
+            expect(router.navigateByUrl).not.toHaveBeenCalled();
             done();
         });
     });
