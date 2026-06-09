@@ -33,15 +33,18 @@ export class DeleteAccountService {
                 return this.workoutsService.getWorkouts().pipe(
                     map((all) => all.filter((w) => w.createdByUserId === userId)),
                     switchMap((owned) =>
-                        owned.length === 0
-                            ? of([])
-                            : of(...owned).pipe(
-                                  concatMap((w) => this.workoutsService.deleteWorkout(w.id)),
-                                  toArray()
-                              )
-                    ),
-                    switchMap(() => this.userWorkoutsService.deleteUserWorkout(userId, userWorkoutsAuthToken)),
-                    switchMap(() => this.authService.deleteCurrentUser())
+                        this.authService.deleteCurrentUser().pipe(
+                            switchMap(() =>
+                                owned.length === 0
+                                    ? of([])
+                                    : of(...owned).pipe(
+                                          concatMap((w) => this.workoutsService.deleteWorkout(w.id)),
+                                          toArray()
+                                      )
+                            ),
+                            switchMap(() => this.userWorkoutsService.deleteUserWorkout(userId, userWorkoutsAuthToken))
+                        )
+                    )
                 );
             }),
             map(() => true),

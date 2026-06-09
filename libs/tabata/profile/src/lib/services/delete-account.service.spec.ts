@@ -63,7 +63,7 @@ describe('DeleteAccountService', () => {
         userWorkoutsService.deleteUserWorkout.mockReturnValue(of({ success: true }));
     });
 
-    it('should clean up workout data with the captured token before deleting the user account', (done) => {
+    it('should delete the user account before destructive workout cleanup while reusing the captured token', (done) => {
         // Arrange
         const calls: string[] = [];
         userWorkoutsAuthToken.mockImplementation(() => {
@@ -99,9 +99,9 @@ describe('DeleteAccountService', () => {
             expect(calls).toEqual([
                 'capture-token',
                 'get-workouts',
+                'delete-current-user',
                 'delete-workout:w1',
-                'delete-user-workout:u1:captured-token',
-                'delete-current-user'
+                'delete-user-workout:u1:captured-token'
             ]);
             expect(toast.showSuccess).toHaveBeenCalledWith('Account deleted');
             expect(router.navigateByUrl).toHaveBeenCalledWith('/auth/login');
@@ -124,16 +124,23 @@ describe('DeleteAccountService', () => {
         });
     });
 
-    it('should toast error and return false on failure', (done) => {
+    it('should not delete workout data when Firebase account deletion fails', (done) => {
+        // Arrange
         authService.deleteCurrentUser.mockReturnValueOnce(throwError(() => new Error('nope')));
+
+        // Act
         service.deleteAccount().subscribe((ok) => {
+            // Assert
             expect(ok).toBe(false);
+            expect(workoutsService.getWorkouts).toHaveBeenCalled();
+            expect(workoutsService.deleteWorkout).not.toHaveBeenCalled();
+            expect(userWorkoutsService.deleteUserWorkout).not.toHaveBeenCalled();
             expect(toast.showError).toHaveBeenCalledWith('nope');
             done();
         });
     });
 
-    it('should not delete the user account when user-workout cleanup fails', (done) => {
+    it('should surface cleanup failure and skip success navigation', (done) => {
         // Arrange
         userWorkoutsService.deleteUserWorkout.mockReturnValueOnce(throwError(() => new Error('cleanup failed')));
 
@@ -141,9 +148,9 @@ describe('DeleteAccountService', () => {
         service.deleteAccount().subscribe((ok) => {
             // Assert
             expect(ok).toBe(false);
+            expect(authService.deleteCurrentUser).toHaveBeenCalled();
             expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1');
             expect(userWorkoutsService.deleteUserWorkout).toHaveBeenCalledWith('u1', 'captured-token');
-            expect(authService.deleteCurrentUser).not.toHaveBeenCalled();
             expect(toast.showError).toHaveBeenCalledWith('cleanup failed');
             expect(router.navigateByUrl).not.toHaveBeenCalled();
             done();
