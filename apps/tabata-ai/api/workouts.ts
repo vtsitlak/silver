@@ -45,6 +45,10 @@ function timestamp(): string {
     return `${y}-${M}-${D}-${h}:${m}:${s}`;
 }
 
+function workoutPathById(id: string): string {
+    return `$[?(@.id==${JSON.stringify(id)})]`;
+}
+
 export default {
     async fetch(request: Request): Promise<Response> {
         if (request.method === 'OPTIONS') {
@@ -78,15 +82,10 @@ export default {
                     return jsonResponse(JSON.stringify(workout), 200);
                 }
                 if (method === 'DELETE') {
-                    const response = await fetch(`${UPSTASH_URL}/JSON.GET/tabata_workouts`, { headers });
-                    const data = await response.json();
-                    const parsed = typeof data.result === 'string' ? JSON.parse(data.result) : (data.result ?? []);
-                    const list = Array.isArray(parsed) ? parsed : [];
-                    const filtered = list.filter((w: { id?: string }) => String(w?.id) !== id);
                     const setRes = await fetch(UPSTASH_URL, {
                         method: 'POST',
                         headers,
-                        body: JSON.stringify(['JSON.SET', 'tabata_workouts', '$', JSON.stringify(filtered)])
+                        body: JSON.stringify(['JSON.DEL', 'tabata_workouts', workoutPathById(id)])
                     });
                     const setData = await setRes.json();
                     if (setData.error) {
@@ -107,12 +106,10 @@ export default {
                     const existing = list[index] as Record<string, unknown>;
                     const omit = (o: Record<string, unknown>, keys: string[]) => Object.fromEntries(Object.entries(o).filter(([k]) => !keys.includes(k)));
                     const updated = { ...existing, ...omit(body as Record<string, unknown>, ['updatedAt']), id, updatedAt: timestamp() };
-                    const newList = [...list];
-                    newList[index] = updated;
                     const setRes = await fetch(UPSTASH_URL, {
                         method: 'POST',
                         headers,
-                        body: JSON.stringify(['JSON.SET', 'tabata_workouts', '$', JSON.stringify(newList)])
+                        body: JSON.stringify(['JSON.SET', 'tabata_workouts', workoutPathById(id), JSON.stringify(updated)])
                     });
                     const setData = await setRes.json();
                     if (setData.error) {
