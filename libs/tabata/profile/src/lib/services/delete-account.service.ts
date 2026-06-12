@@ -38,7 +38,7 @@ export class DeleteAccountService {
                                 owned.length === 0
                                     ? of([])
                                     : of(...owned).pipe(
-                                          concatMap((w) => this.workoutsService.deleteWorkout(w.id)),
+                                          concatMap((w) => this.workoutsService.deleteWorkout(w.id, userWorkoutsAuthToken)),
                                           toArray()
                                       )
                             ),
