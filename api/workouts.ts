@@ -4,6 +4,8 @@
  * CORS allows localhost (e.g. local dev) to call this deployed API.
  */
 
+import { AuthError, requireAuthenticatedUserId } from './firebase-auth';
+
 const UPSTASH_URL = process.env['UPSTASH_URL'];
 const UPSTASH_TOKEN = process.env['UPSTASH_TOKEN'];
 
@@ -48,6 +50,14 @@ function workoutPathById(id: string): string {
     return `$[?(@.id==${JSON.stringify(id)})]`;
 }
 
+function omitWorkoutFields(o: Record<string, unknown>, keys: string[]): Record<string, unknown> {
+    return Object.fromEntries(Object.entries(o).filter(([k]) => !keys.includes(k)));
+}
+
+function isWorkoutOwner(workout: Record<string, unknown>, userId: string): boolean {
+    return String(workout['createdByUserId'] ?? '') === userId;
+}
+
 export default {
     async fetch(request: Request): Promise<Response> {
         if (request.method === 'OPTIONS') {
@@ -83,6 +93,18 @@ export default {
                     return jsonResponse(JSON.stringify(workout), 200);
                 }
                 if (method === 'DELETE') {
+                    const authenticatedUserId = await requireAuthenticatedUserId(request);
+                    const response = await fetch(`${UPSTASH_URL}/JSON.GET/tabata_workouts`, { headers });
+                    const data = await response.json();
+                    const parsed = typeof data.result === 'string' ? JSON.parse(data.result) : (data.result ?? []);
+                    const list = Array.isArray(parsed) ? parsed : [];
+                    const existing = (list.find((w: { id?: string }) => String(w?.id) === id) as Record<string, unknown> | undefined) ?? null;
+                    if (!existing) {
+                        return jsonResponse(JSON.stringify({ error: 'Workout not found' }), 404);
+                    }
+                    if (!isWorkoutOwner(existing, authenticatedUserId)) {
+                        return jsonResponse(JSON.stringify({ error: 'Authenticated user cannot mutate another user workout' }), 403);
+                    }
                     const setRes = await fetch(UPSTASH_URL, {
                         method: 'POST',
                         headers,
@@ -95,6 +117,7 @@ export default {
                     return jsonResponse(JSON.stringify({ success: true }), 200);
                 }
                 if (method === 'PUT') {
+                    const authenticatedUserId = await requireAuthenticatedUserId(request);
                     const body = await request.json();
                     const response = await fetch(`${UPSTASH_URL}/JSON.GET/tabata_workouts`, { headers });
                     const data = await response.json();
@@ -105,8 +128,16 @@ export default {
                         return jsonResponse(JSON.stringify({ error: 'Workout not found' }), 404);
                     }
                     const existing = list[index] as Record<string, unknown>;
-                    const omit = (o: Record<string, unknown>, keys: string[]) => Object.fromEntries(Object.entries(o).filter(([k]) => !keys.includes(k)));
-                    const updated = { ...existing, ...omit(body as Record<string, unknown>, ['updatedAt']), id, updatedAt: timestamp() };
+                    if (!isWorkoutOwner(existing, authenticatedUserId)) {
+                        return jsonResponse(JSON.stringify({ error: 'Authenticated user cannot mutate another user workout' }), 403);
+                    }
+                    const updated = {
+                        ...existing,
+                        ...omitWorkoutFields(body as Record<string, unknown>, ['id', 'createdAt', 'createdByUserId', 'updatedAt', 'updatedByUserId']),
+                        id,
+                        updatedByUserId: authenticatedUserId,
+                        updatedAt: timestamp()
+                    };
                     const setRes = await fetch(UPSTASH_URL, {
                         method: 'POST',
                         headers,
@@ -142,14 +173,16 @@ export default {
             }
 
             if (method === 'POST') {
+                const authenticatedUserId = await requireAuthenticatedUserId(request);
                 const body = (await request.json()) as Record<string, unknown>;
-                const omit = (o: Record<string, unknown>, keys: string[]) => Object.fromEntries(Object.entries(o).filter(([k]) => !keys.includes(k)));
                 const createdAt = timestamp();
                 const workout = {
-                    ...omit(body, ['id', 'createdAt', 'updatedAt']),
+                    ...omitWorkoutFields(body, ['id', 'createdAt', 'createdByUserId', 'updatedAt', 'updatedByUserId']),
                     id: generateWorkoutId(),
                     createdAt,
-                    updatedAt: createdAt
+                    updatedAt: createdAt,
+                    createdByUserId: authenticatedUserId,
+                    updatedByUserId: authenticatedUserId
                 };
                 const response = await fetch(`${UPSTASH_URL}/JSON.ARRAPPEND/tabata_workouts/$`, {
                     method: 'POST',
@@ -166,7 +199,8 @@ export default {
             return jsonResponse(JSON.stringify({ error: 'Method not allowed' }), 405);
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Internal Server Error';
-            return jsonResponse(JSON.stringify({ error: message }), 500);
+            const status = error instanceof AuthError ? error.status : 500;
+            return jsonResponse(JSON.stringify({ error: message }), status);
         }
     }
 };
