@@ -74,8 +74,8 @@ describe('DeleteAccountService', () => {
             calls.push('get-workouts');
             return of([createWorkout('w1', 'u1'), createWorkout('w2', 'other')]);
         });
-        workoutsService.deleteWorkout.mockImplementation((id: string) => {
-            calls.push(`delete-workout:${id}`);
+        workoutsService.deleteWorkout.mockImplementation((id: string, token?: string) => {
+            calls.push(`delete-workout:${id}:${token}`);
             return of({ success: true });
         });
         userWorkoutsService.deleteUserWorkout.mockImplementation((userId: string, token?: string) => {
@@ -94,13 +94,13 @@ describe('DeleteAccountService', () => {
             expect(ok).toBe(true);
             expect(authService.deleteCurrentUser).toHaveBeenCalled();
             expect(workoutsService.getWorkouts).toHaveBeenCalled();
-            expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1');
+            expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1', 'captured-token');
             expect(userWorkoutsService.deleteUserWorkout).toHaveBeenCalledWith('u1', 'captured-token');
             expect(calls).toEqual([
                 'capture-token',
                 'get-workouts',
                 'delete-current-user',
-                'delete-workout:w1',
+                'delete-workout:w1:captured-token',
                 'delete-user-workout:u1:captured-token'
             ]);
             expect(toast.showSuccess).toHaveBeenCalledWith('Account deleted');
@@ -149,7 +149,7 @@ describe('DeleteAccountService', () => {
             // Assert
             expect(ok).toBe(false);
             expect(authService.deleteCurrentUser).toHaveBeenCalled();
-            expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1');
+            expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1', 'captured-token');
             expect(userWorkoutsService.deleteUserWorkout).toHaveBeenCalledWith('u1', 'captured-token');
             expect(toast.showError).toHaveBeenCalledWith('cleanup failed');
             expect(router.navigateByUrl).not.toHaveBeenCalled();
