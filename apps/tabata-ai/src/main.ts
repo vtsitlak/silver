@@ -13,7 +13,7 @@ import { environment } from './app/environments/environment';
 import { computed, inject, provideAppInitializer, provideZoneChangeDetection } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { AuthFacade } from '@silver/tabata/auth';
-import { WORKOUTS_API_BASE_URL } from '@silver/tabata/workouts';
+import { WORKOUTS_API_BASE_URL, WORKOUTS_AUTH_TOKEN } from '@silver/tabata/workouts';
 import { EXERCISES_API_BASE_URL } from '@silver/tabata/states/exercises';
 import { USER_WORKOUTS_ACTIVE_USER_ID, USER_WORKOUTS_API_BASE_URL, USER_WORKOUTS_AUTH_TOKEN } from '@silver/tabata/states/user-workouts';
 import { GENERATE_WORKOUT_API_BASE_URL } from '@silver/tabata/ai-workout-generator';
@@ -97,6 +97,13 @@ export const appConfig = {
         provideFirestore(() => getFirestore()),
         provideAuth(() => getAuth()),
         { provide: WORKOUTS_API_BASE_URL, useFactory: () => getApiBaseUrl() },
+        {
+            provide: WORKOUTS_AUTH_TOKEN,
+            useFactory: () => {
+                const auth = inject(Auth);
+                return () => auth.currentUser?.getIdToken() ?? null;
+            }
+        },
         {
             provide: EXERCISES_API_BASE_URL,
             useFactory: () => {
