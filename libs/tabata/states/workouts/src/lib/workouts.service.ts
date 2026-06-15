@@ -18,8 +18,8 @@ export class WorkoutsService {
         return base ? `${base}${p}` : p;
     }
 
-    private authenticatedOptions(): Observable<{ headers: { Authorization: string } }> {
-        const token = this.authTokenProvider();
+    private authenticatedOptions(authToken: string | Promise<string | null> | null = this.authTokenProvider()): Observable<{ headers: { Authorization: string } }> {
+        const token = authToken;
         if (!token) {
             return throwError(() => new Error('No user signed in.'));
         }
@@ -47,8 +47,8 @@ export class WorkoutsService {
     }
 
     /** DELETE workout. Accepts 200/204; does not require JSON body. */
-    deleteWorkout(id: string): Observable<{ success: boolean }> {
-        return this.authenticatedOptions().pipe(
+    deleteWorkout(id: string, authToken?: string): Observable<{ success: boolean }> {
+        return this.authenticatedOptions(authToken ?? this.authTokenProvider()).pipe(
             switchMap((options) =>
                 this.http
                     .delete(this.apiUrl(`/api/workouts/${encodeURIComponent(id)}`), { ...options, responseType: 'text' })

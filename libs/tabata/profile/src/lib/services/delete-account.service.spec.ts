@@ -4,7 +4,7 @@ import { of, throwError } from 'rxjs';
 import { ToastService } from '@silver/tabata/helpers';
 import { AuthFacade } from '@silver/tabata/auth';
 import { AuthService } from '@silver/tabata/states/auth';
-import { type TabataWorkout, WorkoutsService } from '@silver/tabata/states/workouts';
+import { type TabataWorkout, WORKOUTS_AUTH_TOKEN, WorkoutsService } from '@silver/tabata/states/workouts';
 import { USER_WORKOUTS_AUTH_TOKEN, UserWorkoutsService } from '@silver/tabata/states/user-workouts';
 import { DeleteAccountService } from './delete-account.service';
 
@@ -33,6 +33,7 @@ describe('DeleteAccountService', () => {
 
     const authFacade = { user: () => ({ uid: 'u1' }) };
     const authService = { deleteCurrentUser: jest.fn(() => of(undefined)) };
+    const workoutsAuthToken = jest.fn(() => 'captured-workouts-token');
     const userWorkoutsAuthToken = jest.fn(() => 'captured-token');
     const workoutsService = {
         getWorkouts: jest.fn(() => of([createWorkout('w1', 'u1'), createWorkout('w2', 'other')])),
@@ -49,6 +50,7 @@ describe('DeleteAccountService', () => {
                 { provide: Router, useValue: router },
                 { provide: AuthFacade, useValue: authFacade },
                 { provide: AuthService, useValue: authService },
+                { provide: WORKOUTS_AUTH_TOKEN, useValue: workoutsAuthToken },
                 { provide: USER_WORKOUTS_AUTH_TOKEN, useValue: userWorkoutsAuthToken },
                 { provide: WorkoutsService, useValue: workoutsService },
                 { provide: UserWorkoutsService, useValue: userWorkoutsService }
@@ -57,6 +59,7 @@ describe('DeleteAccountService', () => {
         service = TestBed.inject(DeleteAccountService);
         jest.clearAllMocks();
         authService.deleteCurrentUser.mockReturnValue(of(undefined));
+        workoutsAuthToken.mockReturnValue('captured-workouts-token');
         userWorkoutsAuthToken.mockReturnValue('captured-token');
         workoutsService.getWorkouts.mockReturnValue(of([createWorkout('w1', 'u1'), createWorkout('w2', 'other')]));
         workoutsService.deleteWorkout.mockReturnValue(of({ success: true }));
@@ -67,8 +70,12 @@ describe('DeleteAccountService', () => {
         // Arrange
         const calls: string[] = [];
         userWorkoutsAuthToken.mockImplementation(() => {
-            calls.push('capture-token');
+            calls.push('capture-user-workouts-token');
             return 'captured-token';
+        });
+        workoutsAuthToken.mockImplementation(() => {
+            calls.push('capture-workouts-token');
+            return 'captured-workouts-token';
         });
         workoutsService.getWorkouts.mockImplementation(() => {
             calls.push('get-workouts');
@@ -94,10 +101,11 @@ describe('DeleteAccountService', () => {
             expect(ok).toBe(true);
             expect(authService.deleteCurrentUser).toHaveBeenCalled();
             expect(workoutsService.getWorkouts).toHaveBeenCalled();
-            expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1');
+            expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1', 'captured-workouts-token');
             expect(userWorkoutsService.deleteUserWorkout).toHaveBeenCalledWith('u1', 'captured-token');
             expect(calls).toEqual([
-                'capture-token',
+                'capture-workouts-token',
+                'capture-user-workouts-token',
                 'get-workouts',
                 'delete-current-user',
                 'delete-workout:w1',
@@ -105,6 +113,22 @@ describe('DeleteAccountService', () => {
             ]);
             expect(toast.showSuccess).toHaveBeenCalledWith('Account deleted');
             expect(router.navigateByUrl).toHaveBeenCalledWith('/auth/login');
+            done();
+        });
+    });
+
+    it('should stop before deleting the user account when no workouts cleanup token is available', (done) => {
+        // Arrange
+        workoutsAuthToken.mockReturnValue(null);
+
+        // Act
+        service.deleteAccount().subscribe((ok) => {
+            // Assert
+            expect(ok).toBe(false);
+            expect(authService.deleteCurrentUser).not.toHaveBeenCalled();
+            expect(workoutsService.deleteWorkout).not.toHaveBeenCalled();
+            expect(userWorkoutsService.deleteUserWorkout).not.toHaveBeenCalled();
+            expect(toast.showError).toHaveBeenCalledWith('No user signed in.');
             done();
         });
     });
@@ -149,7 +173,7 @@ describe('DeleteAccountService', () => {
             // Assert
             expect(ok).toBe(false);
             expect(authService.deleteCurrentUser).toHaveBeenCalled();
-            expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1');
+            expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1', 'captured-workouts-token');
             expect(userWorkoutsService.deleteUserWorkout).toHaveBeenCalledWith('u1', 'captured-token');
             expect(toast.showError).toHaveBeenCalledWith('cleanup failed');
             expect(router.navigateByUrl).not.toHaveBeenCalled();
