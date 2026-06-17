@@ -8,7 +8,7 @@
     }
 
     <mat-form-field class="block">
-        <input matInput placeholder="Note Title" [formField]="noteForm.title" />
+        <input [formField]="noteForm.title" matInput placeholder="Note Title" />
 
         @if (noteForm.title().touched() && noteForm.title().invalid()) {
             <mat-error>
@@ -20,7 +20,7 @@
     </mat-form-field>
 
     <mat-form-field class="block">
-        <textarea matInput placeholder="Note" [formField]="noteForm.body" class="h-[100px] resize-y"> </textarea>
+        <textarea [formField]="noteForm.body" matInput placeholder="Note" class="h-[100px] resize-y"> </textarea>
 
         @if (noteForm.body().touched() && noteForm.body().invalid()) {
             <mat-error>
