@@ -1,15 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
 import { nxE2EPreset } from '@nx/playwright/preset';
 import { workspaceRoot } from '@nx/devkit';
+import * as dotenv from 'dotenv';
+import { join } from 'path';
+
+dotenv.config({ path: join(__dirname, '.env') });
 
 // For CI, you may want to set BASE_URL to the deployed application.
 const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
-
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// require('dotenv').config();
+const isCi = Boolean(process.env['CI']);
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -24,11 +23,17 @@ export default defineConfig({
     },
     /* Run your local dev server before starting the tests */
     webServer: {
-        command: 'npx nx run tabata-ai:serve',
+        command: isCi
+            ? 'npx nx run tabata-ai:serve --configuration=ci --no-cloud'
+            : 'npx nx run tabata-ai:serve --no-cloud',
         url: 'http://localhost:4200',
-        reuseExistingServer: !process.env['CI'],
+        reuseExistingServer: !isCi,
         cwd: workspaceRoot,
-        timeout: 180000
+        timeout: 180000,
+        env: {
+            TEST_USER_EMAIL: process.env['TEST_USER_EMAIL'] ?? '',
+            TEST_USER_PASSWORD: process.env['TEST_USER_PASSWORD'] ?? ''
+        }
     },
     projects: [
         {

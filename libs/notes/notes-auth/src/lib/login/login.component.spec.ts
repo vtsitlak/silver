@@ -27,11 +27,15 @@ describe('LoginComponent', () => {
     beforeEach(() => {
         fixture = TestBed.createComponent(LoginComponent);
         component = fixture.componentInstance;
-        fixture.detectChanges();
     });
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should render the login form', () => {
+        expect(() => fixture.detectChanges()).not.toThrow();
+        expect(fixture.nativeElement.querySelector('mat-card')).toBeTruthy();
     });
 
     it('should call facade login when login is called', () => {

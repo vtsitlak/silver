@@ -18,13 +18,22 @@ export class WorkoutsService {
         return base ? `${base}${p}` : p;
     }
 
-    private authenticatedOptions(authToken?: string): Observable<{ headers: { Authorization: string } }> {
-        const token = authToken ?? this.authTokenProvider();
+    private authenticatedOptions(
+        authToken: string | Promise<string | null> | null = this.authTokenProvider()
+    ): Observable<{ headers: { Authorization: string } }> {
+        const token = authToken;
         if (!token) {
             return throwError(() => new Error('No user signed in.'));
         }
 
-        return from(Promise.resolve(token)).pipe(map((resolvedToken) => ({ headers: { Authorization: `Bearer ${resolvedToken}` } })));
+        return from(Promise.resolve(token)).pipe(
+            map((resolvedToken) => {
+                if (!resolvedToken) {
+                    throw new Error('No user signed in.');
+                }
+                return { headers: { Authorization: `Bearer ${resolvedToken}` } };
+            })
+        );
     }
 
     /** GET all workouts (optional search filters by name server-side). */
@@ -40,26 +49,36 @@ export class WorkoutsService {
     }
 
     /** DELETE workout. Accepts 200/204; does not require JSON body. */
-    deleteWorkout(id: string, authToken?: string): Observable<{ success: boolean }> {
-        return this.authenticatedOptions(authToken).pipe(
+    deleteWorkout(id: string, authToken?: string | Promise<string | null> | null): Observable<{ success: boolean }> {
+        return this.authenticatedOptions(authToken ?? this.authTokenProvider()).pipe(
             switchMap((options) =>
-                this.http.delete(this.apiUrl(`/api/workouts/${encodeURIComponent(id)}`), { ...options, responseType: 'text' }).pipe(map(() => ({ success: true })))
+                this.http
+                    .delete(this.apiUrl(`/api/workouts/${encodeURIComponent(id)}`), { ...options, responseType: 'text' })
+                    .pipe(map(() => ({ success: true })))
             )
         );
     }
 
     /** POST a new workout (proxied to Upstash JSON.ARRAPPEND). */
-    addWorkout(workout: TabataWorkout, authToken?: string): Observable<{ success: boolean }> {
-        return this.authenticatedOptions(authToken).pipe(switchMap((options) => this.http.post<{ success: boolean }>(this.apiUrl('/api/workouts'), workout, options)));
+    addWorkout(workout: TabataWorkout, authToken?: string | Promise<string | null> | null): Observable<{ success: boolean }> {
+        return this.authenticatedOptions(authToken).pipe(
+            switchMap((options) => this.http.post<{ success: boolean }>(this.apiUrl('/api/workouts'), workout, options))
+        );
     }
 
     /** POST a new workout and return the saved workout (id, timestamps). */
-    createWorkout(payload: CreateWorkoutPayload, authToken?: string): Observable<TabataWorkout> {
-        return this.authenticatedOptions(authToken).pipe(switchMap((options) => this.http.post<TabataWorkout>(this.apiUrl('/api/workouts'), payload, options)));
+    createWorkout(payload: CreateWorkoutPayload, authToken?: string | Promise<string | null> | null): Observable<TabataWorkout> {
+        return this.authenticatedOptions(authToken).pipe(
+            switchMap((options) => this.http.post<TabataWorkout>(this.apiUrl('/api/workouts'), payload, options))
+        );
     }
 
     /** PUT an existing workout and return the updated workout. */
-    updateWorkout(id: string, payload: UpdateWorkoutPayload, authToken?: string): Observable<TabataWorkout> {
+    updateWorkout(
+        id: string,
+        payload: UpdateWorkoutPayload,
+        authToken?: string | Promise<string | null> | null
+    ): Observable<TabataWorkout> {
         return this.authenticatedOptions(authToken).pipe(
             switchMap((options) => this.http.put<TabataWorkout>(this.apiUrl(`/api/workouts/${encodeURIComponent(id)}`), payload, options))
         );

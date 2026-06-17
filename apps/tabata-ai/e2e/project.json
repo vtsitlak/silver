@@ -12,7 +12,8 @@
             "dependsOn": [],
             "options": {
                 "cwd": "apps/tabata-ai/e2e",
-                "command": "playwright test"
+                "command": "playwright test",
+                "envFile": "apps/tabata-ai/e2e/.env"
             }
         }
     }

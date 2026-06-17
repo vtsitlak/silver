@@ -13,6 +13,10 @@ permissions:
 jobs:
     main:
         runs-on: ubuntu-latest
+        env:
+            NX_NO_CLOUD: true
+            TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+            TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
         steps:
             - uses: actions/checkout@v4
               with:
@@ -34,11 +38,16 @@ jobs:
             - run: npx playwright install --with-deps
             - uses: nrwl/nx-set-shas@v4
 
+            - name: Configure e2e credentials
+              run: |
+                  if [ -z "$TEST_USER_EMAIL" ] || [ -z "$TEST_USER_PASSWORD" ]; then
+                    echo "::error::TEST_USER_EMAIL and TEST_USER_PASSWORD repository secrets are required for e2e tests."
+                    exit 1
+                  fi
+                  printf 'TEST_USER_EMAIL=%s\nTEST_USER_PASSWORD=%s\n' "$TEST_USER_EMAIL" "$TEST_USER_PASSWORD" > apps/tabata-ai/e2e/.env
+
             # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
             # - run: npx nx-cloud record -- echo Hello World
             # Nx Affected runs only tasks affected by the changes in this PR/commit. Learn more: https://nx.dev/ci/features/affected
             # When you enable task distribution, run the e2e-ci task instead of e2e
             - run: npx nx affected -t lint test build e2e
-              env:
-                  TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
-                  TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
