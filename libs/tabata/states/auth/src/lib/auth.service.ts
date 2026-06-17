@@ -12,9 +12,10 @@ import {
     signInWithPopup,
     GoogleAuthProvider,
     sendPasswordResetEmail,
-    deleteUser
+    deleteUser,
+    User
 } from '@angular/fire/auth';
-import { catchError, from, Observable, of, switchMap, throwError } from 'rxjs';
+import { catchError, from, map, Observable, switchMap, throwError } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -25,7 +26,7 @@ export class AuthService {
 
     signUp(email: string, password: string, displayName: string): Observable<UserCredential> {
         return from(createUserWithEmailAndPassword(this.auth, email, password)).pipe(
-            switchMap((userCredential) => this.updateDisplayName(displayName).pipe(switchMap(() => from(Promise.resolve(userCredential))))),
+            switchMap((userCredential) => this.updateDisplayNameForUser(userCredential.user, displayName).pipe(map(() => userCredential))),
             catchError((error) => {
                 // Handle errors during user creation
                 console.error('Error creating user:', error);
@@ -70,27 +71,18 @@ export class AuthService {
     }
 
     updateDisplayName(displayName: string): Observable<void> {
-        if (this.auth.currentUser) {
-            return from(updateProfile(this.auth.currentUser, { displayName: displayName })).pipe(
-                catchError((error) => {
-                    // Handle errors during profile update
-                    console.error('Error updating profile:', error);
-                    return throwError(() => error); // Re-throw the error
-                })
-            );
-        } else {
-            // Handle the case where there's no user signed in.
-            console.warn('No user signed in.');
-            return of(undefined); // Or return an error Observable, depending on your needs
+        const user = this.auth.currentUser;
+        if (!user) {
+            return this.noCurrentUserError();
         }
+        return this.updateDisplayNameForUser(user, displayName);
     }
 
     updatePassword(email: string, currentPassword: string, newPassword: string): Observable<void> {
         const user = this.auth.currentUser;
 
         if (!user) {
-            console.warn('No user signed in.');
-            return of(undefined); // Or return an error Observable
+            return this.noCurrentUserError();
         }
 
         // Create a credential with the user's email and current password
@@ -113,7 +105,21 @@ export class AuthService {
 
     deleteCurrentUser(): Observable<void> {
         const user = this.auth.currentUser;
-        if (!user) return of(undefined);
+        if (!user) return this.noCurrentUserError();
         return from(deleteUser(user));
+    }
+
+    private updateDisplayNameForUser(user: User, displayName: string): Observable<void> {
+        return from(updateProfile(user, { displayName })).pipe(
+            catchError((error) => {
+                // Handle errors during profile update
+                console.error('Error updating profile:', error);
+                return throwError(() => error); // Re-throw the error
+            })
+        );
+    }
+
+    private noCurrentUserError(): Observable<never> {
+        return throwError(() => new Error('No user signed in.'));
     }
 }
