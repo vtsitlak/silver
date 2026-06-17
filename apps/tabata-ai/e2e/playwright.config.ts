@@ -1,16 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
 import { nxE2EPreset } from '@nx/playwright/preset';
 import { workspaceRoot } from '@nx/devkit';
+import * as dotenv from 'dotenv';
+import { join } from 'path';
+
+dotenv.config({ path: join(__dirname, '.env') });
 
 // For CI, you may want to set BASE_URL to the deployed application.
 const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
 const isCi = Boolean(process.env['CI']);
-
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// require('dotenv').config();
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -31,7 +29,11 @@ export default defineConfig({
         url: 'http://localhost:4200',
         reuseExistingServer: !isCi,
         cwd: workspaceRoot,
-        timeout: 180000
+        timeout: 180000,
+        env: {
+            TEST_USER_EMAIL: process.env['TEST_USER_EMAIL'] ?? '',
+            TEST_USER_PASSWORD: process.env['TEST_USER_PASSWORD'] ?? ''
+        }
     },
     projects: [
         {

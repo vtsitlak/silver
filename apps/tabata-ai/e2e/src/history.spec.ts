@@ -1,9 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { requireAuthEnv, loginAndWaitForDashboard } from './auth-helpers';
 
-requireAuthEnv();
-
 test.describe('History', () => {
+    test.beforeAll(requireAuthEnv);
     test.beforeEach(async ({ page }) => {
         await loginAndWaitForDashboard(page);
         await page.getByRole('tab', { name: 'History' }).click();
