@@ -7,7 +7,7 @@ import { WorkoutsFacade, TabataWorkout } from '@silver/tabata/states/workouts';
 import { ExercisesFacade, Exercise } from '@silver/tabata/states/exercises';
 import { AuthFacade } from '@silver/tabata/auth';
 import { UserWorkoutsFacade } from '@silver/tabata/states/user-workouts';
-import type { UserWorkoutItem } from '@silver/tabata/states/user-workouts';
+import type { UserWorkout, UserWorkoutItem } from '@silver/tabata/states/user-workouts';
 import { ToastService } from '@silver/tabata/helpers';
 import { ActionSheetController } from '@ionic/angular/standalone';
 
@@ -19,6 +19,11 @@ interface WorkoutSegment {
     durationSeconds: number;
     exerciseId: string | null;
     isRest: boolean;
+}
+
+interface PendingWorkoutSession {
+    userId: string;
+    item: UserWorkoutItem;
 }
 
 @Component({
@@ -54,9 +59,12 @@ export class WorkoutPlayerComponent implements OnDestroy {
     readonly hasStarted = signal(false);
     /** Current workout session to record (startedAt set on first play; finishedAt/completed on finish or cancel). */
     readonly currentSession = signal<UserWorkoutItem | null>(null);
+    private readonly pendingSession = signal<PendingWorkoutSession | null>(null);
+    readonly isSavingSession = computed(() => this.pendingSession() !== null);
 
     private keepAwakeActive = false;
     private pageActive = true;
+    private navigateAfterPendingSessionSave = false;
 
     readonly currentSegment = computed(() => this.segments()[this.currentIndex()] ?? null);
 
@@ -90,10 +98,34 @@ export class WorkoutPlayerComponent implements OnDestroy {
         this.workoutsFacade.loadWorkoutById(id);
 
         effect(() => {
+            const uid = this.authFacade.user()?.uid;
+            if (uid) {
+                this.userWorkoutsFacade.getOrCreateUserWorkout(uid);
+            }
+        });
+
+        effect(() => {
             const w = this.workout();
             if (!w) return;
             this.buildSegments(w);
             this.loadExercisesForWorkout(w);
+        });
+
+        effect(() => {
+            const pending = this.pendingSession();
+            const current = this.userWorkoutsFacade.userWorkout();
+            if (!pending || current?.userId !== pending.userId) return;
+
+            this.saveSessionItem(current, pending.item);
+            this.pendingSession.set(null);
+            const session = this.currentSession();
+            if (session?.workoutId === pending.item.workoutId && session.startedAt === pending.item.startedAt) {
+                this.currentSession.set(null);
+            }
+            if (this.navigateAfterPendingSessionSave) {
+                this.navigateAfterPendingSessionSave = false;
+                this.router.navigate(['/tabs/workouts']);
+            }
         });
 
         effect(() => {
@@ -290,7 +322,7 @@ export class WorkoutPlayerComponent implements OnDestroy {
 
     async cancel(): Promise<void> {
         if (this.finished()) {
-            this.router.navigate(['/tabs/workouts']);
+            this.navigateToWorkoutsAfterSessionSave();
             return;
         }
 
@@ -310,7 +342,7 @@ export class WorkoutPlayerComponent implements OnDestroy {
                             this.finishSession(false);
                         }
                         this.clearTimer();
-                        this.router.navigate(['/tabs/workouts']);
+                        this.navigateToWorkoutsAfterSessionSave();
                     }
                 },
                 {
@@ -338,13 +370,33 @@ export class WorkoutPlayerComponent implements OnDestroy {
         };
 
         const current = this.userWorkoutsFacade.userWorkout();
-        const base = current?.userId === userId ? current : { userId, favoriteWorkouts: [] as string[], workoutItems: [] as UserWorkoutItem[] };
-        const updated = {
-            ...base,
-            workoutItems: [...(base.workoutItems ?? []), item]
-        };
-        this.userWorkoutsFacade.saveUserWorkout(updated);
-        this.currentSession.set(null);
+        if (current?.userId === userId) {
+            this.saveSessionItem(current, item);
+            this.currentSession.set(null);
+            return;
+        }
+
+        this.pendingSession.set({ userId, item });
+        this.userWorkoutsFacade.getOrCreateUserWorkout(userId);
+    }
+
+    private navigateToWorkoutsAfterSessionSave(): void {
+        const pending = this.pendingSession();
+        if (!pending) {
+            this.router.navigate(['/tabs/workouts']);
+            return;
+        }
+
+        this.navigateAfterPendingSessionSave = true;
+        this.userWorkoutsFacade.getOrCreateUserWorkout(pending.userId);
+    }
+
+    private saveSessionItem(current: UserWorkout, item: UserWorkoutItem): void {
+        this.userWorkoutsFacade.saveUserWorkout({
+            userId: current.userId,
+            favoriteWorkouts: current.favoriteWorkouts ?? [],
+            workoutItems: [...(current.workoutItems ?? []), item]
+        });
     }
 
     restart(): void {

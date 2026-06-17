@@ -4,7 +4,7 @@
 
 <ion-content [fullscreen]="true">
     <div class="flex flex-col">
-        <form (submit)="$event.preventDefault(); onSubmit()" method="post" class="profile-form bg-white w-full flex flex-col px-4 py-4">
+        <form (ngSubmit)="onSubmit()" class="profile-form bg-white w-full flex flex-col px-4 py-4">
             <h2 class="text-xl font-semibold mb-4" i18n="@@profileTitle">Profile Settings</h2>
 
             <div class="flex flex-col mb-2">
@@ -129,7 +129,7 @@
                 }
             }
 
-            <ion-button expand="block" type="submit" [disabled]="!profileForm().dirty() || profileForm().invalid()">
+            <ion-button expand="block" type="button" (click)="onSubmit()" [disabled]="!profileForm().dirty() || profileForm().invalid()">
                 <span class="flex w-full items-center justify-center">
                     @if (isLoading()) {
                         <ion-spinner name="crescent" class="h-4 w-4"></ion-spinner>
