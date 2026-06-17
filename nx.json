@@ -55,6 +55,5 @@
         "@schematics/angular:pipe": { "typeSeparator": "." },
         "@nx/angular:resolver": { "typeSeparator": "." },
         "@schematics/angular:resolver": { "typeSeparator": "." }
-    },
-    "nxCloudId": "69d36c86f78e31ce71994f62"
+    }
 }

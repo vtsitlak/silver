@@ -4,6 +4,7 @@ import { workspaceRoot } from '@nx/devkit';
 
 // For CI, you may want to set BASE_URL to the deployed application.
 const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
+const isCi = Boolean(process.env['CI']);
 
 /**
  * Read environment variables from file.
@@ -24,9 +25,11 @@ export default defineConfig({
     },
     /* Run your local dev server before starting the tests */
     webServer: {
-        command: 'npx nx run tabata-ai:serve',
+        command: isCi
+            ? 'npx nx run tabata-ai:serve --configuration=ci --no-cloud'
+            : 'npx nx run tabata-ai:serve --no-cloud',
         url: 'http://localhost:4200',
-        reuseExistingServer: !process.env['CI'],
+        reuseExistingServer: !isCi,
         cwd: workspaceRoot,
         timeout: 180000
     },

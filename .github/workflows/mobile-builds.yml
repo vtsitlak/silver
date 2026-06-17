@@ -14,6 +14,8 @@ jobs:
     android:
         name: Android Build
         runs-on: ubuntu-latest
+        env:
+            NX_NO_CLOUD: true
         steps:
             - uses: actions/checkout@v4
 
@@ -58,6 +60,8 @@ jobs:
     ios:
         name: iOS Build
         runs-on: macos-latest
+        env:
+            NX_NO_CLOUD: true
         steps:
             - uses: actions/checkout@v4
 
