@@ -57,6 +57,8 @@ const handlers: { name: string; handler: WorkoutsHandler }[] = [
     { name: 'root dynamic handler', handler: require('../../../../api/workouts/[id]').default as WorkoutsHandler }
 ];
 
+const collectionHandlers = handlers.filter(({ name }) => name !== 'root dynamic handler');
+
 describe.each(handlers)('workouts API $name', ({ handler }) => {
     let fetchMock: jest.Mock;
     let keyPair: CryptoKeyPair;
@@ -85,29 +87,43 @@ describe.each(handlers)('workouts API $name', ({ handler }) => {
     });
 
     it('rejects mutation requests without a Firebase bearer token before touching Upstash', async () => {
-        // Act
         const response = await handler.fetch(new Request('https://app.test/api/workouts/workout-1', { method: 'DELETE' }));
 
-        // Assert
         expect(response.status).toBe(401);
         await expect(response.json()).resolves.toEqual({ error: 'Missing bearer token' });
         expect(fetchMock).not.toHaveBeenCalled();
     });
 
+    it('rejects updates from a user who did not create the workout', async () => {
+        fetchMock
+            .mockResolvedValueOnce(jsonUpstashResponse({ keys: [publicJwk] }))
+            .mockResolvedValueOnce(jsonUpstashResponse({ result: JSON.stringify([{ id: 'workout-1', name: 'Victim workout', createdByUserId: 'owner-user' }]) }));
+
+        const response = await handler.fetch(
+            new Request('https://app.test/api/workouts/workout-1', {
+                method: 'PUT',
+                headers: await authorizationHeaders('attacker-user'),
+                body: JSON.stringify({ name: 'Hijacked workout' })
+            })
+        );
+
+        expect(response.status).toBe(403);
+        await expect(response.json()).resolves.toEqual({ error: 'Authenticated user cannot mutate another user workout' });
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(fetchMock).toHaveBeenNthCalledWith(2, 'https://upstash.example/JSON.GET/tabata_workouts', expect.any(Object));
+    });
+
     it('deletes a workout with a filtered JSON.DEL instead of rewriting the shared list', async () => {
-        // Arrange
         const existingWorkout = { id: 'workout-1', name: 'Old name', createdByUserId: 'owner-user' };
         fetchMock
             .mockResolvedValueOnce(jsonUpstashResponse({ keys: [publicJwk] }))
             .mockResolvedValueOnce(jsonUpstashResponse({ result: JSON.stringify([existingWorkout]) }))
             .mockResolvedValueOnce(jsonUpstashResponse({ result: 1 }));
 
-        // Act
         const response = await handler.fetch(
             new Request('https://app.test/api/workouts/workout-1', { method: 'DELETE', headers: await authorizationHeaders('owner-user') })
         );
 
-        // Assert
         await expect(response.json()).resolves.toEqual({ success: true });
         expect(fetchMock).toHaveBeenCalledTimes(3);
         expect(fetchMock).toHaveBeenNthCalledWith(2, 'https://upstash.example/JSON.GET/tabata_workouts', expect.any(Object));
@@ -122,24 +138,20 @@ describe.each(handlers)('workouts API $name', ({ handler }) => {
     });
 
     it('rejects attempts to delete another user workout before mutating Upstash', async () => {
-        // Arrange
         fetchMock
             .mockResolvedValueOnce(jsonUpstashResponse({ keys: [publicJwk] }))
             .mockResolvedValueOnce(jsonUpstashResponse({ result: JSON.stringify([{ id: 'workout-1', createdByUserId: 'owner-user' }]) }));
 
-        // Act
         const response = await handler.fetch(
             new Request('https://app.test/api/workouts/workout-1', { method: 'DELETE', headers: await authorizationHeaders('attacker-user') })
         );
 
-        // Assert
         expect(response.status).toBe(403);
         await expect(response.json()).resolves.toEqual({ error: 'Authenticated user cannot mutate another user workout' });
         expect(fetchMock).toHaveBeenCalledTimes(2);
     });
 
     it('updates only the matching workout element instead of writing a stale full-array snapshot', async () => {
-        // Arrange
         const existingWorkout = {
             id: 'workout-1',
             name: 'Old name',
@@ -153,7 +165,6 @@ describe.each(handlers)('workouts API $name', ({ handler }) => {
             .mockResolvedValueOnce(jsonUpstashResponse({ result: JSON.stringify([existingWorkout, { id: 'new-concurrent-workout' }]) }))
             .mockResolvedValueOnce(jsonUpstashResponse({ result: 'OK' }));
 
-        // Act
         const response = await handler.fetch(
             new Request('https://app.test/api/workouts/workout-1', {
                 method: 'PUT',
@@ -162,7 +173,6 @@ describe.each(handlers)('workouts API $name', ({ handler }) => {
             })
         );
 
-        // Assert
         await expect(response.json()).resolves.toEqual(
             expect.objectContaining({
                 id: 'workout-1',
@@ -194,11 +204,59 @@ describe.each(handlers)('workouts API $name', ({ handler }) => {
         );
     });
 
+    async function authorizationHeaders(userId: string): Promise<HeadersInit> {
+        return {
+            Authorization: `Bearer ${await createFirebaseToken(userId)}`
+        };
+    }
+
+    async function createFirebaseToken(userId: string): Promise<string> {
+        const header = encodeJson({ alg: 'RS256', kid: 'test-key', typ: 'JWT' });
+        const now = Math.floor(Date.now() / 1000);
+        const payload = encodeJson({
+            aud: 'tabata-ai-player',
+            exp: now + 3600,
+            iat: now,
+            iss: 'https://securetoken.google.com/tabata-ai-player',
+            sub: userId,
+            user_id: userId
+        });
+        const unsignedToken = `${header}.${payload}`;
+        const signature = await crypto.subtle.sign({ name: 'RSASSA-PKCS1-v1_5' }, keyPair.privateKey, new TextEncoder().encode(unsignedToken));
+        return `${unsignedToken}.${Buffer.from(new Uint8Array(signature)).toString('base64url')}`;
+    }
+});
+
+describe.each(collectionHandlers)('workouts API $name collection mutations', ({ handler }) => {
+    let fetchMock: jest.Mock;
+    let keyPair: CryptoKeyPair;
+    let publicJwk: JsonWebKey;
+
+    beforeAll(async () => {
+        keyPair = (await crypto.subtle.generateKey(
+            {
+                name: 'RSASSA-PKCS1-v1_5',
+                modulusLength: 2048,
+                publicExponent: new Uint8Array([1, 0, 1]),
+                hash: 'SHA-256'
+            },
+            true,
+            ['sign', 'verify']
+        )) as CryptoKeyPair;
+        publicJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey);
+        publicJwk.kid = 'test-key';
+        publicJwk.alg = 'RS256';
+        publicJwk.use = 'sig';
+    });
+
+    beforeEach(() => {
+        fetchMock = jest.fn();
+        global.fetch = fetchMock;
+    });
+
     it('stamps new workouts with the authenticated user instead of trusting the request body owner', async () => {
-        // Arrange
         fetchMock.mockResolvedValueOnce(jsonUpstashResponse({ keys: [publicJwk] })).mockResolvedValueOnce(jsonUpstashResponse({ result: 1 }));
 
-        // Act
         const response = await handler.fetch(
             new Request('https://app.test/api/workouts', {
                 method: 'POST',
@@ -207,7 +265,6 @@ describe.each(handlers)('workouts API $name', ({ handler }) => {
             })
         );
 
-        // Assert
         await expect(response.json()).resolves.toEqual(
             expect.objectContaining({
                 name: 'New workout',

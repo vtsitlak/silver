@@ -18,7 +18,9 @@ export class WorkoutsService {
         return base ? `${base}${p}` : p;
     }
 
-    private authenticatedOptions(authToken: string | Promise<string | null> | null = this.authTokenProvider()): Observable<{ headers: { Authorization: string } }> {
+    private authenticatedOptions(
+        authToken: string | Promise<string | null> | null = this.authTokenProvider()
+    ): Observable<{ headers: { Authorization: string } }> {
         const token = authToken;
         if (!token) {
             return throwError(() => new Error('No user signed in.'));
@@ -47,7 +49,7 @@ export class WorkoutsService {
     }
 
     /** DELETE workout. Accepts 200/204; does not require JSON body. */
-    deleteWorkout(id: string, authToken?: string): Observable<{ success: boolean }> {
+    deleteWorkout(id: string, authToken?: string | Promise<string | null> | null): Observable<{ success: boolean }> {
         return this.authenticatedOptions(authToken ?? this.authTokenProvider()).pipe(
             switchMap((options) =>
                 this.http
@@ -58,18 +60,26 @@ export class WorkoutsService {
     }
 
     /** POST a new workout (proxied to Upstash JSON.ARRAPPEND). */
-    addWorkout(workout: TabataWorkout): Observable<{ success: boolean }> {
-        return this.authenticatedOptions().pipe(switchMap((options) => this.http.post<{ success: boolean }>(this.apiUrl('/api/workouts'), workout, options)));
+    addWorkout(workout: TabataWorkout, authToken?: string | Promise<string | null> | null): Observable<{ success: boolean }> {
+        return this.authenticatedOptions(authToken).pipe(
+            switchMap((options) => this.http.post<{ success: boolean }>(this.apiUrl('/api/workouts'), workout, options))
+        );
     }
 
     /** POST a new workout and return the saved workout (id, timestamps). */
-    createWorkout(payload: CreateWorkoutPayload): Observable<TabataWorkout> {
-        return this.authenticatedOptions().pipe(switchMap((options) => this.http.post<TabataWorkout>(this.apiUrl('/api/workouts'), payload, options)));
+    createWorkout(payload: CreateWorkoutPayload, authToken?: string | Promise<string | null> | null): Observable<TabataWorkout> {
+        return this.authenticatedOptions(authToken).pipe(
+            switchMap((options) => this.http.post<TabataWorkout>(this.apiUrl('/api/workouts'), payload, options))
+        );
     }
 
     /** PUT an existing workout and return the updated workout. */
-    updateWorkout(id: string, payload: UpdateWorkoutPayload): Observable<TabataWorkout> {
-        return this.authenticatedOptions().pipe(
+    updateWorkout(
+        id: string,
+        payload: UpdateWorkoutPayload,
+        authToken?: string | Promise<string | null> | null
+    ): Observable<TabataWorkout> {
+        return this.authenticatedOptions(authToken).pipe(
             switchMap((options) => this.http.put<TabataWorkout>(this.apiUrl(`/api/workouts/${encodeURIComponent(id)}`), payload, options))
         );
     }

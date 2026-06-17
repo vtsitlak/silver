@@ -5,42 +5,16 @@
  * Root API entrypoints re-export this handler for GET list, GET by id, POST, PUT, DELETE.
  */
 
+import { AuthError, requireAuthenticatedUserId } from '../../../api/firebase-auth';
+
 const UPSTASH_URL = process.env['UPSTASH_URL'];
 const UPSTASH_TOKEN = process.env['UPSTASH_TOKEN'];
-const FIREBASE_PROJECT_ID = process.env['FIREBASE_PROJECT_ID'] ?? 'tabata-ai-player';
-const FIREBASE_JWKS_URL = 'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com';
 
 const CORS_HEADERS: Record<string, string> = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
-
-interface FirebaseJwtHeader {
-    alg?: string;
-    kid?: string;
-}
-
-interface FirebaseJwtPayload {
-    aud?: string;
-    exp?: number;
-    iss?: string;
-    sub?: string;
-    user_id?: string;
-}
-
-interface FirebaseJwksResponse {
-    keys?: JsonWebKey[];
-}
-
-class AuthError extends Error {
-    constructor(
-        message: string,
-        readonly status: number = 401
-    ) {
-        super(message);
-    }
-}
 
 function missingEnv(): Response {
     return new Response(JSON.stringify({ error: 'UPSTASH_URL and UPSTASH_TOKEN must be set (e.g. in .env or Vercel)' }), {
@@ -77,73 +51,8 @@ function workoutPathById(id: string): string {
     return `$[?(@.id==${JSON.stringify(id)})]`;
 }
 
-function decodeBase64Url(input: string): Uint8Array {
-    const normalized = input.replace(/-/g, '+').replace(/_/g, '/');
-    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
-    if (typeof atob === 'function') {
-        const binary = atob(padded);
-        return Uint8Array.from(binary, (char) => char.charCodeAt(0));
-    }
-    return Uint8Array.from(Buffer.from(padded, 'base64'));
-}
-
-function decodeJwtPart<T>(input: string): T {
-    return JSON.parse(new TextDecoder().decode(decodeBase64Url(input))) as T;
-}
-
-async function fetchFirebasePublicKeys(): Promise<JsonWebKey[]> {
-    const response = await fetch(FIREBASE_JWKS_URL);
-    const data = (await response.json()) as FirebaseJwksResponse;
-    if (!response.ok) {
-        throw new AuthError('Unable to verify bearer token');
-    }
-    return data.keys ?? [];
-}
-
-async function verifyFirebaseIdToken(token: string): Promise<string> {
-    const parts = token.split('.');
-    if (parts.length !== 3) {
-        throw new AuthError('Invalid bearer token');
-    }
-
-    const [encodedHeader, encodedPayload, encodedSignature] = parts as [string, string, string];
-    const header = decodeJwtPart<FirebaseJwtHeader>(encodedHeader);
-    if (header.alg !== 'RS256' || !header.kid) {
-        throw new AuthError('Invalid bearer token');
-    }
-
-    const publicKeys = await fetchFirebasePublicKeys();
-    const publicKey = publicKeys.find((key) => key.kid === header.kid && key.alg === 'RS256');
-    if (!publicKey) {
-        throw new AuthError('Invalid bearer token');
-    }
-
-    const key = await crypto.subtle.importKey('jwk', publicKey, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
-    const signature = decodeBase64Url(encodedSignature);
-    const signedData = new TextEncoder().encode(`${encodedHeader}.${encodedPayload}`);
-    const isValid = await crypto.subtle.verify({ name: 'RSASSA-PKCS1-v1_5' }, key, signature, signedData);
-    if (!isValid) {
-        throw new AuthError('Invalid bearer token');
-    }
-
-    const payload = decodeJwtPart<FirebaseJwtPayload>(encodedPayload);
-    const now = Math.floor(Date.now() / 1000);
-    const expectedIssuer = `https://securetoken.google.com/${FIREBASE_PROJECT_ID}`;
-    const uid = payload.user_id ?? payload.sub;
-    if (payload.aud !== FIREBASE_PROJECT_ID || payload.iss !== expectedIssuer || !uid || payload.exp === undefined || payload.exp <= now) {
-        throw new AuthError('Invalid bearer token');
-    }
-
-    return uid;
-}
-
-async function requireAuthenticatedUserId(request: Request): Promise<string> {
-    const authorization = request.headers.get('Authorization');
-    const match = authorization?.match(/^Bearer\s+(.+)$/i);
-    if (!match) {
-        throw new AuthError('Missing bearer token');
-    }
-    return verifyFirebaseIdToken(match[1]!);
+function omitWorkoutFields(o: Record<string, unknown>, keys: string[]): Record<string, unknown> {
+    return Object.fromEntries(Object.entries(o).filter(([k]) => !keys.includes(k)));
 }
 
 async function readWorkoutList(headers: Record<string, string>): Promise<Record<string, unknown>[]> {
@@ -224,10 +133,9 @@ export default {
                     if (!isWorkoutOwner(existing, authenticatedUserId)) {
                         return jsonResponse(JSON.stringify({ error: 'Authenticated user cannot mutate another user workout' }), 403);
                     }
-                    const omit = (o: Record<string, unknown>, keys: string[]) => Object.fromEntries(Object.entries(o).filter(([k]) => !keys.includes(k)));
                     const updated = {
                         ...existing,
-                        ...omit(body as Record<string, unknown>, ['id', 'createdAt', 'createdByUserId', 'updatedAt', 'updatedByUserId']),
+                        ...omitWorkoutFields(body as Record<string, unknown>, ['id', 'createdAt', 'createdByUserId', 'updatedAt', 'updatedByUserId']),
                         id,
                         createdAt: existing['createdAt'],
                         createdByUserId: existing['createdByUserId'],
@@ -268,10 +176,9 @@ export default {
             if (method === 'POST') {
                 const authenticatedUserId = await requireAuthenticatedUserId(request);
                 const body = (await request.json()) as Record<string, unknown>;
-                const omit = (o: Record<string, unknown>, keys: string[]) => Object.fromEntries(Object.entries(o).filter(([k]) => !keys.includes(k)));
                 const createdAt = timestamp();
                 const workout = {
-                    ...omit(body, ['id', 'createdAt', 'createdByUserId', 'updatedAt', 'updatedByUserId']),
+                    ...omitWorkoutFields(body, ['id', 'createdAt', 'createdByUserId', 'updatedAt', 'updatedByUserId']),
                     id: generateWorkoutId(),
                     createdByUserId: authenticatedUserId,
                     updatedByUserId: authenticatedUserId,

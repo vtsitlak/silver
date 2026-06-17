@@ -81,8 +81,8 @@ describe('DeleteAccountService', () => {
             calls.push('get-workouts');
             return of([createWorkout('w1', 'u1'), createWorkout('w2', 'other')]);
         });
-        workoutsService.deleteWorkout.mockImplementation((id: string) => {
-            calls.push(`delete-workout:${id}`);
+        workoutsService.deleteWorkout.mockImplementation((id: string, token?: string) => {
+            calls.push(`delete-workout:${id}:${token}`);
             return of({ success: true });
         });
         userWorkoutsService.deleteUserWorkout.mockImplementation((userId: string, token?: string) => {
@@ -108,7 +108,7 @@ describe('DeleteAccountService', () => {
                 'capture-user-workouts-token',
                 'get-workouts',
                 'delete-current-user',
-                'delete-workout:w1',
+                'delete-workout:w1:captured-workouts-token',
                 'delete-user-workout:u1:captured-token'
             ]);
             expect(toast.showSuccess).toHaveBeenCalledWith('Account deleted');
