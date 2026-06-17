@@ -111,6 +111,10 @@
                 },
                 "nl": {
                     "buildTarget": "tabata-ai:build:development:nl"
+                },
+                "ci": {
+                    "buildTarget": "tabata-ai:build:development:en",
+                    "open": false
                 }
             },
             "defaultConfiguration": "development",

@@ -1,11 +1,14 @@
+import { signal, type WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Subject, of } from 'rxjs';
+import { USER_WORKOUTS_ACTIVE_USER_ID } from './user-workouts-active-user-id';
 import { UserWorkoutsService } from './user-workouts.service';
 import { UserWorkoutsStore } from './user-workouts.store';
 import type { UserWorkout, UserWorkoutItem } from './user-workouts.model';
 
 describe('UserWorkoutsStore', () => {
     let store: InstanceType<typeof UserWorkoutsStore>;
+    let activeUserId: WritableSignal<string | null>;
     let saveResponses: Subject<UserWorkout>[];
     let userWorkoutsService: {
         getUserWorkout: jest.Mock;
@@ -14,6 +17,7 @@ describe('UserWorkoutsStore', () => {
     };
 
     beforeEach(() => {
+        activeUserId = signal<string | null>('user1');
         saveResponses = [];
         userWorkoutsService = {
             getUserWorkout: jest.fn(() => of(null)),
@@ -26,7 +30,11 @@ describe('UserWorkoutsStore', () => {
         };
 
         TestBed.configureTestingModule({
-            providers: [UserWorkoutsStore, { provide: UserWorkoutsService, useValue: userWorkoutsService }]
+            providers: [
+                UserWorkoutsStore,
+                { provide: USER_WORKOUTS_ACTIVE_USER_ID, useValue: activeUserId },
+                { provide: UserWorkoutsService, useValue: userWorkoutsService }
+            ]
         });
 
         store = TestBed.inject(UserWorkoutsStore);
@@ -52,15 +60,14 @@ describe('UserWorkoutsStore', () => {
         expect(secondPayload.workoutItems).toEqual([firstItem, secondItem]);
     });
 
-    it('keeps every queued save visible so a third rapid save cannot drop the second save payload', () => {
+    it('exposes every queued save payload before older requests complete so repeated appends do not drop history', () => {
         // Arrange
         const firstItem = createWorkoutItem('first-session');
         const secondItem = createWorkoutItem('second-session');
         const thirdItem = createWorkoutItem('third-session');
-        const firstPayload = createUserWorkout([firstItem]);
 
         // Act
-        store.saveUserWorkout(firstPayload);
+        store.saveUserWorkout(createUserWorkout([firstItem]));
         const stateAfterFirstSave = store.userWorkout();
         const secondPayload = createUserWorkout([...(stateAfterFirstSave?.workoutItems ?? []), secondItem]);
         store.saveUserWorkout(secondPayload);
@@ -69,32 +76,9 @@ describe('UserWorkoutsStore', () => {
         store.saveUserWorkout(thirdPayload);
 
         // Assert
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(1);
         expect(stateAfterSecondSave?.workoutItems).toEqual([firstItem, secondItem]);
         expect(thirdPayload.workoutItems).toEqual([firstItem, secondItem, thirdItem]);
-        expect(store.userWorkout()).toEqual(thirdPayload);
-        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(1);
-
-        // Act
-        saveResponses[0].next(firstPayload);
-        saveResponses[0].complete();
-
-        // Assert
-        expect(store.userWorkout()).toEqual(thirdPayload);
-        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(2);
-
-        // Act
-        saveResponses[1].next(secondPayload);
-        saveResponses[1].complete();
-
-        // Assert
-        expect(store.userWorkout()).toEqual(thirdPayload);
-        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(3);
-
-        // Act
-        saveResponses[2].next(thirdPayload);
-        saveResponses[2].complete();
-
-        // Assert
         expect(store.userWorkout()).toEqual(thirdPayload);
     });
 
@@ -121,11 +105,202 @@ describe('UserWorkoutsStore', () => {
         expect(userWorkoutsService.saveUserWorkout).toHaveBeenNthCalledWith(2, secondPayload);
         expect(store.userWorkout()).toEqual(secondPayload);
     });
+
+    it('ignores stale responses from older saves while newer payloads are queued', () => {
+        // Arrange
+        const firstPayload = createUserWorkout([createWorkoutItem('first-session')]);
+        const secondPayload = createUserWorkout([createWorkoutItem('first-session'), createWorkoutItem('second-session')]);
+
+        // Act
+        store.saveUserWorkout(firstPayload);
+        store.saveUserWorkout(secondPayload);
+        saveResponses[0].next(firstPayload);
+        saveResponses[0].complete();
+
+        // Assert
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(2);
+        expect(store.userWorkout()).toEqual(secondPayload);
+    });
+
+    it('keeps queued save payloads visible so later appends cannot overwrite them with stale history', () => {
+        // Arrange
+        const firstItem = createWorkoutItem('first-session');
+        const secondItem = createWorkoutItem('second-session');
+        const thirdItem = createWorkoutItem('third-session');
+        const firstPayload = createUserWorkout([firstItem]);
+
+        // Act
+        store.saveUserWorkout(firstPayload);
+        const stateAfterFirstSave = store.userWorkout();
+        const secondPayload: UserWorkout = {
+            ...(stateAfterFirstSave as UserWorkout),
+            workoutItems: [...(stateAfterFirstSave?.workoutItems ?? []), secondItem]
+        };
+        store.saveUserWorkout(secondPayload);
+        const stateAfterSecondSave = store.userWorkout();
+        const thirdPayload: UserWorkout = {
+            ...(stateAfterSecondSave as UserWorkout),
+            workoutItems: [...(stateAfterSecondSave?.workoutItems ?? []), thirdItem]
+        };
+        store.saveUserWorkout(thirdPayload);
+
+        // Assert
+        expect(stateAfterSecondSave?.workoutItems).toEqual([firstItem, secondItem]);
+        expect(thirdPayload.workoutItems).toEqual([firstItem, secondItem, thirdItem]);
+        expect(store.userWorkout()).toEqual(thirdPayload);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(1);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenNthCalledWith(1, firstPayload);
+
+        // Act
+        saveResponses[0].next(firstPayload);
+        saveResponses[0].complete();
+
+        // Assert
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(2);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenNthCalledWith(2, secondPayload);
+        expect(store.userWorkout()).toEqual(thirdPayload);
+
+        // Act
+        saveResponses[1].next(secondPayload);
+        saveResponses[1].complete();
+
+        // Assert
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(3);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenNthCalledWith(3, thirdPayload);
+        expect(store.userWorkout()).toEqual(thirdPayload);
+
+        // Act
+        saveResponses[2].next(thirdPayload);
+        saveResponses[2].complete();
+
+        // Assert
+        expect(store.userWorkout()).toEqual(thirdPayload);
+        expect(store.isLoading()).toBe(false);
+        expect(store.error()).toBeNull();
+    });
+
+    it('does not let a refresh overwrite pending save state with stale user workout data', () => {
+        // Arrange
+        const completedItem = createWorkoutItem('completed-session');
+        const pendingPayload = createUserWorkout([completedItem]);
+
+        // Act
+        store.saveUserWorkout(pendingPayload);
+        store.getOrCreateUserWorkout('user1');
+        const nextPayload: UserWorkout = {
+            ...(store.userWorkout() as UserWorkout),
+            favoriteWorkouts: ['favorite-workout']
+        };
+        store.saveUserWorkout(nextPayload);
+
+        // Assert
+        expect(userWorkoutsService.getOrCreateUserWorkout).not.toHaveBeenCalled();
+        expect(nextPayload.workoutItems).toEqual([completedItem]);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(1);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenNthCalledWith(1, pendingPayload);
+
+        // Act
+        saveResponses[0].next(pendingPayload);
+        saveResponses[0].complete();
+        saveResponses[1].next(nextPayload);
+        saveResponses[1].complete();
+
+        // Assert
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(2);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenNthCalledWith(2, nextPayload);
+        expect(store.userWorkout()).toEqual(nextPayload);
+    });
+
+    it('ignores refresh responses that started before a newer save', () => {
+        // Arrange
+        const refreshResponse = new Subject<UserWorkout | null>();
+        userWorkoutsService.getUserWorkout.mockReturnValueOnce(refreshResponse.asObservable());
+        const pendingPayload = createUserWorkout([createWorkoutItem('completed-session')]);
+        const stalePayload = createUserWorkout([]);
+
+        // Act
+        store.getOrCreateUserWorkout('user1');
+        store.saveUserWorkout(pendingPayload);
+        saveResponses[0].next(pendingPayload);
+        saveResponses[0].complete();
+        refreshResponse.next(stalePayload);
+        refreshResponse.complete();
+
+        // Assert
+        expect(store.userWorkout()).toEqual(pendingPayload);
+        expect(store.isLoading()).toBe(false);
+    });
+
+    it('creates missing user workout records through the serialized save queue', () => {
+        // Arrange
+        const loadResponse = new Subject<UserWorkout | null>();
+        const emptyPayload = createUserWorkout([]);
+        userWorkoutsService.getUserWorkout.mockReturnValueOnce(loadResponse.asObservable());
+
+        // Act
+        store.getOrCreateUserWorkout('user1');
+        loadResponse.next(null);
+        loadResponse.complete();
+
+        // Assert
+        expect(userWorkoutsService.getUserWorkout).toHaveBeenCalledWith('user1');
+        expect(userWorkoutsService.getOrCreateUserWorkout).not.toHaveBeenCalled();
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(1);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenNthCalledWith(1, emptyPayload);
+
+        // Act
+        saveResponses[0].next(emptyPayload);
+        saveResponses[0].complete();
+
+        // Assert
+        expect(store.userWorkout()).toEqual(emptyPayload);
+        expect(store.isLoading()).toBe(false);
+    });
+
+    it('clears user workout state and ignores in-flight save responses when the active user changes', () => {
+        // Arrange
+        const userOnePayload = createUserWorkout([createWorkoutItem('user-one-session')], 'user1');
+
+        // Act
+        store.saveUserWorkout(userOnePayload);
+        activeUserId.set(null);
+        flushSignalEffects();
+        saveResponses[0].next(userOnePayload);
+        saveResponses[0].complete();
+
+        // Assert
+        expect(store.userWorkout()).toBeNull();
+        expect(store.isLoading()).toBe(false);
+        expect(store.error()).toBeNull();
+    });
+
+    it('ignores stale previous-user loads while allowing the next user to hydrate', () => {
+        // Arrange
+        const userOneResponse = new Subject<UserWorkout | null>();
+        const userTwoResponse = new Subject<UserWorkout | null>();
+        const userOnePayload = createUserWorkout([createWorkoutItem('user-one-session')], 'user1');
+        const userTwoPayload = createUserWorkout([createWorkoutItem('user-two-session')], 'user2');
+        userWorkoutsService.getUserWorkout.mockReturnValueOnce(userOneResponse.asObservable()).mockReturnValueOnce(userTwoResponse.asObservable());
+
+        // Act
+        store.getOrCreateUserWorkout('user1');
+        activeUserId.set('user2');
+        flushSignalEffects();
+        store.getOrCreateUserWorkout('user2');
+        userOneResponse.next(userOnePayload);
+        userOneResponse.complete();
+        userTwoResponse.next(userTwoPayload);
+        userTwoResponse.complete();
+
+        // Assert
+        expect(store.userWorkout()).toEqual(userTwoPayload);
+        expect(store.isLoading()).toBe(false);
+    });
 });
 
-function createUserWorkout(workoutItems: UserWorkoutItem[]): UserWorkout {
+function createUserWorkout(workoutItems: UserWorkoutItem[], userId = 'user1'): UserWorkout {
     return {
-        userId: 'user1',
+        userId,
         favoriteWorkouts: [],
         workoutItems
     };
@@ -138,4 +313,8 @@ function createWorkoutItem(workoutId: string): UserWorkoutItem {
         finishedAt: `2026-01-01T00:10:00.000Z-${workoutId}`,
         completed: true
     };
+}
+
+function flushSignalEffects(): void {
+    TestBed.flushEffects();
 }
