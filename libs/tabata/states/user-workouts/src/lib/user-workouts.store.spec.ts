@@ -304,7 +304,9 @@ describe('UserWorkoutsStore', () => {
         const userTwoResponse = new Subject<UserWorkout | null>();
         const userOnePayload = createUserWorkout([createWorkoutItem('user-one-session')], 'user1');
         const userTwoPayload = createUserWorkout([createWorkoutItem('user-two-session')], 'user2');
-        userWorkoutsService.getUserWorkout.mockReturnValueOnce(userOneResponse.asObservable()).mockReturnValueOnce(userTwoResponse.asObservable());
+        userWorkoutsService.getUserWorkout
+            .mockReturnValueOnce(userOneResponse.asObservable())
+            .mockReturnValueOnce(userTwoResponse.asObservable());
 
         // Act
         store.getOrCreateUserWorkout('user1');
