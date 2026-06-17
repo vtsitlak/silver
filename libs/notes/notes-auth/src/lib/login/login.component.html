@@ -3,7 +3,7 @@
     <mat-card-content>
         <form class="flex flex-col gap-4" (keydown.enter)="$event.preventDefault(); login()">
             <mat-form-field>
-                <input matInput type="email" placeholder="Email" [formField]="loginForm.email" />
+                <input [formField]="loginForm.email" matInput type="email" placeholder="Email" />
 
                 @if (loginForm.email().touched() && loginForm.email().invalid()) {
                     <mat-error>
@@ -15,7 +15,7 @@
             </mat-form-field>
 
             <mat-form-field>
-                <input matInput type="password" placeholder="Password" [formField]="loginForm.password" />
+                <input [formField]="loginForm.password" matInput type="password" placeholder="Password" />
 
                 @if (loginForm.password().touched() && loginForm.password().invalid()) {
                     <mat-error>
