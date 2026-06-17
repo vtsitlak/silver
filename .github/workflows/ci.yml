@@ -40,5 +40,6 @@ jobs:
             # When you enable task distribution, run the e2e-ci task instead of e2e
             - run: npx nx affected -t lint test build e2e --no-cloud
               env:
+                  NX_NO_CLOUD: true
                   TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
                   TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
