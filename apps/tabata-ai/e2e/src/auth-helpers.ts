@@ -4,11 +4,16 @@ import { join } from 'path';
 
 dotenv.config({ path: join(__dirname, '../.env') });
 
-const TEST_USER_EMAIL = process.env['TEST_USER_EMAIL'];
-const TEST_USER_PASSWORD = process.env['TEST_USER_PASSWORD'];
+function getAuthCredentials(): { email: string | undefined; password: string | undefined } {
+    return {
+        email: process.env['TEST_USER_EMAIL'],
+        password: process.env['TEST_USER_PASSWORD']
+    };
+}
 
 export function requireAuthEnv(): void {
-    if (!TEST_USER_EMAIL || !TEST_USER_PASSWORD) {
+    const { email, password } = getAuthCredentials();
+    if (!email || !password) {
         throw new Error(
             'Missing required environment variables: TEST_USER_EMAIL and TEST_USER_PASSWORD. ' +
                 'Set them in apps/tabata-ai/e2e/.env locally or in your CI environment.'
@@ -33,10 +38,11 @@ export async function fillIonInput(page: Page, fieldId: string, value: string): 
  * (e.g. Workouts/History) from persisted app state in some environments.
  */
 export async function loginAndWaitForDashboard(page: Page): Promise<void> {
+    const { email, password } = getAuthCredentials();
     await page.goto('/auth/login');
     await page.locator('ion-input#email').waitFor({ state: 'visible', timeout: 10000 });
-    await fillIonInput(page, 'email', TEST_USER_EMAIL ?? '');
-    await fillIonInput(page, 'password', TEST_USER_PASSWORD ?? '');
+    await fillIonInput(page, 'email', email ?? '');
+    await fillIonInput(page, 'password', password ?? '');
     await page.getByRole('button', { name: 'Login' }).click();
 
     await expect
