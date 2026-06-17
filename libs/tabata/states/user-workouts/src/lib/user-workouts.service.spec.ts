@@ -127,6 +127,33 @@ describe('UserWorkoutsService', () => {
         putReq.flush(created);
     }));
 
+    it('deleteUserWorkout should reuse a captured token for DELETE and fallback wipe', fakeAsync(() => {
+        // Arrange
+        authTokenProvider.mockReturnValue(null);
+        let result: { success: boolean } | undefined;
+
+        // Act
+        service.deleteUserWorkout('user1', 'captured-token').subscribe((data) => {
+            result = data;
+        });
+        tick();
+
+        const deleteReq = httpMock.expectOne('/api/user-workouts/user1');
+        expect(deleteReq.request.method).toBe('DELETE');
+        expect(deleteReq.request.headers.get('Authorization')).toBe('Bearer captured-token');
+        deleteReq.flush({ message: 'Method not allowed' }, { status: 405, statusText: 'Method Not Allowed' });
+        tick();
+
+        const putReq = httpMock.expectOne('/api/user-workouts/user1');
+        expect(putReq.request.method).toBe('PUT');
+        expect(putReq.request.headers.get('Authorization')).toBe('Bearer captured-token');
+        putReq.flush({ userId: 'user1', favoriteWorkouts: [], workoutItems: [] });
+        tick();
+
+        // Assert
+        expect(result).toEqual({ success: true });
+    }));
+
     it('fails before sending a request when there is no signed-in Firebase user', fakeAsync(() => {
         // Arrange
         authTokenProvider.mockReturnValue(null);
