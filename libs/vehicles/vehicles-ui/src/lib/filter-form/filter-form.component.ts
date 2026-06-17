@@ -11,7 +11,7 @@ import { Filter } from '@silver/vehicles-store';
     imports: [MatFormFieldModule, MatSelectModule, FormField]
 })
 export class FilterFormComponent {
-    private filterModel = signal<Filter>({ type: '', brand: '', color: '' });
+    readonly filterModel = signal<Filter>({ type: '', brand: '', color: '' });
     filterForm = form(this.filterModel);
     types = input<string[] | null>(null);
     brands = input<string[] | null>(null);
@@ -20,12 +20,7 @@ export class FilterFormComponent {
 
     constructor() {
         effect(() => {
-            // Only track actual field values, not form state
-            this.updateFilter.emit({
-                type: this.filterForm.type().value(),
-                brand: this.filterForm.brand().value(),
-                color: this.filterForm.color().value()
-            });
+            this.updateFilter.emit({ ...this.filterModel() });
         });
     }
 }
