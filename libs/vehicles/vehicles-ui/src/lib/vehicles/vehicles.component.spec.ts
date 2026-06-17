@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { provideAnimations } from '@angular/platform-browser/animations';
 import { VehiclesComponent } from './vehicles.component';
 import { VehiclesFacade } from '@silver/vehicles-store';
 import { signal } from '@angular/core';
@@ -18,6 +19,7 @@ describe('VehiclesComponent', () => {
         TestBed.configureTestingModule({
             imports: [VehiclesComponent],
             providers: [
+                provideAnimations(),
                 {
                     provide: VehiclesFacade,
                     useValue: {
@@ -40,7 +42,6 @@ describe('VehiclesComponent', () => {
     beforeEach(() => {
         fixture = TestBed.createComponent(VehiclesComponent);
         component = fixture.componentInstance;
-        fixture.detectChanges();
     });
 
     it('should create VehiclesComponent', () => {

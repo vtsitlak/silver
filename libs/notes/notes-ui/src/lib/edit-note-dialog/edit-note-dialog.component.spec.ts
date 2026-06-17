@@ -56,11 +56,15 @@ describe('EditNoteDialogComponent', () => {
     beforeEach(() => {
         fixture = TestBed.createComponent(EditNoteDialogComponent);
         component = fixture.componentInstance;
-        fixture.detectChanges();
     });
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should render the edit note dialog', () => {
+        expect(() => fixture.detectChanges()).not.toThrow();
+        expect(fixture.nativeElement.querySelector('h2')).toBeTruthy();
     });
 
     it('should close dialog when onClose is called', () => {
