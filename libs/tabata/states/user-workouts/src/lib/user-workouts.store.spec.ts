@@ -65,9 +65,10 @@ describe('UserWorkoutsStore', () => {
         const firstItem = createWorkoutItem('first-session');
         const secondItem = createWorkoutItem('second-session');
         const thirdItem = createWorkoutItem('third-session');
+        const firstPayload = createUserWorkout([firstItem]);
 
         // Act
-        store.saveUserWorkout(createUserWorkout([firstItem]));
+        store.saveUserWorkout(firstPayload);
         const stateAfterFirstSave = store.userWorkout();
         const secondPayload = createUserWorkout([...(stateAfterFirstSave?.workoutItems ?? []), secondItem]);
         store.saveUserWorkout(secondPayload);
@@ -79,6 +80,29 @@ describe('UserWorkoutsStore', () => {
         expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(1);
         expect(stateAfterSecondSave?.workoutItems).toEqual([firstItem, secondItem]);
         expect(thirdPayload.workoutItems).toEqual([firstItem, secondItem, thirdItem]);
+        expect(store.userWorkout()).toEqual(thirdPayload);
+
+        // Act
+        saveResponses[0].next(firstPayload);
+        saveResponses[0].complete();
+
+        // Assert
+        expect(store.userWorkout()).toEqual(thirdPayload);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(2);
+
+        // Act
+        saveResponses[1].next(secondPayload);
+        saveResponses[1].complete();
+
+        // Assert
+        expect(store.userWorkout()).toEqual(thirdPayload);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(3);
+
+        // Act
+        saveResponses[2].next(thirdPayload);
+        saveResponses[2].complete();
+
+        // Assert
         expect(store.userWorkout()).toEqual(thirdPayload);
     });
 
