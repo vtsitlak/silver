@@ -5,7 +5,7 @@ import { ToastService } from '@silver/tabata/helpers';
 import { AuthFacade } from '@silver/tabata/auth';
 import { AuthService } from '@silver/tabata/states/auth';
 import { type TabataWorkout, WORKOUTS_AUTH_TOKEN, WorkoutsService } from '@silver/tabata/states/workouts';
-import { USER_WORKOUTS_AUTH_TOKEN, UserWorkoutsService } from '@silver/tabata/states/user-workouts';
+import { USER_WORKOUTS_AUTH_TOKEN, type UserWorkoutsAuthTokenProvider, UserWorkoutsService } from '@silver/tabata/states/user-workouts';
 import { DeleteAccountService } from './delete-account.service';
 
 describe('DeleteAccountService', () => {
@@ -34,7 +34,7 @@ describe('DeleteAccountService', () => {
     const authFacade = { user: () => ({ uid: 'u1' }) };
     const authService = { deleteCurrentUser: jest.fn(() => of(undefined)) };
     const workoutsAuthToken = jest.fn(() => 'captured-workouts-token');
-    const userWorkoutsAuthToken = jest.fn(() => 'captured-token');
+    const userWorkoutsAuthToken: jest.MockedFunction<UserWorkoutsAuthTokenProvider> = jest.fn(() => 'captured-token');
     const workoutsService = {
         getWorkouts: jest.fn(() => of([createWorkout('w1', 'u1'), createWorkout('w2', 'other')])),
         deleteWorkout: jest.fn(() => of({ success: true }))

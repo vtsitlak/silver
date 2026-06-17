@@ -5,7 +5,7 @@ import { AuthFacade } from '@silver/tabata/auth';
 import { AuthService } from '@silver/tabata/states/auth';
 import { WORKOUTS_AUTH_TOKEN, WorkoutsService } from '@silver/tabata/states/workouts';
 import { USER_WORKOUTS_AUTH_TOKEN, UserWorkoutsService } from '@silver/tabata/states/user-workouts';
-import { catchError, concatMap, defer, from, map, of, switchMap, toArray, throwError } from 'rxjs';
+import { catchError, concatMap, defer, from, map, of, switchMap, throwError, toArray } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class DeleteAccountService {
