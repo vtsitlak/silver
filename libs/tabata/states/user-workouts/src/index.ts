@@ -1,4 +1,6 @@
 export * from './lib/user-workouts.model';
+export * from './lib/user-workouts-active-user-id';
+export * from './lib/user-workouts-auth-token';
 export * from './lib/user-workouts-api-base-url';
 export * from './lib/user-workouts.service';
 export * from './lib/user-workouts.store';
