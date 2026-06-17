@@ -86,23 +86,19 @@ describe.each(handlers)('workouts API $name', ({ handler }) => {
         global.fetch = fetchMock;
     });
 
-    it('rejects unauthenticated deletes before touching Upstash', async () => {
-        // Act
+    it('rejects mutation requests without a Firebase bearer token before touching Upstash', async () => {
         const response = await handler.fetch(new Request('https://app.test/api/workouts/workout-1', { method: 'DELETE' }));
 
-        // Assert
         expect(response.status).toBe(401);
         await expect(response.json()).resolves.toEqual({ error: 'Missing bearer token' });
         expect(fetchMock).not.toHaveBeenCalled();
     });
 
     it('rejects updates from a user who did not create the workout', async () => {
-        // Arrange
         fetchMock
             .mockResolvedValueOnce(jsonUpstashResponse({ keys: [publicJwk] }))
             .mockResolvedValueOnce(jsonUpstashResponse({ result: JSON.stringify([{ id: 'workout-1', name: 'Victim workout', createdByUserId: 'owner-user' }]) }));
 
-        // Act
         const response = await handler.fetch(
             new Request('https://app.test/api/workouts/workout-1', {
                 method: 'PUT',
@@ -111,7 +107,6 @@ describe.each(handlers)('workouts API $name', ({ handler }) => {
             })
         );
 
-        // Assert
         expect(response.status).toBe(403);
         await expect(response.json()).resolves.toEqual({ error: 'Authenticated user cannot mutate another user workout' });
         expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -119,20 +114,19 @@ describe.each(handlers)('workouts API $name', ({ handler }) => {
     });
 
     it('deletes a workout with a filtered JSON.DEL instead of rewriting the shared list', async () => {
-        // Arrange
+        const existingWorkout = { id: 'workout-1', name: 'Old name', createdByUserId: 'owner-user' };
         fetchMock
             .mockResolvedValueOnce(jsonUpstashResponse({ keys: [publicJwk] }))
-            .mockResolvedValueOnce(jsonUpstashResponse({ result: JSON.stringify([{ id: 'workout-1', createdByUserId: 'owner-user' }]) }))
+            .mockResolvedValueOnce(jsonUpstashResponse({ result: JSON.stringify([existingWorkout]) }))
             .mockResolvedValueOnce(jsonUpstashResponse({ result: 1 }));
 
-        // Act
         const response = await handler.fetch(
             new Request('https://app.test/api/workouts/workout-1', { method: 'DELETE', headers: await authorizationHeaders('owner-user') })
         );
 
-        // Assert
         await expect(response.json()).resolves.toEqual({ success: true });
         expect(fetchMock).toHaveBeenCalledTimes(3);
+        expect(fetchMock).toHaveBeenNthCalledWith(2, 'https://upstash.example/JSON.GET/tabata_workouts', expect.any(Object));
         expect(fetchMock).toHaveBeenNthCalledWith(
             3,
             'https://upstash.example',
@@ -143,22 +137,34 @@ describe.each(handlers)('workouts API $name', ({ handler }) => {
         );
     });
 
+    it('rejects attempts to delete another user workout before mutating Upstash', async () => {
+        fetchMock
+            .mockResolvedValueOnce(jsonUpstashResponse({ keys: [publicJwk] }))
+            .mockResolvedValueOnce(jsonUpstashResponse({ result: JSON.stringify([{ id: 'workout-1', createdByUserId: 'owner-user' }]) }));
+
+        const response = await handler.fetch(
+            new Request('https://app.test/api/workouts/workout-1', { method: 'DELETE', headers: await authorizationHeaders('attacker-user') })
+        );
+
+        expect(response.status).toBe(403);
+        await expect(response.json()).resolves.toEqual({ error: 'Authenticated user cannot mutate another user workout' });
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
     it('updates only the matching workout element instead of writing a stale full-array snapshot', async () => {
-        // Arrange
         const existingWorkout = {
             id: 'workout-1',
             name: 'Old name',
             createdAt: '2026-01-01-00:00:00',
-            updatedAt: 'old',
             createdByUserId: 'owner-user',
-            updatedByUserId: 'owner-user'
+            updatedByUserId: 'owner-user',
+            updatedAt: 'old'
         };
         fetchMock
             .mockResolvedValueOnce(jsonUpstashResponse({ keys: [publicJwk] }))
             .mockResolvedValueOnce(jsonUpstashResponse({ result: JSON.stringify([existingWorkout, { id: 'new-concurrent-workout' }]) }))
             .mockResolvedValueOnce(jsonUpstashResponse({ result: 'OK' }));
 
-        // Act
         const response = await handler.fetch(
             new Request('https://app.test/api/workouts/workout-1', {
                 method: 'PUT',
@@ -167,7 +173,6 @@ describe.each(handlers)('workouts API $name', ({ handler }) => {
             })
         );
 
-        // Assert
         await expect(response.json()).resolves.toEqual(
             expect.objectContaining({
                 id: 'workout-1',
@@ -249,32 +254,31 @@ describe.each(collectionHandlers)('workouts API $name collection mutations', ({ 
         global.fetch = fetchMock;
     });
 
-    it('stamps created workouts with the authenticated user instead of trusting client ownership fields', async () => {
-        // Arrange
+    it('stamps new workouts with the authenticated user instead of trusting the request body owner', async () => {
         fetchMock.mockResolvedValueOnce(jsonUpstashResponse({ keys: [publicJwk] })).mockResolvedValueOnce(jsonUpstashResponse({ result: 1 }));
 
-        // Act
         const response = await handler.fetch(
             new Request('https://app.test/api/workouts', {
                 method: 'POST',
                 headers: await authorizationHeaders('owner-user'),
-                body: JSON.stringify({ name: 'Workout', createdByUserId: 'attacker-user', updatedByUserId: 'attacker-user' })
+                body: JSON.stringify({ name: 'New workout', createdByUserId: 'attacker-user', updatedByUserId: 'attacker-user' })
             })
         );
 
-        // Assert
         await expect(response.json()).resolves.toEqual(
             expect.objectContaining({
-                name: 'Workout',
+                name: 'New workout',
                 createdByUserId: 'owner-user',
                 updatedByUserId: 'owner-user'
             })
         );
+
+        expect(fetchMock).toHaveBeenCalledTimes(2);
         const appendCall = fetchMock.mock.calls[1] as [string, RequestInit];
         expect(appendCall[0]).toBe('https://upstash.example/JSON.ARRAPPEND/tabata_workouts/$');
         expect(JSON.parse(appendCall[1].body as string)).toEqual(
             expect.objectContaining({
-                name: 'Workout',
+                name: 'New workout',
                 createdByUserId: 'owner-user',
                 updatedByUserId: 'owner-user'
             })

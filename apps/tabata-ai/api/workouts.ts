@@ -2,7 +2,7 @@
  * Vercel serverless proxy for Upstash (workouts).
  * Token is read from env (UPSTASH_URL, UPSTASH_TOKEN) — never in repo.
  * Local: run vercel dev from repo root; .env at repo root. Production: Vercel project env vars.
- * Kept in sync with repo root api/workouts.ts (GET list, GET by id, POST, PUT, DELETE).
+ * Root API entrypoints re-export this handler for GET list, GET by id, POST, PUT, DELETE.
  */
 
 import { AuthError, requireAuthenticatedUserId } from '../../../api/firebase-auth';
@@ -55,6 +55,16 @@ function omitWorkoutFields(o: Record<string, unknown>, keys: string[]): Record<s
     return Object.fromEntries(Object.entries(o).filter(([k]) => !keys.includes(k)));
 }
 
+async function readWorkoutList(headers: Record<string, string>): Promise<Record<string, unknown>[]> {
+    const response = await fetch(`${UPSTASH_URL}/JSON.GET/tabata_workouts`, { headers });
+    const data = await response.json();
+    if (!response.ok || data.error) {
+        throw new Error(data.error ?? `Upstash request failed with status ${response.status}`);
+    }
+    const parsed = typeof data.result === 'string' ? JSON.parse(data.result) : (data.result ?? []);
+    return Array.isArray(parsed) ? (parsed as Record<string, unknown>[]) : [];
+}
+
 function isWorkoutOwner(workout: Record<string, unknown>, userId: string): boolean {
     return String(workout['createdByUserId'] ?? '') === userId;
 }
@@ -78,30 +88,26 @@ export default {
 
         const url = new URL(request.url);
         const pathParts = url.pathname.replace(/^\/+/, '').split('/');
-        const isIdRoute = pathParts.length === 3 && pathParts[0] === 'api' && pathParts[1] === 'workouts';
-        const id = isIdRoute ? decodeURIComponent(pathParts[2]!) : null;
+        const pathId = pathParts.length === 3 && pathParts[0] === 'api' && pathParts[1] === 'workouts' ? decodeURIComponent(pathParts[2]!) : null;
+        const queryId = url.searchParams.get('id');
+        const id = pathId ?? queryId;
+        const isIdRoute = id != null && id !== '';
 
         try {
             if (isIdRoute && id) {
                 if (method === 'GET') {
-                    const response = await fetch(`${UPSTASH_URL}/JSON.GET/tabata_workouts`, { headers });
-                    const data = await response.json();
-                    const parsed = typeof data.result === 'string' ? JSON.parse(data.result) : (data.result ?? []);
-                    const list = Array.isArray(parsed) ? parsed : [];
-                    const workout = list.find((w: { id?: string }) => String(w?.id) === id) ?? null;
+                    const list = await readWorkoutList(headers);
+                    const workout = list.find((w) => String(w['id'] ?? '') === id) ?? null;
                     return jsonResponse(JSON.stringify(workout), 200);
                 }
                 if (method === 'DELETE') {
                     const authenticatedUserId = await requireAuthenticatedUserId(request);
-                    const response = await fetch(`${UPSTASH_URL}/JSON.GET/tabata_workouts`, { headers });
-                    const data = await response.json();
-                    const parsed = typeof data.result === 'string' ? JSON.parse(data.result) : (data.result ?? []);
-                    const list = Array.isArray(parsed) ? parsed : [];
-                    const existing = (list.find((w: { id?: string }) => String(w?.id) === id) as Record<string, unknown> | undefined) ?? null;
-                    if (!existing) {
+                    const list = await readWorkoutList(headers);
+                    const workout = list.find((w) => String(w['id'] ?? '') === id) ?? null;
+                    if (!workout) {
                         return jsonResponse(JSON.stringify({ error: 'Workout not found' }), 404);
                     }
-                    if (!isWorkoutOwner(existing, authenticatedUserId)) {
+                    if (!isWorkoutOwner(workout, authenticatedUserId)) {
                         return jsonResponse(JSON.stringify({ error: 'Authenticated user cannot mutate another user workout' }), 403);
                     }
                     const setRes = await fetch(UPSTASH_URL, {
@@ -110,19 +116,16 @@ export default {
                         body: JSON.stringify(['JSON.DEL', 'tabata_workouts', workoutPathById(id)])
                     });
                     const setData = await setRes.json();
-                    if (setData.error) {
-                        return jsonResponse(JSON.stringify({ error: setData.error }), 400);
+                    if (!setRes.ok || setData.error) {
+                        return jsonResponse(JSON.stringify({ error: setData.error ?? 'Upstash error' }), setRes.ok ? 400 : setRes.status);
                     }
                     return jsonResponse(JSON.stringify({ success: true }), 200);
                 }
                 if (method === 'PUT') {
                     const authenticatedUserId = await requireAuthenticatedUserId(request);
                     const body = await request.json();
-                    const response = await fetch(`${UPSTASH_URL}/JSON.GET/tabata_workouts`, { headers });
-                    const data = await response.json();
-                    const parsed = typeof data.result === 'string' ? JSON.parse(data.result) : (data.result ?? []);
-                    const list = Array.isArray(parsed) ? parsed : [];
-                    const index = list.findIndex((w: { id?: string }) => String(w?.id) === id);
+                    const list = await readWorkoutList(headers);
+                    const index = list.findIndex((w) => String(w['id'] ?? '') === id);
                     if (index === -1) {
                         return jsonResponse(JSON.stringify({ error: 'Workout not found' }), 404);
                     }
@@ -134,6 +137,8 @@ export default {
                         ...existing,
                         ...omitWorkoutFields(body as Record<string, unknown>, ['id', 'createdAt', 'createdByUserId', 'updatedAt', 'updatedByUserId']),
                         id,
+                        createdAt: existing['createdAt'],
+                        createdByUserId: existing['createdByUserId'],
                         updatedByUserId: authenticatedUserId,
                         updatedAt: timestamp()
                     };
@@ -143,8 +148,8 @@ export default {
                         body: JSON.stringify(['JSON.SET', 'tabata_workouts', workoutPathById(id), JSON.stringify(updated)])
                     });
                     const setData = await setRes.json();
-                    if (setData.error) {
-                        return jsonResponse(JSON.stringify({ error: setData.error }), 400);
+                    if (!setRes.ok || setData.error) {
+                        return jsonResponse(JSON.stringify({ error: setData.error ?? 'Upstash error' }), setRes.ok ? 400 : setRes.status);
                     }
                     return jsonResponse(JSON.stringify(updated), 200);
                 }
@@ -152,10 +157,7 @@ export default {
             }
 
             if (method === 'GET') {
-                const response = await fetch(`${UPSTASH_URL}/JSON.GET/tabata_workouts`, { headers });
-                const data = await response.json();
-                const parsed = typeof data.result === 'string' ? JSON.parse(data.result) : (data.result ?? []);
-                const list = Array.isArray(parsed) ? parsed : [];
+                const list = await readWorkoutList(headers);
                 const searchRaw = url.searchParams.get('search');
                 const search = typeof searchRaw === 'string' ? searchRaw.trim() : '';
                 const filtered =
@@ -178,10 +180,10 @@ export default {
                 const workout = {
                     ...omitWorkoutFields(body, ['id', 'createdAt', 'createdByUserId', 'updatedAt', 'updatedByUserId']),
                     id: generateWorkoutId(),
-                    createdAt,
-                    updatedAt: createdAt,
                     createdByUserId: authenticatedUserId,
-                    updatedByUserId: authenticatedUserId
+                    updatedByUserId: authenticatedUserId,
+                    createdAt,
+                    updatedAt: createdAt
                 };
                 const response = await fetch(`${UPSTASH_URL}/JSON.ARRAPPEND/tabata_workouts/$`, {
                     method: 'POST',
@@ -189,7 +191,7 @@ export default {
                     body: JSON.stringify(workout)
                 });
                 const data = await response.json();
-                if (!response.ok) {
+                if (!response.ok || data.error) {
                     return jsonResponse(JSON.stringify({ error: data.error ?? 'Upstash error' }), response.status);
                 }
                 return jsonResponse(JSON.stringify(workout), 201);
