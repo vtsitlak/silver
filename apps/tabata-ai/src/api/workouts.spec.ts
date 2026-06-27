@@ -87,7 +87,9 @@ describe.each(handlers)('workouts API $name', ({ handler }) => {
     });
 
     it('hides owner-stamped workouts from unauthenticated single-workout reads', async () => {
-        fetchMock.mockResolvedValueOnce(jsonUpstashResponse({ result: JSON.stringify([{ id: 'workout-1', name: 'Private workout', createdByUserId: 'owner-user' }]) }));
+        fetchMock.mockResolvedValueOnce(
+            jsonUpstashResponse({ result: JSON.stringify([{ id: 'workout-1', name: 'Private workout', createdByUserId: 'owner-user' }]) })
+        );
 
         const response = await handler.fetch(new Request('https://app.test/api/workouts/workout-1'));
 
@@ -99,7 +101,9 @@ describe.each(handlers)('workouts API $name', ({ handler }) => {
 
     it('returns owner-stamped workouts to their authenticated owner on single-workout reads', async () => {
         const workout = { id: 'workout-1', name: 'Private workout', createdByUserId: 'owner-user' };
-        fetchMock.mockResolvedValueOnce(jsonUpstashResponse({ keys: [publicJwk] })).mockResolvedValueOnce(jsonUpstashResponse({ result: JSON.stringify([workout]) }));
+        fetchMock
+            .mockResolvedValueOnce(jsonUpstashResponse({ keys: [publicJwk] }))
+            .mockResolvedValueOnce(jsonUpstashResponse({ result: JSON.stringify([workout]) }));
 
         const response = await handler.fetch(new Request('https://app.test/api/workouts/workout-1', { headers: await authorizationHeaders('owner-user') }));
 
@@ -119,7 +123,9 @@ describe.each(handlers)('workouts API $name', ({ handler }) => {
     it('rejects updates from a user who did not create the workout', async () => {
         fetchMock
             .mockResolvedValueOnce(jsonUpstashResponse({ keys: [publicJwk] }))
-            .mockResolvedValueOnce(jsonUpstashResponse({ result: JSON.stringify([{ id: 'workout-1', name: 'Victim workout', createdByUserId: 'owner-user' }]) }));
+            .mockResolvedValueOnce(
+                jsonUpstashResponse({ result: JSON.stringify([{ id: 'workout-1', name: 'Victim workout', createdByUserId: 'owner-user' }]) })
+            );
 
         const response = await handler.fetch(
             new Request('https://app.test/api/workouts/workout-1', {
