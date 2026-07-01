@@ -95,3 +95,9 @@ export async function requireAuthenticatedUserId(request: Request): Promise<stri
     }
     return verifyFirebaseIdToken(match[1]!);
 }
+
+export async function getOptionalAuthenticatedUserId(request: Request): Promise<string | null> {
+    const authorization = request.headers.get('Authorization');
+    const match = authorization?.match(/^Bearer\s+(.+)$/i);
+    return match ? verifyFirebaseIdToken(match[1]!) : null;
+}
