@@ -26,7 +26,9 @@ describe('WorkoutsService', () => {
 
     afterEach(() => httpMock.verify());
 
-    it('should keep workout list reads public', () => {
+    it('should keep workout list reads public when no user is signed in', () => {
+        authTokenProvider.mockReturnValue(null);
+
         service.getWorkouts().subscribe((data) => {
             expect(data).toEqual([]);
         });
@@ -36,6 +38,32 @@ describe('WorkoutsService', () => {
         expect(req.request.headers.has('Authorization')).toBe(false);
         req.flush([]);
     });
+
+    it('should send a Firebase bearer token on workout list reads when signed in', fakeAsync(() => {
+        service.getWorkouts(' strength ').subscribe((data) => {
+            expect(data).toEqual([]);
+        });
+        tick();
+
+        const req = httpMock.expectOne((request) => request.url === '/api/workouts' && request.params.get('search') === 'strength');
+        expect(req.request.method).toBe('GET');
+        expect(req.request.headers.get('Authorization')).toBe('Bearer firebase-token');
+        req.flush([]);
+    }));
+
+    it('should send a Firebase bearer token on workout detail reads when signed in', fakeAsync(() => {
+        const workout = { id: 'workout-1', name: 'Workout' };
+
+        service.getWorkoutById('workout-1').subscribe((data) => {
+            expect(data).toEqual(workout);
+        });
+        tick();
+
+        const req = httpMock.expectOne('/api/workouts/workout-1');
+        expect(req.request.method).toBe('GET');
+        expect(req.request.headers.get('Authorization')).toBe('Bearer firebase-token');
+        req.flush(workout);
+    }));
 
     it('should POST created workouts with a Firebase bearer token', fakeAsync(() => {
         const payload = workoutPayload();
