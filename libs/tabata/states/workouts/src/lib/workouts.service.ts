@@ -42,9 +42,7 @@ export class WorkoutsService {
             return of({});
         }
 
-        return from(Promise.resolve(token)).pipe(
-            map((resolvedToken) => (resolvedToken ? { headers: { Authorization: `Bearer ${resolvedToken}` } } : {}))
-        );
+        return from(Promise.resolve(token)).pipe(map((resolvedToken) => (resolvedToken ? { headers: { Authorization: `Bearer ${resolvedToken}` } } : {})));
     }
 
     /** GET all workouts (optional search filters by name server-side). */
@@ -83,17 +81,11 @@ export class WorkoutsService {
 
     /** POST a new workout and return the saved workout (id, timestamps). */
     createWorkout(payload: CreateWorkoutPayload, authToken?: string | Promise<string | null> | null): Observable<TabataWorkout> {
-        return this.authenticatedOptions(authToken).pipe(
-            switchMap((options) => this.http.post<TabataWorkout>(this.apiUrl('/api/workouts'), payload, options))
-        );
+        return this.authenticatedOptions(authToken).pipe(switchMap((options) => this.http.post<TabataWorkout>(this.apiUrl('/api/workouts'), payload, options)));
     }
 
     /** PUT an existing workout and return the updated workout. */
-    updateWorkout(
-        id: string,
-        payload: UpdateWorkoutPayload,
-        authToken?: string | Promise<string | null> | null
-    ): Observable<TabataWorkout> {
+    updateWorkout(id: string, payload: UpdateWorkoutPayload, authToken?: string | Promise<string | null> | null): Observable<TabataWorkout> {
         return this.authenticatedOptions(authToken).pipe(
             switchMap((options) => this.http.put<TabataWorkout>(this.apiUrl(`/api/workouts/${encodeURIComponent(id)}`), payload, options))
         );

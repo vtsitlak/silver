@@ -107,9 +107,7 @@ describe.each(handlers)('workouts API $name', ({ handler }) => {
             .mockResolvedValueOnce(jsonUpstashResponse({ keys: [publicJwk] }))
             .mockResolvedValueOnce(jsonUpstashResponse({ result: JSON.stringify([workout]) }));
 
-        const response = await handler.fetch(
-            new Request('https://app.test/api/workouts/workout-1', { headers: await authorizationHeaders('owner-user') })
-        );
+        const response = await handler.fetch(new Request('https://app.test/api/workouts/workout-1', { headers: await authorizationHeaders('owner-user') }));
 
         expect(response.status).toBe(200);
         await expect(response.json()).resolves.toEqual(workout);
@@ -128,7 +126,9 @@ describe.each(handlers)('workouts API $name', ({ handler }) => {
     it('rejects updates from a user who did not create the workout', async () => {
         fetchMock
             .mockResolvedValueOnce(jsonUpstashResponse({ keys: [publicJwk] }))
-            .mockResolvedValueOnce(jsonUpstashResponse({ result: JSON.stringify([{ id: 'workout-1', name: 'Victim workout', createdByUserId: 'owner-user' }]) }));
+            .mockResolvedValueOnce(
+                jsonUpstashResponse({ result: JSON.stringify([{ id: 'workout-1', name: 'Victim workout', createdByUserId: 'owner-user' }]) })
+            );
 
         const response = await handler.fetch(
             new Request('https://app.test/api/workouts/workout-1', {
