@@ -5,7 +5,7 @@
  * Root API entrypoints re-export this handler for GET list, GET by id, POST, PUT, DELETE.
  */
 
-import { AuthError, requireAuthenticatedUserId } from '../../../api/firebase-auth';
+import { AuthError, getOptionalAuthenticatedUserId, requireAuthenticatedUserId } from '../../../api/firebase-auth';
 
 const UPSTASH_URL = process.env['UPSTASH_URL'];
 const UPSTASH_TOKEN = process.env['UPSTASH_TOKEN'];
@@ -66,7 +66,17 @@ async function readWorkoutList(headers: Record<string, string>): Promise<Record<
 }
 
 function isWorkoutOwner(workout: Record<string, unknown>, userId: string): boolean {
-    return String(workout['createdByUserId'] ?? '') === userId;
+    return workoutOwnerId(workout) === userId;
+}
+
+function workoutOwnerId(workout: Record<string, unknown>): string | null {
+    const ownerId = workout['createdByUserId'];
+    return typeof ownerId === 'string' && ownerId.trim().length > 0 ? ownerId : null;
+}
+
+function canReadWorkout(workout: Record<string, unknown>, authenticatedUserId: string | null): boolean {
+    const ownerId = workoutOwnerId(workout);
+    return ownerId === null || ownerId === authenticatedUserId;
 }
 
 export default {
@@ -96,8 +106,9 @@ export default {
         try {
             if (isIdRoute && id) {
                 if (method === 'GET') {
+                    const authenticatedUserId = await getOptionalAuthenticatedUserId(request);
                     const list = await readWorkoutList(headers);
-                    const workout = list.find((w) => String(w['id'] ?? '') === id) ?? null;
+                    const workout = list.find((w) => String(w['id'] ?? '') === id && canReadWorkout(w, authenticatedUserId)) ?? null;
                     return jsonResponse(JSON.stringify(workout), 200);
                 }
                 if (method === 'DELETE') {
@@ -157,19 +168,21 @@ export default {
             }
 
             if (method === 'GET') {
+                const authenticatedUserId = await getOptionalAuthenticatedUserId(request);
                 const list = await readWorkoutList(headers);
                 const searchRaw = url.searchParams.get('search');
                 const search = typeof searchRaw === 'string' ? searchRaw.trim() : '';
+                const readableList = list.filter((w) => canReadWorkout(w, authenticatedUserId));
                 const filtered =
                     search.length > 0
-                        ? list.filter((w: Record<string, unknown>) => {
+                        ? readableList.filter((w: Record<string, unknown>) => {
                               const name = typeof w?.name === 'string' ? w.name.toLowerCase() : '';
                               const description = typeof w?.description === 'string' ? w.description.toLowerCase() : '';
                               const id = typeof w?.id === 'string' ? w.id.toLowerCase() : String(w?.id ?? '').toLowerCase();
                               const term = search.toLowerCase();
                               return name.includes(term) || description.includes(term) || id.includes(term);
                           })
-                        : list;
+                        : readableList;
                 return jsonResponse(JSON.stringify(filtered), 200);
             }
 
