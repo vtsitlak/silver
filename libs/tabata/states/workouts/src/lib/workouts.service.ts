@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { from, Observable, throwError } from 'rxjs';
+import { from, Observable, of, throwError } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import type { CreateWorkoutPayload, TabataWorkout, UpdateWorkoutPayload } from './workouts.models';
 import { WORKOUTS_API_BASE_URL } from './workouts-api-base-url';
@@ -36,16 +36,29 @@ export class WorkoutsService {
         );
     }
 
+    private optionallyAuthenticatedOptions(): Observable<{ headers?: { Authorization: string } }> {
+        const token = this.authTokenProvider();
+        if (!token) {
+            return of({});
+        }
+
+        return from(Promise.resolve(token)).pipe(map((resolvedToken) => (resolvedToken ? { headers: { Authorization: `Bearer ${resolvedToken}` } } : {})));
+    }
+
     /** GET all workouts (optional search filters by name server-side). */
     getWorkouts(search?: string): Observable<TabataWorkout[]> {
         const trimmed = search?.trim();
         const params = trimmed ? new HttpParams().set('search', trimmed) : undefined;
-        return this.http.get<TabataWorkout[]>(this.apiUrl('/api/workouts'), { params });
+        return this.optionallyAuthenticatedOptions().pipe(
+            switchMap((options) => this.http.get<TabataWorkout[]>(this.apiUrl('/api/workouts'), { ...options, params }))
+        );
     }
 
     /** GET a single workout by id (if your proxy supports it). */
     getWorkoutById(id: string): Observable<TabataWorkout | null> {
-        return this.http.get<TabataWorkout | null>(this.apiUrl(`/api/workouts/${encodeURIComponent(id)}`));
+        return this.optionallyAuthenticatedOptions().pipe(
+            switchMap((options) => this.http.get<TabataWorkout | null>(this.apiUrl(`/api/workouts/${encodeURIComponent(id)}`), options))
+        );
     }
 
     /** DELETE workout. Accepts 200/204; does not require JSON body. */
@@ -68,17 +81,11 @@ export class WorkoutsService {
 
     /** POST a new workout and return the saved workout (id, timestamps). */
     createWorkout(payload: CreateWorkoutPayload, authToken?: string | Promise<string | null> | null): Observable<TabataWorkout> {
-        return this.authenticatedOptions(authToken).pipe(
-            switchMap((options) => this.http.post<TabataWorkout>(this.apiUrl('/api/workouts'), payload, options))
-        );
+        return this.authenticatedOptions(authToken).pipe(switchMap((options) => this.http.post<TabataWorkout>(this.apiUrl('/api/workouts'), payload, options)));
     }
 
     /** PUT an existing workout and return the updated workout. */
-    updateWorkout(
-        id: string,
-        payload: UpdateWorkoutPayload,
-        authToken?: string | Promise<string | null> | null
-    ): Observable<TabataWorkout> {
+    updateWorkout(id: string, payload: UpdateWorkoutPayload, authToken?: string | Promise<string | null> | null): Observable<TabataWorkout> {
         return this.authenticatedOptions(authToken).pipe(
             switchMap((options) => this.http.put<TabataWorkout>(this.apiUrl(`/api/workouts/${encodeURIComponent(id)}`), payload, options))
         );
