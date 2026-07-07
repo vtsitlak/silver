@@ -74,7 +74,7 @@ function workoutOwnerId(workout: Record<string, unknown>): string | null {
     if (owner === null || owner === undefined) {
         return null;
     }
-    const ownerId = String(owner);
+    const ownerId = String(owner).trim();
     return ownerId.length > 0 ? ownerId : null;
 }
 
