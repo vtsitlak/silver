@@ -21,7 +21,7 @@ interface FirebaseJwksResponse {
 export class AuthError extends Error {
     constructor(
         message: string,
-        readonly status: number = 401
+        readonly status = 401
     ) {
         super(message);
     }
@@ -90,8 +90,64 @@ async function verifyFirebaseIdToken(token: string): Promise<string> {
 export async function requireAuthenticatedUserId(request: Request): Promise<string> {
     const authorization = request.headers.get('Authorization');
     const match = authorization?.match(/^Bearer\s+(.+)$/i);
-    if (!match) {
+    if (!match?.[1]) {
         throw new AuthError('Missing bearer token');
+    }
+    return verifyFirebaseIdToken(match[1]);
+}
+
+export async function getAuthenticatedUserId(request: Request): Promise<string | null> {
+    const authorization = request.headers.get('Authorization');
+    if (!authorization) {
+        return null;
+    }
+
+    const match = authorization.match(/^Bearer\s+(.+)$/i);
+    if (!match?.[1]) {
+        throw new AuthError('Invalid bearer token');
+    }
+
+    return verifyFirebaseIdToken(match[1]);
+}
+
+export async function getOptionalAuthenticatedUserId(request: Request): Promise<string | null> {
+    const authorization = request.headers.get('Authorization');
+    const match = authorization?.match(/^Bearer\s+(.+)$/i);
+    return match ? verifyFirebaseIdToken(match[1]!) : null;
+}
+
+export async function getOptionalAuthenticatedUserId(request: Request): Promise<string | null> {
+    const authorization = request.headers.get('Authorization');
+    if (!authorization) {
+        return null;
+    }
+    const match = authorization.match(/^Bearer\s+(.+)$/i);
+    if (!match) {
+        throw new AuthError('Invalid bearer token');
+    }
+    return verifyFirebaseIdToken(match[1]!);
+}
+
+export async function getOptionalAuthenticatedUserId(request: Request): Promise<string | null> {
+    const authorization = request.headers.get('Authorization');
+    if (!authorization) {
+        return null;
+    }
+    const match = authorization.match(/^Bearer\s+(.+)$/i);
+    if (!match) {
+        throw new AuthError('Invalid bearer token');
+    }
+    return verifyFirebaseIdToken(match[1]!);
+}
+
+export async function getOptionalAuthenticatedUserId(request: Request): Promise<string | null> {
+    const authorization = request.headers.get('Authorization');
+    if (!authorization) {
+        return null;
+    }
+    const match = authorization.match(/^Bearer\s+(.+)$/i);
+    if (!match) {
+        throw new AuthError('Invalid bearer token');
     }
     return verifyFirebaseIdToken(match[1]!);
 }

@@ -36,27 +36,28 @@ export class WorkoutsService {
         );
     }
 
-    private optionallyAuthenticatedOptions(): Observable<{ headers?: { Authorization: string } }> {
-        const token = this.authTokenProvider();
-        if (!token) {
+    private optionalAuthenticatedOptions(
+        authToken: string | Promise<string | null> | null = this.authTokenProvider()
+    ): Observable<{ headers?: { Authorization: string } }> {
+        if (!authToken) {
             return of({});
         }
 
-        return from(Promise.resolve(token)).pipe(map((resolvedToken) => (resolvedToken ? { headers: { Authorization: `Bearer ${resolvedToken}` } } : {})));
+        return from(Promise.resolve(authToken)).pipe(map((resolvedToken) => (resolvedToken ? { headers: { Authorization: `Bearer ${resolvedToken}` } } : {})));
     }
 
     /** GET all workouts (optional search filters by name server-side). */
     getWorkouts(search?: string): Observable<TabataWorkout[]> {
         const trimmed = search?.trim();
         const params = trimmed ? new HttpParams().set('search', trimmed) : undefined;
-        return this.optionallyAuthenticatedOptions().pipe(
+        return this.optionalAuthenticatedOptions().pipe(
             switchMap((options) => this.http.get<TabataWorkout[]>(this.apiUrl('/api/workouts'), { ...options, params }))
         );
     }
 
     /** GET a single workout by id (if your proxy supports it). */
     getWorkoutById(id: string): Observable<TabataWorkout | null> {
-        return this.optionallyAuthenticatedOptions().pipe(
+        return this.optionalAuthenticatedOptions().pipe(
             switchMap((options) => this.http.get<TabataWorkout | null>(this.apiUrl(`/api/workouts/${encodeURIComponent(id)}`), options))
         );
     }
