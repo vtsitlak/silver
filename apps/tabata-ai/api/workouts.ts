@@ -66,15 +66,17 @@ async function readWorkoutList(headers: Record<string, string>): Promise<Record<
 }
 
 function isWorkoutOwner(workout: Record<string, unknown>, userId: string): boolean {
-    return String(workout['createdByUserId'] ?? '') === userId;
+    return workoutOwnerId(workout) === userId;
+}
+
+function workoutOwnerId(workout: Record<string, unknown>): string | null {
+    const ownerId = workout['createdByUserId'];
+    return typeof ownerId === 'string' && ownerId.trim().length > 0 ? ownerId : null;
 }
 
 function canReadWorkout(workout: Record<string, unknown>, userId: string | null): boolean {
-    const owner = workout['createdByUserId'];
-    if (owner == null || owner === '') {
-        return true;
-    }
-    return userId != null && String(owner) === userId;
+    const ownerId = workoutOwnerId(workout);
+    return ownerId === null || ownerId === userId;
 }
 
 export default {
@@ -170,17 +172,17 @@ export default {
                 const list = await readWorkoutList(headers);
                 const searchRaw = url.searchParams.get('search');
                 const search = typeof searchRaw === 'string' ? searchRaw.trim() : '';
-                const visibleList = list.filter((w) => canReadWorkout(w, authenticatedUserId));
+                const readable = list.filter((w) => canReadWorkout(w, authenticatedUserId));
                 const filtered =
                     search.length > 0
-                        ? visibleList.filter((w: Record<string, unknown>) => {
+                        ? readable.filter((w: Record<string, unknown>) => {
                               const name = typeof w?.name === 'string' ? w.name.toLowerCase() : '';
                               const description = typeof w?.description === 'string' ? w.description.toLowerCase() : '';
                               const id = typeof w?.id === 'string' ? w.id.toLowerCase() : String(w?.id ?? '').toLowerCase();
                               const term = search.toLowerCase();
                               return name.includes(term) || description.includes(term) || id.includes(term);
                           })
-                        : visibleList;
+                        : readable;
                 return jsonResponse(JSON.stringify(filtered), 200);
             }
 

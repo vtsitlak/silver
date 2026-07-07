@@ -98,9 +98,14 @@ export async function requireAuthenticatedUserId(request: Request): Promise<stri
 
 export async function getAuthenticatedUserId(request: Request): Promise<string | null> {
     const authorization = request.headers.get('Authorization');
-    const match = authorization?.match(/^Bearer\s+(.+)$/i);
-    if (!match) {
+    if (!authorization) {
         return null;
     }
+
+    const match = authorization.match(/^Bearer\s+(.+)$/i);
+    if (!match) {
+        throw new AuthError('Invalid bearer token');
+    }
+
     return verifyFirebaseIdToken(match[1]!);
 }
