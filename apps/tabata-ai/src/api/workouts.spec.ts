@@ -53,7 +53,10 @@ interface WorkoutsHandler {
 
 const handlers: { name: string; handler: WorkoutsHandler }[] = [
     { name: 'app-local handler', handler: require('../../api/workouts').default as WorkoutsHandler },
+    // Root Vercel entrypoints re-export the app handler; loaded here to verify deployment wiring.
+    // eslint-disable-next-line @nx/enforce-module-boundaries -- integration test for root API re-export
     { name: 'root handler', handler: require('../../../../api/workouts').default as WorkoutsHandler },
+    // eslint-disable-next-line @nx/enforce-module-boundaries -- integration test for root API re-export
     { name: 'root dynamic handler', handler: require('../../../../api/workouts/[id]').default as WorkoutsHandler }
 ];
 
@@ -110,6 +113,7 @@ describe.each(handlers)('workouts API $name', ({ handler }) => {
         expect(response.status).toBe(200);
         await expect(response.json()).resolves.toEqual(workout);
         expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(fetchMock).toHaveBeenNthCalledWith(2, 'https://upstash.example/JSON.GET/tabata_workouts', expect.any(Object));
     });
 
     it('rejects mutation requests without a Firebase bearer token before touching Upstash', async () => {
