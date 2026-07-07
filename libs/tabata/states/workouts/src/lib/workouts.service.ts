@@ -36,13 +36,14 @@ export class WorkoutsService {
         );
     }
 
-    private optionalAuthenticatedOptions(): Observable<{ headers?: { Authorization: string } }> {
-        const token = this.authTokenProvider();
-        if (!token) {
+    private optionalAuthenticatedOptions(
+        authToken: string | Promise<string | null> | null = this.authTokenProvider()
+    ): Observable<{ headers?: { Authorization: string } }> {
+        if (!authToken) {
             return of({});
         }
 
-        return from(Promise.resolve(token)).pipe(map((resolvedToken) => (resolvedToken ? { headers: { Authorization: `Bearer ${resolvedToken}` } } : {})));
+        return from(Promise.resolve(authToken)).pipe(map((resolvedToken) => (resolvedToken ? { headers: { Authorization: `Bearer ${resolvedToken}` } } : {})));
     }
 
     /** GET all workouts (optional search filters by name server-side). */

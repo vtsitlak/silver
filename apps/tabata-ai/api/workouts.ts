@@ -5,7 +5,7 @@
  * Root API entrypoints re-export this handler for GET list, GET by id, POST, PUT, DELETE.
  */
 
-import { AuthError, getAuthenticatedUserId, requireAuthenticatedUserId } from '../../../api/firebase-auth';
+import { AuthError, getAuthenticatedUserId, requireAuthenticatedUserId } from './firebase-auth';
 
 const UPSTASH_URL = process.env['UPSTASH_URL'];
 const UPSTASH_TOKEN = process.env['UPSTASH_TOKEN'];
@@ -66,7 +66,7 @@ async function readWorkoutList(headers: Record<string, string>): Promise<Record<
 }
 
 function isWorkoutOwner(workout: Record<string, unknown>, userId: string): boolean {
-    return String(workout['createdByUserId'] ?? '') === userId;
+    return workoutOwnerId(workout) === userId;
 }
 
 function workoutOwnerId(workout: Record<string, unknown>): string | null {

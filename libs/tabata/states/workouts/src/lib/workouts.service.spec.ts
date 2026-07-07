@@ -1,5 +1,6 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { WORKOUTS_API_BASE_URL } from './workouts-api-base-url';
 import { WORKOUTS_AUTH_TOKEN, type WorkoutsAuthTokenProvider } from './workouts-auth-token';
 import { WorkoutsService } from './workouts.service';
@@ -14,8 +15,9 @@ describe('WorkoutsService', () => {
         authTokenProvider = jest.fn().mockResolvedValue('firebase-token');
 
         TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule],
             providers: [
+                provideHttpClient(),
+                provideHttpClientTesting(),
                 { provide: WORKOUTS_API_BASE_URL, useValue: '' },
                 { provide: WORKOUTS_AUTH_TOKEN, useValue: authTokenProvider }
             ]
@@ -26,7 +28,7 @@ describe('WorkoutsService', () => {
 
     afterEach(() => httpMock.verify());
 
-    it('should include a Firebase bearer token on workout list reads when signed in', fakeAsync(() => {
+    it('should send bearer token on workout list reads when available', fakeAsync(() => {
         service.getWorkouts().subscribe((data) => {
             expect(data).toEqual([]);
         });
@@ -38,7 +40,7 @@ describe('WorkoutsService', () => {
         req.flush([]);
     }));
 
-    it('should keep workout list reads public when there is no signed-in user', () => {
+    it('should keep workout list reads public when no Firebase user is available', () => {
         authTokenProvider.mockReturnValue(null);
 
         service.getWorkouts().subscribe((data) => {
@@ -51,8 +53,8 @@ describe('WorkoutsService', () => {
         req.flush([]);
     });
 
-    it('should include a Firebase bearer token on workout detail reads when signed in', fakeAsync(() => {
-        const workout = { id: 'workout-1', name: 'Workout' };
+    it('should add a Firebase bearer token to workout detail reads when signed in', fakeAsync(() => {
+        const workout = { ...workoutPayload(), id: 'workout-1', createdAt: '2026-01-01', updatedAt: '2026-01-01' };
 
         service.getWorkoutById('workout-1').subscribe((data) => {
             expect(data).toEqual(workout);
