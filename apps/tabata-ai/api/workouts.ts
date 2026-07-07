@@ -5,7 +5,7 @@
  * Root API entrypoints re-export this handler for GET list, GET by id, POST, PUT, DELETE.
  */
 
-import { AuthError, getAuthenticatedUserId, requireAuthenticatedUserId } from './firebase-auth';
+import { AuthError, getOptionalAuthenticatedUserId, requireAuthenticatedUserId } from './firebase-auth';
 
 const UPSTASH_URL = process.env['UPSTASH_URL'];
 const UPSTASH_TOKEN = process.env['UPSTASH_TOKEN'];
@@ -110,10 +110,10 @@ export default {
         try {
             if (isIdRoute && id) {
                 if (method === 'GET') {
-                    const authenticatedUserId = await getAuthenticatedUserId(request);
+                    const authenticatedUserId = await getOptionalAuthenticatedUserId(request);
                     const list = await readWorkoutList(headers);
-                    const workout = list.find((w) => String(w['id'] ?? '') === id && canReadWorkout(w, authenticatedUserId)) ?? null;
-                    return jsonResponse(JSON.stringify(workout), 200);
+                    const workout = list.find((w) => String(w['id'] ?? '') === id) ?? null;
+                    return jsonResponse(JSON.stringify(workout && canReadWorkout(workout, authenticatedUserId) ? workout : null), 200);
                 }
                 if (method === 'DELETE') {
                     const authenticatedUserId = await requireAuthenticatedUserId(request);
@@ -172,7 +172,7 @@ export default {
             }
 
             if (method === 'GET') {
-                const authenticatedUserId = await getAuthenticatedUserId(request);
+                const authenticatedUserId = await getOptionalAuthenticatedUserId(request);
                 const list = await readWorkoutList(headers);
                 const readableList = list.filter((w) => canReadWorkout(w, authenticatedUserId));
                 const searchRaw = url.searchParams.get('search');

@@ -53,6 +53,18 @@ describe('WorkoutsService', () => {
         req.flush([]);
     });
 
+    it('should send a Firebase bearer token on workout list reads when signed in', fakeAsync(() => {
+        service.getWorkouts(' strength ').subscribe((data) => {
+            expect(data).toEqual([]);
+        });
+        tick();
+
+        const req = httpMock.expectOne((request) => request.url === '/api/workouts' && request.params.get('search') === 'strength');
+        expect(req.request.method).toBe('GET');
+        expect(req.request.headers.get('Authorization')).toBe('Bearer firebase-token');
+        req.flush([]);
+    }));
+
     it('should add a Firebase bearer token to workout detail reads when signed in', fakeAsync(() => {
         const workout = { ...workoutPayload(), id: 'workout-1', createdAt: '2026-01-01', updatedAt: '2026-01-01' };
 
