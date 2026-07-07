@@ -58,3 +58,7 @@ AGENTS.md
 # Bundle analysis
 bundle-report.html
 bundle-analysis.json
+
+.nx/polygraph
+.claude/worktrees
+.claude/settings.local.json
