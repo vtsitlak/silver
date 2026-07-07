@@ -115,3 +115,15 @@ export async function getOptionalAuthenticatedUserId(request: Request): Promise<
     const match = authorization?.match(/^Bearer\s+(.+)$/i);
     return match ? verifyFirebaseIdToken(match[1]!) : null;
 }
+
+export async function getOptionalAuthenticatedUserId(request: Request): Promise<string | null> {
+    const authorization = request.headers.get('Authorization');
+    if (!authorization) {
+        return null;
+    }
+    const match = authorization.match(/^Bearer\s+(.+)$/i);
+    if (!match) {
+        throw new AuthError('Invalid bearer token');
+    }
+    return verifyFirebaseIdToken(match[1]!);
+}

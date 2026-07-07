@@ -174,9 +174,9 @@ export default {
             if (method === 'GET') {
                 const authenticatedUserId = await getOptionalAuthenticatedUserId(request);
                 const list = await readWorkoutList(headers);
-                const readableList = list.filter((w) => canReadWorkout(w, authenticatedUserId));
                 const searchRaw = url.searchParams.get('search');
                 const search = typeof searchRaw === 'string' ? searchRaw.trim() : '';
+                const readableList = list.filter((w) => canReadWorkout(w, authenticatedUserId));
                 const filtered =
                     search.length > 0
                         ? readableList.filter((w: Record<string, unknown>) => {
