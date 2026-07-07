@@ -53,7 +53,10 @@ interface WorkoutsHandler {
 
 const handlers: { name: string; handler: WorkoutsHandler }[] = [
     { name: 'app-local handler', handler: require('../../api/workouts').default as WorkoutsHandler },
+    // Root Vercel entrypoints re-export the app handler; loaded here to verify deployment wiring.
+    // eslint-disable-next-line @nx/enforce-module-boundaries -- integration test for root API re-export
     { name: 'root handler', handler: require('../../../../api/workouts').default as WorkoutsHandler },
+    // eslint-disable-next-line @nx/enforce-module-boundaries -- integration test for root API re-export
     { name: 'root dynamic handler', handler: require('../../../../api/workouts/[id]').default as WorkoutsHandler }
 ];
 
@@ -98,7 +101,7 @@ describe.each(handlers)('workouts API $name', ({ handler }) => {
         expect(fetchMock).toHaveBeenNthCalledWith(1, 'https://upstash.example/JSON.GET/tabata_workouts', expect.any(Object));
     });
 
-    it('hides owner-stamped workout details from anonymous readers', async () => {
+    it('hides owner-stamped workouts from unauthenticated single-workout reads', async () => {
         fetchMock.mockResolvedValueOnce(
             jsonUpstashResponse({ result: JSON.stringify([{ id: 'workout-1', name: 'Private workout', createdByUserId: 'owner-user' }]) })
         );
@@ -111,16 +114,16 @@ describe.each(handlers)('workouts API $name', ({ handler }) => {
         expect(fetchMock).toHaveBeenNthCalledWith(1, 'https://upstash.example/JSON.GET/tabata_workouts', expect.any(Object));
     });
 
-    it('returns owner-stamped workout details to matching authenticated readers', async () => {
-        const ownerWorkout = { id: 'workout-1', name: 'Private workout', createdByUserId: 'owner-user' };
+    it('returns owner-stamped workouts to their authenticated owner on single-workout reads', async () => {
+        const workout = { id: 'workout-1', name: 'Private workout', createdByUserId: 'owner-user' };
         fetchMock
             .mockResolvedValueOnce(jsonUpstashResponse({ keys: [publicJwk] }))
-            .mockResolvedValueOnce(jsonUpstashResponse({ result: JSON.stringify([ownerWorkout]) }));
+            .mockResolvedValueOnce(jsonUpstashResponse({ result: JSON.stringify([workout]) }));
 
         const response = await handler.fetch(new Request('https://app.test/api/workouts/workout-1', { headers: await authorizationHeaders('owner-user') }));
 
         expect(response.status).toBe(200);
-        await expect(response.json()).resolves.toEqual(ownerWorkout);
+        await expect(response.json()).resolves.toEqual(workout);
         expect(fetchMock).toHaveBeenCalledTimes(2);
         expect(fetchMock).toHaveBeenNthCalledWith(2, 'https://upstash.example/JSON.GET/tabata_workouts', expect.any(Object));
     });
@@ -303,13 +306,10 @@ describe.each(collectionHandlers)('workouts API $name collection mutations', ({ 
         global.fetch = fetchMock;
     });
 
-    it('filters owner-stamped workouts from anonymous list reads', async () => {
+    it('keeps legacy public workouts readable while hiding owner-stamped workouts from anonymous list reads', async () => {
         const legacyWorkout = { id: 'legacy-workout', name: 'Legacy public workout' };
-        fetchMock.mockResolvedValueOnce(
-            jsonUpstashResponse({
-                result: JSON.stringify([legacyWorkout, { id: 'workout-1', name: 'Private workout', createdByUserId: 'owner-user' }])
-            })
-        );
+        const privateWorkout = { id: 'private-workout', name: 'Private workout', createdByUserId: 'owner-user' };
+        fetchMock.mockResolvedValueOnce(jsonUpstashResponse({ result: JSON.stringify([legacyWorkout, privateWorkout]) }));
 
         const response = await handler.fetch(new Request('https://app.test/api/workouts'));
 
@@ -319,19 +319,18 @@ describe.each(collectionHandlers)('workouts API $name collection mutations', ({ 
         expect(fetchMock).toHaveBeenNthCalledWith(1, 'https://upstash.example/JSON.GET/tabata_workouts', expect.any(Object));
     });
 
-    it('includes matching owner workouts in authenticated list reads', async () => {
+    it('returns legacy public workouts and owned workouts to an authenticated list reader', async () => {
         const legacyWorkout = { id: 'legacy-workout', name: 'Legacy public workout' };
-        const ownerWorkout = { id: 'workout-1', name: 'Owner workout', createdByUserId: 'owner-user' };
-        fetchMock.mockResolvedValueOnce(jsonUpstashResponse({ keys: [publicJwk] })).mockResolvedValueOnce(
-            jsonUpstashResponse({
-                result: JSON.stringify([legacyWorkout, ownerWorkout, { id: 'workout-2', name: 'Other user workout', createdByUserId: 'other-user' }])
-            })
-        );
+        const ownedWorkout = { id: 'owned-workout', name: 'Owned workout', createdByUserId: 'owner-user' };
+        const otherWorkout = { id: 'other-workout', name: 'Other workout', createdByUserId: 'other-user' };
+        fetchMock
+            .mockResolvedValueOnce(jsonUpstashResponse({ keys: [publicJwk] }))
+            .mockResolvedValueOnce(jsonUpstashResponse({ result: JSON.stringify([legacyWorkout, ownedWorkout, otherWorkout]) }));
 
         const response = await handler.fetch(new Request('https://app.test/api/workouts', { headers: await authorizationHeaders('owner-user') }));
 
         expect(response.status).toBe(200);
-        await expect(response.json()).resolves.toEqual([legacyWorkout, ownerWorkout]);
+        await expect(response.json()).resolves.toEqual([legacyWorkout, ownedWorkout]);
         expect(fetchMock).toHaveBeenCalledTimes(2);
         expect(fetchMock).toHaveBeenNthCalledWith(2, 'https://upstash.example/JSON.GET/tabata_workouts', expect.any(Object));
     });

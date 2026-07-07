@@ -5,7 +5,7 @@
  * Root API entrypoints re-export this handler for GET list, GET by id, POST, PUT, DELETE.
  */
 
-import { AuthError, getOptionalAuthenticatedUserId, requireAuthenticatedUserId } from '../../../api/firebase-auth';
+import { AuthError, getOptionalAuthenticatedUserId, requireAuthenticatedUserId } from './firebase-auth';
 
 const UPSTASH_URL = process.env['UPSTASH_URL'];
 const UPSTASH_TOKEN = process.env['UPSTASH_TOKEN'];
@@ -66,12 +66,21 @@ async function readWorkoutList(headers: Record<string, string>): Promise<Record<
 }
 
 function isWorkoutOwner(workout: Record<string, unknown>, userId: string): boolean {
-    return String(workout['createdByUserId'] ?? '') === userId;
+    return workoutOwnerId(workout) === userId;
 }
 
-function canReadWorkout(workout: Record<string, unknown>, userId: string | null): boolean {
-    const ownerId = workout['createdByUserId'];
-    return ownerId === undefined || ownerId === null || ownerId === '' || String(ownerId) === userId;
+function workoutOwnerId(workout: Record<string, unknown>): string | null {
+    const owner = workout['createdByUserId'];
+    if (owner === null || owner === undefined) {
+        return null;
+    }
+    const ownerId = String(owner);
+    return ownerId.length > 0 ? ownerId : null;
+}
+
+function canReadWorkout(workout: Record<string, unknown>, authenticatedUserId: string | null): boolean {
+    const ownerId = workoutOwnerId(workout);
+    return ownerId === null || ownerId === authenticatedUserId;
 }
 
 export default {
@@ -165,9 +174,9 @@ export default {
             if (method === 'GET') {
                 const authenticatedUserId = await getOptionalAuthenticatedUserId(request);
                 const list = await readWorkoutList(headers);
+                const readableList = list.filter((w) => canReadWorkout(w, authenticatedUserId));
                 const searchRaw = url.searchParams.get('search');
                 const search = typeof searchRaw === 'string' ? searchRaw.trim() : '';
-                const readableList = list.filter((workout) => canReadWorkout(workout, authenticatedUserId));
                 const filtered =
                     search.length > 0
                         ? readableList.filter((w: Record<string, unknown>) => {
