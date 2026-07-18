@@ -12,7 +12,7 @@ interface ForgotPasswordForm {
     selector: 'tbt-forgot-password',
     imports: [IonContent, IonButton, IonSpinner, FormField, IonInput],
     templateUrl: './forgot-password.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './forgot-password.component.scss'
 })
 export class ForgotPasswordComponent {

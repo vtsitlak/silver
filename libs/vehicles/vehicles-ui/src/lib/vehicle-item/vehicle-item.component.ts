@@ -5,7 +5,7 @@ import { Vehicle } from '@silver/vehicles-store';
     selector: 'app-vehicle-item',
     templateUrl: './vehicle-item.component.html',
     styleUrls: ['./vehicle-item.component.scss'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: []
 })
 export class VehicleItemComponent {

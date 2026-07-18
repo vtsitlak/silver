@@ -20,7 +20,7 @@ export interface PhaseExerciseItem {
     selector: 'tbt-workout-phase',
     templateUrl: 'workout-phase.component.html',
     styleUrls: ['workout-phase.component.scss'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [IonButton, IonItem, IonList, IonIcon, IonReorderGroup, IonReorder, DurationInputModalComponent]
 })
 export class WorkoutPhaseComponent {

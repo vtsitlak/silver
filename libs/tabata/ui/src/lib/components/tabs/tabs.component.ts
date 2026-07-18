@@ -8,7 +8,7 @@ import { speedometerOutline, barbell, calendar, personOutline } from 'ionicons/i
     selector: 'tbt-tabs',
     templateUrl: 'tabs.component.html',
     styleUrls: ['tabs.component.scss'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, RouterLink]
 })
 export class TabsComponent {

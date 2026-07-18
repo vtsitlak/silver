@@ -19,7 +19,7 @@ interface ProfileFormModel {
     selector: 'tbt-profile',
     imports: [IonToggle, IonHeader, IonContent, ToolbarComponent, FormField, IonButton, IonSpinner, IonIcon, IonInput],
     templateUrl: './profile.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './profile.component.scss'
 })
 export class ProfileComponent implements OnInit {

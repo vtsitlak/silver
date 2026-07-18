@@ -9,7 +9,7 @@ type TabValue = 'overview' | 'how-to-use';
     standalone: true,
     imports: [IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent, IonSegment, IonSegmentButton, IonLabel],
     templateUrl: './about-modal.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './about-modal.component.scss'
 })
 export class AboutModalComponent {

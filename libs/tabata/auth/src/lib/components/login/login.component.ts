@@ -15,7 +15,7 @@ interface LoginFormModel {
     selector: 'tbt-login',
     imports: [FormField, IonContent, IonButton, IonSpinner, IonIcon, IonInput],
     templateUrl: './login.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './login.component.scss'
 })
 export class LoginComponent {

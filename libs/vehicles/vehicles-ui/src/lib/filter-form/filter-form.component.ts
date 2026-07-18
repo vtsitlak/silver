@@ -8,7 +8,7 @@ import { Filter } from '@silver/vehicles-store';
     selector: 'app-filter-form',
     templateUrl: './filter-form.component.html',
     styleUrls: ['./filter-form.component.scss'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [MatFormFieldModule, MatSelectModule, FormField]
 })
 export class FilterFormComponent {

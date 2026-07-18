@@ -26,7 +26,7 @@ export interface MainWorkoutBlockItem {
     selector: 'tbt-main-workout',
     templateUrl: 'main-workout.component.html',
     styleUrls: ['main-workout.component.scss'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [IonButton, IonButtons, IonLabel, IonItem, IonIcon, IonList, IonReorderGroup, IonReorder]
 })
 export class MainWorkoutComponent {

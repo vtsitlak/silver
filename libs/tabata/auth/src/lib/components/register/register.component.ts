@@ -16,7 +16,7 @@ interface RegisterFormModel {
     selector: 'tbt-register',
     imports: [FormField, IonContent, IonButton, IonSpinner, IonIcon, IonInput],
     templateUrl: './register.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './register.component.scss'
 })
 export class RegisterComponent {

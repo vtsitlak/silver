@@ -10,7 +10,7 @@ import { VehicleItemComponent } from '../vehicle-item/vehicle-item.component';
     selector: 'app-vehicles',
     templateUrl: './vehicles.component.html',
     styleUrls: ['./vehicles.component.scss'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [MatProgressSpinnerModule, MatSnackBarModule, FilterFormComponent, VehicleItemComponent]
 })
 export class VehiclesComponent implements OnInit {

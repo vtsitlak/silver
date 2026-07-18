@@ -9,7 +9,7 @@ import { AuthFacade } from '../store/auth.facade';
     selector: 'lib-login',
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.scss'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [MatCard, MatCardTitle, MatCardContent, FormField, MatFormField, MatInput, MatError, MatButton]
 })
 export class LoginComponent {
