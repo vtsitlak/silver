@@ -51,4 +51,12 @@ describe('VehicleItemComponent', () => {
 
         expect(img.nativeElement.src).toContain(vehicle.img);
     });
+
+    it('should use fallback image when load fails', () => {
+        const img = fixture.debugElement.query(By.css('img')).nativeElement as HTMLImageElement;
+
+        img.dispatchEvent(new Event('error'));
+
+        expect(img.src).toContain(component.fallbackImage);
+    });
 });

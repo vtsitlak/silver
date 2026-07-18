@@ -5,7 +5,7 @@ export const VEHICLES = {
         brand: 'Bugatti Veyron',
         colors: ['red', 'black'],
         // tslint:disable-next-line:max-line-length
-        img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Bugatti_Veyron_16.4_%E2%80%93_Frontansicht_%281%29%2C_5._April_2012%2C_D%C3%BCsseldorf.jpg/520px-Bugatti_Veyron_16.4_%E2%80%93_Frontansicht_%281%29%2C_5._April_2012%2C_D%C3%BCsseldorf.jpg'
+        img: 'https://upload.wikimedia.org/wikipedia/commons/c/c9/Bugatti_Veyron_16.4_%E2%80%93_Frontansicht_%281%29%2C_5._April_2012%2C_D%C3%BCsseldorf.jpg'
     },
     2: {
         id: 2,
@@ -13,14 +13,14 @@ export const VEHICLES = {
         brand: 'Boeing 787 Dreamliner',
         colors: ['red', 'white', 'black', 'green'],
         // tslint:disable-next-line:max-line-length
-        img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/All_Nippon_Airways_Boeing_787-8_Dreamliner_JA801A_OKJ_in_flight.jpg/600px-All_Nippon_Airways_Boeing_787-8_Dreamliner_JA801A_OKJ_in_flight.jpg'
+        img: 'https://upload.wikimedia.org/wikipedia/commons/1/15/All_Nippon_Airways_Boeing_787-8_Dreamliner_JA801A_OKJ_in_flight.jpg'
     },
     3: {
         id: 3,
         type: 'train',
         brand: 'USRA 0-6-6',
         colors: ['yellow', 'white', 'black'],
-        img: 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a1/UP_4466_Neil916.JPG/600px-UP_4466_Neil916.JPG'
+        img: 'https://upload.wikimedia.org/wikipedia/en/a/a1/UP_4466_Neil916.JPG'
     },
     4: {
         id: 4,
@@ -28,14 +28,14 @@ export const VEHICLES = {
         brand: 'Canadair North Star',
         colors: ['red', 'blue', 'yellow', 'green'],
         // tslint:disable-next-line:max-line-length
-        img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/BOAC_C-4_Argonaut_Heathrow_1954.jpg/600px-BOAC_C-4_Argonaut_Heathrow_1954.jpg'
+        img: 'https://upload.wikimedia.org/wikipedia/commons/1/1f/BOAC_C-4_Argonaut_Heathrow_1954.jpg'
     },
     5: {
         id: 5,
         type: 'airplane',
         brand: 'Airbus A400M Atlas',
         colors: ['red', 'white'],
-        img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/A400M-1969.jpg/600px-A400M-1969.jpg'
+        img: 'https://upload.wikimedia.org/wikipedia/commons/1/1a/A400M-1969.jpg'
     },
     6: {
         id: 6,
@@ -49,7 +49,7 @@ export const VEHICLES = {
         type: 'train',
         brand: 'Prairie 2-6-2',
         colors: ['red', 'white', 'grey'],
-        img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/CFR_Steam_locomotive.jpg/600px-CFR_Steam_locomotive.jpg'
+        img: 'https://upload.wikimedia.org/wikipedia/commons/d/d2/CFR_Steam_locomotive.jpg'
     },
     8: {
         id: 8,
@@ -57,21 +57,21 @@ export const VEHICLES = {
         brand: 'EMD GP40',
         colors: ['black', 'grey', 'white'],
         // tslint:disable-next-line:max-line-length
-        img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/EMD_GP40_B%26M_339_Wells_Maine.jpg/600px-EMD_GP40_B%26M_339_Wells_Maine.jpg'
+        img: 'https://upload.wikimedia.org/wikipedia/commons/5/52/EMD_GP40_B%26M_339_Wells_Maine.jpg'
     },
     9: {
         id: 9,
         type: 'train',
         brand: 'Amer 4-4-0',
         colors: ['red', 'black'],
-        img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/440woodcut.jpg/600px-440woodcut.jpg'
+        img: 'https://upload.wikimedia.org/wikipedia/commons/1/1c/440woodcut.jpg'
     },
     10: {
         id: 10,
         type: 'car',
         brand: 'Ferrari F40',
         colors: ['red', 'yellow'],
-        img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/F40_Ferrari_20090509.jpg/1920px-F40_Ferrari_20090509.jpg'
+        img: 'https://upload.wikimedia.org/wikipedia/commons/c/cb/F40_Ferrari_20090509.jpg'
     },
     11: {
         id: 11,
@@ -79,7 +79,7 @@ export const VEHICLES = {
         brand: 'Lamborghini Huracán',
         colors: ['black', 'white'],
         // tslint:disable-next-line:max-line-length
-        img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/2014-03-04_Geneva_Motor_Show_1379.JPG/440px-2014-03-04_Geneva_Motor_Show_1379.JPG'
+        img: 'https://upload.wikimedia.org/wikipedia/commons/e/e5/2014-03-04_Geneva_Motor_Show_1379.JPG'
     },
     12: {
         id: 12,
@@ -87,6 +87,6 @@ export const VEHICLES = {
         brand: 'Porsche Carrera GT',
         colors: ['green', 'yellow'],
         // tslint:disable-next-line:max-line-length
-        img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Porsche_Carrera_GT_-_Goodwood_Breakfast_Club_%28July_2008%29.jpg/440px-Porsche_Carrera_GT_-_Goodwood_Breakfast_Club_%28July_2008%29.jpg'
+        img: 'https://upload.wikimedia.org/wikipedia/commons/6/65/Porsche_Carrera_GT_-_Goodwood_Breakfast_Club_%28July_2008%29.jpg'
     }
 };

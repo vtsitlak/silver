@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { email, form, FormField, minLength, required } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { IonContent, IonButton, IonSpinner, IonIcon, IonInput } from '@ionic/angular/standalone';
@@ -16,6 +16,7 @@ interface RegisterFormModel {
     selector: 'tbt-register',
     imports: [FormField, IonContent, IonButton, IonSpinner, IonIcon, IonInput],
     templateUrl: './register.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './register.component.scss'
 })
 export class RegisterComponent {

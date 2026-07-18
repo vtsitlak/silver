@@ -33,7 +33,7 @@
 
 | Layer            | Technology                                                                            |
 | ---------------- | ------------------------------------------------------------------------------------- |
-| Framework        | Angular 21, Ionic 8 (standalone components, Signals, control flow)                    |
+| Framework        | Angular 22, Ionic 8 (standalone components, Signals, control flow)                    |
 | Auth             | Firebase (Angular Fire), AuthGuard                                                    |
 | State            | NgRx-style facades and stores; Angular Signals for reactive UI and computed values    |
 | Exercises API    | [ExerciseDB](https://www.exercisedb.dev) (public API)                                 |

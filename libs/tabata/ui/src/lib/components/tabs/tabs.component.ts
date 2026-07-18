@@ -1,4 +1,4 @@
-import { Component, EnvironmentInjector, inject } from '@angular/core';
+import { Component, EnvironmentInjector, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -8,6 +8,7 @@ import { speedometerOutline, barbell, calendar, personOutline } from 'ionicons/i
     selector: 'tbt-tabs',
     templateUrl: 'tabs.component.html',
     styleUrls: ['tabs.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, RouterLink]
 })
 export class TabsComponent {

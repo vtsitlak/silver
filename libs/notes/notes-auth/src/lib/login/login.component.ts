@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
 import { MatCard, MatCardTitle, MatCardContent } from '@angular/material/card';
 import { MatFormField, MatInput, MatError } from '@angular/material/input';
@@ -9,6 +9,7 @@ import { AuthFacade } from '../store/auth.facade';
     selector: 'lib-login',
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, MatCardTitle, MatCardContent, FormField, MatFormField, MatInput, MatError, MatButton]
 })
 export class LoginComponent {

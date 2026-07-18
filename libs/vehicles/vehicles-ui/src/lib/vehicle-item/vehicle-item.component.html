@@ -19,7 +19,8 @@
                 class="h-full w-full object-cover"
                 [src]="img()"
                 alt="image of vehicle"
-                onError="this.src='assets/images/image-not-found-scaled-1150x647.png'"
+                referrerpolicy="no-referrer"
+                (error)="onImageError($event)"
             />
         </div>
     </div>

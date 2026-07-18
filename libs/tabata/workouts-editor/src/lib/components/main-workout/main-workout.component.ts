@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal, untracked, ChangeDetectionStrategy } from '@angular/core';
 import { IonButton, IonButtons, IonLabel, IonItem, IonIcon, IonList, IonReorderGroup, IonReorder } from '@ionic/angular/standalone';
 import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -26,6 +26,7 @@ export interface MainWorkoutBlockItem {
     selector: 'tbt-main-workout',
     templateUrl: 'main-workout.component.html',
     styleUrls: ['main-workout.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [IonButton, IonButtons, IonLabel, IonItem, IonIcon, IonList, IonReorderGroup, IonReorder]
 })
 export class MainWorkoutComponent {

@@ -1,4 +1,5 @@
 import * as jsonServer from 'json-server';
+import { NextFunction, Request, Response } from 'express';
 import { loginUser } from './auth.route';
 
 const server = jsonServer.create();
@@ -6,7 +7,7 @@ const path = require('path');
 const router = jsonServer.router(path.join(__dirname, 'db.json'));
 
 // Enable CORS
-server.use((req, res, next) => {
+server.use((req: Request, res: Response, next: NextFunction) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');

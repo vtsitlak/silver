@@ -1,6 +1,6 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { WORKOUTS_API_BASE_URL } from './workouts-api-base-url';
 import { WORKOUTS_AUTH_TOKEN, type WorkoutsAuthTokenProvider } from './workouts-auth-token';
 import { WorkoutsService } from './workouts.service';
@@ -16,7 +16,7 @@ describe('WorkoutsService', () => {
 
         TestBed.configureTestingModule({
             providers: [
-                provideHttpClient(),
+                provideHttpClient(withXhr()),
                 provideHttpClientTesting(),
                 { provide: WORKOUTS_API_BASE_URL, useValue: '' },
                 { provide: WORKOUTS_AUTH_TOKEN, useValue: authTokenProvider }

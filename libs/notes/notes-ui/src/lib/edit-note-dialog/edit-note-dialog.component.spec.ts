@@ -74,7 +74,13 @@ describe('EditNoteDialogComponent', () => {
 
     it('should update note when onSave is called in update mode', () => {
         component.onSave();
-        expect(facade.update).toHaveBeenCalled();
+        expect(facade.update).toHaveBeenCalledWith(mockNote.id, expect.objectContaining({
+            id: mockNote.id,
+            title: mockNote.title,
+            body: mockNote.body,
+            important: mockNote.important,
+            created: mockNote.created
+        }));
         expect(dialogRef.close).toHaveBeenCalled();
     });
 });

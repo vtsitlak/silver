@@ -5,7 +5,7 @@ import { signal } from '@angular/core';
 import { AppComponent } from './app.component';
 import { Location } from '@angular/common';
 import { appRoutes } from './app.routes';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { AuthFacade } from '@silver/notes-auth';
 
@@ -20,7 +20,7 @@ describe('AppComponent', () => {
             imports: [AppComponent],
             providers: [
                 provideRouter(appRoutes),
-                provideHttpClient(),
+                provideHttpClient(withXhr()),
                 provideHttpClientTesting(),
                 provideAnimations(),
                 {
@@ -67,5 +67,21 @@ describe('AppComponent', () => {
         const app = fixture.debugElement.componentInstance;
         app.logout();
         expect(facade.logout).toHaveBeenCalled();
+    });
+
+    it('should expose auth state signals from the facade', () => {
+        fixture.detectChanges();
+        const app = fixture.debugElement.componentInstance;
+        expect(app.isLoggedIn).toBe(facade.isLoggedIn);
+        expect(app.isLoggedOut).toBe(facade.isLoggedOut);
+    });
+
+    it('should show toolbar logout button when logged in', () => {
+        (facade.isLoggedIn as ReturnType<typeof signal<boolean>>).set(true);
+        (facade.isLoggedOut as ReturnType<typeof signal<boolean>>).set(false);
+        fixture.detectChanges();
+
+        const logoutButton = fixture.nativeElement.querySelector('mat-toolbar button[aria-label="Logout"]');
+        expect(logoutButton).toBeTruthy();
     });
 });

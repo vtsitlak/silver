@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { email, form, FormField, required } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { IonContent, IonButton, IonSpinner, IonInput } from '@ionic/angular/standalone';
@@ -12,6 +12,7 @@ interface ForgotPasswordForm {
     selector: 'tbt-forgot-password',
     imports: [IonContent, IonButton, IonSpinner, FormField, IonInput],
     templateUrl: './forgot-password.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './forgot-password.component.scss'
 })
 export class ForgotPasswordComponent {

@@ -1,4 +1,4 @@
-import { Component, inject, linkedSignal, OnInit, signal } from '@angular/core';
+import { Component, inject, linkedSignal, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { disabled, email, form, FormField, required, validate } from '@angular/forms/signals';
 import { IonHeader, IonContent, IonButton, IonToggle, IonSpinner, IonIcon, IonInput, ActionSheetController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -19,6 +19,7 @@ interface ProfileFormModel {
     selector: 'tbt-profile',
     imports: [IonToggle, IonHeader, IonContent, ToolbarComponent, FormField, IonButton, IonSpinner, IonIcon, IonInput],
     templateUrl: './profile.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './profile.component.scss'
 })
 export class ProfileComponent implements OnInit {

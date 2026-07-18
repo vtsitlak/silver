@@ -15,19 +15,43 @@
         "sharedGlobals": ["{workspaceRoot}/.github/workflows/ci.yml"]
     },
     "targetDefaults": {
-        "@angular-devkit/build-angular:browser": { "cache": true, "dependsOn": ["^build"], "inputs": ["production", "^production"] },
+        "@angular-devkit/build-angular:browser": {
+            "cache": true,
+            "dependsOn": ["^build"],
+            "inputs": ["production", "^production"]
+        },
         "@nx/eslint:lint": {
             "cache": true,
-            "inputs": ["default", "{workspaceRoot}/.eslintrc.json", "{workspaceRoot}/.eslintignore", "{workspaceRoot}/eslint.config.mjs"]
+            "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore",
+                "{workspaceRoot}/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*"
+            ]
         },
         "@nx/jest:jest": {
             "cache": true,
             "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"],
-            "options": { "passWithNoTests": true },
-            "configurations": { "ci": { "ci": true, "codeCoverage": true } }
+            "options": {
+                "passWithNoTests": true
+            },
+            "configurations": {
+                "ci": {
+                    "ci": true,
+                    "codeCoverage": true
+                }
+            }
         },
-        "e2e-ci--**/*": { "dependsOn": ["^build"] },
-        "@angular/build:application": { "cache": true, "dependsOn": ["^build"], "inputs": ["production", "^production"] }
+        "e2e-ci--**/*": {
+            "dependsOn": ["^build"]
+        },
+        "@angular/build:application": {
+            "cache": true,
+            "dependsOn": ["^build"],
+            "inputs": ["production", "^production"]
+        }
     },
     "plugins": [
         {

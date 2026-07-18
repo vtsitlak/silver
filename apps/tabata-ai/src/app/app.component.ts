@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router, NavigationStart } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
@@ -7,6 +7,7 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 @Component({
     selector: 'app-root',
     templateUrl: 'app.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [IonApp, IonRouterOutlet]
 })
 export class AppComponent implements OnInit, OnDestroy {
