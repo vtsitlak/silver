@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { email, form, FormField, minLength, required } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { IonContent, IonButton, IonSpinner, IonIcon, IonInput, ActionSheetController } from '@ionic/angular/standalone';
@@ -15,6 +15,7 @@ interface LoginFormModel {
     selector: 'tbt-login',
     imports: [FormField, IonContent, IonButton, IonSpinner, IonIcon, IonInput],
     templateUrl: './login.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './login.component.scss'
 })
 export class LoginComponent {

@@ -1,18 +1,18 @@
 <mat-sidenav-container fullscreen>
     <mat-sidenav #start>
-        <mat-nav-list (click)="start.close()">
-            @if (authFacade.isLoggedOut()) {
-                <a mat-list-item routerLink="/login">
+        <mat-nav-list>
+            @if (isLoggedOut()) {
+                <a mat-list-item routerLink="/login" (click)="start.close()">
                     <mat-icon>account_circle</mat-icon>
                     <span>Login</span>
                 </a>
             }
 
-            @if (authFacade.isLoggedIn()) {
-                <a mat-list-item (click)="logout()">
+            @if (isLoggedIn()) {
+                <button mat-list-item type="button" (click)="logout(); start.close()">
                     <mat-icon>exit_to_app</mat-icon>
                     <span>Logout</span>
-                </a>
+                </button>
             }
         </mat-nav-list>
     </mat-sidenav>
@@ -21,7 +21,12 @@
         <button class="text-white mat-primary" mat-icon-button (click)="start.open('mouse')" color="primary">
             <mat-icon>menu</mat-icon>
         </button>
-        <span class="text-white"> {{ title }} </span>
+        <span class="text-white flex-1"> {{ title }} </span>
+        @if (isLoggedIn()) {
+            <button mat-icon-button class="text-white" (click)="logout()" matTooltip="Logout" aria-label="Logout">
+                <mat-icon>exit_to_app</mat-icon>
+            </button>
+        }
     </mat-toolbar>
 
     @if (loading) {

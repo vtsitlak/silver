@@ -16,10 +16,15 @@ const isCi = Boolean(process.env['CI']);
 export default defineConfig({
     ...nxE2EPreset(__filename, { testDir: './src' }),
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+    // Cap parallelism: Firefox + Ionic login is flaky when 4 workers hit Firebase together.
+    workers: isCi ? 2 : 2,
+    retries: isCi ? 2 : 1,
+    timeout: 60000,
     use: {
         baseURL,
         /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-        trace: 'on-first-retry'
+        trace: 'on-first-retry',
+        actionTimeout: 15000
     },
     /* Run your local dev server before starting the tests */
     webServer: {

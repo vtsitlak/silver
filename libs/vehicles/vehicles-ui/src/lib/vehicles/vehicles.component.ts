@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, effect } from '@angular/core';
+import { Component, OnInit, inject, effect, ChangeDetectionStrategy } from '@angular/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { VehiclesFacade } from '@silver/vehicles-store';
@@ -10,6 +10,7 @@ import { VehicleItemComponent } from '../vehicle-item/vehicle-item.component';
     selector: 'app-vehicles',
     templateUrl: './vehicles.component.html',
     styleUrls: ['./vehicles.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [MatProgressSpinnerModule, MatSnackBarModule, FilterFormComponent, VehicleItemComponent]
 })
 export class VehiclesComponent implements OnInit {

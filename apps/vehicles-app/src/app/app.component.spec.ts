@@ -3,7 +3,7 @@ import { provideRouter, Router } from '@angular/router';
 import { AppComponent } from './app.component';
 import { Location } from '@angular/common';
 import { appRoutes } from './app-routing.module';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('AppComponent', () => {
@@ -14,7 +14,7 @@ describe('AppComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             imports: [AppComponent],
-            providers: [provideRouter(appRoutes), provideHttpClient(), provideHttpClientTesting()]
+            providers: [provideRouter(appRoutes), provideHttpClient(withXhr()), provideHttpClientTesting()]
         }).compileComponents();
         router = TestBed.inject(Router);
         location = TestBed.inject(Location);

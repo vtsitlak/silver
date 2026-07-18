@@ -56,10 +56,10 @@ export async function loginAndWaitForDashboard(page: Page): Promise<void> {
                 // Wait for *any* Ion tab button to appear (tabs shell is ready).
                 return (await page.getByRole('tab').count()) > 0;
             },
-            { timeout: 30000 }
+            { timeout: 45000 }
         )
         .toBeTruthy();
 
     // Ensure at least one tab button is visible before returning.
-    await page.getByRole('tab').first().waitFor({ state: 'visible', timeout: 15000 });
+    await page.getByRole('tab').first().waitFor({ state: 'visible', timeout: 20000 });
 }

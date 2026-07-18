@@ -1,7 +1,15 @@
 import { Request, Response } from 'express';
-const userdb = require('./auth.json');
 
-function authenticate(email, password) {
+interface AuthUser {
+    id: number;
+    name: string;
+    email: string;
+    password: string;
+}
+
+const userdb: { users: AuthUser[] } = require('./auth.json');
+
+function authenticate(email: string, password: string): AuthUser | undefined {
     console.log(
         'user = ',
         userdb.users.find((user) => user.email === email && user.password === password)

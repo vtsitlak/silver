@@ -22,8 +22,8 @@
 
 | Area         | Stack                                                                                                                                                |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Monorepo** | [Nx](https://nx.dev) 22.x                                                                                                                            |
-| **Frontend** | [Angular](https://angular.dev) 21, [Ionic](https://ionicframework.com/) 8 (tabata-ai), [Angular Material](https://material.angular.io/) (other apps) |
+| **Monorepo** | [Nx](https://nx.dev) 23.x                                                                                                                            |
+| **Frontend** | [Angular](https://angular.dev) 22, [Ionic](https://ionicframework.com/) 8 (tabata-ai), [Angular Material](https://material.angular.io/) (other apps) |
 | **State**    | [NgRx Signals](https://ngrx.io/guide/signals) (tabata), NgRx Store/Effects (notes, vehicles)                                                         |
 | **Auth**     | [Angular Fire](https://github.com/angular/angularfire) (Firebase Auth) in tabata-ai                                                                  |
 | **Mobile**   | [Capacitor](https://capacitorjs.com/) 6 (tabata-ai)                                                                                                  |
@@ -110,7 +110,7 @@ silver/
 
 ### Prerequisites
 
-- **Node.js** (v20+ recommended)
+- **Node.js** (v22.22.3+ or v24.15.0+; required by Angular 22)
 - **npm** or **yarn**
 
 ### Install dependencies

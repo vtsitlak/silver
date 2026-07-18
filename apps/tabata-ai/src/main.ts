@@ -11,7 +11,7 @@ import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 import { environment } from './app/environments/environment';
 import { computed, inject, provideAppInitializer, provideZoneChangeDetection } from '@angular/core';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
 import { AuthFacade } from '@silver/tabata/auth';
 import { WORKOUTS_API_BASE_URL, WORKOUTS_AUTH_TOKEN } from '@silver/tabata/workouts';
 import { EXERCISES_API_BASE_URL } from '@silver/tabata/states/exercises';
@@ -87,7 +87,7 @@ export const appConfig = {
             scrollAssist: Capacitor.isNativePlatform()
         }),
         provideRouter(routes, withComponentInputBinding(), withPreloading(PreloadAllModules)),
-        provideHttpClient(withInterceptors([rateLimitInterceptor])),
+        provideHttpClient(withXhr(), withInterceptors([rateLimitInterceptor])),
         provideAppInitializer(() => {
             forceLightTheme();
             return of(undefined);

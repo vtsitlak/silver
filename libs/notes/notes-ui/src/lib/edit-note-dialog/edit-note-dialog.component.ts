@@ -61,7 +61,7 @@ export class EditNoteDialogComponent {
                 ...this.note,
                 ...formData
             };
-            this.notesFacade.update(note.id, formData);
+            this.notesFacade.update(note.id, note);
             this.dialogRef.close();
         } else if (this.mode === 'create') {
             const newNote: Omit<Note, 'id'> = {

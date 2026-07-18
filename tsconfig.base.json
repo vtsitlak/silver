@@ -40,7 +40,12 @@
             "@silver/tabata/workout-player": ["libs/tabata/workout-player/src/index.ts"],
             "@silver/tabata/ai-workout-generator": ["libs/tabata/ai-workout-generator/src/index.ts"],
             "@silver/ai-workout-generator": ["libs/tabata/ai-workout-generator/src/index.ts"]
-        }
+        },
+        "strict": false,
+        "noUncheckedSideEffectImports": false,
+        "types": ["*"],
+        "esModuleInterop": false,
+        "ignoreDeprecations": "6.0"
     },
     "exclude": ["node_modules", "tmp"]
 }

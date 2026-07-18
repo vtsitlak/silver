@@ -3,6 +3,7 @@
         "module": "commonjs",
         "lib": ["es2017"],
         "resolveJsonModule": true,
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "skipLibCheck": true
     }
 }

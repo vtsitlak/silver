@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal, untracked, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { form, FormField, required } from '@angular/forms/signals';
 import { IonButton, IonInput, IonItem, IonList, IonSelect, IonSelectOption, IonSpinner, IonTextarea, ModalController } from '@ionic/angular/standalone';
@@ -28,6 +28,7 @@ import type { WorkoutInfoFormModel } from '@silver/tabata/states/workouts';
     selector: 'tbt-workout-info',
     templateUrl: 'workout-info.component.html',
     styleUrls: ['workout-info.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [IonButton, IonInput, IonItem, IonList, IonSelect, IonSelectOption, IonSpinner, IonTextarea, FormField]
 })
 export class WorkoutInfoComponent {

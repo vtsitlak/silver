@@ -1,4 +1,4 @@
-import { Component, effect, input, output, signal } from '@angular/core';
+import { Component, effect, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormField, form } from '@angular/forms/signals';
@@ -8,6 +8,7 @@ import { Filter } from '@silver/vehicles-store';
     selector: 'app-filter-form',
     templateUrl: './filter-form.component.html',
     styleUrls: ['./filter-form.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [MatFormFieldModule, MatSelectModule, FormField]
 })
 export class FilterFormComponent {

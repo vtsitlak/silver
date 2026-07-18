@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal, untracked, ChangeDetectionStrategy } from '@angular/core';
 import { IonButton, IonItem, IonList, IonIcon, IonReorderGroup, IonReorder } from '@ionic/angular/standalone';
 import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -20,6 +20,7 @@ export interface PhaseExerciseItem {
     selector: 'tbt-workout-phase',
     templateUrl: 'workout-phase.component.html',
     styleUrls: ['workout-phase.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [IonButton, IonItem, IonList, IonIcon, IonReorderGroup, IonReorder, DurationInputModalComponent]
 })
 export class WorkoutPhaseComponent {
