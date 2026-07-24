@@ -97,20 +97,19 @@ describe('AppComponent', () => {
         expect(fixture.nativeElement.querySelector('mat-spinner')).toBeFalsy();
     });
 
-    it('should show the loading overlay on NavigationStart and hide it on NavigationEnd', fakeAsync(() => {
+    it('should toggle the loading overlay across a real route change under OnPush', fakeAsync(() => {
         fixture.detectChanges();
         router.initialNavigation();
         tick();
         fixture.detectChanges();
         expect(fixture.nativeElement.querySelector('mat-spinner')).toBeFalsy();
 
-        const navigation = router.navigateByUrl('/login');
+        void router.navigateByUrl('/notes');
         expect(fixture.debugElement.componentInstance.loading()).toBe(true);
         fixture.detectChanges();
         expect(fixture.nativeElement.querySelector('mat-spinner')).toBeTruthy();
 
         tick();
-        void navigation;
         fixture.detectChanges();
 
         expect(fixture.debugElement.componentInstance.loading()).toBe(false);
