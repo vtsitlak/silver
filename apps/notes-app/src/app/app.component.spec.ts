@@ -84,4 +84,35 @@ describe('AppComponent', () => {
         const logoutButton = fixture.nativeElement.querySelector('mat-toolbar button[aria-label="Logout"]');
         expect(logoutButton).toBeTruthy();
     });
+
+    it('should clear the loading overlay after NavigationEnd under OnPush', fakeAsync(() => {
+        fixture.detectChanges();
+        expect(fixture.nativeElement.querySelector('mat-spinner')).toBeTruthy();
+
+        router.initialNavigation();
+        tick();
+        fixture.detectChanges();
+
+        expect(fixture.debugElement.componentInstance.loading()).toBe(false);
+        expect(fixture.nativeElement.querySelector('mat-spinner')).toBeFalsy();
+    });
+
+    it('should toggle the loading overlay across a real route change under OnPush', fakeAsync(() => {
+        fixture.detectChanges();
+        router.initialNavigation();
+        tick();
+        fixture.detectChanges();
+        expect(fixture.nativeElement.querySelector('mat-spinner')).toBeFalsy();
+
+        void router.navigateByUrl('/notes');
+        expect(fixture.debugElement.componentInstance.loading()).toBe(true);
+        fixture.detectChanges();
+        expect(fixture.nativeElement.querySelector('mat-spinner')).toBeTruthy();
+
+        tick();
+        fixture.detectChanges();
+
+        expect(fixture.debugElement.componentInstance.loading()).toBe(false);
+        expect(fixture.nativeElement.querySelector('mat-spinner')).toBeFalsy();
+    });
 });
