@@ -29,7 +29,7 @@
         }
     </mat-toolbar>
 
-    @if (loading) {
+    @if (loading()) {
         <div class="fixed inset-0 z-10 flex items-center justify-center bg-white bg-opacity-50">
             <mat-spinner></mat-spinner>
         </div>

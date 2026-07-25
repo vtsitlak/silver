@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet, RouterLink, Router } from '@angular/router';
 import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart } from '@angular/router';
 import { MatSidenavContainer, MatSidenav } from '@angular/material/sidenav';
@@ -8,6 +8,7 @@ import { MatToolbar } from '@angular/material/toolbar';
 import { MatIconButton } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatTooltip } from '@angular/material/tooltip';
+import { Subscription } from 'rxjs';
 import { AuthFacade } from '@silver/notes-auth';
 
 @Component({
@@ -29,13 +30,14 @@ import { AuthFacade } from '@silver/notes-auth';
         MatProgressSpinner
     ]
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
     title = 'Notes App';
 
-    loading = true;
+    readonly loading = signal(true);
 
     private authFacade = inject(AuthFacade);
     private router = inject(Router);
+    private routerEventsSubscription: Subscription | null = null;
 
     readonly isLoggedIn = this.authFacade.isLoggedIn;
     readonly isLoggedOut = this.authFacade.isLoggedOut;
@@ -47,17 +49,17 @@ export class AppComponent implements OnInit {
             this.authFacade.setUser(JSON.parse(userProfile));
         }
 
-        this.router.events.subscribe((event) => {
+        this.routerEventsSubscription = this.router.events.subscribe((event) => {
             switch (true) {
                 case event instanceof NavigationStart: {
-                    this.loading = true;
+                    this.loading.set(true);
                     break;
                 }
 
                 case event instanceof NavigationEnd:
                 case event instanceof NavigationCancel:
                 case event instanceof NavigationError: {
-                    this.loading = false;
+                    this.loading.set(false);
                     break;
                 }
                 default: {
@@ -65,6 +67,10 @@ export class AppComponent implements OnInit {
                 }
             }
         });
+    }
+
+    ngOnDestroy() {
+        this.routerEventsSubscription?.unsubscribe();
     }
 
     logout() {
