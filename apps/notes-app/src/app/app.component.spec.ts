@@ -95,7 +95,7 @@ describe('AppComponent', () => {
 
         expect(fixture.debugElement.componentInstance.loading()).toBe(false);
         expect(fixture.nativeElement.querySelector('mat-spinner')).toBeFalsy();
-    });
+    }));
 
     it('should toggle the loading overlay across a real route change under OnPush', fakeAsync(() => {
         fixture.detectChanges();
@@ -114,5 +114,5 @@ describe('AppComponent', () => {
 
         expect(fixture.debugElement.componentInstance.loading()).toBe(false);
         expect(fixture.nativeElement.querySelector('mat-spinner')).toBeFalsy();
-    });
+    }));
 });
