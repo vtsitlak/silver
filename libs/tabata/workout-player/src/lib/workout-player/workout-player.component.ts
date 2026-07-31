@@ -7,7 +7,7 @@ import { WorkoutsFacade, TabataWorkout } from '@silver/tabata/states/workouts';
 import { ExercisesFacade, Exercise } from '@silver/tabata/states/exercises';
 import { AuthFacade } from '@silver/tabata/auth';
 import { UserWorkoutsFacade } from '@silver/tabata/states/user-workouts';
-import type { UserWorkout, UserWorkoutItem } from '@silver/tabata/states/user-workouts';
+import type { UserWorkoutItem } from '@silver/tabata/states/user-workouts';
 import { ToastService } from '@silver/tabata/helpers';
 import { ActionSheetController } from '@ionic/angular/standalone';
 
@@ -19,11 +19,6 @@ interface WorkoutSegment {
     durationSeconds: number;
     exerciseId: string | null;
     isRest: boolean;
-}
-
-interface PendingWorkoutSession {
-    userId: string;
-    item: UserWorkoutItem;
 }
 
 @Component({
@@ -59,8 +54,8 @@ export class WorkoutPlayerComponent implements OnDestroy {
     readonly hasStarted = signal(false);
     /** Current workout session to record (startedAt set on first play; finishedAt/completed on finish or cancel). */
     readonly currentSession = signal<UserWorkoutItem | null>(null);
-    private readonly pendingSession = signal<PendingWorkoutSession | null>(null);
-    readonly isSavingSession = computed(() => this.pendingSession() !== null);
+    /** True while a finished session is buffered in the user-workouts store awaiting hydration/save. */
+    readonly isSavingSession = this.userWorkoutsFacade.hasPendingSessionAppends;
 
     private keepAwakeActive = false;
     private pageActive = true;
@@ -112,20 +107,12 @@ export class WorkoutPlayerComponent implements OnDestroy {
         });
 
         effect(() => {
-            const pending = this.pendingSession();
-            const current = this.userWorkoutsFacade.userWorkout();
-            if (!pending || current?.userId !== pending.userId) return;
-
-            this.saveSessionItem(current, pending.item);
-            this.pendingSession.set(null);
-            const session = this.currentSession();
-            if (session?.workoutId === pending.item.workoutId && session.startedAt === pending.item.startedAt) {
-                this.currentSession.set(null);
-            }
-            if (this.navigateAfterPendingSessionSave) {
-                this.navigateAfterPendingSessionSave = false;
-                this.router.navigate(['/tabs/workouts']);
-            }
+            // Always read the signal first so this effect re-runs when buffering clears
+            // (do not short-circuit on the plain navigate flag before the signal read).
+            const saving = this.isSavingSession();
+            if (!this.navigateAfterPendingSessionSave || saving) return;
+            this.navigateAfterPendingSessionSave = false;
+            this.router.navigate(['/tabs/workouts']);
         });
 
         effect(() => {
@@ -369,34 +356,22 @@ export class WorkoutPlayerComponent implements OnDestroy {
             completed
         };
 
-        const current = this.userWorkoutsFacade.userWorkout();
-        if (current?.userId === userId) {
-            this.saveSessionItem(current, item);
-            this.currentSession.set(null);
-            return;
-        }
-
-        this.pendingSession.set({ userId, item });
-        this.userWorkoutsFacade.getOrCreateUserWorkout(userId);
+        // Buffer/save in the root store so OS/browser back (component destroy) cannot drop the session.
+        this.userWorkoutsFacade.appendWorkoutSession(userId, item);
+        this.currentSession.set(null);
     }
 
     private navigateToWorkoutsAfterSessionSave(): void {
-        const pending = this.pendingSession();
-        if (!pending) {
+        if (!this.isSavingSession()) {
             this.router.navigate(['/tabs/workouts']);
             return;
         }
 
         this.navigateAfterPendingSessionSave = true;
-        this.userWorkoutsFacade.getOrCreateUserWorkout(pending.userId);
-    }
-
-    private saveSessionItem(current: UserWorkout, item: UserWorkoutItem): void {
-        this.userWorkoutsFacade.saveUserWorkout({
-            userId: current.userId,
-            favoriteWorkouts: current.favoriteWorkouts ?? [],
-            workoutItems: [...(current.workoutItems ?? []), item]
-        });
+        const userId = this.authFacade.user()?.uid;
+        if (userId) {
+            this.userWorkoutsFacade.getOrCreateUserWorkout(userId);
+        }
     }
 
     restart(): void {
