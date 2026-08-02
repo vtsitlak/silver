@@ -49,6 +49,12 @@ export class WorkoutPlayerComponent implements OnDestroy {
     readonly workout = this.workoutsFacade.loadedWorkout;
     readonly isLoading = this.workoutsFacade.isLoading;
     readonly error = this.workoutsFacade.error;
+    /** True only when the store workout matches this route — prevents playing a stale prior workout. */
+    readonly isWorkoutReady = computed(() => {
+        const id = this.workoutId();
+        const w = this.workout();
+        return !!id && !!w && w.id === id && !this.isLoading();
+    });
 
     readonly segments = signal<WorkoutSegment[]>([]);
     readonly currentIndex = signal(0);
@@ -105,8 +111,12 @@ export class WorkoutPlayerComponent implements OnDestroy {
         });
 
         effect(() => {
+            const requestedId = this.workoutId();
             const w = this.workout();
-            if (!w) return;
+            if (!requestedId || !w || w.id !== requestedId) {
+                this.clearPlaybackState();
+                return;
+            }
             this.buildSegments(w);
             this.loadExercisesForWorkout(w);
         });
@@ -201,6 +211,17 @@ export class WorkoutPlayerComponent implements OnDestroy {
         }
     }
 
+    private clearPlaybackState(): void {
+        this.clearTimer();
+        this.segments.set([]);
+        this.currentIndex.set(0);
+        this.remainingInSegment.set(0);
+        this.isPlaying.set(false);
+        this.finished.set(false);
+        this.hasStarted.set(false);
+        this.currentSession.set(null);
+    }
+
     private buildSegments(workout: TabataWorkout): void {
         const result: WorkoutSegment[] = [];
 
@@ -293,6 +314,9 @@ export class WorkoutPlayerComponent implements OnDestroy {
     }
 
     togglePlay(): void {
+        if (!this.isWorkoutReady() && !this.finished()) {
+            return;
+        }
         if (this.finished()) {
             this.restart();
             return;
@@ -317,6 +341,9 @@ export class WorkoutPlayerComponent implements OnDestroy {
     }
 
     skip(): void {
+        if (!this.isWorkoutReady()) {
+            return;
+        }
         this.advanceSegment();
     }
 
@@ -400,6 +427,7 @@ export class WorkoutPlayerComponent implements OnDestroy {
     }
 
     restart(): void {
+        if (!this.isWorkoutReady() && this.segments().length === 0) return;
         const segs = this.segments();
         if (segs.length === 0) return;
         // New run => fresh session, so completion is persisted each time.
@@ -414,16 +442,16 @@ export class WorkoutPlayerComponent implements OnDestroy {
 
     private ensureSessionStarted(): void {
         if (this.hasStarted()) return;
-        this.hasStarted.set(true);
         const id = this.workoutId();
-        if (id) {
-            this.currentSession.set({
-                workoutId: id,
-                startedAt: new Date().toISOString(),
-                finishedAt: '',
-                completed: false
-            });
-        }
+        const w = this.workout();
+        if (!id || !w || w.id !== id) return;
+        this.hasStarted.set(true);
+        this.currentSession.set({
+            workoutId: id,
+            startedAt: new Date().toISOString(),
+            finishedAt: '',
+            completed: false
+        });
     }
 
     phaseLabel(seg: WorkoutSegment | null): string {

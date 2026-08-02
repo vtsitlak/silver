@@ -41,7 +41,9 @@ export const WorkoutsStore = signalStore(
 
         rxMethod<string>((id$) =>
             id$.pipe(
-                tap(() => patchState(store, { isLoading: true, error: null })),
+                // Clear any previously loaded workout immediately so consumers cannot
+                // render/play stale segments while a different id is in flight.
+                tap(() => patchState(store, { isLoading: true, error: null, loadedWorkout: null })),
                 switchMap((id) =>
                     workoutsService.getWorkoutById(id).pipe(
                         tapResponse({
@@ -52,7 +54,11 @@ export const WorkoutsStore = signalStore(
                                     const next = exists ? current.map((w) => (w.id === workout.id ? workout : w)) : [...current, workout];
                                     patchState(store, { workouts: next, loadedWorkout: workout, isLoading: false });
                                 } else {
-                                    patchState(store, { loadedWorkout: null, isLoading: false });
+                                    patchState(store, {
+                                        loadedWorkout: null,
+                                        isLoading: false,
+                                        error: 'Workout not found'
+                                    });
                                 }
                             },
                             error: (err: Error) => patchState(store, { error: err.message, loadedWorkout: null, isLoading: false })
