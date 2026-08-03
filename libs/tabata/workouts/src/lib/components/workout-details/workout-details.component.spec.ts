@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { fakeAsync, tick } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { ModalController } from '@ionic/angular/standalone';
 import { WorkoutDetailsComponent } from './workout-details.component';
 import { WorkoutsFacade, TabataBlock } from '@silver/tabata/states/workouts';
@@ -156,5 +156,61 @@ describe('WorkoutDetailsComponent', () => {
             ...current,
             favoriteWorkouts: ['existing-favorite', '1']
         });
+    });
+
+    it('ignores a stale loadedWorkout from a different route id', () => {
+        // Arrange — Ionic can restore this page while the store still holds workout B
+        mockWorkoutsFacade.loadedWorkout.set({
+            ...mockTabataWorkout,
+            id: 'other-workout',
+            name: 'Other Workout'
+        });
+        mockWorkoutsFacade.isLoading.set(false);
+        fixture.detectChanges();
+
+        // Assert
+        expect(component.workout()).toBeNull();
+        expect(component.isLoading()).toBe(false);
+    });
+
+    it('navigates Edit using the route workout id, not a mismatched store id', () => {
+        // Arrange
+        const navigateSpy = jest.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+        mockWorkoutsFacade.loadedWorkout.set({ ...mockTabataWorkout, id: '1' });
+        fixture.detectChanges();
+
+        // Act
+        component.editWorkout();
+
+        // Assert
+        expect(navigateSpy).toHaveBeenCalledWith(['/tabs/workout-editor', '1']);
+    });
+
+    it('does not navigate Edit when loadedWorkout does not match the route id', () => {
+        // Arrange
+        const navigateSpy = jest.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+        mockWorkoutsFacade.loadedWorkout.set({
+            ...mockTabataWorkout,
+            id: 'other-workout',
+            name: 'Other Workout'
+        });
+        fixture.detectChanges();
+
+        // Act
+        component.editWorkout();
+
+        // Assert
+        expect(navigateSpy).not.toHaveBeenCalled();
+    });
+
+    it('reloads the route workout when Ionic restores the page', () => {
+        // Arrange
+        mockWorkoutsFacade.loadWorkoutById.mockClear();
+
+        // Act
+        component.ionViewWillEnter();
+
+        // Assert
+        expect(mockWorkoutsFacade.loadWorkoutById).toHaveBeenCalledWith('1');
     });
 });
