@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output, viewChild, effect, inject, afterNextRender } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, viewChild, effect, inject, afterNextRender } from '@angular/core';
 import { Note } from '@silver/notes-store';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
@@ -54,7 +54,6 @@ import { MatIconButton } from '@angular/material/button';
 })
 export class NotesTableListComponent {
     notes = input<Note[]>([]);
-    noteChanged = output<void>();
 
     notesFacade = inject(NotesFacade);
     private dialog = inject(MatDialog);
@@ -123,10 +122,10 @@ export class NotesTableListComponent {
             mode: 'update'
         };
 
-        this.dialog
-            .open(EditNoteDialogComponent, dialogConfig)
-            .afterClosed()
-            .subscribe(() => this.noteChanged.emit());
+        // Do not reload-all on close: save already patches the store on HTTP success.
+        // Firing loadAll here raced the in-flight PUT and could replace the list with a
+        // stale GET, so a later edit/save could permanently clobber the prior write.
+        this.dialog.open(EditNoteDialogComponent, dialogConfig);
     }
 
     onDeleteCourse(note: Note) {
