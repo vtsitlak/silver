@@ -235,6 +235,58 @@ describe('UserWorkoutsStore', () => {
         expect(store.userWorkout()).toEqual(nextPayload);
     });
 
+    it('keeps failed session saves and retries them instead of letting History GET wipe the session', () => {
+        // Arrange — player finished a session; PUT fails (offline / 500)
+        const completedItem = createWorkoutItem('completed-session');
+        const failedPayload = createUserWorkout([completedItem]);
+
+        // Act
+        store.saveUserWorkout(failedPayload);
+        saveResponses[0].error(new Error('Network error'));
+
+        // Assert — failure keeps optimistic session and records the error
+        expect(store.userWorkout()).toEqual(failedPayload);
+        expect(store.error()).toBe('Network error');
+
+        // Act — History/Dashboard enter calls getOrCreate; must retry save, not GET-stomp.
+        store.getOrCreateUserWorkout('user1');
+
+        // Assert — no GET; failed payload requeued (retry clears error while in-flight)
+        expect(store.userWorkout()).toEqual(failedPayload);
+        expect(userWorkoutsService.getUserWorkout).not.toHaveBeenCalled();
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(2);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenNthCalledWith(2, failedPayload);
+
+        // Act — retry succeeds
+        saveResponses[1].next(failedPayload);
+        saveResponses[1].complete();
+
+        // Assert
+        expect(store.userWorkout()).toEqual(failedPayload);
+        expect(store.error()).toBeNull();
+        expect(store.isLoading()).toBe(false);
+    });
+
+    it('does not apply a late GET over a failed unsynced session payload', () => {
+        // Arrange
+        const completedItem = createWorkoutItem('completed-session');
+        const failedPayload = createUserWorkout([completedItem]);
+        const staleServerPayload = createUserWorkout([]);
+        const refreshResponse = new Subject<UserWorkout | null>();
+        userWorkoutsService.getUserWorkout.mockReturnValueOnce(refreshResponse.asObservable());
+
+        // Act — start a refresh, then a save fails before the GET returns
+        store.getOrCreateUserWorkout('user1');
+        store.saveUserWorkout(failedPayload);
+        saveResponses[0].error(new Error('Network error'));
+        refreshResponse.next(staleServerPayload);
+        refreshResponse.complete();
+
+        // Assert — failed optimistic payload wins over the late stale GET
+        expect(store.userWorkout()).toEqual(failedPayload);
+        expect(store.error()).toBe('Network error');
+    });
+
     it('ignores refresh responses that started before a newer save', () => {
         // Arrange
         const refreshResponse = new Subject<UserWorkout | null>();

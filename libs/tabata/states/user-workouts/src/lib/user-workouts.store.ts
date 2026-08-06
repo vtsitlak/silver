@@ -34,14 +34,24 @@ export const UserWorkoutsStore = signalStore(
         let userWorkoutRevision = 0;
         let activeUserId = activeUserIdSignal();
         const latestPendingSaveByUserId = new Map<string, number>();
+        /** Latest save payload that failed HTTP; blocks GET stomps and is retried on the next load. */
+        const failedSavePayloadByUserId = new Map<string, UserWorkout>();
 
         const hasPendingSaveForUser = (userId: string): boolean => latestPendingSaveByUserId.has(userId);
+        const hasFailedSaveForUser = (userId: string): boolean => failedSavePayloadByUserId.has(userId);
         const isActiveUser = (userId: string): boolean => activeUserId === userId;
+
+        const markSaveFailed = (userId: string, requestId: number, userWorkout: UserWorkout, errorMessage: string): void => {
+            if (requestId !== latestSaveRequestId || !isActiveUser(userId)) return;
+            failedSavePayloadByUserId.set(userId, userWorkout);
+            patchState(store, { error: errorMessage, isLoading: false });
+        };
 
         const resetUserWorkoutState = (): void => {
             latestSaveRequestId += 1;
             userWorkoutRevision += 1;
             latestPendingSaveByUserId.clear();
+            failedSavePayloadByUserId.clear();
             patchState(store, userWorkoutsInitialState);
         };
 
@@ -53,7 +63,12 @@ export const UserWorkoutsStore = signalStore(
         });
 
         const applyLoadedUserWorkout = ({ userId, revision }: UserWorkoutLoadRequest, userWorkout: UserWorkout | null): void => {
-            if (!isActiveUser(userId) || revision !== userWorkoutRevision || hasPendingSaveForUser(userId)) {
+            if (
+                !isActiveUser(userId) ||
+                revision !== userWorkoutRevision ||
+                hasPendingSaveForUser(userId) ||
+                hasFailedSaveForUser(userId)
+            ) {
                 return;
             }
             patchState(store, { userWorkout, isLoading: false });
@@ -66,8 +81,19 @@ export const UserWorkoutsStore = signalStore(
             latestSaveRequestId = requestId;
             userWorkoutRevision += 1;
             latestPendingSaveByUserId.set(userWorkout.userId, requestId);
+            failedSavePayloadByUserId.delete(userWorkout.userId);
             patchState(store, { userWorkout, isLoading: true, error: null });
             saveTrigger.next({ requestId, userWorkout });
+        };
+
+        const retryFailedSaveOr = (userId: string, startLoad: () => void): void => {
+            if (!isActiveUser(userId) || hasPendingSaveForUser(userId)) return;
+            const failedPayload = failedSavePayloadByUserId.get(userId);
+            if (failedPayload) {
+                queueSaveUserWorkout(failedPayload);
+                return;
+            }
+            startLoad();
         };
 
         rxMethod<UserWorkoutLoadRequest>((request$) =>
@@ -99,22 +125,21 @@ export const UserWorkoutsStore = signalStore(
                         tapResponse({
                             next: (saved) => {
                                 if (requestId === latestSaveRequestId && isActiveUser(saved.userId)) {
+                                    failedSavePayloadByUserId.delete(saved.userId);
                                     patchState(store, { userWorkout: saved, isLoading: false, error: null });
                                 }
                             },
                             error: (err: Error) => {
-                                if (requestId === latestSaveRequestId) {
-                                    patchState(store, { error: err.message, isLoading: false });
-                                }
+                                markSaveFailed(userWorkout.userId, requestId, userWorkout, err.message);
                             }
                         }),
                         catchError((err: unknown) => {
-                            if (requestId === latestSaveRequestId) {
-                                patchState(store, {
-                                    error: err instanceof Error ? err.message : String(err),
-                                    isLoading: false
-                                });
-                            }
+                            markSaveFailed(
+                                userWorkout.userId,
+                                requestId,
+                                userWorkout,
+                                err instanceof Error ? err.message : String(err)
+                            );
                             return of(null as unknown as UserWorkout);
                         }),
                         finalize(() => {
@@ -139,7 +164,11 @@ export const UserWorkoutsStore = signalStore(
                                     applyLoadedUserWorkout(request, userWorkout);
                                     return;
                                 }
-                                if (request.revision !== userWorkoutRevision || hasPendingSaveForUser(userId)) {
+                                if (
+                                    request.revision !== userWorkoutRevision ||
+                                    hasPendingSaveForUser(userId) ||
+                                    hasFailedSaveForUser(userId)
+                                ) {
                                     return;
                                 }
                                 queueSaveUserWorkout({ userId, favoriteWorkouts: [], workoutItems: [] });
@@ -160,13 +189,11 @@ export const UserWorkoutsStore = signalStore(
 
         return {
             loadUserWorkout: (userId: string) => {
-                if (!isActiveUser(userId) || hasPendingSaveForUser(userId)) return;
-                loadTrigger.next({ userId, revision: userWorkoutRevision });
+                retryFailedSaveOr(userId, () => loadTrigger.next({ userId, revision: userWorkoutRevision }));
             },
             saveUserWorkout: queueSaveUserWorkout,
             getOrCreateUserWorkout: (userId: string) => {
-                if (!isActiveUser(userId) || hasPendingSaveForUser(userId)) return;
-                getOrCreateTrigger.next({ userId, revision: userWorkoutRevision });
+                retryFailedSaveOr(userId, () => getOrCreateTrigger.next({ userId, revision: userWorkoutRevision }));
             }
         };
     })
