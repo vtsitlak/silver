@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { AuthFacade } from '@silver/tabata/auth';
-import { mockAuthFacade, mockModalController } from '@silver/tabata/testing';
+import { mockAuthFacade, mockModalController, mockWorkoutEditorFacade } from '@silver/tabata/testing';
 import { WorkoutInfoComponent } from './workout-info.component';
 import { ModalController } from '@ionic/angular/standalone';
 import { AiWorkoutGenerationService } from '../../services/ai-workout-generation.service';
+import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { EMPTY } from 'rxjs';
 
 const mockAiWorkoutGenerationService = {
@@ -22,7 +23,8 @@ describe('WorkoutInfoComponent', () => {
                 provideRouter([]),
                 { provide: AuthFacade, useValue: mockAuthFacade },
                 { provide: ModalController, useValue: mockModalController },
-                { provide: AiWorkoutGenerationService, useValue: mockAiWorkoutGenerationService }
+                { provide: AiWorkoutGenerationService, useValue: mockAiWorkoutGenerationService },
+                { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade }
             ]
         }).compileComponents();
 

@@ -6,10 +6,9 @@ import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { ModalController } from '@ionic/angular/standalone';
 import { signal } from '@angular/core';
 import { WorkoutsFacade } from '@silver/tabata/states/workouts';
+import type { GenerateWorkoutOutput } from '@silver/tabata/ai-workout-generator';
 
-const mockDraft = {
-    name: 'AI Core',
-    description: 'Core focus',
+const mockGenerated: GenerateWorkoutOutput = {
     totalDurationMinutes: 20,
     warmup: {
         totalDurationSeconds: 180,
@@ -20,7 +19,7 @@ const mockDraft = {
     },
     blocks: [
         {
-            rounds: 8,
+            rounds: 4,
             workDurationSeconds: 20,
             restDurationSeconds: 10,
             exerciseId: 'ex3',
@@ -30,14 +29,33 @@ const mockDraft = {
     cooldown: {
         totalDurationSeconds: 120,
         movements: [{ exerciseId: 'ex1', durationSeconds: 60 }]
-    },
+    }
+};
+
+const mockDraft = {
+    name: 'AI Core',
+    description: 'Core focus',
+    ...mockGenerated,
+    // Stale local tab sync may have stomped the live draft — preview must still show generated.
+    blocks: [
+        {
+            rounds: 8,
+            workDurationSeconds: 20,
+            restDurationSeconds: 10,
+            exerciseId: 'stale-local',
+            interBlockRestSeconds: 60
+        }
+    ],
     generatedByAi: true
 };
 
 describe('AiWorkoutPreviewModalComponent', () => {
     let component: AiWorkoutPreviewModalComponent;
     let fixture: ComponentFixture<AiWorkoutPreviewModalComponent>;
-    let mockFacade: { workoutDraft: ReturnType<typeof signal> };
+    let mockFacade: {
+        workoutDraft: ReturnType<typeof signal>;
+        lockAiGeneratedStructure: jest.Mock;
+    };
     let mockSubmitService: { submitWorkout: jest.Mock };
     let mockExercisesFacade: { exercisesMap: ReturnType<typeof signal>; loadExercisesMap: jest.Mock };
     let mockModalCtrl: { dismiss: jest.Mock };
@@ -45,7 +63,8 @@ describe('AiWorkoutPreviewModalComponent', () => {
 
     beforeEach(async () => {
         mockFacade = {
-            workoutDraft: signal(mockDraft)
+            workoutDraft: signal(mockDraft),
+            lockAiGeneratedStructure: jest.fn()
         };
         mockWorkoutsFacade = {
             isSaving: signal(false)
@@ -56,7 +75,11 @@ describe('AiWorkoutPreviewModalComponent', () => {
             })
         };
         mockExercisesFacade = {
-            exercisesMap: signal({ ex1: { name: 'Ex 1', images: [] }, ex2: { name: 'Ex 2', images: [] }, ex3: { name: 'Ex 3', images: [] } }),
+            exercisesMap: signal({
+                ex1: { name: 'Ex 1', images: [] },
+                ex2: { name: 'Ex 2', images: [] },
+                ex3: { name: 'Ex 3', images: [] }
+            }),
             loadExercisesMap: jest.fn()
         };
         mockModalCtrl = { dismiss: jest.fn().mockResolvedValue(undefined) };
@@ -74,6 +97,7 @@ describe('AiWorkoutPreviewModalComponent', () => {
 
         fixture = TestBed.createComponent(AiWorkoutPreviewModalComponent);
         component = fixture.componentInstance;
+        fixture.componentRef.setInput('generatedWorkout', mockGenerated);
         fixture.detectChanges();
     });
 
@@ -81,11 +105,13 @@ describe('AiWorkoutPreviewModalComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should show AI Generated chip alongside duration and block count chips', () => {
+    it('should show AI Generated chip alongside duration and block count chips from generated workout', () => {
         const el = fixture.nativeElement as HTMLElement;
         const chipTexts = Array.from(el.querySelectorAll('ion-chip')).map((c) => c.textContent?.replace(/\s+/g, ' ').trim() ?? '');
         expect(chipTexts.some((t) => t.includes('AI Generated'))).toBe(true);
         expect(chipTexts.some((t) => /block/i.test(t))).toBe(true);
+        expect(el.textContent).toContain('4 rounds');
+        expect(el.textContent).not.toContain('stale-local');
     });
 
     it('should resolve exercise name from map', () => {
@@ -93,7 +119,7 @@ describe('AiWorkoutPreviewModalComponent', () => {
         expect(component.getExerciseName('unknown')).toBe('unknown');
     });
 
-    it('should call loadExercisesMap with draft exercise ids', () => {
+    it('should call loadExercisesMap with generated exercise ids', () => {
         expect(mockExercisesFacade.loadExercisesMap).toHaveBeenCalled();
         const ids = mockExercisesFacade.loadExercisesMap.mock.calls[0][0] as string[];
         expect(ids).toHaveLength(3);
@@ -102,8 +128,9 @@ describe('AiWorkoutPreviewModalComponent', () => {
         expect(ids).toContain('ex3');
     });
 
-    it('should dismiss with save role when save succeeds', () => {
+    it('should re-lock AI structure then submit on save', () => {
         component.onSave();
+        expect(mockFacade.lockAiGeneratedStructure).toHaveBeenCalledWith(mockGenerated);
         expect(mockSubmitService.submitWorkout).toHaveBeenCalled();
         expect(mockModalCtrl.dismiss).toHaveBeenCalledWith(expect.objectContaining({ workout: expect.objectContaining({ id: 'w1' }) }), 'save');
     });

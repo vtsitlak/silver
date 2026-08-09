@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { WorkoutEditorStore } from './workout-editor.store';
-import type { WorkoutDraft } from './workout-editor.models';
+import type { AiGeneratedWorkoutStructure, WorkoutDraft } from './workout-editor.models';
 import type { TabataWorkout } from '@silver/tabata/states/workouts';
 
 @Injectable({ providedIn: 'root' })
@@ -14,10 +14,23 @@ export class WorkoutEditorFacade {
     readonly hasDraftChanges = this.store.hasDraftChanges;
     readonly hasUnsavedChanges = this.store.hasUnsavedChanges;
     readonly mergedWorkout = this.store.mergedWorkout;
+    readonly aiStructureLock = this.store.aiStructureLock;
 
     /** Applies a loaded workout to draft + baseline snapshot (e.g. after GET by id). */
     hydrateEditorFromWorkout(workout: TabataWorkout): void {
         this.store.hydrateEditorFromWorkout(workout);
+    }
+
+    /**
+     * Applies AI-generated structure and pins it so mounted editor tabs cannot overwrite
+     * warmup/blocks/cooldown while the preview modal is open.
+     */
+    lockAiGeneratedStructure(structure: AiGeneratedWorkoutStructure): void {
+        this.store.lockAiGeneratedStructure(structure);
+    }
+
+    clearAiStructureLock(): void {
+        this.store.clearAiStructureLock();
     }
 
     updateDraft(changes: WorkoutDraft): void {
