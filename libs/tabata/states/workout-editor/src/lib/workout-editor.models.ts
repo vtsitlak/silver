@@ -87,6 +87,7 @@ export interface WorkoutEditorState {
     /**
      * When set (AI preview open), `updateDraft` keeps these structural fields pinned so mounted
      * warmup/main/cooldown tab effects cannot stomp the generated workout before Save.
+     * Cleared on successful save, cancel, reset/clearDraft, or preview backdrop dismiss.
      */
     aiStructureLock: AiGeneratedWorkoutStructure | null;
 }

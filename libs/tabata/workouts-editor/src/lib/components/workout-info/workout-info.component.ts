@@ -183,9 +183,13 @@ export class WorkoutInfoComponent {
                         this.router.navigate(['/tabs/workouts'], {
                             state: { [SKIP_WORKOUT_EDITOR_CANCEL]: true }
                         });
+                    } else {
+                        // Backdrop / hardware back / other dismiss: draft + snapshot already hold
+                        // the AI structure from lockAiGeneratedStructure. Drop the pin so the user
+                        // can edit warmup/main/cooldown; otherwise Save would persist locked AI
+                        // while the tabs still showed (and accepted) local edits.
+                        this.workoutEditorFacade.clearAiStructureLock();
                     }
-                    // Backdrop / other dismiss: keep the structure lock so mounted tabs cannot
-                    // stomp the AI workout if the user stays on the editor.
                 });
                 return modal.present();
             });

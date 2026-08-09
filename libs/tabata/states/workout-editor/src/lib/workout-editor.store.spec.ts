@@ -66,6 +66,19 @@ describe('WorkoutEditorStore AI structure lock', () => {
         expect(draft.name).toBe('Test');
     });
 
+    it('syncs initialDraftSnapshot structure on lock so mounted tabs rehydrate to the AI workout', () => {
+        store.lockAiGeneratedStructure(aiStructure);
+
+        const snapshot = store.initialDraftSnapshot();
+        expect(snapshot.blocks).toEqual(aiStructure.blocks);
+        expect(snapshot.warmup).toEqual(aiStructure.warmup);
+        expect(snapshot.cooldown).toEqual(aiStructure.cooldown);
+        expect(snapshot.totalDurationMinutes).toBe(25);
+        expect(snapshot.generatedByAi).toBe(true);
+        // Info fields on the live draft are not wiped by snapshot sync.
+        expect(store.workoutDraft().name).toBe('Test');
+    });
+
     it('allows info-field updates while the AI structure lock is active', () => {
         store.lockAiGeneratedStructure(aiStructure);
         store.updateDraft({ name: 'Renamed', description: 'Updated' });

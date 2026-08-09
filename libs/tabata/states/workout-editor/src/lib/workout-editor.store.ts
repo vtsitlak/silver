@@ -124,9 +124,20 @@ export const WorkoutEditorStore = signalStore(
                     cooldown: structure.cooldown,
                     totalDurationMinutes: structure.totalDurationMinutes
                 };
+                // Sync baseline snapshot so mounted editor tabs rehydrate to the AI structure
+                // (they read `initialDraftSnapshot`, not the live draft).
+                const baseline = store.initialDraftSnapshot();
                 patchState(store, {
                     aiStructureLock: lock,
-                    workoutDraft: withPinnedAiStructure({ ...store.workoutDraft(), ...lock, generatedByAi: true }, lock)
+                    workoutDraft: withPinnedAiStructure({ ...store.workoutDraft(), ...lock, generatedByAi: true }, lock),
+                    initialDraftSnapshot: {
+                        ...baseline,
+                        warmup: lock.warmup,
+                        blocks: lock.blocks,
+                        cooldown: lock.cooldown,
+                        totalDurationMinutes: lock.totalDurationMinutes,
+                        generatedByAi: true
+                    }
                 });
             },
             clearAiStructureLock: () => patchState(store, { aiStructureLock: null }),
