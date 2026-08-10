@@ -60,4 +60,14 @@ describe('NotesTableListComponent', () => {
         component.editCourse(note);
         expect(dialog.open).toHaveBeenCalled();
     });
+
+    it('should not subscribe to afterClosed reload when editing a note', () => {
+        const afterClosed = jest.fn().mockReturnValue({ subscribe: jest.fn() });
+        (dialog.open as jest.Mock).mockReturnValue({ afterClosed });
+
+        component.editCourse(mockNotes[0]);
+
+        expect(dialog.open).toHaveBeenCalled();
+        expect(afterClosed).not.toHaveBeenCalled();
+    });
 });
