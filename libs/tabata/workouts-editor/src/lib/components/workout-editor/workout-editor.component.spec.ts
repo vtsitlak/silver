@@ -16,9 +16,11 @@ describe('WorkoutEditorComponent', () => {
     let fixture: ComponentFixture<WorkoutEditorComponent>;
     let router: Router;
     let loadWorkoutForEditor: jest.Mock;
+    let cancelPendingLoad: jest.Mock;
 
     beforeEach(async () => {
         loadWorkoutForEditor = jest.fn();
+        cancelPendingLoad = jest.fn();
         /** jsdom has no `scrollTo`; Ionic scrollable `ion-segment` uses it. */
         if (typeof Element.prototype.scrollTo !== 'function') {
             Element.prototype.scrollTo = jest.fn() as unknown as typeof Element.prototype.scrollTo;
@@ -35,7 +37,10 @@ describe('WorkoutEditorComponent', () => {
                         isSaving: signal(false)
                     }
                 },
-                { provide: WorkoutEditorInitService, useFactory: () => ({ loadWorkoutForEditor: loadWorkoutForEditor }) },
+                {
+                    provide: WorkoutEditorInitService,
+                    useFactory: () => ({ loadWorkoutForEditor, cancelPendingLoad })
+                },
                 { provide: WorkoutSubmitService, useValue: mockSubmitService },
                 { provide: ModalController, useValue: mockModalController }
             ]
@@ -81,5 +86,14 @@ describe('WorkoutEditorComponent', () => {
         component.ionViewWillEnter();
         expect(mockWorkoutEditorFacade.reset).toHaveBeenCalled();
         expect(loadWorkoutForEditor).toHaveBeenCalledWith('abc-123');
+        expect(cancelPendingLoad).not.toHaveBeenCalled();
+    });
+
+    it('should cancel pending edit loads on ionViewWillEnter in create mode', () => {
+        fixture.componentRef.setInput('workoutId', null);
+        component.ionViewWillEnter();
+        expect(mockWorkoutEditorFacade.reset).toHaveBeenCalled();
+        expect(loadWorkoutForEditor).not.toHaveBeenCalled();
+        expect(cancelPendingLoad).toHaveBeenCalled();
     });
 });
