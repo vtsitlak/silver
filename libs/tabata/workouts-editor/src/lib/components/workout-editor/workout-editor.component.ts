@@ -100,6 +100,9 @@ export class WorkoutEditorComponent {
         const id = this.workoutId();
         if (id) {
             this.workoutEditorInit.loadWorkoutForEditor(id);
+        } else {
+            // Create mode: drop any in-flight edit load so a slow GET cannot flip create → edit.
+            this.workoutEditorInit.cancelPendingLoad();
         }
     }
 
