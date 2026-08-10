@@ -24,26 +24,34 @@ describe('WorkoutPlayerComponent', () => {
     const mockWorkoutsFacade = createMockWorkoutsFacade();
     const mockExercisesFacade = createMockExercisesFacade();
     let userWorkoutState: WritableSignal<UserWorkout | null>;
+    let pendingSessionAppends: WritableSignal<boolean>;
     let userWorkoutsFacade: {
         userWorkout: WritableSignal<UserWorkout | null>;
         isLoading: () => boolean;
         error: () => string | null;
         hasUserWorkout: () => boolean;
+        hasPendingSessionAppends: WritableSignal<boolean>;
         loadUserWorkout: jest.Mock;
         saveUserWorkout: jest.Mock;
         getOrCreateUserWorkout: jest.Mock;
+        appendWorkoutSession: jest.Mock;
     };
 
     beforeEach(async () => {
         userWorkoutState = signal<UserWorkout | null>(null);
+        pendingSessionAppends = signal(false);
         userWorkoutsFacade = {
             userWorkout: userWorkoutState,
             isLoading: () => false,
             error: () => null,
             hasUserWorkout: () => userWorkoutState() !== null,
+            hasPendingSessionAppends: pendingSessionAppends,
             loadUserWorkout: jest.fn(),
             saveUserWorkout: jest.fn(),
-            getOrCreateUserWorkout: jest.fn()
+            getOrCreateUserWorkout: jest.fn(),
+            appendWorkoutSession: jest.fn((_userId: string, _item: UserWorkoutItem) => {
+                pendingSessionAppends.set(true);
+            })
         };
 
         await TestBed.configureTestingModule({
@@ -102,18 +110,12 @@ describe('WorkoutPlayerComponent', () => {
         );
     });
 
-    it('preserves existing favorites and history when persisting a completed session', () => {
+    it('appends a completed session through the user-workouts store', () => {
         // Arrange
-        const existingItem: UserWorkoutItem = {
-            workoutId: 'old-workout',
-            startedAt: '2026-01-01T00:00:00.000Z',
-            finishedAt: '2026-01-01T00:10:00.000Z',
-            completed: true
-        };
         userWorkoutState.set({
             userId: 'user1',
             favoriteWorkouts: ['favorite-workout'],
-            workoutItems: [existingItem]
+            workoutItems: []
         });
         component.workoutId.set('w1');
         component.segments.set([{ phase: 'warmup', label: 'Warmup', durationSeconds: 10, exerciseId: 'e1', isRest: false }]);
@@ -128,28 +130,19 @@ describe('WorkoutPlayerComponent', () => {
         component.skip();
 
         // Assert
-        expect(userWorkoutsFacade.saveUserWorkout).toHaveBeenCalledWith({
-            userId: 'user1',
-            favoriteWorkouts: ['favorite-workout'],
-            workoutItems: [
-                existingItem,
-                expect.objectContaining({
-                    workoutId: 'w1',
-                    startedAt: '2026-01-02T00:00:00.000Z',
-                    completed: true
-                })
-            ]
-        });
+        expect(userWorkoutsFacade.appendWorkoutSession).toHaveBeenCalledWith(
+            'user1',
+            expect.objectContaining({
+                workoutId: 'w1',
+                startedAt: '2026-01-02T00:00:00.000Z',
+                completed: true
+            })
+        );
+        expect(component.currentSession()).toBeNull();
     });
 
-    it('waits for user workout hydration before saving a completed session', async () => {
+    it('buffers the session in the store when user workout is not hydrated yet', () => {
         // Arrange
-        const existingItem: UserWorkoutItem = {
-            workoutId: 'old-workout',
-            startedAt: '2026-01-01T00:00:00.000Z',
-            finishedAt: '2026-01-01T00:10:00.000Z',
-            completed: true
-        };
         component.workoutId.set('w1');
         component.segments.set([{ phase: 'warmup', label: 'Warmup', durationSeconds: 10, exerciseId: 'e1', isRest: false }]);
         component.currentSession.set({
@@ -163,45 +156,23 @@ describe('WorkoutPlayerComponent', () => {
         // Act
         component.skip();
 
-        // Assert
-        expect(userWorkoutsFacade.saveUserWorkout).not.toHaveBeenCalled();
-        expect(userWorkoutsFacade.getOrCreateUserWorkout).toHaveBeenCalledWith('user1');
-
-        // Act
-        userWorkoutState.set({
-            userId: 'user1',
-            favoriteWorkouts: ['favorite-workout'],
-            workoutItems: [existingItem]
-        });
-        fixture.detectChanges();
-        await fixture.whenStable();
-
-        // Assert
-        expect(userWorkoutsFacade.saveUserWorkout).toHaveBeenCalledWith({
-            userId: 'user1',
-            favoriteWorkouts: ['favorite-workout'],
-            workoutItems: [
-                existingItem,
-                expect.objectContaining({
-                    workoutId: 'w1',
-                    startedAt: '2026-01-02T00:00:00.000Z',
-                    completed: true
-                })
-            ]
-        });
+        // Assert — store owns buffering/hydration; component must not keep a local-only pending copy.
+        expect(userWorkoutsFacade.appendWorkoutSession).toHaveBeenCalledWith(
+            'user1',
+            expect.objectContaining({
+                workoutId: 'w1',
+                startedAt: '2026-01-02T00:00:00.000Z',
+                completed: true
+            })
+        );
         expect(component.currentSession()).toBeNull();
+        expect(component.isSavingSession()).toBe(true);
     });
 
-    it('waits to leave the finished player until a pending session is saved', async () => {
+    it('waits to leave the finished player until store-buffered session appends clear', async () => {
         // Arrange
         const router = TestBed.inject(Router);
         const navigateSpy = jest.spyOn(router, 'navigate').mockResolvedValue(true);
-        const existingItem: UserWorkoutItem = {
-            workoutId: 'old-workout',
-            startedAt: '2026-01-01T00:00:00.000Z',
-            finishedAt: '2026-01-01T00:10:00.000Z',
-            completed: true
-        };
         component.workoutId.set('w1');
         component.segments.set([{ phase: 'warmup', label: 'Warmup', durationSeconds: 10, exerciseId: 'e1', isRest: false }]);
         component.currentSession.set({
@@ -218,31 +189,33 @@ describe('WorkoutPlayerComponent', () => {
 
         // Assert
         expect(navigateSpy).not.toHaveBeenCalled();
-        expect(userWorkoutsFacade.saveUserWorkout).not.toHaveBeenCalled();
         expect(userWorkoutsFacade.getOrCreateUserWorkout).toHaveBeenCalledWith('user1');
 
-        // Act
-        userWorkoutState.set({
-            userId: 'user1',
-            favoriteWorkouts: ['favorite-workout'],
-            workoutItems: [existingItem]
-        });
+        // Act — store finished merging/queueing the buffered session
+        pendingSessionAppends.set(false);
         fixture.detectChanges();
         await fixture.whenStable();
 
         // Assert
-        expect(userWorkoutsFacade.saveUserWorkout).toHaveBeenCalledWith({
-            userId: 'user1',
-            favoriteWorkouts: ['favorite-workout'],
-            workoutItems: [
-                existingItem,
-                expect.objectContaining({
-                    workoutId: 'w1',
-                    startedAt: '2026-01-02T00:00:00.000Z',
-                    completed: true
-                })
-            ]
-        });
         expect(navigateSpy).toHaveBeenCalledWith(['/tabs/workouts']);
+    });
+
+    it('does not keep the finished session only in component state (destroy-safe)', () => {
+        // Arrange
+        component.workoutId.set('w1');
+        component.segments.set([{ phase: 'warmup', label: 'Warmup', durationSeconds: 10, exerciseId: 'e1', isRest: false }]);
+        component.currentSession.set({
+            workoutId: 'w1',
+            startedAt: '2026-01-02T00:00:00.000Z',
+            finishedAt: '',
+            completed: false
+        });
+
+        // Act
+        component.skip();
+        fixture.destroy();
+
+        // Assert — append was handed to the root store before teardown
+        expect(userWorkoutsFacade.appendWorkoutSession).toHaveBeenCalledTimes(1);
     });
 });
