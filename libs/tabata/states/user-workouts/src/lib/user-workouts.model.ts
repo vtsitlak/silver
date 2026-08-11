@@ -22,10 +22,13 @@ export interface UserWorkoutsState {
     userWorkout: UserWorkout | null;
     isLoading: boolean;
     error: string | null;
+    /** Buffered session appends waiting for user-workout hydration (survives player teardown). */
+    pendingSessionAppendCount: number;
 }
 
 export const userWorkoutsInitialState: UserWorkoutsState = {
     userWorkout: null,
     isLoading: false,
-    error: null
+    error: null,
+    pendingSessionAppendCount: 0
 };

@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { ToastService } from '@silver/tabata/helpers';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { WorkoutsService, type TabataWorkout } from '@silver/tabata/states/workouts';
@@ -12,6 +12,7 @@ describe('WorkoutEditorInitService', () => {
     let toast: jest.Mocked<Pick<ToastService, 'showError'>>;
 
     const sampleWorkout = { id: 'w1', name: 'Test' } as TabataWorkout;
+    const otherWorkout = { id: 'w2', name: 'Other' } as TabataWorkout;
 
     beforeEach(() => {
         workoutsService = { getWorkoutById: jest.fn() };
@@ -56,5 +57,54 @@ describe('WorkoutEditorInitService', () => {
 
         expect(facade.hydrateEditorFromWorkout).not.toHaveBeenCalled();
         expect(toast.showError).toHaveBeenCalledWith('Could not load workout. Please try again.');
+    });
+
+    it('should ignore a stale response when a newer workout load is requested', () => {
+        const first$ = new Subject<TabataWorkout | null>();
+        const second$ = new Subject<TabataWorkout | null>();
+        workoutsService.getWorkoutById.mockReturnValueOnce(first$.asObservable()).mockReturnValueOnce(second$.asObservable());
+
+        service.loadWorkoutForEditor('w1');
+        service.loadWorkoutForEditor('w2');
+
+        first$.next(sampleWorkout);
+        first$.complete();
+        expect(facade.hydrateEditorFromWorkout).not.toHaveBeenCalled();
+
+        second$.next(otherWorkout);
+        second$.complete();
+        expect(facade.hydrateEditorFromWorkout).toHaveBeenCalledTimes(1);
+        expect(facade.hydrateEditorFromWorkout).toHaveBeenCalledWith(otherWorkout);
+        expect(toast.showError).not.toHaveBeenCalled();
+    });
+
+    it('should ignore a stale response after cancelPendingLoad (create mode)', () => {
+        const pending$ = new Subject<TabataWorkout | null>();
+        workoutsService.getWorkoutById.mockReturnValue(pending$.asObservable());
+
+        service.loadWorkoutForEditor('w1');
+        service.cancelPendingLoad();
+
+        pending$.next(sampleWorkout);
+        pending$.complete();
+
+        expect(facade.hydrateEditorFromWorkout).not.toHaveBeenCalled();
+        expect(toast.showError).not.toHaveBeenCalled();
+    });
+
+    it('should ignore stale error toasts after a newer load is requested', () => {
+        const first$ = new Subject<TabataWorkout | null>();
+        const second$ = new Subject<TabataWorkout | null>();
+        workoutsService.getWorkoutById.mockReturnValueOnce(first$.asObservable()).mockReturnValueOnce(second$.asObservable());
+
+        service.loadWorkoutForEditor('w1');
+        service.loadWorkoutForEditor('w2');
+
+        first$.error(new Error('network'));
+        expect(toast.showError).not.toHaveBeenCalled();
+
+        second$.next(otherWorkout);
+        second$.complete();
+        expect(facade.hydrateEditorFromWorkout).toHaveBeenCalledWith(otherWorkout);
     });
 });

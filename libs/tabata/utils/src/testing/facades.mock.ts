@@ -50,9 +50,11 @@ export const mockUserWorkoutsFacade = {
     isLoading: () => false,
     error: () => null,
     hasUserWorkout: () => false,
+    hasPendingSessionAppends: () => false,
     loadUserWorkout: mockFn(),
     saveUserWorkout: mockFn(),
-    getOrCreateUserWorkout: mockFn()
+    getOrCreateUserWorkout: mockFn(),
+    appendWorkoutSession: mockFn()
 };
 
 /** Simple mock for WorkoutsFacade (read-only style). For writable signals use createMockWorkoutsFacade from workouts.mock. */

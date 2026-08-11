@@ -96,33 +96,33 @@ describe('MainWorkoutComponent', () => {
         expect(emitted.some((e) => typeof e === 'object' && e !== null && 'blocks' in (e as object))).toBe(true);
     });
 
-    it('should preserve non-default block rounds when syncing draftChange', async () => {
-        await fixture.whenStable();
-        const emitted: { blocks?: TabataBlock[] }[] = [];
+    it('preserves non-default block rounds when hydrating loadedBlocks into draftChange', async () => {
+        const emitted: Array<{ blocks?: TabataBlock[] }> = [];
         component.draftChange.subscribe((v) => emitted.push(v));
-        component.blocks.set([
+
+        const loaded: TabataBlock[] = [
             {
                 rounds: 4,
-                workDurationSeconds: 20,
-                restDurationSeconds: 10,
-                exercise: {
-                    exerciseId: 'e1',
-                    name: 'Push',
-                    images: [],
-                    targetMuscles: [],
-                    category: [],
-                    equipments: [],
-                    secondaryMuscles: [],
-                    instructions: []
-                },
-                interBlockRestSeconds: 60
+                workDurationSeconds: 30,
+                restDurationSeconds: 15,
+                exerciseId: 'ex-custom',
+                interBlockRestSeconds: 45
             }
-        ]);
+        ];
+        fixture.componentRef.setInput('loadedBlocks', loaded);
         fixture.detectChanges();
         await fixture.whenStable();
-        const withBlocks = emitted.filter((e) => Array.isArray(e.blocks) && e.blocks.length > 0);
-        expect(withBlocks.length).toBeGreaterThan(0);
-        expect(withBlocks[withBlocks.length - 1].blocks?.[0]?.rounds).toBe(4);
+
+        const lastWithBlocks = [...emitted].reverse().find((e) => Array.isArray(e.blocks) && e.blocks.length > 0);
+        expect(lastWithBlocks?.blocks).toEqual([
+            {
+                rounds: 4,
+                workDurationSeconds: 30,
+                restDurationSeconds: 15,
+                exerciseId: 'ex-custom',
+                interBlockRestSeconds: 45
+            }
+        ]);
     });
 
     it('should add block on addBlock', () => {

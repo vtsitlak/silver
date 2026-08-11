@@ -1,3 +1,5 @@
 {
-    "editor.definitionLinkOpensInPeek": false
+    "editor.definitionLinkOpensInPeek": false,
+    "git.autoRepositoryDetection": "openEditors",
+    "git.repositoryScanMaxDepth": 1
 }

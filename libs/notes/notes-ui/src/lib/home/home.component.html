@@ -9,11 +9,11 @@
 
     <mat-tab-group>
         <mat-tab label="All Notes">
-            <lib-notes-table-list (noteChanged)="reload()" [notes]="notesFacade.notes()"> </lib-notes-table-list>
+            <lib-notes-table-list [notes]="notesFacade.notes()"> </lib-notes-table-list>
         </mat-tab>
 
         <mat-tab label="Important">
-            <lib-notes-table-list (noteChanged)="reload()" [notes]="notesFacade.importantNotes()"></lib-notes-table-list>
+            <lib-notes-table-list [notes]="notesFacade.importantNotes()"></lib-notes-table-list>
         </mat-tab>
     </mat-tab-group>
 </div>
