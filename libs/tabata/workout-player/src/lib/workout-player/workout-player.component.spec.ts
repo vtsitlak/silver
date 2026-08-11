@@ -15,13 +15,14 @@ import {
     createMockExercisesFacade,
     mockAuthFacade,
     mockToastService,
-    mockActionSheetController
+    mockActionSheetController,
+    mockTabataWorkout
 } from '@silver/tabata/testing';
 
 describe('WorkoutPlayerComponent', () => {
     let component: WorkoutPlayerComponent;
     let fixture: ComponentFixture<WorkoutPlayerComponent>;
-    const mockWorkoutsFacade = createMockWorkoutsFacade();
+    let mockWorkoutsFacade: ReturnType<typeof createMockWorkoutsFacade>;
     const mockExercisesFacade = createMockExercisesFacade();
     let userWorkoutState: WritableSignal<UserWorkout | null>;
     let pendingSessionAppends: WritableSignal<boolean>;
@@ -37,7 +38,18 @@ describe('WorkoutPlayerComponent', () => {
         appendWorkoutSession: jest.Mock;
     };
 
+    function setReadyWorkout(id = 'w1'): void {
+        mockWorkoutsFacade.loadedWorkout.set({ ...mockTabataWorkout, id });
+        mockWorkoutsFacade.isLoading.set(false);
+        mockWorkoutsFacade.error.set(null);
+        component.workoutId.set(id);
+        fixture.detectChanges();
+    }
+
     beforeEach(async () => {
+        mockWorkoutsFacade = createMockWorkoutsFacade();
+        // Start with no loaded workout so the player cannot adopt a stale prior workout.
+        mockWorkoutsFacade.loadedWorkout.set(null);
         userWorkoutState = signal<UserWorkout | null>(null);
         pendingSessionAppends = signal(false);
         userWorkoutsFacade = {
@@ -84,7 +96,7 @@ describe('WorkoutPlayerComponent', () => {
     });
 
     it('should create a fresh session on restart so replay can be recorded', () => {
-        component.workoutId.set('w1');
+        setReadyWorkout('w1');
         component.segments.set([{ phase: 'warmup', label: 'Warmup', durationSeconds: 10, exerciseId: 'e1', isRest: false }]);
         component.currentSession.set({
             workoutId: 'w1',
@@ -117,7 +129,7 @@ describe('WorkoutPlayerComponent', () => {
             favoriteWorkouts: ['favorite-workout'],
             workoutItems: []
         });
-        component.workoutId.set('w1');
+        setReadyWorkout('w1');
         component.segments.set([{ phase: 'warmup', label: 'Warmup', durationSeconds: 10, exerciseId: 'e1', isRest: false }]);
         component.currentSession.set({
             workoutId: 'w1',
@@ -143,7 +155,7 @@ describe('WorkoutPlayerComponent', () => {
 
     it('buffers the session in the store when user workout is not hydrated yet', () => {
         // Arrange
-        component.workoutId.set('w1');
+        setReadyWorkout('w1');
         component.segments.set([{ phase: 'warmup', label: 'Warmup', durationSeconds: 10, exerciseId: 'e1', isRest: false }]);
         component.currentSession.set({
             workoutId: 'w1',
@@ -173,7 +185,7 @@ describe('WorkoutPlayerComponent', () => {
         // Arrange
         const router = TestBed.inject(Router);
         const navigateSpy = jest.spyOn(router, 'navigate').mockResolvedValue(true);
-        component.workoutId.set('w1');
+        setReadyWorkout('w1');
         component.segments.set([{ phase: 'warmup', label: 'Warmup', durationSeconds: 10, exerciseId: 'e1', isRest: false }]);
         component.currentSession.set({
             workoutId: 'w1',
@@ -200,9 +212,43 @@ describe('WorkoutPlayerComponent', () => {
         expect(navigateSpy).toHaveBeenCalledWith(['/tabs/workouts']);
     });
 
+    it('does not build segments or start a session from a stale previously loaded workout', () => {
+        // Arrange — store still holds workout A while the route asks for workout B
+        mockWorkoutsFacade.loadedWorkout.set({ ...mockTabataWorkout, id: 'workout-a', name: 'Workout A' });
+        mockWorkoutsFacade.isLoading.set(false);
+        component.workoutId.set('workout-b');
+        fixture.detectChanges();
+
+        // Act
+        component.togglePlay();
+
+        // Assert
+        expect(component.isWorkoutReady()).toBe(false);
+        expect(component.segments()).toEqual([]);
+        expect(component.hasStarted()).toBe(false);
+        expect(component.currentSession()).toBeNull();
+        expect(component.isPlaying()).toBe(false);
+    });
+
+    it('clears stale segments when the requested workout load resolves to null', () => {
+        // Arrange — briefly adopt a matching workout, then simulate not-found
+        setReadyWorkout('w1');
+        expect(component.segments().length).toBeGreaterThan(0);
+
+        // Act
+        mockWorkoutsFacade.loadedWorkout.set(null);
+        mockWorkoutsFacade.error.set('Workout not found');
+        fixture.detectChanges();
+
+        // Assert
+        expect(component.isWorkoutReady()).toBe(false);
+        expect(component.segments()).toEqual([]);
+        expect(component.currentSession()).toBeNull();
+    });
+
     it('does not keep the finished session only in component state (destroy-safe)', () => {
         // Arrange
-        component.workoutId.set('w1');
+        setReadyWorkout('w1');
         component.segments.set([{ phase: 'warmup', label: 'Warmup', durationSeconds: 10, exerciseId: 'e1', isRest: false }]);
         component.currentSession.set({
             workoutId: 'w1',

@@ -77,10 +77,19 @@ export function toWorkoutInfoFormModelFromSnapshot(w: WorkoutDraft | null | unde
     };
 }
 
+/** Structural fields produced by AI generation; while locked, child tab sync cannot overwrite them. */
+export type AiGeneratedWorkoutStructure = Pick<WorkoutDraft, 'warmup' | 'blocks' | 'cooldown' | 'totalDurationMinutes'>;
+
 export interface WorkoutEditorState {
     workoutDraft: WorkoutDraft;
     /** Snapshot of draft when workout was loaded/set (edit) or null for create. Used to detect unsaved changes. */
     initialDraftSnapshot: WorkoutDraft;
+    /**
+     * When set (AI preview open), `updateDraft` keeps these structural fields pinned so mounted
+     * warmup/main/cooldown tab effects cannot stomp the generated workout before Save.
+     * Cleared on successful save, cancel, reset/clearDraft, or preview backdrop dismiss.
+     */
+    aiStructureLock: AiGeneratedWorkoutStructure | null;
 }
 
 export const EMPTY_PHASE: Phase = { movements: [], totalDurationSeconds: 0 };
@@ -98,5 +107,6 @@ export const initialWorkoutDraft: WorkoutDraft = {
 
 export const workoutEditorInitialState: WorkoutEditorState = {
     workoutDraft: initialWorkoutDraft,
-    initialDraftSnapshot: initialWorkoutDraft
+    initialDraftSnapshot: initialWorkoutDraft,
+    aiStructureLock: null
 };

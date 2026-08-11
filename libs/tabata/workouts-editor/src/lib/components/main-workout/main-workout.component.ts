@@ -108,7 +108,8 @@ export class MainWorkoutComponent {
         effect(() => {
             const blks = this.blocks();
             const tabataBlocks: TabataBlock[] = blks.map((b) => ({
-                rounds: DEFAULT_TABATA_ROUNDS,
+                // Preserve loaded/AI rounds; only new blocks default to DEFAULT_TABATA_ROUNDS.
+                rounds: b.rounds,
                 workDurationSeconds: b.workDurationSeconds,
                 restDurationSeconds: b.restDurationSeconds,
                 exerciseId: b.exercise?.exerciseId ?? '',

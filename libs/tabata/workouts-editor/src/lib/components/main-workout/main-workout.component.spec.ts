@@ -96,6 +96,35 @@ describe('MainWorkoutComponent', () => {
         expect(emitted.some((e) => typeof e === 'object' && e !== null && 'blocks' in (e as object))).toBe(true);
     });
 
+    it('preserves non-default block rounds when hydrating loadedBlocks into draftChange', async () => {
+        const emitted: Array<{ blocks?: TabataBlock[] }> = [];
+        component.draftChange.subscribe((v) => emitted.push(v));
+
+        const loaded: TabataBlock[] = [
+            {
+                rounds: 4,
+                workDurationSeconds: 30,
+                restDurationSeconds: 15,
+                exerciseId: 'ex-custom',
+                interBlockRestSeconds: 45
+            }
+        ];
+        fixture.componentRef.setInput('loadedBlocks', loaded);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const lastWithBlocks = [...emitted].reverse().find((e) => Array.isArray(e.blocks) && e.blocks.length > 0);
+        expect(lastWithBlocks?.blocks).toEqual([
+            {
+                rounds: 4,
+                workDurationSeconds: 30,
+                restDurationSeconds: 15,
+                exerciseId: 'ex-custom',
+                interBlockRestSeconds: 45
+            }
+        ]);
+    });
+
     it('should add block on addBlock', () => {
         component.addBlock();
         expect(component.blocks().length).toBe(1);

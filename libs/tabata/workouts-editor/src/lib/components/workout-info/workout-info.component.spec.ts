@@ -1,14 +1,31 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { AuthFacade } from '@silver/tabata/auth';
-import { mockAuthFacade, mockModalController } from '@silver/tabata/testing';
+import { mockAuthFacade, mockModalController, mockWorkoutEditorFacade } from '@silver/tabata/testing';
 import { WorkoutInfoComponent } from './workout-info.component';
 import { ModalController } from '@ionic/angular/standalone';
 import { AiWorkoutGenerationService } from '../../services/ai-workout-generation.service';
-import { EMPTY } from 'rxjs';
+import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
+import { EMPTY, of } from 'rxjs';
+import type { GenerateWorkoutOutput } from '@silver/tabata/ai-workout-generator';
 
 const mockAiWorkoutGenerationService = {
     generateWorkout: jest.fn(() => EMPTY)
+};
+
+const mockGenerated: GenerateWorkoutOutput = {
+    totalDurationMinutes: 20,
+    warmup: { totalDurationSeconds: 60, movements: [{ exerciseId: 'wu1', durationSeconds: 60 }] },
+    blocks: [
+        {
+            rounds: 4,
+            workDurationSeconds: 20,
+            restDurationSeconds: 10,
+            exerciseId: 'b1',
+            interBlockRestSeconds: 60
+        }
+    ],
+    cooldown: { totalDurationSeconds: 60, movements: [{ exerciseId: 'cd1', durationSeconds: 60 }] }
 };
 
 describe('WorkoutInfoComponent', () => {
@@ -16,13 +33,16 @@ describe('WorkoutInfoComponent', () => {
     let fixture: ComponentFixture<WorkoutInfoComponent>;
 
     beforeEach(async () => {
+        jest.clearAllMocks();
+        mockAiWorkoutGenerationService.generateWorkout.mockReturnValue(EMPTY);
         await TestBed.configureTestingModule({
             imports: [WorkoutInfoComponent],
             providers: [
                 provideRouter([]),
                 { provide: AuthFacade, useValue: mockAuthFacade },
                 { provide: ModalController, useValue: mockModalController },
-                { provide: AiWorkoutGenerationService, useValue: mockAiWorkoutGenerationService }
+                { provide: AiWorkoutGenerationService, useValue: mockAiWorkoutGenerationService },
+                { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade }
             ]
         }).compileComponents();
 
@@ -112,5 +132,34 @@ describe('WorkoutInfoComponent', () => {
         });
         fixture.detectChanges();
         expect(component.infoForm.name().touched()).toBe(false);
+    });
+
+    it('should clear AI structure lock when preview is dismissed via backdrop', async () => {
+        mockAiWorkoutGenerationService.generateWorkout.mockReturnValue(of(mockGenerated));
+        const onDidDismiss = jest.fn().mockResolvedValue({ role: undefined, data: null });
+        (mockModalController.create as jest.Mock).mockResolvedValue({
+            present: jest.fn().mockResolvedValue(undefined),
+            onDidDismiss,
+            dismiss: jest.fn()
+        });
+
+        component.formModel.set({
+            name: 'AI Core',
+            description: 'Core focus',
+            mainTargetBodypart: 'Core',
+            level: 'beginner',
+            primaryGoal: 'Cardio',
+            availableEquipments: ['Bodyweight'],
+            secondaryTargetBodyparts: [],
+            generatedByAi: false
+        });
+        fixture.detectChanges();
+
+        component.onGenerateWithAi();
+        await fixture.whenStable();
+
+        expect(mockWorkoutEditorFacade.lockAiGeneratedStructure).toHaveBeenCalledWith(mockGenerated);
+        expect(mockWorkoutEditorFacade.clearAiStructureLock).toHaveBeenCalled();
+        expect(mockWorkoutEditorFacade.clearDraft).not.toHaveBeenCalled();
     });
 });

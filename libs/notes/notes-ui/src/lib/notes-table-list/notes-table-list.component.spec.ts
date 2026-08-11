@@ -68,6 +68,7 @@ describe('NotesTableListComponent', () => {
         component.editCourse(mockNotes[0]);
 
         expect(dialog.open).toHaveBeenCalled();
+        // Reloading on close raced in-flight PUTs and could clobber saves.
         expect(afterClosed).not.toHaveBeenCalled();
     });
 });

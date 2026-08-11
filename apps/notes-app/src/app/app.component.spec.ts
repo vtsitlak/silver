@@ -40,6 +40,7 @@ describe('AppComponent', () => {
         location = TestBed.inject(Location);
         facade = TestBed.inject(AuthFacade);
         fixture = TestBed.createComponent(AppComponent);
+        localStorage.removeItem('user');
     }));
 
     it('should create the app', () => {
@@ -67,6 +68,20 @@ describe('AppComponent', () => {
         const app = fixture.debugElement.componentInstance;
         app.logout();
         expect(facade.logout).toHaveBeenCalled();
+    });
+
+    it('should ignore corrupt localStorage user JSON on boot without throwing', () => {
+        localStorage.setItem('user', '{not-json');
+        expect(() => fixture.detectChanges()).not.toThrow();
+        expect(facade.setUser).not.toHaveBeenCalled();
+        expect(localStorage.getItem('user')).toBeNull();
+    });
+
+    it('should restore a valid localStorage user on boot', () => {
+        const user = { id: 1, email: 'user1@email.com', name: 'user1' };
+        localStorage.setItem('user', JSON.stringify(user));
+        fixture.detectChanges();
+        expect(facade.setUser).toHaveBeenCalledWith(user);
     });
 
     it('should expose auth state signals from the facade', () => {

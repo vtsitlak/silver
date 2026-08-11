@@ -46,7 +46,11 @@ export class AppComponent implements OnInit, OnDestroy {
         const userProfile = localStorage.getItem('user');
 
         if (userProfile) {
-            this.authFacade.setUser(JSON.parse(userProfile));
+            try {
+                this.authFacade.setUser(JSON.parse(userProfile));
+            } catch {
+                localStorage.removeItem('user');
+            }
         }
 
         this.routerEventsSubscription = this.router.events.subscribe((event) => {

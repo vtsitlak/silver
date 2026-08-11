@@ -20,8 +20,16 @@ export class FilterFormComponent {
     updateFilter = output<Filter>();
 
     constructor() {
+        // Skip the initial empty model emit so we don't race loadAll on page load
+        // with a redundant empty loadByFilter that clears the loading spinner early.
+        let isFirstRead = true;
         effect(() => {
-            this.updateFilter.emit({ ...this.filterModel() });
+            const nextFilter = { ...this.filterModel() };
+            if (isFirstRead) {
+                isFirstRead = false;
+                return;
+            }
+            this.updateFilter.emit(nextFilter);
         });
     }
 }

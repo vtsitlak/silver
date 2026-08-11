@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, input, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, inject, input, effect } from '@angular/core';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import {
@@ -23,7 +23,6 @@ import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { AuthFacade } from '@silver/tabata/auth';
 import { UserWorkoutsFacade } from '@silver/tabata/states/user-workouts';
-import { computed } from '@angular/core';
 import { formatDurationMinutes, getBlockDurationMinutes, formatSecondsToMinutes, resolveExerciseName } from '@silver/tabata/helpers';
 import { ToolbarComponent } from '@silver/tabata/ui';
 import { PhaseMovementsListComponent } from '../phase-movements-list/phase-movements-list.component';
@@ -62,10 +61,28 @@ export class WorkoutDetailsComponent {
 
     readonly workoutId = input.required<string>();
 
-    /** Use the facade's loaded workout signal (set when loadWorkoutById completes). */
-    readonly workout = this.facade.loadedWorkout;
+    /**
+     * Only expose the store workout when it matches this page's route id.
+     * Ionic can restore a cached details page while `loadedWorkout` still holds
+     * a later-opened workout — never render or edit that stale payload.
+     */
+    readonly workout = computed(() => {
+        const id = this.workoutId();
+        const loaded = this.facade.loadedWorkout();
+        if (!id || !loaded || loaded.id !== id) {
+            return null;
+        }
+        return loaded;
+    });
 
-    readonly isLoading = this.facade.isLoading;
+    readonly isLoading = computed(() => {
+        const id = this.workoutId();
+        const loaded = this.facade.loadedWorkout();
+        if (id && loaded?.id === id) {
+            return false;
+        }
+        return this.facade.isLoading();
+    });
     readonly error = this.facade.error;
 
     readonly hasExercisesMap = computed(() => Object.keys(this.exercisesFacade.exercisesMap()).length > 0);
@@ -109,14 +126,25 @@ export class WorkoutDetailsComponent {
         });
     }
 
+    /**
+     * Ionic may keep this page cached under a later details navigation.
+     * Re-load on re-entry so `loadedWorkout` matches the restored route id.
+     */
+    ionViewWillEnter(): void {
+        const id = this.workoutId();
+        if (id) {
+            this.facade.loadWorkoutById(id);
+        }
+    }
+
     goBack(): void {
         this.location.back();
     }
 
     editWorkout(): void {
-        const w = this.workout();
-        if (w) {
-            this.router.navigate(['/tabs/workout-editor', w.id]);
+        const id = this.workoutId();
+        if (id && this.workout()) {
+            this.router.navigate(['/tabs/workout-editor', id]);
         }
     }
 
