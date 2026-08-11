@@ -27,10 +27,6 @@ export class HomeComponent implements OnInit {
         }
     }
 
-    reload() {
-        this.notesFacade.loadAll();
-    }
-
     onAddCourse() {
         const dialogConfig = defaultDialogConfig();
 

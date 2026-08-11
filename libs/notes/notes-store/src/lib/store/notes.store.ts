@@ -3,7 +3,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { inject } from '@angular/core';
 import { Note } from '../models/note';
 import { NotesHttpService } from './notes-http.service';
-import { pipe, switchMap, tap } from 'rxjs';
+import { pipe, switchMap, concatMap, tap, catchError, of } from 'rxjs';
 
 interface NotesState {
     notes: Note[];
@@ -43,39 +43,43 @@ export const NotesStore = signalStore(
         ),
         update: rxMethod<{ noteId: string | number; changes: Partial<Note> }>(
             pipe(
-                switchMap(({ noteId, changes }) =>
+                // concatMap: rapid multi-note saves must not abort earlier PUTs (data loss).
+                concatMap(({ noteId, changes }) =>
                     notesHttpService.saveNote(noteId, changes).pipe(
                         tap(() => {
                             patchState(store, (state) => ({
                                 notes: state.notes.map((n) => (n.id === noteId ? { ...n, ...changes } : n))
                             }));
-                        })
+                        }),
+                        catchError(() => of(null))
                     )
                 )
             )
         ),
         add: rxMethod<Omit<Note, 'id'> | Note>(
             pipe(
-                switchMap((note) =>
+                concatMap((note) =>
                     notesHttpService.createNote(note).pipe(
                         tap((createdNote) => {
                             patchState(store, (state) => ({
                                 notes: [...state.notes, createdNote]
                             }));
-                        })
+                        }),
+                        catchError(() => of(null))
                     )
                 )
             )
         ),
         delete: rxMethod<string | number>(
             pipe(
-                switchMap((noteId) =>
+                concatMap((noteId) =>
                     notesHttpService.deleteNote(noteId).pipe(
                         tap(() => {
                             patchState(store, (state) => ({
                                 notes: state.notes.filter((n) => n.id !== noteId)
                             }));
-                        })
+                        }),
+                        catchError(() => of(null))
                     )
                 )
             )
