@@ -31,21 +31,21 @@ export class DeleteAccountService {
                     return throwError(() => new Error('No user signed in.'));
                 }
 
+                // Delete Upstash data BEFORE Firebase auth. If Firebase is removed first and
+                // cleanup then fails, the user cannot sign in to retry and owned workouts /
+                // history remain orphaned under the deleted uid.
                 return this.workoutsService.getWorkouts().pipe(
                     map((all) => all.filter((w) => w.createdByUserId === userId)),
                     switchMap((owned) =>
-                        this.authService.deleteCurrentUser().pipe(
-                            switchMap(() =>
-                                owned.length === 0
-                                    ? of([])
-                                    : of(...owned).pipe(
-                                          concatMap((w) => this.workoutsService.deleteWorkout(w.id, workoutsAuthToken)),
-                                          toArray()
-                                      )
-                            ),
-                            switchMap(() => this.userWorkoutsService.deleteUserWorkout(userId, userWorkoutsAuthToken))
-                        )
-                    )
+                        owned.length === 0
+                            ? of([])
+                            : of(...owned).pipe(
+                                  concatMap((w) => this.workoutsService.deleteWorkout(w.id, workoutsAuthToken)),
+                                  toArray()
+                              )
+                    ),
+                    switchMap(() => this.userWorkoutsService.deleteUserWorkout(userId, userWorkoutsAuthToken)),
+                    switchMap(() => this.authService.deleteCurrentUser())
                 );
             }),
             map(() => true),
