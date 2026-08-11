@@ -162,4 +162,38 @@ describe('WorkoutInfoComponent', () => {
         expect(mockWorkoutEditorFacade.clearAiStructureLock).toHaveBeenCalled();
         expect(mockWorkoutEditorFacade.clearDraft).not.toHaveBeenCalled();
     });
+
+    it('should clear AI structure lock before try-again regeneration so a failed retry cannot strand the pin', async () => {
+        mockAiWorkoutGenerationService.generateWorkout
+            .mockReturnValueOnce(of(mockGenerated))
+            .mockReturnValueOnce(EMPTY);
+        const onDidDismiss = jest.fn().mockResolvedValue({ role: 'tryAgain', data: null });
+        (mockModalController.create as jest.Mock).mockResolvedValue({
+            present: jest.fn().mockResolvedValue(undefined),
+            onDidDismiss,
+            dismiss: jest.fn()
+        });
+
+        component.formModel.set({
+            name: 'AI Core',
+            description: 'Core focus',
+            mainTargetBodypart: 'Core',
+            level: 'beginner',
+            primaryGoal: 'Cardio',
+            availableEquipments: ['Bodyweight'],
+            secondaryTargetBodyparts: [],
+            generatedByAi: false
+        });
+        fixture.detectChanges();
+
+        component.onGenerateWithAi();
+        await fixture.whenStable();
+
+        expect(mockWorkoutEditorFacade.lockAiGeneratedStructure).toHaveBeenCalledWith(mockGenerated);
+        expect(mockWorkoutEditorFacade.clearAiStructureLock).toHaveBeenCalled();
+        expect(mockAiWorkoutGenerationService.generateWorkout).toHaveBeenCalledTimes(2);
+        // Failed retry must not re-pin; otherwise tab edits appear to stick while Save keeps AI structure.
+        expect(mockWorkoutEditorFacade.lockAiGeneratedStructure).toHaveBeenCalledTimes(1);
+        expect(component.isGenerating()).toBe(false);
+    });
 });
