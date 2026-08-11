@@ -28,14 +28,15 @@ export const NotesStore = signalStore(
             pipe(
                 tap(() => patchState(store, { loading: true })),
                 switchMap(() =>
+                    // Inner catchError: tap({ error }) does not swallow; without this the
+                    // root rxMethod dies after the first failed GET and notes never reload.
                     notesHttpService.findAllNotes().pipe(
-                        tap({
-                            next: (notes) => {
-                                patchState(store, { notes, loading: false, loaded: true });
-                            },
-                            error: () => {
-                                patchState(store, { loading: false });
-                            }
+                        tap((notes) => {
+                            patchState(store, { notes, loading: false, loaded: true });
+                        }),
+                        catchError(() => {
+                            patchState(store, { loading: false });
+                            return of(null);
                         })
                     )
                 )

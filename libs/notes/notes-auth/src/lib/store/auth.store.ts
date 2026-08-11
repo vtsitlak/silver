@@ -4,8 +4,8 @@ import { inject } from '@angular/core';
 import { User } from '../models/user.model';
 import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
-import { tap } from 'rxjs/operators';
-import { pipe, switchMap } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
+import { of, pipe, switchMap } from 'rxjs';
 
 interface AuthState {
     user: User | null;
@@ -26,12 +26,15 @@ export const AuthStore = signalStore(
         login: rxMethod<{ email: string; password: string }>(
             pipe(
                 switchMap(({ email, password }) =>
+                    // Inner catchError: an uncaught HTTP 403 otherwise kills the root
+                    // rxMethod subscription so later correct-password attempts do nothing.
                     authService.login(email, password).pipe(
                         tap((user) => {
                             patchState(store, { user });
                             localStorage.setItem('user', JSON.stringify(user));
                             router.navigateByUrl('/notes');
-                        })
+                        }),
+                        catchError(() => of(null))
                     )
                 )
             )
