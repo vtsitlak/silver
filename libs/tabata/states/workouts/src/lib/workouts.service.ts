@@ -47,17 +47,19 @@ export class WorkoutsService {
     }
 
     /** GET all workouts (optional search filters by name server-side). */
-    getWorkouts(search?: string): Observable<TabataWorkout[]> {
+    getWorkouts(search?: string, authToken?: string | Promise<string | null> | null): Observable<TabataWorkout[]> {
         const trimmed = search?.trim();
         const params = trimmed ? new HttpParams().set('search', trimmed) : undefined;
-        return this.optionalAuthenticatedOptions().pipe(
+        // Prefer an explicit token (e.g. captured before account deletion) so a mid-flow
+        // auth.currentUser clear cannot silently drop owner-private workouts from the list.
+        return this.optionalAuthenticatedOptions(authToken !== undefined ? authToken : this.authTokenProvider()).pipe(
             switchMap((options) => this.http.get<TabataWorkout[]>(this.apiUrl('/api/workouts'), { ...options, params }))
         );
     }
 
     /** GET a single workout by id (if your proxy supports it). */
-    getWorkoutById(id: string): Observable<TabataWorkout | null> {
-        return this.optionalAuthenticatedOptions().pipe(
+    getWorkoutById(id: string, authToken?: string | Promise<string | null> | null): Observable<TabataWorkout | null> {
+        return this.optionalAuthenticatedOptions(authToken !== undefined ? authToken : this.authTokenProvider()).pipe(
             switchMap((options) => this.http.get<TabataWorkout | null>(this.apiUrl(`/api/workouts/${encodeURIComponent(id)}`), options))
         );
     }

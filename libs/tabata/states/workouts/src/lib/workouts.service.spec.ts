@@ -53,6 +53,20 @@ describe('WorkoutsService', () => {
         req.flush([]);
     });
 
+    it('getWorkouts should reuse a captured Firebase token when the live auth user is gone', fakeAsync(() => {
+        authTokenProvider.mockReturnValue(null);
+
+        service.getWorkouts(undefined, 'captured-list-token').subscribe((data) => {
+            expect(data).toEqual([]);
+        });
+        tick();
+
+        const req = httpMock.expectOne('/api/workouts');
+        expect(req.request.method).toBe('GET');
+        expect(req.request.headers.get('Authorization')).toBe('Bearer captured-list-token');
+        req.flush([]);
+    }));
+
     it('should send a Firebase bearer token on workout list reads when signed in', fakeAsync(() => {
         service.getWorkouts(' strength ').subscribe((data) => {
             expect(data).toEqual([]);
