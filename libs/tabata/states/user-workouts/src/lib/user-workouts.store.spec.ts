@@ -374,6 +374,81 @@ describe('UserWorkoutsStore', () => {
         expect(store.userWorkout()).toEqual(userTwoPayload);
         expect(store.isLoading()).toBe(false);
     });
+
+    it('appendWorkoutSession saves immediately when user workout is already hydrated', () => {
+        // Arrange
+        const existingItem = createWorkoutItem('existing-session');
+        const newItem = createWorkoutItem('new-session');
+        const existing = createUserWorkout([existingItem]);
+        store.saveUserWorkout(existing);
+        saveResponses[0].next(existing);
+        saveResponses[0].complete();
+
+        // Act
+        store.appendWorkoutSession('user1', newItem);
+
+        // Assert
+        expect(store.hasPendingSessionAppends()).toBe(false);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(2);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenNthCalledWith(
+            2,
+            expect.objectContaining({
+                userId: 'user1',
+                workoutItems: [existingItem, newItem]
+            })
+        );
+    });
+
+    it('buffers appendWorkoutSession until hydration and merges into the loaded record', () => {
+        // Arrange
+        const loadResponse = new Subject<UserWorkout | null>();
+        const existingItem = createWorkoutItem('existing-session');
+        const newItem = createWorkoutItem('completed-session');
+        const existing = createUserWorkout([existingItem]);
+        userWorkoutsService.getUserWorkout.mockReturnValueOnce(loadResponse.asObservable());
+
+        // Act — simulate player finish before getOrCreate returns, then component teardown
+        store.appendWorkoutSession('user1', newItem);
+
+        // Assert
+        expect(store.hasPendingSessionAppends()).toBe(true);
+        expect(userWorkoutsService.saveUserWorkout).not.toHaveBeenCalled();
+        expect(userWorkoutsService.getUserWorkout).toHaveBeenCalledWith('user1');
+
+        // Act
+        loadResponse.next(existing);
+        loadResponse.complete();
+
+        // Assert
+        expect(store.hasPendingSessionAppends()).toBe(false);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledTimes(1);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledWith(
+            expect.objectContaining({
+                favoriteWorkouts: existing.favoriteWorkouts,
+                workoutItems: [existingItem, newItem]
+            })
+        );
+    });
+
+    it('includes buffered session appends when creating a missing user workout record', () => {
+        // Arrange
+        const loadResponse = new Subject<UserWorkout | null>();
+        const newItem = createWorkoutItem('completed-session');
+        userWorkoutsService.getUserWorkout.mockReturnValueOnce(loadResponse.asObservable());
+
+        // Act
+        store.appendWorkoutSession('user1', newItem);
+        loadResponse.next(null);
+        loadResponse.complete();
+
+        // Assert
+        expect(store.hasPendingSessionAppends()).toBe(false);
+        expect(userWorkoutsService.saveUserWorkout).toHaveBeenCalledWith({
+            userId: 'user1',
+            favoriteWorkouts: [],
+            workoutItems: [newItem]
+        });
+    });
 });
 
 function createUserWorkout(workoutItems: UserWorkoutItem[], userId = 'user1'): UserWorkout {

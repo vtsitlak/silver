@@ -14,11 +14,13 @@ export class VehiclesService {
     private snackBarService = inject(SnackBarService);
 
     getAll(): Observable<Vehicle[]> {
-        return this.http.get<Vehicle[]>(`/api/vehicles`, { observe: 'body', responseType: 'json' }).pipe(catchError(this.handleError));
+        return this.http.get<Vehicle[]>(`/api/vehicles`, { observe: 'body', responseType: 'json' }).pipe(catchError((error) => this.handleError(error)));
     }
 
     getByFilter(filter: Filter): Observable<Vehicle[]> {
-        return this.http.post<Vehicle[]>(`/api/vehicles`, filter, { observe: 'body', responseType: 'json' }).pipe(catchError(this.handleError));
+        return this.http
+            .post<Vehicle[]>(`/api/vehicles`, filter, { observe: 'body', responseType: 'json' })
+            .pipe(catchError((error) => this.handleError(error)));
     }
 
     private handleError(error: HttpErrorResponse): Observable<never> {
@@ -26,11 +28,16 @@ export class VehiclesService {
             // A client-side or network error occurred. Handle it accordingly.
             console.error('An error occurred:', error.error.message);
             this.snackBarService.show(error.error.message);
-        }
-        if (!(error.error instanceof ErrorEvent)) {
+        } else {
             this.snackBarService.show('An error occurred while loading vehicles.');
         }
         // return an observable with a user-facing error message
-        return throwError(() => new Error(error.error.message));
+        const message =
+            error.error instanceof ErrorEvent
+                ? error.error.message
+                : typeof error.error?.message === 'string'
+                  ? error.error.message
+                  : error.message || 'Failed to load vehicles';
+        return throwError(() => new Error(message));
     }
 }

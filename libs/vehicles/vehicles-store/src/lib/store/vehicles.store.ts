@@ -22,6 +22,31 @@ const initialState: VehiclesState = {
     filter: { type: '', brand: '', color: '' }
 };
 
+/** Client-side filter matching vehicles-server getByFilter semantics. */
+export function applyVehicleFilter(vehicles: Vehicle[], filter: Filter): Vehicle[] {
+    const hasAnyFilter = filter.type !== '' || filter.brand !== '' || filter.color !== '';
+    if (!hasAnyFilter) {
+        return vehicles;
+    }
+
+    return vehicles.filter((vehicle) => {
+        if (filter.type && vehicle.type !== filter.type) {
+            return false;
+        }
+        if (filter.brand && vehicle.brand !== filter.brand) {
+            return false;
+        }
+        if (filter.color && vehicle.colors.indexOf(filter.color) === -1) {
+            return false;
+        }
+        return true;
+    });
+}
+
+function hasActiveFilter(filter: Filter): boolean {
+    return filter.type !== '' || filter.brand !== '' || filter.color !== '';
+}
+
 export const VehiclesStore = signalStore(
     { providedIn: 'root' },
     withState(initialState),
@@ -54,9 +79,12 @@ export const VehiclesStore = signalStore(
                 switchMap(() =>
                     vehiclesService.getAll().pipe(
                         tap((vehicles: Vehicle[]) => {
+                            // Respect any filter chosen while loadAll was in flight so a late
+                            // getAll response cannot stomp filtered results back to the full list.
+                            const filter = store.filter();
                             patchState(store, {
                                 allVehicles: vehicles,
-                                filteredVehicles: vehicles,
+                                filteredVehicles: applyVehicleFilter(vehicles, filter),
                                 loading: false,
                                 error: null
                             });
@@ -79,10 +107,8 @@ export const VehiclesStore = signalStore(
                     patchState(store, { loading: true, error: null, filter });
                 }),
                 switchMap((filter) => {
-                    const hasAnyFilter = filter.type !== '' || filter.brand !== '' || filter.color !== '';
-
-                    if (!hasAnyFilter) {
-                        // No filters, use all vehicles
+                    if (!hasActiveFilter(filter)) {
+                        // No filters: show the full catalog. loadAll owns the initial spinner.
                         patchState(store, {
                             filteredVehicles: store.allVehicles(),
                             loading: false
@@ -90,10 +116,26 @@ export const VehiclesStore = signalStore(
                         return of(null);
                     }
 
+                    // Prefer filtering the already-loaded catalog when available so an in-flight
+                    // loadAll completion and a filter POST cannot race to different list states.
+                    const allVehicles = store.allVehicles();
+                    if (allVehicles.length > 0) {
+                        patchState(store, {
+                            filteredVehicles: applyVehicleFilter(allVehicles, filter),
+                            loading: false,
+                            error: null
+                        });
+                        return of(null);
+                    }
+
                     return vehiclesService.getByFilter(filter).pipe(
                         tap((vehicles: Vehicle[]) => {
+                            // If loadAll finished while this request was in flight, prefer
+                            // filtering the authoritative catalog over a possibly-stale POST body.
+                            const latestAll = store.allVehicles();
                             patchState(store, {
-                                filteredVehicles: vehicles,
+                                filteredVehicles:
+                                    latestAll.length > 0 ? applyVehicleFilter(latestAll, filter) : vehicles,
                                 loading: false,
                                 error: null
                             });
