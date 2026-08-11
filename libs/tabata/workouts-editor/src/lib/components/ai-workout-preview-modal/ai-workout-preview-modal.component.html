@@ -10,7 +10,7 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-    @if (draft(); as d) {
+    @if (preview(); as d) {
         <div class="workout-preview mb-6">
             <div class="mb-2">
                 <h1 class="text-xl font-bold">{{ d.name ?? 'Untitled' }}</h1>

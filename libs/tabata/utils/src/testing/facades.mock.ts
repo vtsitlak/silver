@@ -80,8 +80,11 @@ export const mockWorkoutEditorFacade = {
     canSubmitWorkout: () => false,
     hasUnsavedChanges: () => false,
     isSaveEnabled: () => false,
+    aiStructureLock: () => null,
     loadWorkout: mockFn(),
     hydrateEditorFromWorkout: mockFn(),
+    lockAiGeneratedStructure: mockFn(),
+    clearAiStructureLock: mockFn(),
     updateDraft: mockFn(),
     reset: mockFn(),
     clearDraft: mockFn()

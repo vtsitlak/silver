@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, effect, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, effect, computed, input } from '@angular/core';
 import {
     IonHeader,
     IonToolbar,
@@ -25,6 +25,8 @@ import { WorkoutSubmitService } from '../../services/workout-submit.service';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
 import { WorkoutsFacade } from '@silver/tabata/states/workouts';
 import { formatDurationMinutes, getBlockDurationMinutes, formatSecondsToMinutes, resolveExerciseName } from '@silver/tabata/helpers';
+import type { GenerateWorkoutOutput } from '@silver/tabata/ai-workout-generator';
+
 @Component({
     selector: 'tbt-ai-workout-preview-modal',
     templateUrl: './ai-workout-preview-modal.component.html',
@@ -56,18 +58,39 @@ export class AiWorkoutPreviewModalComponent {
     private readonly workoutsFacade = inject(WorkoutsFacade);
     private readonly modalCtrl = inject(ModalController);
 
+    /**
+     * Captured AI output from generation. Prefer this over the live draft for structure so
+     * mounted editor-tab sync cannot change what the user previews / saves.
+     */
+    readonly generatedWorkout = input<GenerateWorkoutOutput | null>(null);
+
     readonly draft = this.facade.workoutDraft;
     readonly isSaving = this.workoutsFacade.isSaving;
     readonly exercisesMap = this.exercisesFacade.exercisesMap;
     readonly hasExercisesMap = computed(() => Object.keys(this.exercisesMap()).length > 0);
 
+    /** Info fields from the live draft; structure from the captured AI result when present. */
+    readonly preview = computed(() => {
+        const generated = this.generatedWorkout();
+        const d = this.draft();
+        if (!generated) return d;
+        return {
+            ...d,
+            totalDurationMinutes: generated.totalDurationMinutes,
+            warmup: generated.warmup,
+            blocks: generated.blocks,
+            cooldown: generated.cooldown,
+            generatedByAi: true
+        };
+    });
+
     readonly formatDurationMinutes = formatDurationMinutes;
     readonly getBlockDurationMinutes = getBlockDurationMinutes;
     readonly formatSecondsToMinutes = formatSecondsToMinutes;
 
-    /** Collect exercise IDs from draft and load map when draft has structure. */
+    /** Collect exercise IDs from preview structure and load map when present. */
     private readonly exerciseIds = computed(() => {
-        const d = this.draft();
+        const d = this.preview();
         const ids: string[] = [];
         d.blocks?.forEach((b) => b.exerciseId && ids.push(b.exerciseId));
         d.warmup?.movements?.forEach((m) => m.exerciseId && ids.push(m.exerciseId));
@@ -102,6 +125,11 @@ export class AiWorkoutPreviewModalComponent {
     }
 
     onSave(): void {
+        const generated = this.generatedWorkout();
+        if (generated) {
+            // Re-assert AI structure immediately before submit in case anything raced the lock.
+            this.facade.lockAiGeneratedStructure(generated);
+        }
         this.submitService.submitWorkout({
             navigateToWorkouts: false,
             showSuccessToast: false,

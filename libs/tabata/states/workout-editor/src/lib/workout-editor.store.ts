@@ -4,7 +4,13 @@ import { signalStore, withState, withMethods, patchState, withComputed } from '@
 import { cloneDeep } from '@silver/shared/helpers';
 import { TabataWorkout } from '@silver/tabata/states/workouts';
 
-import { type WorkoutEditorState, type WorkoutDraft, ensureBodyweightIncluded, initialWorkoutDraft } from './workout-editor.models';
+import {
+    type WorkoutEditorState,
+    type WorkoutDraft,
+    type AiGeneratedWorkoutStructure,
+    ensureBodyweightIncluded,
+    initialWorkoutDraft
+} from './workout-editor.models';
 import { areWorkoutDraftsEqual, draftHasMeaningfulContent } from './workout-draft.util';
 
 function draftCanSubmitWorkout(draft: WorkoutDraft): boolean {
@@ -51,7 +57,20 @@ function draftCanSubmitWorkout(draft: WorkoutDraft): boolean {
 function createFreshWorkoutEditorState(): WorkoutEditorState {
     return {
         workoutDraft: cloneDeep(initialWorkoutDraft),
-        initialDraftSnapshot: cloneDeep(initialWorkoutDraft)
+        initialDraftSnapshot: cloneDeep(initialWorkoutDraft),
+        aiStructureLock: null
+    };
+}
+
+function withPinnedAiStructure(draft: WorkoutDraft, lock: AiGeneratedWorkoutStructure | null): WorkoutDraft {
+    if (!lock) return draft;
+    return {
+        ...draft,
+        warmup: lock.warmup,
+        blocks: lock.blocks,
+        cooldown: lock.cooldown,
+        totalDurationMinutes: lock.totalDurationMinutes,
+        generatedByAi: true
     };
 }
 
@@ -87,18 +106,55 @@ export const WorkoutEditorStore = signalStore(
             };
             patchState(store, {
                 workoutDraft: { ...normalizedWorkout },
-                initialDraftSnapshot: cloneDeep(normalizedWorkout)
+                initialDraftSnapshot: cloneDeep(normalizedWorkout),
+                aiStructureLock: null
             });
         };
 
         return {
             hydrateEditorFromWorkout,
-            updateDraft: (changes: WorkoutDraft) => patchState(store, { workoutDraft: { ...store.workoutDraft(), ...changes } }),
-            setDraft: (draft: WorkoutDraft) => patchState(store, { workoutDraft: draft }),
+            /**
+             * Pins AI-generated structure into the draft and blocks child-tab sync from overwriting
+             * warmup/blocks/cooldown until {@link clearAiStructureLock} / reset / clearDraft.
+             */
+            lockAiGeneratedStructure: (structure: AiGeneratedWorkoutStructure) => {
+                const lock: AiGeneratedWorkoutStructure = {
+                    warmup: structure.warmup,
+                    blocks: structure.blocks,
+                    cooldown: structure.cooldown,
+                    totalDurationMinutes: structure.totalDurationMinutes
+                };
+                // Sync baseline snapshot so mounted editor tabs rehydrate to the AI structure
+                // (they read `initialDraftSnapshot`, not the live draft).
+                const baseline = store.initialDraftSnapshot();
+                patchState(store, {
+                    aiStructureLock: lock,
+                    workoutDraft: withPinnedAiStructure({ ...store.workoutDraft(), ...lock, generatedByAi: true }, lock),
+                    initialDraftSnapshot: {
+                        ...baseline,
+                        warmup: lock.warmup,
+                        blocks: lock.blocks,
+                        cooldown: lock.cooldown,
+                        totalDurationMinutes: lock.totalDurationMinutes,
+                        generatedByAi: true
+                    }
+                });
+            },
+            clearAiStructureLock: () => patchState(store, { aiStructureLock: null }),
+            updateDraft: (changes: WorkoutDraft) => {
+                const lock = store.aiStructureLock();
+                const merged = { ...store.workoutDraft(), ...changes };
+                patchState(store, { workoutDraft: withPinnedAiStructure(merged, lock) });
+            },
+            setDraft: (draft: WorkoutDraft) => {
+                const lock = store.aiStructureLock();
+                patchState(store, { workoutDraft: withPinnedAiStructure(draft, lock) });
+            },
             clearDraft: () =>
                 patchState(store, {
                     workoutDraft: cloneDeep(initialWorkoutDraft),
-                    initialDraftSnapshot: cloneDeep(initialWorkoutDraft)
+                    initialDraftSnapshot: cloneDeep(initialWorkoutDraft),
+                    aiStructureLock: null
                 }),
             reset: () => patchState(store, createFreshWorkoutEditorState())
         };
