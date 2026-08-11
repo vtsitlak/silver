@@ -122,9 +122,9 @@ export class NotesTableListComponent {
             mode: 'update'
         };
 
-        // Do not reload-all on close: save already patches the store on HTTP success.
+        // Do not reload-all on close: update already patches the store (optimistically).
         // Firing loadAll here raced the in-flight PUT and could replace the list with a
-        // stale GET, so a later edit/save could permanently clobber the prior write.
+        // stale GET, so a quick re-edit saved an older full note snapshot.
         this.dialog.open(EditNoteDialogComponent, dialogConfig);
     }
 

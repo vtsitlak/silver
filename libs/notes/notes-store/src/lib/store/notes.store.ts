@@ -44,16 +44,26 @@ export const NotesStore = signalStore(
         update: rxMethod<{ noteId: string | number; changes: Partial<Note> }>(
             pipe(
                 // concatMap: rapid multi-note saves must not abort earlier PUTs (data loss).
-                concatMap(({ noteId, changes }) =>
-                    notesHttpService.saveNote(noteId, changes).pipe(
-                        tap(() => {
-                            patchState(store, (state) => ({
-                                notes: state.notes.map((n) => (n.id === noteId ? { ...n, ...changes } : n))
-                            }));
-                        }),
-                        catchError(() => of(null))
-                    )
-                )
+                concatMap(({ noteId, changes }) => {
+                    // Optimistic patch: EditNoteDialog closes before HTTP ack and re-open reads
+                    // from this list. Waiting until PUT success left a stale snapshot window that
+                    // could permanently clobber the in-flight save with an older full note.
+                    const previous = store.notes().find((n) => n.id === noteId);
+                    patchState(store, (state) => ({
+                        notes: state.notes.map((n) => (n.id === noteId ? { ...n, ...changes } : n))
+                    }));
+
+                    return notesHttpService.saveNote(noteId, changes).pipe(
+                        catchError(() => {
+                            if (previous) {
+                                patchState(store, (state) => ({
+                                    notes: state.notes.map((n) => (n.id === noteId ? previous : n))
+                                }));
+                            }
+                            return of(null);
+                        })
+                    );
+                })
             )
         ),
         add: rxMethod<Omit<Note, 'id'> | Note>(
