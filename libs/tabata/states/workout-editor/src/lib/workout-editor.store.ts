@@ -124,20 +124,15 @@ export const WorkoutEditorStore = signalStore(
                     cooldown: structure.cooldown,
                     totalDurationMinutes: structure.totalDurationMinutes
                 };
-                // Sync baseline snapshot so mounted editor tabs rehydrate to the AI structure
-                // (they read `initialDraftSnapshot`, not the live draft).
-                const baseline = store.initialDraftSnapshot();
+                // Snapshot must include live info fields (name/description/…) as well as AI
+                // structure. The Info tab rehydrates from `initialDraftSnapshot`; spreading only
+                // the create-mode baseline (empty info) made it emit blank fields and wipe the
+                // draft before preview Save.
+                const nextDraft = withPinnedAiStructure({ ...store.workoutDraft(), ...lock, generatedByAi: true }, lock);
                 patchState(store, {
                     aiStructureLock: lock,
-                    workoutDraft: withPinnedAiStructure({ ...store.workoutDraft(), ...lock, generatedByAi: true }, lock),
-                    initialDraftSnapshot: {
-                        ...baseline,
-                        warmup: lock.warmup,
-                        blocks: lock.blocks,
-                        cooldown: lock.cooldown,
-                        totalDurationMinutes: lock.totalDurationMinutes,
-                        generatedByAi: true
-                    }
+                    workoutDraft: nextDraft,
+                    initialDraftSnapshot: cloneDeep(nextDraft)
                 });
             },
             clearAiStructureLock: () => patchState(store, { aiStructureLock: null }),

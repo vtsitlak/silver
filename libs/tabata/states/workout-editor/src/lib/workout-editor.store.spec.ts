@@ -77,6 +77,12 @@ describe('WorkoutEditorStore AI structure lock', () => {
         expect(snapshot.generatedByAi).toBe(true);
         // Info fields on the live draft are not wiped by snapshot sync.
         expect(store.workoutDraft().name).toBe('Test');
+        // Snapshot must keep live info so the Info tab cannot rehydrate empty name/description.
+        expect(snapshot.name).toBe('Test');
+        expect(snapshot.description).toBe('Desc');
+        expect(snapshot.mainTargetBodypart).toBe('Core');
+        expect(snapshot.level).toBe('beginner');
+        expect(snapshot.primaryGoal).toBe('Cardio');
     });
 
     it('allows info-field updates while the AI structure lock is active', () => {

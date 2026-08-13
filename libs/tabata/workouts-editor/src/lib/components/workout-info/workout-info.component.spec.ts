@@ -134,6 +134,40 @@ describe('WorkoutInfoComponent', () => {
         expect(component.infoForm.name().touched()).toBe(false);
     });
 
+    it('should keep info fields when loadedInfo is re-applied after AI lock snapshot sync', () => {
+        component.formModel.set({
+            name: 'AI Core',
+            description: 'Core focus',
+            mainTargetBodypart: 'Core',
+            level: 'beginner',
+            primaryGoal: 'Cardio',
+            availableEquipments: ['Bodyweight'],
+            secondaryTargetBodyparts: [],
+            generatedByAi: false
+        });
+        fixture.detectChanges();
+
+        const emitted: Array<{ name?: string; description?: string; generatedByAi?: boolean }> = [];
+        component.draftChange.subscribe((v) => emitted.push(v));
+
+        fixture.componentRef.setInput('loadedInfo', {
+            name: 'AI Core',
+            description: 'Core focus',
+            mainTargetBodypart: 'Core',
+            level: 'beginner',
+            primaryGoal: 'Cardio',
+            availableEquipments: ['Bodyweight'],
+            secondaryTargetBodyparts: [],
+            generatedByAi: true
+        });
+        fixture.detectChanges();
+
+        const last = emitted[emitted.length - 1];
+        expect(last?.name).toBe('AI Core');
+        expect(last?.description).toBe('Core focus');
+        expect(last?.generatedByAi).toBe(true);
+    });
+
     it('should clear AI structure lock when preview is dismissed via backdrop', async () => {
         mockAiWorkoutGenerationService.generateWorkout.mockReturnValue(of(mockGenerated));
         const onDidDismiss = jest.fn().mockResolvedValue({ role: undefined, data: null });
