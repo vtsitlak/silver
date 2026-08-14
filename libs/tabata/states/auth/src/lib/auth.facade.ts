@@ -29,9 +29,13 @@ export class AuthFacade {
             }
         });
 
-        // Navigate when loading completes successfully (no error for the current operation)
+        // Navigate when loading completes successfully (no error for the current operation).
+        // Do not consume pendingNavigation until the destination matches auth: a late
+        // authState(null) can clear isLoading during sign-in and would otherwise send us to
+        // /tabs while still logged out, then drop the pending dashboard route.
         effect(() => {
             const isLoading = this.store.isLoading();
+            const isAuthenticated = this.store.isAuthenticated();
             const hasAnyError =
                 isNonNullish(this.store.loginError()) ||
                 isNonNullish(this.store.getUserError()) ||
@@ -42,10 +46,20 @@ export class AuthFacade {
                 isNonNullish(this.store.logoutError());
             const path = this.pendingNavigation();
 
-            if (isNonNullish(path) && !isLoading && !hasAnyError) {
-                this.router.navigateByUrl(path);
-                this.pendingNavigation.set(null);
+            if (!isNonNullish(path) || isLoading || hasAnyError) {
+                return;
             }
+
+            const requiresAuth = path.startsWith('/tabs');
+            if (requiresAuth && !isAuthenticated) {
+                return;
+            }
+            if (!requiresAuth && isAuthenticated) {
+                return;
+            }
+
+            this.router.navigateByUrl(path);
+            this.pendingNavigation.set(null);
         });
     }
 

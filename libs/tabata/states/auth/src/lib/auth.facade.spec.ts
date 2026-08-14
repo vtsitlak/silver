@@ -154,4 +154,36 @@ describe('AuthFacade', () => {
         expect(store.logout).toHaveBeenCalledTimes(1);
         expect(store.clearError.mock.invocationCallOrder[0]).toBeLessThan(store.logout.mock.invocationCallOrder[0]);
     });
+
+    it('does not navigate to dashboard until the user is authenticated', () => {
+        const credentials: LoginUser = { email: 'test@example.com', password: 'password123' };
+        const router = TestBed.inject(Router);
+
+        facade.sign(credentials);
+        store.isLoading.set(false);
+        TestBed.flushEffects();
+
+        expect(router.navigateByUrl).not.toHaveBeenCalled();
+
+        store.isAuthenticated.set(true);
+        TestBed.flushEffects();
+
+        expect(router.navigateByUrl).toHaveBeenCalledWith('/tabs/dashboard');
+    });
+
+    it('does not navigate to login until the user is signed out', () => {
+        const router = TestBed.inject(Router);
+        store.isAuthenticated.set(true);
+
+        facade.logout();
+        store.isLoading.set(false);
+        TestBed.flushEffects();
+
+        expect(router.navigateByUrl).not.toHaveBeenCalled();
+
+        store.isAuthenticated.set(false);
+        TestBed.flushEffects();
+
+        expect(router.navigateByUrl).toHaveBeenCalledWith('/auth/login');
+    });
 });
