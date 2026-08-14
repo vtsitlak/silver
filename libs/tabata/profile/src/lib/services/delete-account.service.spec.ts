@@ -66,7 +66,7 @@ describe('DeleteAccountService', () => {
         userWorkoutsService.deleteUserWorkout.mockReturnValue(of({ success: true }));
     });
 
-    it('should delete the user account before destructive workout cleanup while reusing the captured token', (done) => {
+    it('should wipe Upstash data before Firebase delete while reusing captured tokens', (done) => {
         // Arrange
         const calls: string[] = [];
         userWorkoutsAuthToken.mockImplementation(() => {
@@ -77,8 +77,8 @@ describe('DeleteAccountService', () => {
             calls.push('capture-workouts-token');
             return 'captured-workouts-token';
         });
-        workoutsService.getWorkouts.mockImplementation(() => {
-            calls.push('get-workouts');
+        workoutsService.getWorkouts.mockImplementation((_search?: string, token?: string) => {
+            calls.push(`get-workouts:${token}`);
             return of([createWorkout('w1', 'u1'), createWorkout('w2', 'other')]);
         });
         workoutsService.deleteWorkout.mockImplementation((id: string, token?: string) => {
@@ -92,27 +92,53 @@ describe('DeleteAccountService', () => {
         authService.deleteCurrentUser.mockImplementationOnce(() => {
             calls.push('delete-current-user');
             userWorkoutsAuthToken.mockReturnValue(null);
+            workoutsAuthToken.mockReturnValue(null);
             return of(undefined);
+        });
+
+        // Act
+        service.deleteAccount().subscribe((ok) => {
+            // Assert — cleanup must finish before Firebase delete so a failed wipe is still retryable.
+            // List must use the captured token so a mid-flow live-token clear cannot hide owned workouts.
+            expect(ok).toBe(true);
+            expect(authService.deleteCurrentUser).toHaveBeenCalled();
+            expect(workoutsService.getWorkouts).toHaveBeenCalledWith(undefined, 'captured-workouts-token');
+            expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1', 'captured-workouts-token');
+            expect(userWorkoutsService.deleteUserWorkout).toHaveBeenCalledWith('u1', 'captured-token');
+            expect(calls).toEqual([
+                'capture-workouts-token',
+                'capture-user-workouts-token',
+                'get-workouts:captured-workouts-token',
+                'delete-workout:w1:captured-workouts-token',
+                'delete-user-workout:u1:captured-token',
+                'delete-current-user'
+            ]);
+            expect(toast.showSuccess).toHaveBeenCalledWith('Account deleted');
+            expect(router.navigateByUrl).toHaveBeenCalledWith('/auth/login');
+            done();
+        });
+    });
+
+    it('should still list owned workouts with the captured token after the live auth provider clears', (done) => {
+        // Arrange — simulate another tab signing out after tokens were captured.
+        workoutsAuthToken.mockImplementationOnce(() => 'captured-workouts-token').mockReturnValue(null);
+        userWorkoutsAuthToken.mockImplementationOnce(() => 'captured-token').mockReturnValue(null);
+        workoutsService.getWorkouts.mockImplementation((_search?: string, token?: string) => {
+            // Without the captured token this would look like an unauthenticated list (no owned rows).
+            if (token !== 'captured-workouts-token') {
+                return of([createWorkout('public', 'other')]);
+            }
+            return of([createWorkout('w1', 'u1'), createWorkout('public', 'other')]);
         });
 
         // Act
         service.deleteAccount().subscribe((ok) => {
             // Assert
             expect(ok).toBe(true);
-            expect(authService.deleteCurrentUser).toHaveBeenCalled();
-            expect(workoutsService.getWorkouts).toHaveBeenCalled();
+            expect(workoutsService.getWorkouts).toHaveBeenCalledWith(undefined, 'captured-workouts-token');
             expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1', 'captured-workouts-token');
             expect(userWorkoutsService.deleteUserWorkout).toHaveBeenCalledWith('u1', 'captured-token');
-            expect(calls).toEqual([
-                'capture-workouts-token',
-                'capture-user-workouts-token',
-                'get-workouts',
-                'delete-current-user',
-                'delete-workout:w1:captured-workouts-token',
-                'delete-user-workout:u1:captured-token'
-            ]);
-            expect(toast.showSuccess).toHaveBeenCalledWith('Account deleted');
-            expect(router.navigateByUrl).toHaveBeenCalledWith('/auth/login');
+            expect(authService.deleteCurrentUser).toHaveBeenCalled();
             done();
         });
     });
@@ -148,23 +174,25 @@ describe('DeleteAccountService', () => {
         });
     });
 
-    it('should not delete workout data when Firebase account deletion fails', (done) => {
+    it('should not delete Firebase account when owned workout cleanup fails (account stays retryable)', (done) => {
         // Arrange
-        authService.deleteCurrentUser.mockReturnValueOnce(throwError(() => new Error('nope')));
+        workoutsService.deleteWorkout.mockReturnValueOnce(throwError(() => new Error('workout wipe failed')));
 
         // Act
         service.deleteAccount().subscribe((ok) => {
             // Assert
             expect(ok).toBe(false);
             expect(workoutsService.getWorkouts).toHaveBeenCalled();
-            expect(workoutsService.deleteWorkout).not.toHaveBeenCalled();
+            expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1', 'captured-workouts-token');
             expect(userWorkoutsService.deleteUserWorkout).not.toHaveBeenCalled();
-            expect(toast.showError).toHaveBeenCalledWith('nope');
+            expect(authService.deleteCurrentUser).not.toHaveBeenCalled();
+            expect(toast.showError).toHaveBeenCalledWith('workout wipe failed');
+            expect(router.navigateByUrl).not.toHaveBeenCalled();
             done();
         });
     });
 
-    it('should surface cleanup failure and skip success navigation', (done) => {
+    it('should not delete Firebase account when user-workout cleanup fails (account stays retryable)', (done) => {
         // Arrange
         userWorkoutsService.deleteUserWorkout.mockReturnValueOnce(throwError(() => new Error('cleanup failed')));
 
@@ -172,10 +200,27 @@ describe('DeleteAccountService', () => {
         service.deleteAccount().subscribe((ok) => {
             // Assert
             expect(ok).toBe(false);
-            expect(authService.deleteCurrentUser).toHaveBeenCalled();
             expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1', 'captured-workouts-token');
             expect(userWorkoutsService.deleteUserWorkout).toHaveBeenCalledWith('u1', 'captured-token');
+            expect(authService.deleteCurrentUser).not.toHaveBeenCalled();
             expect(toast.showError).toHaveBeenCalledWith('cleanup failed');
+            expect(router.navigateByUrl).not.toHaveBeenCalled();
+            done();
+        });
+    });
+
+    it('should surface Firebase deletion failure after successful cleanup', (done) => {
+        // Arrange
+        authService.deleteCurrentUser.mockReturnValueOnce(throwError(() => new Error('requires-recent-login')));
+
+        // Act
+        service.deleteAccount().subscribe((ok) => {
+            // Assert — data wipe already happened; user can re-auth and retry Firebase delete.
+            expect(ok).toBe(false);
+            expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1', 'captured-workouts-token');
+            expect(userWorkoutsService.deleteUserWorkout).toHaveBeenCalledWith('u1', 'captured-token');
+            expect(authService.deleteCurrentUser).toHaveBeenCalled();
+            expect(toast.showError).toHaveBeenCalledWith('requires-recent-login');
             expect(router.navigateByUrl).not.toHaveBeenCalled();
             done();
         });

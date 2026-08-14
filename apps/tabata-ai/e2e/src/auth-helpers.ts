@@ -29,6 +29,8 @@ export async function fillIonInput(page: Page, fieldId: string, value: string): 
     const input = page.locator(`ion-input#${fieldId} input`);
     await input.waitFor({ state: 'visible', timeout: 10000 });
     await input.fill(value);
+    await expect(input).toHaveValue(value);
+    await input.blur();
 }
 
 /**
@@ -43,8 +45,12 @@ export async function loginAndWaitForDashboard(page: Page): Promise<void> {
     await page.locator('ion-input#email').waitFor({ state: 'visible', timeout: 10000 });
     await fillIonInput(page, 'email', email ?? '');
     await fillIonInput(page, 'password', password ?? '');
-    await page.getByRole('button', { name: 'Login' }).click();
 
+    const loginButton = page.getByRole('button', { name: 'Login' });
+    await loginButton.click();
+
+    const submittedAt = Date.now();
+    let retriedLogin = false;
     await expect
         .poll(
             async () => {
@@ -54,7 +60,18 @@ export async function loginAndWaitForDashboard(page: Page): Promise<void> {
                 if (/\/tabs/.test(url)) return true;
 
                 // Wait for *any* Ion tab button to appear (tabs shell is ready).
-                return (await page.getByRole('tab').count()) > 0;
+                if ((await page.getByRole('tab').count()) > 0) return true;
+
+                // Ionic signal-forms can miss the first submit if native fill hasn't synced yet.
+                if (!retriedLogin && Date.now() - submittedAt > 8000 && /\/auth\/login/.test(url)) {
+                    retriedLogin = true;
+                    const retryButton = page.getByRole('button', { name: 'Login' });
+                    if (await retryButton.isVisible().catch(() => false)) {
+                        await retryButton.click({ timeout: 3000 }).catch(() => undefined);
+                    }
+                }
+
+                return false;
             },
             { timeout: 45000 }
         )

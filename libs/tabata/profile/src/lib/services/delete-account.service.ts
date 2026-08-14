@@ -31,21 +31,27 @@ export class DeleteAccountService {
                     return throwError(() => new Error('No user signed in.'));
                 }
 
-                return this.workoutsService.getWorkouts().pipe(
+                // Delete Upstash data BEFORE Firebase auth. If Firebase is removed first and
+                // cleanup then fails, the user cannot sign in to retry and owned workouts /
+                // history remain orphaned under the deleted uid.
+                //
+                // List with the *captured* workouts token — not a live auth.currentUser lookup.
+                // Owner-stamped workouts are filtered out of unauthenticated GETs; if another tab
+                // signs out mid-delete, a live null token would return an empty owned list, then
+                // still wipe user-workout history with the captured token (permanent history loss
+                // while the account delete later fails).
+                return this.workoutsService.getWorkouts(undefined, workoutsAuthToken).pipe(
                     map((all) => all.filter((w) => w.createdByUserId === userId)),
                     switchMap((owned) =>
-                        this.authService.deleteCurrentUser().pipe(
-                            switchMap(() =>
-                                owned.length === 0
-                                    ? of([])
-                                    : of(...owned).pipe(
-                                          concatMap((w) => this.workoutsService.deleteWorkout(w.id, workoutsAuthToken)),
-                                          toArray()
-                                      )
-                            ),
-                            switchMap(() => this.userWorkoutsService.deleteUserWorkout(userId, userWorkoutsAuthToken))
-                        )
-                    )
+                        owned.length === 0
+                            ? of([])
+                            : of(...owned).pipe(
+                                  concatMap((w) => this.workoutsService.deleteWorkout(w.id, workoutsAuthToken)),
+                                  toArray()
+                              )
+                    ),
+                    switchMap(() => this.userWorkoutsService.deleteUserWorkout(userId, userWorkoutsAuthToken)),
+                    switchMap(() => this.authService.deleteCurrentUser())
                 );
             }),
             map(() => true),

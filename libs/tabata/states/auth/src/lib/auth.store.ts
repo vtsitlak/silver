@@ -2,8 +2,7 @@ import { computed, inject } from '@angular/core';
 import { signalStore, withState, withMethods, patchState, withComputed } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 
-import { catchError, exhaustMap, finalize, map, of, pipe, switchMap, tap } from 'rxjs';
-import { Subject } from 'rxjs';
+import { catchError, exhaustMap, finalize, map, Observable, of, pipe, Subject, switchMap, tap } from 'rxjs';
 import { tapResponse } from '@ngrx/operators';
 import { AuthService } from './auth.service';
 import { ToastService } from '@silver/tabata/helpers';
@@ -20,8 +19,21 @@ export const AuthStore = signalStore(
         isAuthenticated: computed(() => !!profileUser())
     })),
     // --- METHODS ---
-    withMethods((store, authService = inject(AuthService), toast = inject(ToastService)) => ({
-        clearError(): void {
+    withMethods((store, authService = inject(AuthService), toast = inject(ToastService)) => {
+        // authState(null) on Firebase init must not finish (or wipe) an in-flight sign/register/logout.
+        // That race cleared isLoading and consumed dashboard navigation while still on /auth/login.
+        let credentialFlowsInFlight = 0;
+        const trackCredentialFlow = <T>(source$: Observable<T>) => {
+            credentialFlowsInFlight += 1;
+            return source$.pipe(
+                finalize(() => {
+                    credentialFlowsInFlight = Math.max(0, credentialFlowsInFlight - 1);
+                })
+            );
+        };
+
+        return {
+            clearError(): void {
             patchState(store, {
                 loginError: null,
                 getUserError: null,
@@ -53,9 +65,12 @@ export const AuthStore = signalStore(
                     tap((state) => {
                         if (state) {
                             patchState(store, { ...state, isLoading: false });
-                        } else {
-                            patchState(store, { user: null, usePassword: false, useGoogle: false, isLoading: false });
+                            return;
                         }
+                        if (credentialFlowsInFlight > 0) {
+                            return;
+                        }
+                        patchState(store, { user: null, usePassword: false, useGoogle: false, isLoading: false });
                     })
                 )
             )(getUserTrigger);
@@ -104,7 +119,7 @@ export const AuthStore = signalStore(
                     }),
                     exhaustMap(({ email, password }) => {
                         console.debug('[AuthStore.sign] Calling authService.sign', { email });
-                        return authService.sign(email, password).pipe(
+                        return trackCredentialFlow(authService.sign(email, password)).pipe(
                             tapResponse({
                                 next: (userCredential) => {
                                     const profileUser = toProfileUser(userCredential.user);
@@ -145,7 +160,7 @@ export const AuthStore = signalStore(
                 pipe(
                     tap(() => patchState(store, { isLoading: true, loginError: null })),
                     exhaustMap(() =>
-                        authService.signInWithGoogle().pipe(
+                        trackCredentialFlow(authService.signInWithGoogle()).pipe(
                             tapResponse({
                                 next: ({ user: firebaseUser }) => {
                                     const profileUser = toProfileUser(firebaseUser);
@@ -172,7 +187,7 @@ export const AuthStore = signalStore(
             pipe(
                 tap(() => patchState(store, { isLoading: true, registerError: null })),
                 exhaustMap((newUser) =>
-                    authService.signUp(newUser.email, newUser.password, newUser.displayName).pipe(
+                    trackCredentialFlow(authService.signUp(newUser.email, newUser.password, newUser.displayName)).pipe(
                         tapResponse({
                             next: ({ user: firebaseUser }) => {
                                 const profileUser = toProfileUser(firebaseUser);
@@ -241,7 +256,7 @@ export const AuthStore = signalStore(
                 pipe(
                     tap(() => patchState(store, { isLoading: true, logoutError: null })),
                     exhaustMap(() =>
-                        authService.logout().pipe(
+                        trackCredentialFlow(authService.logout()).pipe(
                             tapResponse({
                                 next: () => {
                                     patchState(store, { user: null, isLoading: false });
@@ -258,5 +273,6 @@ export const AuthStore = signalStore(
             )(logoutTrigger);
             return () => logoutTrigger.next();
         })()
-    }))
+        };
+    })
 );

@@ -37,6 +37,27 @@ describe('NotesStore', () => {
         expect(store.loading()).toBe(false);
     });
 
+    it('should keep accepting loadAll after a failed GET (no rxMethod soft-lock)', () => {
+        store.loadAll();
+
+        const failed = httpTestingController.expectOne('/api/notes');
+        failed.flush('Server Error', { status: 500, statusText: 'Server Error' });
+
+        expect(store.loading()).toBe(false);
+        expect(store.loaded()).toBe(false);
+        expect(store.notes()).toEqual([]);
+
+        store.loadAll();
+
+        const retry = httpTestingController.expectOne('/api/notes');
+        expect(retry.request.method).toBe('GET');
+        retry.flush(mockNotes);
+
+        expect(store.notes()).toEqual(mockNotes);
+        expect(store.loaded()).toBe(true);
+        expect(store.loading()).toBe(false);
+    });
+
     it('should optimistically patch updates so a rapid re-edit sees the in-flight save', () => {
         store.loadAll();
         httpTestingController.expectOne('/api/notes').flush(mockNotes);

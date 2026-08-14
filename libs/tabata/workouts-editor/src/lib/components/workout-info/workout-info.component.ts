@@ -129,11 +129,11 @@ export class WorkoutInfoComponent {
         const level = model.level;
         const primaryGoal = model.primaryGoal;
         if (!level || !primaryGoal) return;
-        this.isGenerating.set(true);
         const name = model.name;
         const description = model.description;
         if (!name || !description) return;
 
+        this.isGenerating.set(true);
         this.aiWorkoutGeneration
             .generateWorkout({
                 name,
@@ -176,7 +176,10 @@ export class WorkoutInfoComponent {
                             state: { [SKIP_WORKOUT_EDITOR_CANCEL]: true }
                         });
                     } else if (typedRole === 'tryAgain') {
-                        // Keep prior lock until the next generation replaces it.
+                        // Drop the pin before regenerating. If generation fails (quota/network/EMPTY),
+                        // a stranded lock would make warmup/main/cooldown look editable while Save
+                        // still persisted the previous AI structure.
+                        this.workoutEditorFacade.clearAiStructureLock();
                         this.onGenerateWithAi();
                     } else if (typedRole === 'cancel') {
                         this.clearDraftRequested.emit();
