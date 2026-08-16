@@ -166,7 +166,10 @@ export class WorkoutPlayerComponent implements OnDestroy {
     ionViewWillLeave(): void {
         // Called when the page is about to be navigated away from.
         // If Ionic caches pages, ngOnDestroy may not run immediately, so we release here too.
+        // Clear the interval synchronously — do not wait for the pageActive effect to flush,
+        // or one more tick could finish the workout in the background.
         this.pageActive.set(false);
+        this.clearTimer();
         void this.disableKeepAwake();
     }
 

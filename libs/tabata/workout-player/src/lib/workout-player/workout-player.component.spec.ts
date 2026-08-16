@@ -266,8 +266,8 @@ describe('WorkoutPlayerComponent', () => {
 
             // Act — user navigates back; the interval must not keep ticking
             component.ionViewWillLeave();
-            jest.advanceTimersByTime(10_000);
             fixture.detectChanges();
+            jest.advanceTimersByTime(10_000);
 
             // Assert — abandoned workout must not be recorded as completed in history
             expect(userWorkoutsFacade.appendWorkoutSession).not.toHaveBeenCalled();
@@ -303,6 +303,7 @@ describe('WorkoutPlayerComponent', () => {
             fixture.detectChanges();
 
             component.ionViewWillLeave();
+            fixture.detectChanges();
             jest.advanceTimersByTime(10_000);
             expect(component.remainingInSegment()).toBe(5);
 
