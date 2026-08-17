@@ -64,7 +64,8 @@ export class WorkoutPlayerComponent implements OnDestroy {
     readonly isSavingSession = this.userWorkoutsFacade.hasPendingSessionAppends;
 
     private keepAwakeActive = false;
-    private pageActive = true;
+    /** Signal so leave/enter can stop and resume the interval; Ionic caches this page. */
+    private readonly pageActive = signal(true);
     private navigateAfterPendingSessionSave = false;
 
     readonly currentSegment = computed(() => this.segments()[this.currentIndex()] ?? null);
@@ -128,7 +129,9 @@ export class WorkoutPlayerComponent implements OnDestroy {
         effect(() => {
             const playing = this.isPlaying();
             const seg = this.currentSegment();
-            if (!playing || !seg || this.finished()) {
+            // IonicRouteStrategy caches this page; ngOnDestroy may not run on Back.
+            // Stop the interval while detached so a hidden player cannot auto-complete.
+            if (!this.pageActive() || !playing || !seg || this.finished()) {
                 this.clearTimer();
                 return;
             }
@@ -141,7 +144,7 @@ export class WorkoutPlayerComponent implements OnDestroy {
         // Keep the device awake only while an active workout session is in progress.
         // Using Ionic page lifecycle is important because the view can be cached.
         effect(() => {
-            const shouldBeAwake = this.pageActive && this.hasStarted() && !this.finished();
+            const shouldBeAwake = this.pageActive() && this.hasStarted() && !this.finished();
             if (shouldBeAwake) {
                 void this.enableKeepAwake();
             } else {
@@ -151,19 +154,22 @@ export class WorkoutPlayerComponent implements OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.pageActive = false;
+        this.pageActive.set(false);
         this.clearTimer();
         void this.disableKeepAwake();
     }
 
     ionViewWillEnter(): void {
-        this.pageActive = true;
+        this.pageActive.set(true);
     }
 
     ionViewWillLeave(): void {
         // Called when the page is about to be navigated away from.
         // If Ionic caches pages, ngOnDestroy may not run immediately, so we release here too.
-        this.pageActive = false;
+        // Clear the interval synchronously — do not wait for the pageActive effect to flush,
+        // or one more tick could finish the workout in the background.
+        this.pageActive.set(false);
+        this.clearTimer();
         void this.disableKeepAwake();
     }
 

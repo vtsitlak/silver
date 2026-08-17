@@ -246,6 +246,81 @@ describe('WorkoutPlayerComponent', () => {
         expect(component.currentSession()).toBeNull();
     });
 
+    it('does not auto-complete an in-progress session after Ionic caches the player on leave', () => {
+        // Arrange — IonicRouteStrategy detaches this page on Back; ngOnDestroy may not run.
+        jest.useFakeTimers();
+        try {
+            setReadyWorkout('w1');
+            component.segments.set([{ phase: 'warmup', label: 'Warmup', durationSeconds: 2, exerciseId: 'e1', isRest: false }]);
+            component.currentIndex.set(0);
+            component.remainingInSegment.set(2);
+            component.hasStarted.set(true);
+            component.currentSession.set({
+                workoutId: 'w1',
+                startedAt: '2026-01-02T00:00:00.000Z',
+                finishedAt: '',
+                completed: false
+            });
+            component.isPlaying.set(true);
+            fixture.detectChanges();
+
+            // Act — user navigates back; the interval must not keep ticking
+            component.ionViewWillLeave();
+            fixture.detectChanges();
+            jest.advanceTimersByTime(10_000);
+
+            // Assert — abandoned workout must not be recorded as completed in history
+            expect(userWorkoutsFacade.appendWorkoutSession).not.toHaveBeenCalled();
+            expect(component.finished()).toBe(false);
+            expect(component.remainingInSegment()).toBe(2);
+            expect(component.currentSession()).toEqual(
+                expect.objectContaining({
+                    workoutId: 'w1',
+                    completed: false
+                })
+            );
+        } finally {
+            jest.useRealTimers();
+        }
+    });
+
+    it('resumes the interval when returning to a cached in-progress player', () => {
+        // Arrange
+        jest.useFakeTimers();
+        try {
+            setReadyWorkout('w1');
+            component.segments.set([{ phase: 'warmup', label: 'Warmup', durationSeconds: 5, exerciseId: 'e1', isRest: false }]);
+            component.currentIndex.set(0);
+            component.remainingInSegment.set(5);
+            component.hasStarted.set(true);
+            component.currentSession.set({
+                workoutId: 'w1',
+                startedAt: '2026-01-02T00:00:00.000Z',
+                finishedAt: '',
+                completed: false
+            });
+            component.isPlaying.set(true);
+            fixture.detectChanges();
+
+            component.ionViewWillLeave();
+            fixture.detectChanges();
+            jest.advanceTimersByTime(10_000);
+            expect(component.remainingInSegment()).toBe(5);
+
+            // Act — same cached instance becomes active again
+            component.ionViewWillEnter();
+            fixture.detectChanges();
+            jest.advanceTimersByTime(1000);
+
+            // Assert
+            expect(component.remainingInSegment()).toBe(4);
+            expect(userWorkoutsFacade.appendWorkoutSession).not.toHaveBeenCalled();
+            expect(component.finished()).toBe(false);
+        } finally {
+            jest.useRealTimers();
+        }
+    });
+
     it('does not keep the finished session only in component state (destroy-safe)', () => {
         // Arrange
         setReadyWorkout('w1');
