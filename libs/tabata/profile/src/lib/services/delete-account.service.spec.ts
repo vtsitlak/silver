@@ -66,7 +66,7 @@ describe('DeleteAccountService', () => {
         userWorkoutsService.deleteUserWorkout.mockReturnValue(of({ success: true }));
     });
 
-    it('should wipe Upstash data before Firebase delete while reusing captured tokens', (done) => {
+    it('should delete Firebase first then wipe Upstash with captured tokens', (done) => {
         // Arrange
         const calls: string[] = [];
         userWorkoutsAuthToken.mockImplementation(() => {
@@ -98,8 +98,10 @@ describe('DeleteAccountService', () => {
 
         // Act
         service.deleteAccount().subscribe((ok) => {
-            // Assert — cleanup must finish before Firebase delete so a failed wipe is still retryable.
-            // List must use the captured token so a mid-flow live-token clear cannot hide owned workouts.
+            // Assert — Firebase delete is the operation that fails on persisted sessions
+            // (requires-recent-login). Do it before any Upstash wipe so a returning user
+            // who taps Delete account does not lose workouts/history while still signed in.
+            // Cleanup must still use captured tokens because deleteUser clears live auth.
             expect(ok).toBe(true);
             expect(authService.deleteCurrentUser).toHaveBeenCalled();
             expect(workoutsService.getWorkouts).toHaveBeenCalledWith(undefined, 'captured-workouts-token');
@@ -108,10 +110,10 @@ describe('DeleteAccountService', () => {
             expect(calls).toEqual([
                 'capture-workouts-token',
                 'capture-user-workouts-token',
+                'delete-current-user',
                 'get-workouts:captured-workouts-token',
                 'delete-workout:w1:captured-workouts-token',
-                'delete-user-workout:u1:captured-token',
-                'delete-current-user'
+                'delete-user-workout:u1:captured-token'
             ]);
             expect(toast.showSuccess).toHaveBeenCalledWith('Account deleted');
             expect(router.navigateByUrl).toHaveBeenCalledWith('/auth/login');
@@ -174,53 +176,42 @@ describe('DeleteAccountService', () => {
         });
     });
 
-    it('should not delete Firebase account when owned workout cleanup fails (account stays retryable)', (done) => {
-        // Arrange
-        workoutsService.deleteWorkout.mockReturnValueOnce(throwError(() => new Error('workout wipe failed')));
-
-        // Act
-        service.deleteAccount().subscribe((ok) => {
-            // Assert
-            expect(ok).toBe(false);
-            expect(workoutsService.getWorkouts).toHaveBeenCalled();
-            expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1', 'captured-workouts-token');
-            expect(userWorkoutsService.deleteUserWorkout).not.toHaveBeenCalled();
-            expect(authService.deleteCurrentUser).not.toHaveBeenCalled();
-            expect(toast.showError).toHaveBeenCalledWith('workout wipe failed');
-            expect(router.navigateByUrl).not.toHaveBeenCalled();
-            done();
-        });
-    });
-
-    it('should not delete Firebase account when user-workout cleanup fails (account stays retryable)', (done) => {
-        // Arrange
-        userWorkoutsService.deleteUserWorkout.mockReturnValueOnce(throwError(() => new Error('cleanup failed')));
-
-        // Act
-        service.deleteAccount().subscribe((ok) => {
-            // Assert
-            expect(ok).toBe(false);
-            expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1', 'captured-workouts-token');
-            expect(userWorkoutsService.deleteUserWorkout).toHaveBeenCalledWith('u1', 'captured-token');
-            expect(authService.deleteCurrentUser).not.toHaveBeenCalled();
-            expect(toast.showError).toHaveBeenCalledWith('cleanup failed');
-            expect(router.navigateByUrl).not.toHaveBeenCalled();
-            done();
-        });
-    });
-
-    it('should surface Firebase deletion failure after successful cleanup', (done) => {
-        // Arrange
+    it('should not wipe workouts or history when Firebase delete fails (requires-recent-login)', (done) => {
+        // Arrange — persisted sessions fail deleteUser until the user signs in again.
         authService.deleteCurrentUser.mockReturnValueOnce(throwError(() => new Error('requires-recent-login')));
 
         // Act
         service.deleteAccount().subscribe((ok) => {
-            // Assert — data wipe already happened; user can re-auth and retry Firebase delete.
+            // Assert — account and Upstash data both remain so the user can re-auth and retry.
             expect(ok).toBe(false);
-            expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1', 'captured-workouts-token');
-            expect(userWorkoutsService.deleteUserWorkout).toHaveBeenCalledWith('u1', 'captured-token');
             expect(authService.deleteCurrentUser).toHaveBeenCalled();
+            expect(workoutsService.getWorkouts).not.toHaveBeenCalled();
+            expect(workoutsService.deleteWorkout).not.toHaveBeenCalled();
+            expect(userWorkoutsService.deleteUserWorkout).not.toHaveBeenCalled();
             expect(toast.showError).toHaveBeenCalledWith('requires-recent-login');
+            expect(router.navigateByUrl).not.toHaveBeenCalled();
+            done();
+        });
+    });
+
+    it('should surface Upstash cleanup failure after Firebase delete using captured tokens', (done) => {
+        // Arrange
+        authService.deleteCurrentUser.mockImplementationOnce(() => {
+            userWorkoutsAuthToken.mockReturnValue(null);
+            workoutsAuthToken.mockReturnValue(null);
+            return of(undefined);
+        });
+        workoutsService.deleteWorkout.mockReturnValueOnce(throwError(() => new Error('workout wipe failed')));
+
+        // Act
+        service.deleteAccount().subscribe((ok) => {
+            // Assert — Firebase already succeeded; cleanup still used the captured token.
+            expect(ok).toBe(false);
+            expect(authService.deleteCurrentUser).toHaveBeenCalled();
+            expect(workoutsService.getWorkouts).toHaveBeenCalledWith(undefined, 'captured-workouts-token');
+            expect(workoutsService.deleteWorkout).toHaveBeenCalledWith('w1', 'captured-workouts-token');
+            expect(userWorkoutsService.deleteUserWorkout).not.toHaveBeenCalled();
+            expect(toast.showError).toHaveBeenCalledWith('workout wipe failed');
             expect(router.navigateByUrl).not.toHaveBeenCalled();
             done();
         });
