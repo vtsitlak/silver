@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, OnDestroy, computed, effect, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnDestroy, computed, effect, inject, signal, untracked } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IonContent, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon, IonFooter } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -109,12 +109,36 @@ export class WorkoutPlayerComponent implements OnDestroy {
         effect(() => {
             const requestedId = this.workoutId();
             const w = this.workout();
-            if (!requestedId || !w || w.id !== requestedId) {
-                this.clearPlaybackState();
-                return;
-            }
-            this.buildSegments(w);
-            this.loadExercisesForWorkout(w);
+            const loadError = this.error();
+            // Read only the store signals as dependencies. Playback signals are checked
+            // untracked so rebuilding segments cannot retrigger this effect.
+            untracked(() => {
+                if (!requestedId) {
+                    this.clearPlaybackState();
+                    return;
+                }
+                if (!w || w.id !== requestedId) {
+                    // A different workout must not keep this page's segments.
+                    if (w && w.id !== requestedId) {
+                        this.clearPlaybackState();
+                        return;
+                    }
+                    // Details re-enters with loadWorkoutById, which nulls loadedWorkout
+                    // before the same id returns. That gap is not "workout missing".
+                    // Clearing here dropped the cached player's in-progress session, so
+                    // Back from the player restarted the workout and never recorded it.
+                    if (loadError && !(this.hasStarted() && this.segments().length > 0)) {
+                        this.clearPlaybackState();
+                    }
+                    return;
+                }
+                if (this.hasStarted() && this.segments().length > 0) {
+                    this.loadExercisesForWorkout(w);
+                    return;
+                }
+                this.buildSegments(w);
+                this.loadExercisesForWorkout(w);
+            });
         });
 
         effect(() => {

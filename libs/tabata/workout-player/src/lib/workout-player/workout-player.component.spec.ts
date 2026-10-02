@@ -321,6 +321,52 @@ describe('WorkoutPlayerComponent', () => {
         }
     });
 
+    it('keeps in-progress playback when the same workout is reloaded after Back', () => {
+        // Arrange — details ionViewWillEnter calls loadWorkoutById, which nulls
+        // loadedWorkout and then replaces it with a new object for the same id.
+        setReadyWorkout('w1');
+        component.segments.set([{ phase: 'warmup', label: 'Warmup', durationSeconds: 5, exerciseId: 'e1', isRest: false }]);
+        component.currentIndex.set(0);
+        component.remainingInSegment.set(3);
+        component.hasStarted.set(true);
+        component.isPlaying.set(true);
+        component.currentSession.set({
+            workoutId: 'w1',
+            startedAt: '2026-01-02T00:00:00.000Z',
+            finishedAt: '',
+            completed: false
+        });
+        fixture.detectChanges();
+
+        // Act — in-flight reload clears the store workout without a terminal error
+        mockWorkoutsFacade.loadedWorkout.set(null);
+        mockWorkoutsFacade.isLoading.set(true);
+        mockWorkoutsFacade.error.set(null);
+        fixture.detectChanges();
+
+        // Assert — session and remaining time survive the null gap
+        expect(component.currentSession()).toEqual(
+            expect.objectContaining({
+                workoutId: 'w1',
+                completed: false
+            })
+        );
+        expect(component.remainingInSegment()).toBe(3);
+        expect(component.hasStarted()).toBe(true);
+        expect(component.segments().length).toBe(1);
+
+        // Act — same workout returns as a new object
+        mockWorkoutsFacade.loadedWorkout.set({ ...mockTabataWorkout, id: 'w1', name: 'Reloaded' });
+        mockWorkoutsFacade.isLoading.set(false);
+        fixture.detectChanges();
+
+        // Assert — timer position is not rebuilt from the first segment
+        expect(component.remainingInSegment()).toBe(3);
+        expect(component.hasStarted()).toBe(true);
+        expect(component.currentSession()?.workoutId).toBe('w1');
+        expect(userWorkoutsFacade.appendWorkoutSession).not.toHaveBeenCalled();
+    });
+
     it('does not keep the finished session only in component state (destroy-safe)', () => {
         // Arrange
         setReadyWorkout('w1');
