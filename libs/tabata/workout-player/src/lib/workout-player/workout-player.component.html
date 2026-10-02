@@ -10,15 +10,15 @@
 </ion-header>
 
 <ion-content class="ion-padding workout-player">
-    @if (isLoading()) {
+    @if (!hasInProgressPlayback() && !finished() && isLoading()) {
         <div class="flex justify-center items-center min-h-[200px]">
             <ion-icon name="time-outline" class="text-4xl"></ion-icon>
         </div>
-    } @else if (error()) {
+    } @else if (!hasInProgressPlayback() && !finished() && error()) {
         <div class="text-center text-red-500">
             {{ error() }}
         </div>
-    } @else if (!isWorkoutReady() && !finished()) {
+    } @else if (!hasInProgressPlayback() && !isWorkoutReady() && !finished()) {
         <div class="flex justify-center items-center min-h-[200px]">
             <ion-icon name="time-outline" class="text-4xl"></ion-icon>
         </div>
@@ -30,7 +30,7 @@
             @if (isSavingSession()) {
                 <p class="text-sm text-gray-500 text-center">Saving your workout history...</p>
             }
-            <ion-button expand="block" (click)="restart()" [disabled]="isSavingSession()">Play Again</ion-button>
+            <ion-button expand="block" (click)="restart()" [disabled]="isSavingSession() || !isWorkoutReady()">Play Again</ion-button>
             <ion-button expand="block" fill="clear" (click)="cancel()">Back to Workouts</ion-button>
         </div>
     } @else {
@@ -92,12 +92,12 @@
             <span class="ion-padding-start">Cancel</span>
         </ion-button>
 
-        <ion-button fill="clear" (click)="skip()" [disabled]="!isWorkoutReady() || !hasStarted()">
+        <ion-button fill="clear" (click)="skip()" [disabled]="(!isWorkoutReady() && !hasInProgressPlayback()) || !hasStarted()">
             <span class="ion-padding-end">Skip</span>
             <ion-icon name="play-skip-forward"></ion-icon>
         </ion-button>
 
-        <ion-button shape="round" size="large" (click)="togglePlay()" [disabled]="!isWorkoutReady() && !finished()">
+        <ion-button shape="round" size="large" (click)="togglePlay()" [disabled]="finished() ? !isWorkoutReady() : !isWorkoutReady() && !hasInProgressPlayback()">
             @if (isPlaying()) {
                 <ion-icon name="pause"></ion-icon>
             } @else {

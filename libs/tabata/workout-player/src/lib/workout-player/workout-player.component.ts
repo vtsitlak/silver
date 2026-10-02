@@ -70,6 +70,14 @@ export class WorkoutPlayerComponent implements OnDestroy {
 
     readonly currentSegment = computed(() => this.segments()[this.currentIndex()] ?? null);
 
+    /**
+     * Local playback is the source of truth once the user has pressed Play.
+     * `loadedWorkout` is a single global slot: details reloads and other workouts
+     * null it or replace it, and `isLoading` / `error` are shared with list fetches.
+     * Those store updates must not hide the timer or disable pause.
+     */
+    readonly hasInProgressPlayback = computed(() => this.hasStarted() && this.segments().length > 0 && !this.finished() && this.currentSession()?.workoutId === this.workoutId());
+
     readonly totalDurationSeconds = computed(() => this.segments().reduce((acc, seg) => acc + seg.durationSeconds, 0));
 
     readonly remainingTotalSeconds = computed(() => {
@@ -118,16 +126,18 @@ export class WorkoutPlayerComponent implements OnDestroy {
                     return;
                 }
                 if (!w || w.id !== requestedId) {
-                    // A different workout must not keep this page's segments.
-                    if (w && w.id !== requestedId) {
+                    // `loadedWorkout` is shared. Another details page can store a different
+                    // id while this cached player still holds an in-progress session.
+                    // Clearing here dropped that session without writing history.
+                    if (w && w.id !== requestedId && !this.hasInProgressPlayback()) {
+                        this.recordSessionIfRequestChanged();
                         this.clearPlaybackState();
                         return;
                     }
                     // Details re-enters with loadWorkoutById, which nulls loadedWorkout
                     // before the same id returns. That gap is not "workout missing".
-                    // Clearing here dropped the cached player's in-progress session, so
-                    // Back from the player restarted the workout and never recorded it.
-                    if (loadError && !(this.hasStarted() && this.segments().length > 0)) {
+                    // A terminal error before Play still resets this page.
+                    if ((!w || w.id !== requestedId) && loadError && !this.hasInProgressPlayback()) {
                         this.clearPlaybackState();
                     }
                     return;
@@ -180,6 +190,12 @@ export class WorkoutPlayerComponent implements OnDestroy {
     ngOnDestroy(): void {
         this.pageActive.set(false);
         this.clearTimer();
+        // Ionic pops this page on hardware/browser Back, which destroys the component.
+        // The in-progress session lives only here until finish/cancel, so record it
+        // as incomplete or the workout disappears from history.
+        if (this.hasInProgressPlayback()) {
+            this.finishSession(false);
+        }
         void this.disableKeepAwake();
     }
 
@@ -331,11 +347,11 @@ export class WorkoutPlayerComponent implements OnDestroy {
     }
 
     togglePlay(): void {
-        if (!this.isWorkoutReady() && !this.finished()) {
-            return;
-        }
         if (this.finished()) {
             this.restart();
+            return;
+        }
+        if (!this.isWorkoutReady() && !this.hasInProgressPlayback()) {
             return;
         }
         const next = !this.isPlaying();
@@ -358,7 +374,7 @@ export class WorkoutPlayerComponent implements OnDestroy {
     }
 
     skip(): void {
-        if (!this.isWorkoutReady()) {
+        if (!this.isWorkoutReady() && !this.hasInProgressPlayback()) {
             return;
         }
         this.advanceSegment();
@@ -432,7 +448,8 @@ export class WorkoutPlayerComponent implements OnDestroy {
     }
 
     restart(): void {
-        if (!this.isWorkoutReady() && this.segments().length === 0) return;
+        // Replay needs the store workout so the new session is tied to a loaded id.
+        if (!this.isWorkoutReady()) return;
         const segs = this.segments();
         if (segs.length === 0) return;
         // New run => fresh session, so completion is persisted each time.
@@ -443,6 +460,14 @@ export class WorkoutPlayerComponent implements OnDestroy {
         this.finished.set(false);
         this.ensureSessionStarted();
         this.isPlaying.set(true);
+    }
+
+    /** Save a session that belonged to a previous route id before this page is reset. */
+    private recordSessionIfRequestChanged(): void {
+        const session = this.currentSession();
+        if (!this.hasStarted() || !session) return;
+        if (session.workoutId === this.workoutId()) return;
+        this.finishSession(false);
     }
 
     private ensureSessionStarted(): void {
