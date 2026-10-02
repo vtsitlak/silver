@@ -2,7 +2,7 @@ import { computed } from '@angular/core';
 import { signalStore, withState, withMethods, patchState, withComputed } from '@ngrx/signals';
 
 import { cloneDeep } from '@silver/shared/helpers';
-import { TabataWorkout } from '@silver/tabata/states/workouts';
+import { type TabataWorkout } from '@silver/tabata/states/workouts';
 
 import {
     type WorkoutEditorState,

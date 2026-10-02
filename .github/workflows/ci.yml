@@ -31,7 +31,8 @@ jobs:
             # Cache node_modules
             - uses: actions/setup-node@v4
               with:
-                  node-version: 22
+                  # @angular/build@22.2+ requires Node ^22.22.3 || ^24.15.0
+                  node-version: 22.22.3
                   cache: 'npm'
 
             - run: npm ci --legacy-peer-deps
@@ -41,6 +42,11 @@ jobs:
             - name: Configure e2e credentials
               run: |
                   if [ -z "$TEST_USER_EMAIL" ] || [ -z "$TEST_USER_PASSWORD" ]; then
+                    if [ "${{ github.actor }}" = "dependabot[bot]" ]; then
+                      echo "::warning::Skipping e2e credential setup for Dependabot (repository secrets are not available to Dependabot PRs)."
+                      echo "SKIP_E2E=1" >> "$GITHUB_ENV"
+                      exit 0
+                    fi
                     echo "::error::TEST_USER_EMAIL and TEST_USER_PASSWORD repository secrets are required for e2e tests."
                     exit 1
                   fi
@@ -50,4 +56,10 @@ jobs:
             # - run: npx nx-cloud record -- echo Hello World
             # Nx Affected runs only tasks affected by the changes in this PR/commit. Learn more: https://nx.dev/ci/features/affected
             # When you enable task distribution, run the e2e-ci task instead of e2e
-            - run: npx nx affected -t lint test build e2e
+            - name: Run affected lint, test, build, e2e
+              run: |
+                  if [ "${SKIP_E2E:-}" = "1" ]; then
+                    npx nx affected -t lint test build
+                  else
+                    npx nx affected -t lint test build e2e
+                  fi

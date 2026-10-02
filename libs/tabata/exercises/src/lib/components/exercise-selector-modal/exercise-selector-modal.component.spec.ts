@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ExerciseSelectorModalComponent } from './exercise-selector-modal.component';
-import { ExercisesFacade, Exercise } from '@silver/tabata/states/exercises';
+import { ExercisesFacade, type Exercise } from '@silver/tabata/states/exercises';
 import { ModalController } from '@ionic/angular/standalone';
 import { mockExercisesArray, createMockExercisesFacadeForSelector, mockModalController } from '@silver/tabata/testing';
 import { ExerciseFilterService } from '../../services/exercise-filter.service';

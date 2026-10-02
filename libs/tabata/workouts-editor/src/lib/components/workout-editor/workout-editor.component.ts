@@ -22,7 +22,7 @@ import {
 } from '@silver/tabata/states/workout-editor';
 import { WorkoutSubmitService } from '../../services/workout-submit.service';
 import { WorkoutEditorInitService } from '../../services/workout-editor-init.service';
-import { Phase, TabataBlock, WorkoutsFacade } from '@silver/tabata/states/workouts';
+import { type Phase, type TabataBlock, WorkoutsFacade } from '@silver/tabata/states/workouts';
 import { WorkoutInfoComponent } from '../workout-info/workout-info.component';
 import { WorkoutPhaseComponent } from '../workout-phase/workout-phase.component';
 import { MainWorkoutComponent } from '../main-workout/main-workout.component';
