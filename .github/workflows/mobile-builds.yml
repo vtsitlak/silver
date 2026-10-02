@@ -24,13 +24,14 @@ jobs:
                   node-version: 22
                   cache: 'npm'
 
-            - uses: actions/setup-java@v4
+            - uses: actions/setup-java@v5
               with:
                   distribution: 'temurin'
                   java-version: '21'
 
+            # v4 runs on Node 24; v3 targets Node 20 and fails once runners force Node 24.
             - name: Setup Android SDK
-              uses: android-actions/setup-android@v3
+              uses: android-actions/setup-android@v4
 
             - name: Install dependencies
               run: npm ci --legacy-peer-deps
