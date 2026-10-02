@@ -367,6 +367,99 @@ describe('WorkoutPlayerComponent', () => {
         expect(userWorkoutsFacade.appendWorkoutSession).not.toHaveBeenCalled();
     });
 
+    it('records an incomplete session when the player is destroyed mid-workout', () => {
+        // Arrange — hardware/browser Back pops the Ionic page and runs ngOnDestroy.
+        setReadyWorkout('w1');
+        component.segments.set([{ phase: 'warmup', label: 'Warmup', durationSeconds: 20, exerciseId: 'e1', isRest: false }]);
+        component.currentIndex.set(0);
+        component.remainingInSegment.set(12);
+        component.hasStarted.set(true);
+        component.isPlaying.set(true);
+        component.currentSession.set({
+            workoutId: 'w1',
+            startedAt: '2026-01-02T00:00:00.000Z',
+            finishedAt: '',
+            completed: false
+        });
+        fixture.detectChanges();
+
+        // Act
+        fixture.destroy();
+
+        // Assert — the partial workout is history, not a silent drop or a false completion
+        expect(userWorkoutsFacade.appendWorkoutSession).toHaveBeenCalledTimes(1);
+        expect(userWorkoutsFacade.appendWorkoutSession).toHaveBeenCalledWith(
+            'user1',
+            expect.objectContaining({
+                workoutId: 'w1',
+                startedAt: '2026-01-02T00:00:00.000Z',
+                completed: false
+            })
+        );
+    });
+
+    it('keeps pause available when a reload fails after the session has started', () => {
+        // Arrange — Back refetches the workout; a failed GET used to replace the timer with an error
+        // while the interval kept running and pause stayed disabled.
+        setReadyWorkout('w1');
+        component.segments.set([{ phase: 'warmup', label: 'Warmup', durationSeconds: 20, exerciseId: 'e1', isRest: false }]);
+        component.currentIndex.set(0);
+        component.remainingInSegment.set(12);
+        component.hasStarted.set(true);
+        component.isPlaying.set(true);
+        component.currentSession.set({
+            workoutId: 'w1',
+            startedAt: '2026-01-02T00:00:00.000Z',
+            finishedAt: '',
+            completed: false
+        });
+        fixture.detectChanges();
+
+        // Act
+        mockWorkoutsFacade.loadedWorkout.set(null);
+        mockWorkoutsFacade.isLoading.set(false);
+        mockWorkoutsFacade.error.set('Network error');
+        fixture.detectChanges();
+
+        // Assert — session stays on screen and can be paused
+        expect(component.hasInProgressPlayback()).toBe(true);
+        expect(component.remainingInSegment()).toBe(12);
+        expect(fixture.nativeElement.textContent).toContain('12s');
+        expect(fixture.nativeElement.textContent).not.toContain('Network error');
+        component.togglePlay();
+        expect(component.isPlaying()).toBe(false);
+        expect(userWorkoutsFacade.appendWorkoutSession).not.toHaveBeenCalled();
+    });
+
+    it('does not drop an in-progress session when another workout occupies the store', () => {
+        // Arrange — details for a different id writes loadedWorkout while this page is still cached.
+        setReadyWorkout('w1');
+        component.segments.set([{ phase: 'warmup', label: 'Warmup', durationSeconds: 20, exerciseId: 'e1', isRest: false }]);
+        component.remainingInSegment.set(12);
+        component.hasStarted.set(true);
+        component.isPlaying.set(true);
+        component.currentSession.set({
+            workoutId: 'w1',
+            startedAt: '2026-01-02T00:00:00.000Z',
+            finishedAt: '',
+            completed: false
+        });
+        fixture.detectChanges();
+
+        // Act
+        mockWorkoutsFacade.loadedWorkout.set({ ...mockTabataWorkout, id: 'w2', name: 'Other' });
+        mockWorkoutsFacade.isLoading.set(false);
+        mockWorkoutsFacade.error.set(null);
+        fixture.detectChanges();
+
+        // Assert
+        expect(component.currentSession()?.workoutId).toBe('w1');
+        expect(component.segments().length).toBe(1);
+        expect(component.remainingInSegment()).toBe(12);
+        expect(component.hasInProgressPlayback()).toBe(true);
+        expect(userWorkoutsFacade.appendWorkoutSession).not.toHaveBeenCalled();
+    });
+
     it('does not keep the finished session only in component state (destroy-safe)', () => {
         // Arrange
         setReadyWorkout('w1');
