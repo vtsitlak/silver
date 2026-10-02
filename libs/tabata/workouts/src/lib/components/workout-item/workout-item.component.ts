@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, input, output } from '@angular/core
 import { IonItem, IonLabel, IonIcon, IonButton, IonButtons } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { chevronForward, timeOutline, fitnessOutline, createOutline, playCircle, trashOutline } from 'ionicons/icons';
-import { TabataWorkout } from '@silver/tabata/states/workouts';
+import { type TabataWorkout } from '@silver/tabata/states/workouts';
 import { formatDurationMinutes } from '@silver/tabata/helpers';
 
 @Component({

@@ -22,7 +22,7 @@ import {
 import { ModalController } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { checkmark } from 'ionicons/icons';
-import { EXERCISE_LEVEL_OPTIONS, ExercisesFacade, type ExerciseLevel, Exercise } from '@silver/tabata/states/exercises';
+import { EXERCISE_LEVEL_OPTIONS, ExercisesFacade, type Exercise, type ExerciseLevel } from '@silver/tabata/states/exercises';
 import { ExerciseFilterService } from '../../services/exercise-filter.service';
 
 @Component({

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TabataWorkout } from '@silver/tabata/states/workouts';
+import { type TabataWorkout } from '@silver/tabata/states/workouts';
 import { mockTabataWorkout } from '@silver/tabata/testing';
 import { WorkoutItemComponent } from './workout-item.component';
 

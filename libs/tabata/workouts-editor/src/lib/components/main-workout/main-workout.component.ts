@@ -11,7 +11,7 @@ import {
     type WorkoutDraft
 } from '@silver/tabata/states/workout-editor';
 import { ExercisesFacade } from '@silver/tabata/states/exercises';
-import { Exercise, ExerciseSelectorModalComponent, ExerciseDetailsModalComponent } from '@silver/tabata/exercises';
+import { ExerciseSelectorModalComponent, ExerciseDetailsModalComponent, type Exercise } from '@silver/tabata/exercises';
 import type { TabataBlock } from '@silver/tabata/states/workouts';
 
 export interface MainWorkoutBlockItem {

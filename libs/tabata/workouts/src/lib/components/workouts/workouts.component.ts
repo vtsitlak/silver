@@ -8,7 +8,7 @@ import { IonContent, IonHeader, IonSearchbar, IonButton, IonList, IonItem, IonIc
 import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
 import { ToolbarComponent } from '@silver/tabata/ui';
-import { WorkoutsFacade, TabataWorkout } from '@silver/tabata/states/workouts';
+import { WorkoutsFacade, type TabataWorkout } from '@silver/tabata/states/workouts';
 import { AuthFacade } from '@silver/tabata/auth';
 import { ToastService } from '@silver/tabata/helpers';
 import { WorkoutItemComponent } from '../workout-item/workout-item.component';
