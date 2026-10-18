@@ -1,10 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AuthFacade } from '@silver/tabata/auth';
-import { mockAuthFacade, mockModalController, mockWorkoutEditorFacade } from '@silver/tabata/testing';
+import { mockActionSheetController, mockAuthFacade, mockWorkoutEditorFacade } from '@silver/tabata/testing';
 import { WorkoutInfoComponent } from './workout-info.component';
-import { ModalController } from '@ionic/angular/standalone';
+import { ActionSheetController } from '@ionic/angular/standalone';
 import { AiWorkoutGenerationService } from '../../services/ai-workout-generation.service';
-import { AiWorkoutGeneratedModalComponent } from '../ai-workout-generated-modal/ai-workout-generated-modal.component';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { EMPTY, of } from 'rxjs';
 import type { GenerateWorkoutOutput } from '@silver/tabata/ai-workout-generator';
@@ -39,7 +38,7 @@ describe('WorkoutInfoComponent', () => {
             imports: [WorkoutInfoComponent],
             providers: [
                 { provide: AuthFacade, useValue: mockAuthFacade },
-                { provide: ModalController, useValue: mockModalController },
+                { provide: ActionSheetController, useValue: mockActionSheetController },
                 { provide: AiWorkoutGenerationService, useValue: mockAiWorkoutGenerationService },
                 { provide: WorkoutEditorFacade, useValue: mockWorkoutEditorFacade }
             ]
@@ -167,13 +166,12 @@ describe('WorkoutInfoComponent', () => {
         expect(last?.generatedByAi).toBe(true);
     });
 
-    it('should pin AI structure, clear the lock for tab edits, and open the success modal', async () => {
+    it('should pin AI structure, clear the lock for tab edits, and open the success action sheet', async () => {
         mockAiWorkoutGenerationService.generateWorkout.mockReturnValue(of(mockGenerated));
         const present = jest.fn().mockResolvedValue(undefined);
-        (mockModalController.create as jest.Mock).mockResolvedValue({
+        (mockActionSheetController.create as jest.Mock).mockResolvedValue({
             present,
-            onDidDismiss: jest.fn().mockResolvedValue({ role: 'confirm', data: null }),
-            dismiss: jest.fn()
+            onDidDismiss: jest.fn().mockResolvedValue({ role: 'cancel', data: undefined })
         });
 
         component.formModel.set({
@@ -193,10 +191,11 @@ describe('WorkoutInfoComponent', () => {
 
         expect(mockWorkoutEditorFacade.lockAiGeneratedStructure).toHaveBeenCalledWith(mockGenerated);
         expect(mockWorkoutEditorFacade.clearAiStructureLock).toHaveBeenCalled();
-        expect(mockModalController.create).toHaveBeenCalledWith({
-            component: AiWorkoutGeneratedModalComponent,
-            cssClass: 'ai-workout-generated-modal',
-            backdropDismiss: true
+        expect(mockActionSheetController.create).toHaveBeenCalledWith({
+            header: 'Workout generated successfully',
+            subHeader: 'You can navigate to the workout tabs to edit and save the workout.',
+            cssClass: 'tbt-action-sheet-visible',
+            buttons: [{ text: 'Got it', role: 'cancel' }]
         });
         expect(present).toHaveBeenCalled();
         expect(component.formModel().generatedByAi).toBe(true);
