@@ -427,6 +427,27 @@ textarea {
     --border-radius: 12px 12px 0 0;
 }
 
+/* Centered success dialog after AI workout generation */
+ion-modal.ai-workout-generated-modal {
+    --width: min(92vw, 22rem);
+    --height: auto;
+    --max-height: 70vh;
+    --border-radius: 1rem;
+    --box-shadow: 0 10px 40px rgba(15, 23, 42, 0.28);
+    align-items: center;
+}
+
+ion-modal.ai-workout-generated-modal .ion-page {
+    position: relative;
+    display: block;
+    contain: content;
+}
+
+ion-modal.ai-workout-generated-modal .ion-delegate-host,
+ion-modal.ai-workout-generated-modal ion-content {
+    --background: #ffffff;
+}
+
 /* About modal (presented via ModalController from toolbar) */
 .about-modal-sheet {
     --height: 85%;

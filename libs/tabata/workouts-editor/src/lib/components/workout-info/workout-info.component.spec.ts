@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
 import { AuthFacade } from '@silver/tabata/auth';
 import { mockAuthFacade, mockModalController, mockWorkoutEditorFacade } from '@silver/tabata/testing';
 import { WorkoutInfoComponent } from './workout-info.component';
 import { ModalController } from '@ionic/angular/standalone';
 import { AiWorkoutGenerationService } from '../../services/ai-workout-generation.service';
+import { AiWorkoutGeneratedModalComponent } from '../ai-workout-generated-modal/ai-workout-generated-modal.component';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { EMPTY, of } from 'rxjs';
 import type { GenerateWorkoutOutput } from '@silver/tabata/ai-workout-generator';
@@ -38,7 +38,6 @@ describe('WorkoutInfoComponent', () => {
         await TestBed.configureTestingModule({
             imports: [WorkoutInfoComponent],
             providers: [
-                provideRouter([]),
                 { provide: AuthFacade, useValue: mockAuthFacade },
                 { provide: ModalController, useValue: mockModalController },
                 { provide: AiWorkoutGenerationService, useValue: mockAiWorkoutGenerationService },
@@ -168,12 +167,12 @@ describe('WorkoutInfoComponent', () => {
         expect(last?.generatedByAi).toBe(true);
     });
 
-    it('should clear AI structure lock when preview is dismissed via backdrop', async () => {
+    it('should pin AI structure, clear the lock for tab edits, and open the success modal', async () => {
         mockAiWorkoutGenerationService.generateWorkout.mockReturnValue(of(mockGenerated));
-        const onDidDismiss = jest.fn().mockResolvedValue({ role: undefined, data: null });
+        const present = jest.fn().mockResolvedValue(undefined);
         (mockModalController.create as jest.Mock).mockResolvedValue({
-            present: jest.fn().mockResolvedValue(undefined),
-            onDidDismiss,
+            present,
+            onDidDismiss: jest.fn().mockResolvedValue({ role: 'confirm', data: null }),
             dismiss: jest.fn()
         });
 
@@ -194,40 +193,13 @@ describe('WorkoutInfoComponent', () => {
 
         expect(mockWorkoutEditorFacade.lockAiGeneratedStructure).toHaveBeenCalledWith(mockGenerated);
         expect(mockWorkoutEditorFacade.clearAiStructureLock).toHaveBeenCalled();
+        expect(mockModalController.create).toHaveBeenCalledWith({
+            component: AiWorkoutGeneratedModalComponent,
+            cssClass: 'ai-workout-generated-modal',
+            backdropDismiss: true
+        });
+        expect(present).toHaveBeenCalled();
+        expect(component.formModel().generatedByAi).toBe(true);
         expect(mockWorkoutEditorFacade.clearDraft).not.toHaveBeenCalled();
-    });
-
-    it('should clear AI structure lock before try-again regeneration so a failed retry cannot strand the pin', async () => {
-        mockAiWorkoutGenerationService.generateWorkout
-            .mockReturnValueOnce(of(mockGenerated))
-            .mockReturnValueOnce(EMPTY);
-        const onDidDismiss = jest.fn().mockResolvedValue({ role: 'tryAgain', data: null });
-        (mockModalController.create as jest.Mock).mockResolvedValue({
-            present: jest.fn().mockResolvedValue(undefined),
-            onDidDismiss,
-            dismiss: jest.fn()
-        });
-
-        component.formModel.set({
-            name: 'AI Core',
-            description: 'Core focus',
-            mainTargetBodypart: 'Core',
-            level: 'beginner',
-            primaryGoal: 'Cardio',
-            availableEquipments: ['Bodyweight'],
-            secondaryTargetBodyparts: [],
-            generatedByAi: false
-        });
-        fixture.detectChanges();
-
-        component.onGenerateWithAi();
-        await fixture.whenStable();
-
-        expect(mockWorkoutEditorFacade.lockAiGeneratedStructure).toHaveBeenCalledWith(mockGenerated);
-        expect(mockWorkoutEditorFacade.clearAiStructureLock).toHaveBeenCalled();
-        expect(mockAiWorkoutGenerationService.generateWorkout).toHaveBeenCalledTimes(2);
-        // Failed retry must not re-pin; otherwise tab edits appear to stick while Save keeps AI structure.
-        expect(mockWorkoutEditorFacade.lockAiGeneratedStructure).toHaveBeenCalledTimes(1);
-        expect(component.isGenerating()).toBe(false);
     });
 });
