@@ -1,5 +1,4 @@
 import { Component, computed, effect, inject, input, output, signal, untracked, ChangeDetectionStrategy } from '@angular/core';
-import { Router } from '@angular/router';
 import { form, FormField, required } from '@angular/forms/signals';
 import { IonButton, IonInput, IonItem, IonList, IonSelect, IonSelectOption, IonSpinner, IonTextarea, ModalController } from '@ionic/angular/standalone';
 import {
@@ -18,13 +17,11 @@ import {
     type WorkoutLevel,
     type WorkoutPrimaryGoal
 } from '@silver/tabata/helpers';
-import { SKIP_WORKOUT_EDITOR_CANCEL } from '../../guards/workout-editor-can-deactivate.guard';
 import { AiWorkoutGenerationService } from '../../services/ai-workout-generation.service';
-import { AiWorkoutPreviewModalComponent } from '../ai-workout-preview-modal/ai-workout-preview-modal.component';
+import { AiWorkoutGeneratedModalComponent } from '../ai-workout-generated-modal/ai-workout-generated-modal.component';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { finalize } from 'rxjs/operators';
 import type { WorkoutInfoFormModel } from '@silver/tabata/states/workouts';
-import type { GenerateWorkoutOutput } from '@silver/tabata/ai-workout-generator';
 
 @Component({
     selector: 'tbt-workout-info',
@@ -36,7 +33,6 @@ import type { GenerateWorkoutOutput } from '@silver/tabata/ai-workout-generator'
 export class WorkoutInfoComponent {
     private readonly aiWorkoutGeneration = inject(AiWorkoutGenerationService);
     private readonly workoutEditorFacade = inject(WorkoutEditorFacade);
-    private readonly router = inject(Router);
     private readonly modalCtrl = inject(ModalController);
 
     /** Snapshot from the editor's loaded workout (not live draft) — avoids parent↔draft feedback loops. */
@@ -46,7 +42,7 @@ export class WorkoutInfoComponent {
     readonly isCreateMode = input(true);
 
     readonly draftChange = output<Partial<WorkoutDraft>>();
-    /** Emitted when AI preview is cancelled — parent clears draft / resets as needed. */
+    /** Emitted when the parent should discard the current draft (e.g. leave create flow). */
     readonly clearDraftRequested = output<void>();
 
     readonly equipmentOptions = [BODYWEIGHT_CATEGORY, ...EQUIPMENT_CATEGORY_OPTIONS.filter((eq) => eq !== BODYWEIGHT_CATEGORY)];
@@ -147,54 +143,23 @@ export class WorkoutInfoComponent {
             .pipe(finalize(() => this.isGenerating.set(false)))
             .subscribe({
                 next: (generated) => {
-                    // Pin structure in the editor store so mounted warmup/main/cooldown tabs cannot
-                    // stomp the AI result via draft sync while the preview is open.
+                    // Pin structure into draft + snapshot, then clear the lock so warmup/main/cooldown
+                    // tabs stay editable while the user reviews the success modal.
                     this.workoutEditorFacade.lockAiGeneratedStructure(generated);
+                    this.workoutEditorFacade.clearAiStructureLock();
                     this.formModel.update((m) => ({ ...m, generatedByAi: true }));
-                    this.openAiPreviewModal(generated);
+                    this.openAiGeneratedSuccessModal();
                 }
             });
     }
 
-    private openAiPreviewModal(generated: GenerateWorkoutOutput): void {
+    private openAiGeneratedSuccessModal(): void {
         this.modalCtrl
             .create({
-                component: AiWorkoutPreviewModalComponent,
-                componentProps: {
-                    generatedWorkout: generated
-                },
-                cssClass: 'ai-workout-preview-modal-sheet'
+                component: AiWorkoutGeneratedModalComponent,
+                cssClass: 'ai-workout-generated-modal',
+                backdropDismiss: true
             })
-            .then((modal) => {
-                modal.onDidDismiss().then(({ role }) => {
-                    const typedRole = role as 'save' | 'tryAgain' | 'cancel' | undefined;
-                    if (typedRole === 'save') {
-                        // create success path calls reset() which also clears the lock
-                        this.workoutEditorFacade.clearAiStructureLock();
-                        /** Same as {@link WorkoutsFacade} after save — skip can-deactivate confirm (draft still looks “dirty”). */
-                        this.router.navigate(['/tabs/workouts'], {
-                            state: { [SKIP_WORKOUT_EDITOR_CANCEL]: true }
-                        });
-                    } else if (typedRole === 'tryAgain') {
-                        // Drop the pin before regenerating. If generation fails (quota/network/EMPTY),
-                        // a stranded lock would make warmup/main/cooldown look editable while Save
-                        // still persisted the previous AI structure.
-                        this.workoutEditorFacade.clearAiStructureLock();
-                        this.onGenerateWithAi();
-                    } else if (typedRole === 'cancel') {
-                        this.clearDraftRequested.emit();
-                        this.router.navigate(['/tabs/workouts'], {
-                            state: { [SKIP_WORKOUT_EDITOR_CANCEL]: true }
-                        });
-                    } else {
-                        // Backdrop / hardware back / other dismiss: draft + snapshot already hold
-                        // the AI structure from lockAiGeneratedStructure. Drop the pin so the user
-                        // can edit warmup/main/cooldown; otherwise Save would persist locked AI
-                        // while the tabs still showed (and accepted) local edits.
-                        this.workoutEditorFacade.clearAiStructureLock();
-                    }
-                });
-                return modal.present();
-            });
+            .then((modal) => modal.present());
     }
 }

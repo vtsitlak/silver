@@ -1,4 +1,5 @@
 export * from './lib/components/ai-workout-preview-modal/ai-workout-preview-modal.component';
+export * from './lib/components/ai-workout-generated-modal/ai-workout-generated-modal.component';
 export * from './lib/components/workout-editor/workout-editor.component';
 export * from './lib/components/workout-info/workout-info.component';
 export * from './lib/components/workout-phase/workout-phase.component';
