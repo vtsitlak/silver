@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, input, output, signal, untracked, ChangeDetectionStrategy } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
-import { IonButton, IonInput, IonItem, IonList, IonSelect, IonSelectOption, IonSpinner, IonTextarea, ModalController } from '@ionic/angular/standalone';
+import { ActionSheetController, IonButton, IonInput, IonItem, IonList, IonSelect, IonSelectOption, IonSpinner, IonTextarea } from '@ionic/angular/standalone';
 import {
     BODYWEIGHT_CATEGORY,
     createEmptyWorkoutInfoFormModel,
@@ -18,7 +18,6 @@ import {
     type WorkoutPrimaryGoal
 } from '@silver/tabata/helpers';
 import { AiWorkoutGenerationService } from '../../services/ai-workout-generation.service';
-import { AiWorkoutGeneratedModalComponent } from '../ai-workout-generated-modal/ai-workout-generated-modal.component';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
 import { finalize } from 'rxjs/operators';
 import type { WorkoutInfoFormModel } from '@silver/tabata/states/workouts';
@@ -33,7 +32,7 @@ import type { WorkoutInfoFormModel } from '@silver/tabata/states/workouts';
 export class WorkoutInfoComponent {
     private readonly aiWorkoutGeneration = inject(AiWorkoutGenerationService);
     private readonly workoutEditorFacade = inject(WorkoutEditorFacade);
-    private readonly modalCtrl = inject(ModalController);
+    private readonly actionSheetCtrl = inject(ActionSheetController);
 
     /** Snapshot from the editor's loaded workout (not live draft) — avoids parent↔draft feedback loops. */
     readonly loadedInfo = input<WorkoutInfoFormModel | null>(null);
@@ -144,22 +143,22 @@ export class WorkoutInfoComponent {
             .subscribe({
                 next: (generated) => {
                     // Pin structure into draft + snapshot, then clear the lock so warmup/main/cooldown
-                    // tabs stay editable while the user reviews the success modal.
+                    // tabs stay editable while the user reviews the success sheet.
                     this.workoutEditorFacade.lockAiGeneratedStructure(generated);
                     this.workoutEditorFacade.clearAiStructureLock();
                     this.formModel.update((m) => ({ ...m, generatedByAi: true }));
-                    this.openAiGeneratedSuccessModal();
+                    void this.openAiGeneratedSuccessSheet();
                 }
             });
     }
 
-    private openAiGeneratedSuccessModal(): void {
-        this.modalCtrl
-            .create({
-                component: AiWorkoutGeneratedModalComponent,
-                cssClass: 'ai-workout-generated-modal',
-                backdropDismiss: true
-            })
-            .then((modal) => modal.present());
+    private async openAiGeneratedSuccessSheet(): Promise<void> {
+        const sheet = await this.actionSheetCtrl.create({
+            header: 'Workout generated successfully',
+            subHeader: 'You can navigate to the workout tabs to edit and save the workout.',
+            cssClass: 'tbt-action-sheet-visible',
+            buttons: [{ text: 'Got it', role: 'cancel' }]
+        });
+        await sheet.present();
     }
 }
