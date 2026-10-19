@@ -85,6 +85,7 @@ export const mockWorkoutEditorFacade = {
     hydrateEditorFromWorkout: mockFn(),
     lockAiGeneratedStructure: mockFn(),
     clearAiStructureLock: mockFn(),
+    trackAiGeneration: mockFn(),
     updateDraft: mockFn(),
     reset: mockFn(),
     clearDraft: mockFn()

@@ -5,7 +5,7 @@ import { WorkoutInfoComponent } from './workout-info.component';
 import { ActionSheetController } from '@ionic/angular/standalone';
 import { AiWorkoutGenerationService } from '../../services/ai-workout-generation.service';
 import { WorkoutEditorFacade } from '@silver/tabata/states/workout-editor';
-import { EMPTY, of } from 'rxjs';
+import { EMPTY, of, Subject, type Subscription } from 'rxjs';
 import type { GenerateWorkoutOutput } from '@silver/tabata/ai-workout-generator';
 
 const mockAiWorkoutGenerationService = {
@@ -200,5 +200,35 @@ describe('WorkoutInfoComponent', () => {
         expect(present).toHaveBeenCalled();
         expect(component.formModel().generatedByAi).toBe(true);
         expect(mockWorkoutEditorFacade.clearDraft).not.toHaveBeenCalled();
+        expect(mockWorkoutEditorFacade.trackAiGeneration).toHaveBeenCalled();
+    });
+
+    it('should not apply AI structure when generation is cancelled before the result arrives', () => {
+        const pending = new Subject<GenerateWorkoutOutput>();
+        mockAiWorkoutGenerationService.generateWorkout.mockReturnValue(pending.asObservable());
+
+        component.formModel.set({
+            name: 'AI Core',
+            description: 'Core focus',
+            mainTargetBodypart: 'Core',
+            level: 'beginner',
+            primaryGoal: 'Cardio',
+            availableEquipments: ['Bodyweight'],
+            secondaryTargetBodyparts: [],
+            generatedByAi: false
+        });
+        fixture.detectChanges();
+
+        component.onGenerateWithAi();
+        expect(component.isGenerating()).toBe(true);
+
+        const tracked = mockWorkoutEditorFacade.trackAiGeneration.mock.calls.at(-1)?.[0] as Subscription;
+        tracked.unsubscribe();
+        pending.next(mockGenerated);
+
+        expect(mockWorkoutEditorFacade.lockAiGeneratedStructure).not.toHaveBeenCalled();
+        expect(mockActionSheetController.create).not.toHaveBeenCalled();
+        expect(component.isGenerating()).toBe(false);
+        expect(component.formModel().generatedByAi).toBe(false);
     });
 });

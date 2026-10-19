@@ -74,6 +74,8 @@ export class WorkoutInfoComponent {
 
     readonly isFormValid = computed(() => this.infoForm().valid());
     readonly isGenerating = signal(false);
+    /** Bumped for each Generate click so a superseded request cannot clear `isGenerating` or apply a stale result. */
+    private aiGenerationSeq = 0;
 
     constructor() {
         // `loadedInfo` is derived from `workout()` in the parent; it only changes when that workout changes, not on draft patches.
@@ -128,8 +130,9 @@ export class WorkoutInfoComponent {
         const description = model.description;
         if (!name || !description) return;
 
+        const generationSeq = ++this.aiGenerationSeq;
         this.isGenerating.set(true);
-        this.aiWorkoutGeneration
+        const generation = this.aiWorkoutGeneration
             .generateWorkout({
                 name,
                 description,
@@ -139,9 +142,20 @@ export class WorkoutInfoComponent {
                 level,
                 primaryGoal
             })
-            .pipe(finalize(() => this.isGenerating.set(false)))
+            .pipe(
+                finalize(() => {
+                    if (this.aiGenerationSeq === generationSeq) {
+                        this.isGenerating.set(false);
+                    }
+                })
+            )
             .subscribe({
                 next: (generated) => {
+                    // Leave / re-enter unsubscribes this request. Ignore a result that still arrives
+                    // for an older click so it cannot overwrite the workout now in the editor.
+                    if (this.aiGenerationSeq !== generationSeq) {
+                        return;
+                    }
                     // Pin structure into draft + snapshot, then clear the lock so warmup/main/cooldown
                     // tabs stay editable while the user reviews the success sheet.
                     this.workoutEditorFacade.lockAiGeneratedStructure(generated);
@@ -150,6 +164,7 @@ export class WorkoutInfoComponent {
                     void this.openAiGeneratedSuccessSheet();
                 }
             });
+        this.workoutEditorFacade.trackAiGeneration(generation);
     }
 
     private async openAiGeneratedSuccessSheet(): Promise<void> {

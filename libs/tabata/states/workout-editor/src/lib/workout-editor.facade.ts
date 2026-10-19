@@ -1,4 +1,5 @@
 import { inject, Injectable } from '@angular/core';
+import type { Subscription } from 'rxjs';
 import { WorkoutEditorStore } from './workout-editor.store';
 import type { AiGeneratedWorkoutStructure, WorkoutDraft } from './workout-editor.models';
 import type { TabataWorkout } from '@silver/tabata/states/workouts';
@@ -6,6 +7,8 @@ import type { TabataWorkout } from '@silver/tabata/states/workouts';
 @Injectable({ providedIn: 'root' })
 export class WorkoutEditorFacade {
     private readonly store = inject(WorkoutEditorStore);
+    /** In-flight Generate-with-AI subscription. Cleared on reset/clearDraft so a late response cannot overwrite another session. */
+    private inFlightAiGeneration: Subscription | null = null;
 
     readonly initialDraftSnapshot = this.store.initialDraftSnapshot;
     readonly workoutDraft = this.store.workoutDraft;
@@ -41,12 +44,31 @@ export class WorkoutEditorFacade {
         this.store.setDraft(draft);
     }
 
+    /**
+     * Tracks the active Generate-with-AI subscription, replacing any previous one.
+     * {@link reset} and {@link clearDraft} unsubscribe it. The editor calls those when leaving
+     * or re-entering, so a response that arrives after the user opened another workout is dropped.
+     */
+    trackAiGeneration(subscription: Subscription): void {
+        if (this.inFlightAiGeneration && this.inFlightAiGeneration !== subscription) {
+            this.inFlightAiGeneration.unsubscribe();
+        }
+        this.inFlightAiGeneration = subscription;
+    }
+
     clearDraft(): void {
+        this.cancelAiGeneration();
         this.store.clearDraft();
     }
 
     reset(): void {
+        this.cancelAiGeneration();
         this.store.reset();
+    }
+
+    private cancelAiGeneration(): void {
+        this.inFlightAiGeneration?.unsubscribe();
+        this.inFlightAiGeneration = null;
     }
 
     /**
